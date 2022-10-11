@@ -31,7 +31,7 @@ end
 function Ketcheson4(; precision::Type{<:AbstractFloat} = Float64)
     # SSP
     butcher = [0 0 0 0 0 0 0 0 0 0 0
-               1/6 1/6 0 0 0 0 0 0 0 0 
+               1/6 1/6 0 0 0 0 0 0 0 0 0
                1/3 1/6 1/6 0 0 0 0 0 0 0 0
                1/2 1/6 1/6 1/6 0 0 0 0 0 0 0
                2/3 1/6 1/6 1/6 1/6 0 0 0 0 0 0
