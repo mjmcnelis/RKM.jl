@@ -1,4 +1,9 @@
 
+# TODO: for Fehlberg4, etc, take Fehlberg45 except 2nd-last (last) row
+# TODO: make dictionary with code names
+# TODO: make doc strings with links 
+# TODO: make documentation page 
+
 function RungeKutta4(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0
                1/2 1/2 0 0 0
@@ -44,10 +49,26 @@ function Ketcheson4(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(:Ketcheson_4, butcher .|> precision, Explicit())
 end
 
-# TODO: should just grab fehlberg_45 except 2nd last row
-fehlberg_4 =[0 0 0 0 0 0;
-             1/4 1/4 0 0 0 0;
-             3/8 3/32 9/32 0 0 0;
-             12/13 1932/2197 -7200/2197 7296/2197 0 0;
-             1 439/216 -8 3680/513 -845/4104 0;
-             1 25/216 0 1408/2565 2197/4104 -1/5]
+function Butcher5(; precision::Type{<:AbstractFloat} = Float64)
+    butcher = [0 0 0 0 0 0 0
+               1/4 1/4 0 0 0 0 0
+               1/4 1/8 1/8 0 0 0 0
+               1/2 0 -1/2 1 0 0 0
+               3/4 3/16 0 0 9/16 0 0
+               1 -3/7 2/7 12/7 -12/7 8/7 0
+               1 7/90 0 32/90 12/90 32/90 7/90]
+    RungeKutta(:Butcher_5, butcher .|> precision, Explicit())
+end
+
+function Butcher6(; precision::Type{<:AbstractFloat} = Float64)
+    butcher = [0 0 0 0 0 0 0 0
+               1/2 1/2 0 0 0 0 0 0
+               2/3 2/9 4/9 0 0 0 0 0
+               1/3 7/36 2/9 -1/12 0 0 0 0
+               5/6 -35/144 -55/36 35/48 15/8 0 0 0
+               1/6 -1/360 -11/36 -1/8 1/2 1/10 0 0
+               1 -41/260 22/13 43/156 -118/39 32/195 80/39 0
+               1 13/200 0 11/40 11/40 4/25 4/25 13/200]
+    RungeKutta(:Butcher_6, butcher .|> precision, Explicit())
+end
+
