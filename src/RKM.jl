@@ -1,6 +1,6 @@
 module RKM
 
-using DataFrames
+# using DataFrames      # may use to output RK tables
 using UnPack
 import Base.@kwdef
 
