@@ -15,14 +15,16 @@ include("adaptive.jl")
 include("methods/iteration.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
+include("methods/runge_kutta/utils.jl")
+       # explicit/embedded/
+include("methods/runge_kutta/explicit/embedded/low_order.jl")
+include("methods/runge_kutta/explicit/embedded/medium_order.jl")
+include("methods/runge_kutta/explicit/embedded/high_order.jl")
+include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
         # explicit/fixed/
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
-        # explicit/embedded/
-include("methods/runge_kutta/explicit/embedded/low_order.jl")
-include("methods/runge_kutta/explicit/embedded/medium_order.jl")
-# include("methods/runge_kutta/explicit/embedded/high_order.jl")
 
 include("parameters.jl")
 include("evolve.jl")
@@ -41,6 +43,8 @@ export Curtis8, Shanks8, ShanksPseudo8
 export Fehlberg12, HeunEuler21, BogackiShampine32
 export Fehlberg45, CashKarp54, DormandPrince54, BogackiShampine54
 export Tsitouras54, Verner56, Verner65
+export Fehlberg78, DormandPrince87
+export Feagin108
 # Code names
 export get_code_name
 # ODE solution
@@ -49,5 +53,7 @@ export Solution
 export Parameters
 # ODE solver
 export evolve_ode
+# Utilities 
+export debug_table
 
 end
