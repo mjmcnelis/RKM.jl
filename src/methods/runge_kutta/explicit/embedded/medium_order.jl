@@ -8,7 +8,9 @@ function Fehlberg45(; precision::Type{<:AbstractFloat} = Float64)
                1//2 -8//27 2 -3544//2565 1859//4104 -11//40 0
                1 25//216 0 1408//2565 2197//4104 -1//5 0
                1 16//135 0 6656//12825 28561//56430 -9//50 2//55]
-    EmbeddedRungeKutta(:Fehlberg_45, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Fehlberg_45, butcher)
 end
 
 function CashKarp54(; precision::Type{<:AbstractFloat} = Float64)
@@ -20,7 +22,9 @@ function CashKarp54(; precision::Type{<:AbstractFloat} = Float64)
                7//8 1631//55296 175//512 575//13824 44275//110592 253//4096 0
                1 37//378 0 250//621 125//594 0 512//1771
                1 2825//27648 0 18575//48384 13525//55296 277//14336 1//4]
-    EmbeddedRungeKutta(:Cash_Karp_54, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Cash_Karp_54, butcher)
 end
 
 function DormandPrince54(; precision::Type{<:AbstractFloat} = Float64)
@@ -33,7 +37,9 @@ function DormandPrince54(; precision::Type{<:AbstractFloat} = Float64)
                1 35//384 0 500//1113 125//192 -2187//6784 11//84 0
                1 35//384 0 500//1113 125//192 -2187//6784 11//84 0
                1 5179//57600 0 7571//16695 393//640 -92097//339200 187//2100 1//40]
-    EmbeddedRungeKutta(:Dormand_Prince_54, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Dormand_Prince_54, butcher)
 end
 
 function BogackiShampine54(; precision::Type{<:AbstractFloat} = Float64)
@@ -46,7 +52,9 @@ function BogackiShampine54(; precision::Type{<:AbstractFloat} = Float64)
                1 174197//959244 -30942//79937 8152137//19744439 666106//1039181 -29421//29068 482048//414219 0
                1 587//8064 0 4440339//15491840 24353//124800 387//44800 2152//5985 7267//94080
                1 6059//80640 0 8559189//30983680 26411//124800 -927//89600 443//1197 7267//94080]
-    EmbeddedRungeKutta(:Bogacki_Shampine_54, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Bogacki_Shampine_54, butcher)
 end
 
 function Tsitouras54(; precision::Type{<:AbstractFloat} = Float64)
@@ -59,7 +67,9 @@ function Tsitouras54(; precision::Type{<:AbstractFloat} = Float64)
                1 9.6460766818065230e-2 0.01 4.7988965041449960e-1 1.3790085741037419 -3.2900695154360808 2.3247105240997739 0
                1 9.6460766818065230e-2 0.01 4.7988965041449960e-1 1.3790085741037419 -3.2900695154360808 2.3247105240997739 0
                1 9.4680755765839453e-2 9.1835655403432540e-3 4.8777052842476160e-1 1.2342975669304790 -2.7077123499835256 1.8666284181705870 1//66]
-    EmbeddedRungeKutta(:Tsitouras_54, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Tsitouras_54, butcher)
 end
 
 function Verner56(; precision::Type{<:AbstractFloat} = Float64)
@@ -73,7 +83,9 @@ function Verner56(; precision::Type{<:AbstractFloat} = Float64)
                1 3015//256 -9//4 -4219//78 5985//128 -539//384 0 693//3328 0
                1 3//80 0 4//25 243//1120 77//160 73//700 0 0
                1 57//640 0 -16//65 1377//2240 121//320 0 891//8320 2//35]
-    EmbeddedRungeKutta(:Verner_56, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Verner_56, butcher)
 end
 
 function Verner65(; precision::Type{<:AbstractFloat} = Float64)
@@ -87,5 +99,7 @@ function Verner65(; precision::Type{<:AbstractFloat} = Float64)
                1 3501//1720 -300//43 297275//52632 -319//2322 24068//84065 0 3850//26703 0
                1 3//40 0 875//2244 23//72 264//1955 0 125//11592 43//616
                1 13//160 0 2375//5984 5//16 12//85 3//44 0 0]
-    EmbeddedRungeKutta(:Verner_65, butcher .|> precision, Explicit())
+    butcher = butcher .|> precision 
+
+    RungeKutta(; name = :Verner_65, butcher)
 end

@@ -1,11 +1,12 @@
 module RKM
 
 # using DataFrames      # may use to output RK tables
+using LinearAlgebra
 using Test
 using UnPack
 import Base.@kwdef
 
-abstract type OrdinaryDiffEqMethod end
+abstract type ODEMethod end
 
 include("utils.jl")
 include("solution.jl")
@@ -13,7 +14,7 @@ include("embedded.jl")
 include("adaptive.jl")
 
 # methods/
-include("methods/iteration.jl")
+include("methods/properties.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
 include("methods/runge_kutta/utils.jl")

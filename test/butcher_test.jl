@@ -21,4 +21,4 @@ butcher_tables = (
 )
 debug_table.(butcher_tables)
 
-println("\ndone")
+println("\ndone\n")
