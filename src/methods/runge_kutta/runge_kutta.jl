@@ -5,7 +5,7 @@ struct RungeKutta <: ODEMethod
     name::Symbol
     butcher::Matrix{<:AbstractFloat}
     iteration::Iteration
-    # fsal::FirstSameAsLast
+    fsal::FirstSameAsLast
 end
 
 # TODO: implement option to use Euler or generic 2nd order 
@@ -18,13 +18,14 @@ end
 #                   :)
 
 function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
+    # determine properties 
     iteration = iteration_prop(butcher)
     fsal      = fsal_prop(butcher)
 
+    # @show name fsal 
+    # println("")
 
-    @show fsal 
-
-    RungeKutta(name, butcher, iteration)
+    RungeKutta(name, butcher, iteration, fsal)
 end
 
 function Base.show(io::IO, RK::RungeKutta)
