@@ -19,9 +19,6 @@ butcher_tables = (
     Fehlberg78(), DormandPrince87(),
     Feagin108(),
 )
-
-for x in butcher_tables
-    @test debug_table(x) == true
-end 
+debug_table.(butcher_tables)
 
 println("\ndone")

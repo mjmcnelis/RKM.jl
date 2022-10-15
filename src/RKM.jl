@@ -1,10 +1,11 @@
 module RKM
 
 # using DataFrames      # may use to output RK tables
+using Test
 using UnPack
 import Base.@kwdef
 
-abstract type DiffEqMethod end
+abstract type OrdinaryDiffEqMethod end
 
 include("utils.jl")
 include("solution.jl")

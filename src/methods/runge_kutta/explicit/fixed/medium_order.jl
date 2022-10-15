@@ -10,7 +10,7 @@ function RungeKutta4(; precision::Type{<:AbstractFloat} = Float64)
                1//2 0 1//2 0 0
                1 0 0 1 0
                1 1//6 1//3 1//3 1//6]
-    RungeKutta(:Runge_Kutta_4, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Runge_Kutta_4, butcher .|> precision, Explicit())
 end
 
 function ThreeEightsRule4(; precision::Type{<:AbstractFloat} = Float64)
@@ -19,7 +19,7 @@ function ThreeEightsRule4(; precision::Type{<:AbstractFloat} = Float64)
                2//3 -1//3 1 0 0
                1 1 -1 1 0
                1 1//8 3//8 3//8 1//8]
-    RungeKutta(:Three_Eights_Rule_4, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Three_Eights_Rule_4, butcher .|> precision, Explicit())
 end
 
 function Ralston4(; precision::Type{<:AbstractFloat} = Float64)
@@ -32,7 +32,7 @@ function Ralston4(; precision::Type{<:AbstractFloat} = Float64)
                0.4557372542187894 0.2969776092477536 0.15875964497103556 0 0
                1 0.21810038822592054 -3.050965148692931 3.8328647604670123 0
                1 0.1747602822626904 -0.551480662878733 1.2055355993965235 0.17118478121951902]
-    RungeKutta(:Ralston_4, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Ralston_4, butcher .|> precision, Explicit())
 end
 
 function Ketcheson4(; precision::Type{<:AbstractFloat} = Float64)
@@ -48,7 +48,7 @@ function Ketcheson4(; precision::Type{<:AbstractFloat} = Float64)
                5//6 1//15 1//15 1//15 1//15 1//15 1//6 1//6 1//6 0 0
                1 1//15 1//15 1//15 1//15 1//15 1//6 1//6 1//6 1//6 0
                1 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10]
-    RungeKutta(:Ketcheson_4, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Ketcheson_4, butcher .|> precision, Explicit())
 end
 
 function Butcher5(; precision::Type{<:AbstractFloat} = Float64)
@@ -59,7 +59,7 @@ function Butcher5(; precision::Type{<:AbstractFloat} = Float64)
                3//4 3//16 0 0 9//16 0 0
                1 -3//7 2//7 12//7 -12//7 8//7 0
                1 7//90 0 32//90 12//90 32//90 7//90]
-    RungeKutta(:Butcher_5, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Butcher_5, butcher .|> precision, Explicit())
 end
 
 function Butcher6(; precision::Type{<:AbstractFloat} = Float64)
@@ -71,6 +71,6 @@ function Butcher6(; precision::Type{<:AbstractFloat} = Float64)
                1//6 -1//360 -11//36 -1//8 1//2 1//10 0 0
                1 -41//260 22//13 43//156 -118//39 32//195 80//39 0
                1 13//200 0 11//40 11//40 4//25 4//25 13//200]
-    RungeKutta(:Butcher_6, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Butcher_6, butcher .|> precision, Explicit())
 end
 

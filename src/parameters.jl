@@ -1,5 +1,5 @@
 
 @kwdef struct Parameters
     adaptive::AdaptiveStepSize
-    method::DiffEqMethod
+    method::OrdinaryDiffEqMethod
 end

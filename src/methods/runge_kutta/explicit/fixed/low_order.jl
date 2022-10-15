@@ -5,7 +5,7 @@
 function Euler1(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0
                1 1] 
-    RungeKutta(:Euler_1, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Euler_1, butcher .|> precision, Explicit())
 end
 
 function Heun2(; precision::Type{<:AbstractFloat} = Float64) 
@@ -13,14 +13,14 @@ function Heun2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0
                1 1 0
                1 1//2 1//2]
-    RungeKutta(:Heun_2, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Heun_2, butcher .|> precision, Explicit())
 end
 
 function Midpoint2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0
                1//2 1//2 0
                1 0 1]
-    RungeKutta(:Midpoint_2, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Midpoint_2, butcher .|> precision, Explicit())
 end
 
 function Ralston2(; precision::Type{<:AbstractFloat} = Float64)
@@ -28,7 +28,7 @@ function Ralston2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0
                2//3 2//3 0
                1 1//4 3//4]
-    RungeKutta(:Ralston_2, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Ralston_2, butcher .|> precision, Explicit())
 end
 
 function Generic2(; alpha::Union{Int, Rational}, 
@@ -38,7 +38,7 @@ function Generic2(; alpha::Union{Int, Rational},
     butcher = [0 0 0
                a a 0
                1 1-1//2a 1//2a]
-    RungeKutta(:Generic_2, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Generic_2, butcher .|> precision, Explicit())
 end
 
 function Heun3(; precision::Type{<:AbstractFloat} = Float64)
@@ -46,7 +46,7 @@ function Heun3(; precision::Type{<:AbstractFloat} = Float64)
                1//3 1//3 0 0
                2//3 0 2//3 0
                1 1/4 0 3//4]
-    RungeKutta(:Heun_3, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Heun_3, butcher .|> precision, Explicit())
 end
 
 function Ralston3(; precision::Type{<:AbstractFloat} = Float64)
@@ -54,7 +54,7 @@ function Ralston3(; precision::Type{<:AbstractFloat} = Float64)
                1//2 1//2 0 0
                3//4 0 3//4 0
                1 2//9 1//3 4//9]
-    RungeKutta(:Ralston_3, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Ralston_3, butcher .|> precision, Explicit())
 end
 
 function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
@@ -62,7 +62,7 @@ function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
                1//2 1//2 0 0
                3//4 0 3/4 0
                1 2//9 1//3 4//9]
-    RungeKutta(:Runge_Kutta_3, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Runge_Kutta_3, butcher .|> precision, Explicit())
 end
 
 function ShuOsher3(; precision::Type{<:AbstractFloat} = Float64)
@@ -71,7 +71,7 @@ function ShuOsher3(; precision::Type{<:AbstractFloat} = Float64)
                1 1 0 0
                1//2 1//4 1//4 0
                1 1//6 1//6 2//3]
-    RungeKutta(:Shu_Osher_3, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Shu_Osher_3, butcher .|> precision, Explicit())
 end
 
 function SpiteriRuuth3(; precision::Type{<:AbstractFloat} = Float64)
@@ -81,7 +81,7 @@ function SpiteriRuuth3(; precision::Type{<:AbstractFloat} = Float64)
                1 1//2 1//2 0 0
                1//2 1//6 1//6 1//6 0
                1 1//6 1//6 1//6 1//2]
-    RungeKutta(:Spiteri_Ruuth_3, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Spiteri_Ruuth_3, butcher .|> precision, Explicit())
 end
 
 function Generic3(; alpha::Union{Int, Rational}, 
@@ -92,5 +92,5 @@ function Generic3(; alpha::Union{Int, Rational},
                a a 0 0 
                1 1+(1-a)//(a*(3a-2)) -(1-a)//(a*(3a-2)) 0
                1 1//2-1//6a 1//(6a*(1-a)) (2-3a)//6(1-a)]
-    RungeKutta(:Generic_3, butcher .|> precision, Explicit())
+    FixedRungeKutta(:Generic_3, butcher .|> precision, Explicit())
 end
