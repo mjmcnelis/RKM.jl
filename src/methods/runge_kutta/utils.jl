@@ -25,3 +25,16 @@ function debug_table(method::RungeKutta)
     end
     nothing
 end
+
+function debug_iteration(method::RungeKutta, iteration::Type{<:Iteration})
+    # TODO: test macro returns a message if failed
+    prop = getproperty(method, :iteration)
+
+    if prop isa iteration
+        @test true 
+    else 
+        @error "$(method.name) iteration = $(typeof(prop)) but should be $iteration"
+        @test false
+    end
+    nothing
+end

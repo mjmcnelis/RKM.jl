@@ -27,6 +27,9 @@ include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
+        # implicit/fixed/
+include("methods/runge_kutta/implicit/fixed/low_order.jl")
+include("methods/runge_kutta/implicit/fixed/medium_order.jl")
 
 include("parameters.jl")
 include("evolve.jl")
@@ -35,18 +38,25 @@ include("evolve.jl")
 export Fixed, StepDoubling, Embedded, FiniteDiff
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
-# Numerical methods (fixed explicit Runge-Kutta)
-export Euler1, Heun2, Midpoint2, Ralston2, Generic2
-export Heun3, Ralston3, RungeKutta3, ShuOsher3, SpiteriRuuth3, Generic3
-export RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4
-export Butcher5, Butcher6
+# Numerical ODE methods
+    # Properties 
+export Explicit, DiagonalImplicit, FullImplicit
+    # Fixed explicit Runge-Kutta
+export Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3, Ralston3, RungeKutta3, 
+       ShuOsher3, SpiteriRuuth3, Generic3
+export RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4, Butcher5, Butcher6
 export Curtis8, Shanks8, ShanksPseudo8
-# Numerical methods (embedded explicit Runge-Kutta)
+    # Embedded explicit Runge-Kutta
 export Fehlberg12, HeunEuler21, BogackiShampine32
-export Fehlberg45, CashKarp54, DormandPrince54, BogackiShampine54
-export Tsitouras54, Verner56, Verner65
+export Fehlberg45, CashKarp54, DormandPrince54, BogackiShampine54, Tsitouras54, Verner56,
+       Verner65
 export Fehlberg78, DormandPrince87
 export Feagin108
+    # Fixed implicit Runge-Kutta 
+export BackwardEuler1, ImplicitMidpoint2, CrankNicolson2, QinZhang2, KraaijevangerSpijker2,
+       PareschiRusso2, LobattoIIIB2, LobattoIIIC2, PareschiRusso3, Crouzeix3, 
+       RadauIA3, RadauIIA3, DIRKL3
+export Norsett4, LobattoIIIA4, LobattoIIIB4, LobattoIIIC4
 # Code names
 export get_code_name
 # ODE solution
@@ -56,6 +66,6 @@ export Parameters
 # ODE solver
 export evolve_ode
 # Utilities 
-export debug_table
+export debug_table, debug_iteration
 
 end

@@ -1,6 +1,4 @@
 
-# TODO: label Bogacki-Shampine, etc as FSAL
-
 function Fehlberg12(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//2 1//2 0 0
