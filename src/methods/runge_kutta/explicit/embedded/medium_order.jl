@@ -58,6 +58,12 @@ function BogackiShampine54(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function Tsitouras54(; precision::Type{<:AbstractFloat} = Float64)
+    # TEMP until can fix get more digits
+    if precision == BigFloat
+        @warn "Tsitouras54 can't use BigFloat right now (default to Float64)"
+        precision = Float64
+    end
+
     butcher = [0 0 0 0 0 0 0 0
                0.161 0.161 0 0 0 0 0 0
                0.327 -8.4806554923569887e-3 3.3548065549235700e-1 0 0 0 0 0

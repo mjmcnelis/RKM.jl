@@ -1,5 +1,6 @@
 
-function Feagin108(; precision::Type{<:AbstractFloat} = BigFloat)
+# TODO: get more digits and try BigFloat
+function Feagin108(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
                1//10 1//10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
                53935784080298178753//100000000000000000000 -22879414034382286013//25000000000000000000 29090688043565464561//20000000000000000000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

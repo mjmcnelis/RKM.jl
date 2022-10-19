@@ -1,35 +1,77 @@
 using Revise
 using RKM 
 using Test
-
 # TODO: export csv files for larger tables for viewing
 
-butcher_tables = (
-    # fixed explicit RK
-    Euler1(), Heun2(), Midpoint2(), Ralston2(), Generic2(; alpha = 1), Heun3(), Ralston3(),
-    RungeKutta3(), ShuOsher3(),SpiteriRuuth3(), Generic3(; alpha = 1//2),
+function get_butcher_tables(; precision::Type{<:AbstractFloat})
+    (
+        # fixed explicit RK
+        Euler1(; precision), 
+        Heun2(; precision), 
+        Midpoint2(; precision), 
+        Ralston2(; precision), 
+        Generic2(; alpha = 1, precision), 
+        Heun3(; precision),
+        Ralston3(; precision),
+        RungeKutta3(; precision), 
+        ShuOsher3(; precision), 
+        SpiteriRuuth3(; precision), 
+        Generic3(; alpha = 1//2, precision),
 
-    RungeKutta4(), ThreeEightsRule4(), Ralston4(), Ketcheson4(), Butcher5(), Butcher6(),
+        RungeKutta4(; precision), 
+        ThreeEightsRule4(; precision), 
+        Ralston4(; precision), 
+        Ketcheson4(; precision), 
+        Butcher5(; precision), 
+        Butcher6(; precision),
 
-    Curtis8(), Shanks8(), ShanksPseudo8(),
+        Curtis8(; precision), 
+        Shanks8(; precision), 
+        ShanksPseudo8(; precision),
 
-    # embedded explicit RK
-    Fehlberg12(), HeunEuler21(), BogackiShampine32(),
+        # embedded explicit RK
+        Fehlberg12(; precision), 
+        HeunEuler21(; precision), 
+        BogackiShampine32(; precision),
 
-    Fehlberg45(), CashKarp54(), DormandPrince54(), BogackiShampine54(), Tsitouras54(), 
-    Verner56(), Verner65(),
+        Fehlberg45(; precision), 
+        CashKarp54(; precision),
+        DormandPrince54(; precision), 
+        BogackiShampine54(; precision), 
+        Tsitouras54(; precision), 
+        Verner56(; precision), 
+        Verner65(; precision),
 
-    Fehlberg78(), DormandPrince87(),
+        Fehlberg78(; precision), 
+        DormandPrince87(; precision),
 
-    Feagin108(),
+        Feagin108(),
 
-    # fixed implicit RK
-    BackwardEuler1(), ImplicitMidpoint2(), CrankNicolson2(), QinZhang2(), 
-    KraaijevangerSpijker2(), PareschiRusso2(), LobattoIIIB2(), LobattoIIIC2(), 
-    PareschiRusso3(), Crouzeix3(), RadauIA3(), RadauIIA3(), DIRKL3(),
+        # fixed implicit RK
+        BackwardEuler1(; precision), 
+        ImplicitMidpoint2(; precision), 
+        CrankNicolson2(; precision), 
+        QinZhang2(; precision), 
+        KraaijevangerSpijker2(; precision), 
+        PareschiRusso2(; precision), 
+        LobattoIIIB2(; precision), 
+        LobattoIIIC2(; precision), 
+        PareschiRusso3(; precision), 
+        Crouzeix3(; precision), 
+        RadauIA3(; precision), 
+        RadauIIA3(; precision), 
+        DIRKL3(; precision),
 
-    Norsett4(), LobattoIIIA4(), LobattoIIIB4(), LobattoIIIC4(),
-)
+        Norsett4(; precision), 
+        LobattoIIIA4(; precision), 
+        LobattoIIIB4(; precision), 
+        LobattoIIIC4(; precision)
+    )
+end
+
+# butcher_tables = get_butcher_tables(; precision = Float32)
+butcher_tables = get_butcher_tables(; precision = Float64)
+# butcher_tables = get_butcher_tables(; precision = BigFloat)
 
 debug_table.(butcher_tables)
 

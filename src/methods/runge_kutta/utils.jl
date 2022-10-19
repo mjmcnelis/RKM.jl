@@ -6,12 +6,18 @@ within floating precision. If the last row fails the test (strict), a failed tes
 registered. Other rows failing the test are marked as broken but may need debugging.
 """
 function debug_table(method::RungeKutta)
-    B = method.butcher
+    B    = method.butcher
+    ncol = size(B, 2)
+
     for i in 1:size(B, 1)
-        err = B[i, 1] - sum(B[i, 2:end])
-        # TODO: adjust tolerance depending on Float type
-        if abs(err) > 1e-15
-            msg = "B[$i,1] - ∑_{j>1} B[$i,j] = $err. Fix row $i in $method."
+        err = abs(B[i, 1] - sum(B[i, 2:end]))
+        tol = (ncol - 1)*eps(B[i, 1])
+      
+        if err > tol
+            err = round(err |> Float64, sigdigits = 3)
+            tol = round(tol |> Float64, sigdigits = 3)
+            msg = "|B[$i,1] - ∑_{j>1} B[$i,j]| = $err > $tol. Fix row $i in $method."
+
             if i == size(B, 1)
                 @error msg          # row must be fixed
                 @test false         # test failed

@@ -1,5 +1,11 @@
 
 function Curtis8(; precision::Type{<:AbstractFloat} = Float64)
+    # TEMP until can fix get more digits
+    if precision == BigFloat
+        @warn "Curtis8 can't use BigFloat right now (default to Float64)"
+        precision = Float64
+    end
+
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0
                1//192 1//192 0 0 0 0 0 0 0 0 0 0
                7.4803184795467909e-2 -4.6236639493684439e-1 5.3716957973231239e-1 0 0 0 0 0 0 0 0 0
@@ -37,6 +43,12 @@ function Shanks8(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function ShanksPseudo8(; precision::Type{<:AbstractFloat} = Float64)
+    # TEMP until can fix get more digits
+    if precision == BigFloat
+        @warn "ShanksPseudo8 can't use BigFloat right now (default to Float64)"
+        precision = Float64
+    end
+
     # TODO: get fractions
     butcher = [0 0 0 0 0 0 0 0 0 0 0
                0.14814814814814814 0.14814814814814814 0 0 0 0 0 0 0 0 0

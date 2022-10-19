@@ -75,7 +75,7 @@ end
 function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//2 1//2 0 0
-               3//4 0 3/4 0
+               3//4 0 3//4 0
                1 2//9 1//3 4//9]
     butcher = butcher .|> precision 
 

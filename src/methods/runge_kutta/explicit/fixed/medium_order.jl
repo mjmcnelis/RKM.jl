@@ -31,6 +31,10 @@ function Ralston4(; precision::Type{<:AbstractFloat} = Float64)
     # note: for multiple terms in element, do a+b+c 0 0 
     # TODO: do sqrt2 = sqrt(precision(2))
     # note: can't use BigFloat precision right now
+    if precision == BigFloat
+        @warn "Ralston4 can't use BigFloat right now (default to Float64)"
+        precision = Float64
+    end
     butcher = [0 0 0 0 0
                2//5 2//5 0 0 0
                0.4557372542187894 0.2969776092477536 0.15875964497103556 0 0
