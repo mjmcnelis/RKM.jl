@@ -21,7 +21,7 @@ function Fehlberg78(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
-    # TEMP until can fix large Ints
+    # TEMP: large fractions in rows 7-15 are not actually exact
     if precision == BigFloat
         @warn "DormandPrince87 can't use BigFloat right now (default to Float64)"
         precision = Float64
@@ -42,8 +42,6 @@ function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
                1 403863854//491063109 0 0 -5068492393//434740067 -411421997//543043805 652783627//914296604 11173962825//925320556 -13158990841//6184727034 3936647629//1978049680 -160528059//685178525 248638103//1413531060 0 0
                1 13451932//455176623 0 0 0 0 -808719846//976000145 1757004468//5645159321 656045339//265891186 -3867574721//1518517206 465885868//322736535  53011238//667516719 2//45 0
                1 14005451//335480064 0 0 0 0 -59238493//1068277825 181606767//758867731 561292985//797845732 -1041891430//1371343529 760417239//1151165299 118820643//751138087 -528747749//2220607170 1//4]
-#    @show typeof(butcher)
-#    q()
     butcher = butcher .|> precision 
 
     RungeKutta(; name = :Dormand_Prince_87, butcher)

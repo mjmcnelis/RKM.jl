@@ -1,17 +1,16 @@
 """
-    debug_table(method::RungeKutta) 
+    debug_table(method::RungeKutta; p::Int = 1) 
 
 Checks that the butcher table satisfies the order conditions B[i,1] = ∑_{j>1} B[i,j]
 within floating precision. If the last row fails the test (strict), a failed test is 
 registered. Other rows failing the test are marked as broken but may need debugging.
 """
-function debug_table(method::RungeKutta)
-    B    = method.butcher
-    ncol = size(B, 2)
+function debug_table(method::RungeKutta; p::Int = 1)
+    B = method.butcher
 
     for i in 1:size(B, 1)
         err = abs(B[i, 1] - sum(B[i, 2:end]))
-        tol = (ncol - 1)*eps(B[i, 1])
+        tol = norm(eps.(B[i, 2:end]), p)        # p = 1 seems to work best
       
         if err > tol
             err = round(err |> Float64, sigdigits = 3)

@@ -1,6 +1,10 @@
 
 # TODO: get more digits and try BigFloat
 function Feagin108(; precision::Type{<:AbstractFloat} = Float64)
+    if precision == BigFloat
+        @warn "Feagin108 can't use BigFloat right now (default to Float64)"
+        precision = Float64
+    end
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
                1//10 1//10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
                53935784080298178753//100000000000000000000 -22879414034382286013//25000000000000000000 29090688043565464561//20000000000000000000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

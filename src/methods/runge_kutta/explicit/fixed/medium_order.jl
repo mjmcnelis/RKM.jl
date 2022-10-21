@@ -27,19 +27,13 @@ function ThreeEightsRule4(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function Ralston4(; precision::Type{<:AbstractFloat} = Float64)
-    # TODO: use irrational form
-    # note: for multiple terms in element, do a+b+c 0 0 
-    # TODO: do sqrt2 = sqrt(precision(2))
-    # note: can't use BigFloat precision right now
-    if precision == BigFloat
-        @warn "Ralston4 can't use BigFloat right now (default to Float64)"
-        precision = Float64
-    end
+    s = sqrt(precision(5))  # sqrt(5)
+                                  
     butcher = [0 0 0 0 0
                2//5 2//5 0 0 0
-               0.4557372542187894 0.2969776092477536 0.15875964497103556 0 0
-               1 0.21810038822592054 -3.050965148692931 3.8328647604670123 0
-               1 0.1747602822626904 -0.551480662878733 1.2055355993965235 0.17118478121951902]
+               7/8-3s/16 (-2889+1428s)/1024 (3785-1620s)/1024 0 0
+               1 (-3365+2094s)/6040 (-975-3046s)/2552 (467040+203968s)/240845 0
+               1 (263+24s)/1812 (125-1000s)/3828 1024(3346+1623s)/5924787 (30-4s)/123]
     butcher = butcher .|> precision 
 
     RungeKutta(; name = :Ralston_4, butcher)

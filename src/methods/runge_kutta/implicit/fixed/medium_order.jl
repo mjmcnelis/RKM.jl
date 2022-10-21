@@ -1,10 +1,10 @@
 
 # TODO: see roots https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 function Norsett4(; precision::Type{<:AbstractFloat} = Float64)
-    sqrt_3   = sqrt(precision(3))
-    costheta = cos(pi/precision(18))
+    s = sqrt(precision(3))      # sqrt(3)
+    c = cos(pi/precision(18))   # cos(pi/18)
 
-    x = 1//2 + costheta/sqrt_3           # root = 1.068579
+    x = 1//2 + c/s              # root = 1.068579
 
     butcher = [x x 0 0
                1//2 1//2-x x 0

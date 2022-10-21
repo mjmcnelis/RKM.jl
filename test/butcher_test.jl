@@ -45,7 +45,7 @@ function get_butcher_tables(; precision::Type{<:AbstractFloat})
         Fehlberg78(; precision), 
         DormandPrince87(; precision),
 
-        Feagin108(),
+        Feagin108(; precision),
 
         # fixed implicit RK
         BackwardEuler1(; precision), 
@@ -66,6 +66,7 @@ function get_butcher_tables(; precision::Type{<:AbstractFloat})
         LobattoIIIA4(; precision), 
         LobattoIIIB4(; precision), 
         LobattoIIIC4(; precision)
+        
     )
 end
 
