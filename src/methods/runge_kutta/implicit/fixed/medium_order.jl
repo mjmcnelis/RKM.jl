@@ -15,6 +15,17 @@ function Norsett4(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Norsett_4, butcher)
 end
 
+function GaussLegendre4(; precision::Type{<:AbstractFloat} = Float64)
+    s = sqrt(precision(3))      # sqrt(3)
+
+    butcher = [1//2-s/6 1/4 1//4-s/6
+               1//2+s/6 1//4+s/6 1//4
+               1 1//2 1//2]
+    butcher = butcher .|> precision
+
+    RungeKutta(; name = :GaussLegendre_4, butcher)
+end
+
 function LobattoIIIA4(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//2 5//24 1//3 -1//24
@@ -43,4 +54,24 @@ function LobattoIIIC4(; precision::Type{<:AbstractFloat} = Float64)
     butcher = butcher .|> precision
 
     RungeKutta(; name = :Lobatto_IIIC_4, butcher)
+end
+
+function LobattoIIICS4(; precision::Type{<:AbstractFloat} = Float64)
+    butcher = [0 0 0 0
+               1//2 1//4 1//4 0
+               1 0 1 0
+               1 1//6 2//3 1//6]
+    butcher = butcher .|> precision
+
+    RungeKutta(; name = :Lobatto_IIICS_4, butcher)
+end
+
+function LobattoIIID4(; precision::Type{<:AbstractFloat} = Float64)
+    butcher = [0 1//6 0 -1//6
+               1//2 1//12 5//12 0
+               1 1//2 1//3 1//6
+               1 1//6 2//3 1//6]
+    butcher = butcher .|> precision
+
+    RungeKutta(; name = :Lobatto_IIID_4, butcher)
 end

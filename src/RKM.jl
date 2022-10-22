@@ -18,16 +18,21 @@ include("methods/properties.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
 include("methods/runge_kutta/utils.jl")
-       # explicit/embedded/
+include("methods/runge_kutta/get_all_tables.jl")
+        # explicit/
+include("methods/runge_kutta/explicit/get_tables.jl")
+            # explicit/embedded/
 include("methods/runge_kutta/explicit/embedded/low_order.jl")
 include("methods/runge_kutta/explicit/embedded/medium_order.jl")
 include("methods/runge_kutta/explicit/embedded/high_order.jl")
 include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
-        # explicit/fixed/
+            # explicit/fixed/
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
-        # implicit/fixed/
+        # implicit/
+include("methods/runge_kutta/implicit/get_tables.jl")
+            # implicit/fixed/
 include("methods/runge_kutta/implicit/fixed/low_order.jl")
 include("methods/runge_kutta/implicit/fixed/medium_order.jl")
 
@@ -57,6 +62,9 @@ export BackwardEuler1, ImplicitMidpoint2, CrankNicolson2, QinZhang2, Kraaijevang
        PareschiRusso2, LobattoIIIB2, LobattoIIIC2, PareschiRusso3, Crouzeix3, 
        RadauIA3, RadauIIA3, DIRKL3
 export Norsett4, LobattoIIIA4, LobattoIIIB4, LobattoIIIC4
+# Get Runge-Kutta tables
+export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables, 
+       get_runge_kutta_full_implicit_tables, get_runge_kutta_diagonal_implicit_tables
 # Code names
 export get_code_name
 # ODE solution
