@@ -27,11 +27,12 @@ function ThreeEightsRule4(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function Ralston4(; precision::Type{<:AbstractFloat} = Float64)
-    s = sqrt(precision(5))  # sqrt(5)
+    # note: used BigFloat to reduce float error propagation before .|> precision line
+    s = sqrt(BigFloat(5))       # sqrt(5)
                                   
     butcher = [0 0 0 0 0
                2//5 2//5 0 0 0
-               7/8-3s/16 (-2889+1428s)/1024 (3785-1620s)/1024 0 0
+               7//8-3s/16 (-2889+1428s)/1024 (3785-1620s)/1024 0 0
                1 (-3365+2094s)/6040 (-975-3046s)/2552 (467040+203968s)/240845 0
                1 (263+24s)/1812 (125-1000s)/3828 1024(3346+1623s)/5924787 (30-4s)/123]
     butcher = butcher .|> precision 

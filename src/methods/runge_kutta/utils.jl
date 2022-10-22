@@ -16,7 +16,7 @@ function debug_table(method::RungeKutta)
         if err > tol
             err = round(err |> Float64, sigdigits = 3)
             tol = round(tol |> Float64, sigdigits = 3)
-            msg = "|B[$i,1] - ∑_{j>1} B[$i,j]| = $err > $tol. Fix row $i in $method."
+            msg = "|B[$i,1] - ∑_{j>1} B[$i,j]| = $err > $tol. Check row $i in $method."
 
             @warn msg           # row may need fixing
             @test_broken false  # test broken

@@ -43,7 +43,8 @@ function KraaijevangerSpijker2(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function PareschiRusso2(; precision::Type{<:AbstractFloat} = Float64)
-    s = sqrt(precision(2))  # sqrt(2)
+    # note: used BigFloat to reduce float error propagation before .|> precision line
+    s = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s             # gamma
     
     butcher = [g g 0
@@ -75,7 +76,8 @@ end
 # TODO: maybe use generic formula from 
 #       https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 function PareschiRusso3(; precision::Type{<:AbstractFloat} = Float64)
-    s = sqrt(precision(2))  # sqrt(2)
+    # note: used BigFloat to reduce float error propagation before .|> precision line
+    s = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s             # gamma, other options were 1/4 (Qin-Zhang), 1+1/sqrt(2)
     
     butcher = [g g 0 0
@@ -88,7 +90,8 @@ function PareschiRusso3(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 function Crouzeix3(; precision::Type{<:AbstractFloat} = Float64)
-    s = sqrt(precision(3))  # sqrt(3)
+    # note: used BigFloat to reduce float error propagation before .|> precision line
+    s = sqrt(BigFloat(3))   # sqrt(3)
 
     butcher = [1//2+s/6 1//2+s/6 0
                1//2-s/6 -s/3 1//2+s/6

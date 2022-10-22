@@ -4,6 +4,7 @@ struct RungeKutta <: ODEMethod
     # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol
     butcher::Matrix{<:AbstractFloat}
+    # TODO: should I just wrap this in a Properties struct? 
     iteration::Iteration
     fsal::FirstSameAsLast
 end

@@ -61,7 +61,9 @@ export Feagin108
 export BackwardEuler1, ImplicitMidpoint2, CrankNicolson2, QinZhang2, KraaijevangerSpijker2,
        PareschiRusso2, LobattoIIIB2, LobattoIIIC2, PareschiRusso3, Crouzeix3, 
        RadauIA3, RadauIIA3, DIRKL3
-export Norsett4, LobattoIIIA4, LobattoIIIB4, LobattoIIIC4
+       # TODO export more tables
+export Norsett4, GaussLegendre4, LobattoIIIA4, LobattoIIIB4, LobattoIIIC4, LobattoIIICS4,
+       LobattoIIID4, RaduaIA5, RaduaIIA5, GaussLegendre6
 # Get Runge-Kutta tables
 export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables, 
        get_runge_kutta_full_implicit_tables, get_runge_kutta_diagonal_implicit_tables
