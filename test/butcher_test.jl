@@ -66,13 +66,12 @@ function get_butcher_tables(; precision::Type{<:AbstractFloat})
         LobattoIIIA4(; precision), 
         LobattoIIIB4(; precision), 
         LobattoIIIC4(; precision)
-        
     )
 end
 
 # butcher_tables = get_butcher_tables(; precision = Float32)
-butcher_tables = get_butcher_tables(; precision = Float64)
-# butcher_tables = get_butcher_tables(; precision = BigFloat)
+# butcher_tables = get_butcher_tables(; precision = Float64)
+butcher_tables = get_butcher_tables(; precision = BigFloat)
 
 debug_table.(butcher_tables)
 
