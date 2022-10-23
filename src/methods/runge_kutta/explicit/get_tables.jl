@@ -2,7 +2,7 @@
 # TODO: make docstring
 function get_runge_kutta_explicit_tables(; precision::Type{<:AbstractFloat})
     ( 
-        # fixed explicit RK 
+        # fixed 
         Euler1(; precision), 
         Heun2(; precision), 
         Midpoint2(; precision), 
@@ -26,7 +26,7 @@ function get_runge_kutta_explicit_tables(; precision::Type{<:AbstractFloat})
         Shanks8(; precision), 
         ShanksPseudo8(; precision),
 
-        # embedded explicit RK
+        # embedded
         Fehlberg12(; precision), 
         HeunEuler21(; precision), 
         BogackiShampine32(; precision),

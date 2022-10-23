@@ -15,15 +15,6 @@ function ImplicitMidpoint2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Implicit_Midpoint_2, butcher)
 end
 
-function CrankNicolson2(; precision::Type{<:AbstractFloat} = Float64)
-    butcher = [0 0 0 
-               1 1//2 1//2
-               1 1//2 1//2]
-    butcher = butcher .|> precision 
-
-    RungeKutta(; name = :Crank_Nicolson_2, butcher)
-end
-
 function QinZhang2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [1//4 1//4 0
                3//4 1//2 1//4
@@ -53,24 +44,6 @@ function PareschiRusso2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = butcher .|> precision
 
     RungeKutta(; name = :Pareschi_Russo_2, butcher)
-end
-
-function LobattoIIIB2(; precision::Type{<:AbstractFloat} = Float64)
-    butcher = [1//2 1//2 0
-               1//2 1//2 0
-               1 1//2 1//2]
-    butcher = butcher .|> precision 
-
-    RungeKutta(; name = :Lobatto_IIIB_2, butcher)
-end
-
-function LobattoIIIC2(; precision::Type{<:AbstractFloat} = Float64)
-    butcher = [0 1//2 -1//2
-               1 1//2 1//2
-               1 1//2 1//2]
-    butcher = butcher .|> precision
-
-    RungeKutta(; name = :Lobatto_IIIC_2, butcher)
 end
 
 # TODO: maybe use generic formula from 

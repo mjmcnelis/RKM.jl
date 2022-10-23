@@ -21,20 +21,23 @@ include("methods/runge_kutta/utils.jl")
 include("methods/runge_kutta/get_all_tables.jl")
         # explicit/
 include("methods/runge_kutta/explicit/get_tables.jl")
+            # explicit/fixed/
+include("methods/runge_kutta/explicit/fixed/low_order.jl")
+include("methods/runge_kutta/explicit/fixed/medium_order.jl")
+include("methods/runge_kutta/explicit/fixed/high_order.jl")
             # explicit/embedded/
 include("methods/runge_kutta/explicit/embedded/low_order.jl")
 include("methods/runge_kutta/explicit/embedded/medium_order.jl")
 include("methods/runge_kutta/explicit/embedded/high_order.jl")
 include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
-            # explicit/fixed/
-include("methods/runge_kutta/explicit/fixed/low_order.jl")
-include("methods/runge_kutta/explicit/fixed/medium_order.jl")
-include("methods/runge_kutta/explicit/fixed/high_order.jl")
         # implicit/
 include("methods/runge_kutta/implicit/get_tables.jl")
             # implicit/fixed/
 include("methods/runge_kutta/implicit/fixed/low_order.jl")
 include("methods/runge_kutta/implicit/fixed/medium_order.jl")
+            # implicit/embedded/
+include("methods/runge_kutta/implicit/embedded/low_order.jl")
+include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 
 include("parameters.jl")
 include("evolve.jl")
@@ -58,12 +61,13 @@ export Fehlberg45, CashKarp54, DormandPrince54, BogackiShampine54, Tsitouras54, 
 export Fehlberg78, DormandPrince87
 export Feagin108
     # Fixed implicit Runge-Kutta 
-export BackwardEuler1, ImplicitMidpoint2, CrankNicolson2, QinZhang2, KraaijevangerSpijker2,
-       PareschiRusso2, LobattoIIIB2, LobattoIIIC2, PareschiRusso3, Crouzeix3, 
-       RadauIA3, RadauIIA3, DIRKL3
-       # TODO export more tables
-export Norsett4, GaussLegendre4, LobattoIIIA4, LobattoIIIB4, LobattoIIIC4, LobattoIIICS4,
-       LobattoIIID4, RaduaIA5, RaduaIIA5, GaussLegendre6
+export BackwardEuler1, ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2, PareschiRusso2,
+       PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3
+export Norsett4, RaduaIA5
+    # Embedded implicit Runge-Kutta 
+export CrankNicolson21, LobattoIIIB21, LobattoIIIC21
+export GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIICS42,
+       LobattoIIID42, RaduaIIA52, GaussLegendre64
 # Get Runge-Kutta tables
 export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables, 
        get_runge_kutta_full_implicit_tables, get_runge_kutta_diagonal_implicit_tables
