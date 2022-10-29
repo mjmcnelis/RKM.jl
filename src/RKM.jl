@@ -38,8 +38,11 @@ include("methods/runge_kutta/implicit/fixed/medium_order.jl")
             # implicit/embedded/
 include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
+#
+include("methods/getters.jl")
 
 include("parameters.jl")
+include("time_span.jl")
 include("evolve.jl")
 
 # Adaptive methods
@@ -76,7 +79,7 @@ export get_code_name
 # ODE solution
 export Solution
 # ODE options
-export Parameters
+export Parameters, TimeSpan    # TODO: put TimeSpan in parameters?
 # ODE solver
 export evolve_ode
 # Utilities 

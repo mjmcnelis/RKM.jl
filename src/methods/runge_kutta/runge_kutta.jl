@@ -23,9 +23,6 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     iteration = iteration_prop(butcher)
     fsal      = fsal_prop(butcher)
 
-    # @show name iteration fsal
-    # println("")
-
     RungeKutta(name, butcher, iteration, fsal)
 end
 

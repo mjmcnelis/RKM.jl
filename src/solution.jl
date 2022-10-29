@@ -1,6 +1,7 @@
 
 @kwdef struct Solution 
-    y::Float64
-    dt::Float64
+    y::Vector{Vector{<:AbstractFloat}}
+    t::Vector{<:AbstractFloat}
+    dt::Vector{<:AbstractFloat}
 end
 

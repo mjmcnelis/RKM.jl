@@ -2,18 +2,19 @@
 using Revise
 using RKM
 
-adaptive = Embedded()
-method   = Heun2()
+# TODO: better interface? (MTK?)
+function y_prime(t, y) 
+    (y + 0.5) * (0.5 - y)
+end
 
-Euler1(), Heun2(), Midpoint2(), Ralston2()
-export Heun3(), Ralston3(), RungeKutta3(), ShuOsher3(), SpiteriRuuth3()
-export RungeKutta4(), ThreeEightsRule4(), Ralston4(), Ketcheson4()
+# should handle scalar and vector cases? or just vector
+y0 = -1.0
+t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 2.0)
 
+adaptive   = Fixed()
+method     = Heun2()
 parameters = Parameters(; adaptive, method)
 
-@show method
 
+@time sol = evolve_ode(y0, t_span, y_prime; parameters)
 
-q()
-
-sol = evolve_ode(; parameters)
