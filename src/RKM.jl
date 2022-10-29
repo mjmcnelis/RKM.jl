@@ -3,6 +3,7 @@ module RKM
 # using DataFrames      # may use to output RK tables
 using LinearAlgebra
 using Test
+using Dates
 using UnPack
 import Base.@kwdef
 

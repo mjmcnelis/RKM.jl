@@ -18,3 +18,7 @@ parameters = Parameters(; adaptive, method)
 
 @time sol = evolve_ode(y0, t_span, y_prime; parameters)
 
+# @show sol.t sol.dt
+
+println("\ndone")
+
