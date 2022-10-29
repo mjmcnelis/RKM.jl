@@ -1,15 +1,15 @@
 """
-    debug_table(method::RungeKutta; tol_factor::Float64 = 1.7) 
+    debug_table(method::RungeKutta; tol_fact_iter = 1.7, tol_fact_stage = 10.0) 
 
 Checks that the Butcher table satisfies the order conditions B[i,1] = ∑_{j>1} B[i,j]
-within floating precision. By default, rows that fail the test are marked as `Broken`
-(`Fail` if the error exceeds the tolerance by an order of magnitude). Primary and 
-embedded iteration rows that fail the test are marked as `Broken` (`Fail` if the 
-error exceeds the tolerance by the factor `tol_factor`).
+within floating precision. Stage rows that fail the test are marked as `Broken`
+(`Fail` if the error exceeds the tolerance by a factor of `tol_fact_stage`). Primary 
+and embedded iteration rows that fail the test are marked as `Broken` (`Fail` if the
+error exceeds the tolerance by the factor `tol_fact_iter`).
 
-Note: `tol_factor = 1.7` is the lowest factor I currently can reach
+Note: `tol_fact_iter = 1.7` is the lowest factor I currently can reach.
 """
-function debug_table(method::RungeKutta; tol_factor::Float64 = 1.7)
+function debug_table(method::RungeKutta; tol_fact_iter = 1.7, tol_fact_stage = 10.0)
     B = method.butcher
 
     for i in 1:size(B, 1)
@@ -21,8 +21,8 @@ function debug_table(method::RungeKutta; tol_factor::Float64 = 1.7)
             tol = round(tol |> Float64, sigdigits = 3)
             msg = "|B[$i,1] - ∑_{j>1} B[$i,j]| = $err > $tol. Check row $i in $method."
 
-            # primary/embedded rows have a stricter test than stage rows
-            if (err > tol_factor*tol && i >= size(B, 2)) || err > 10tol
+            # primary/embedded iteration rows should have a stricter test than stage rows
+            if (err > tol_fact_iter*tol && i >= size(B, 2)) || err > tol_fact_stage*tol
                 @error msg          # row should be fixed
                 @test false         # test fail
             else
@@ -30,7 +30,7 @@ function debug_table(method::RungeKutta; tol_factor::Float64 = 1.7)
                 @test_broken false  # test broken
             end
         else
-            @test true          # test passed
+            @test true              # test passed
         end
     end
     nothing
