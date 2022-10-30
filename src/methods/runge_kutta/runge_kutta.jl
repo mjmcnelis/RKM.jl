@@ -1,9 +1,9 @@
 
-struct RungeKutta <: ODEMethod
+struct RungeKutta{T1} <: ODEMethod
     # TODO: transpose butcher table? 
     # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol
-    butcher::Matrix{<:AbstractFloat}
+    butcher::Matrix{T1}
     # TODO: should I just wrap this in a Properties struct? 
     iteration::Iteration
     fsal::FirstSameAsLast

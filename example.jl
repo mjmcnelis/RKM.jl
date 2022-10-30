@@ -5,8 +5,8 @@ using LinearAlgebra
 using Plots 
 plotly()
 
-# # # TODO: better interface? (MTK?)
-# function dy_dt!(f, t, y; A = 0.5)      # need to pass in a struct somewhere 
+# TODO: need a better interface
+# function dy_dt!(f, t, y; A = 0.5)     # pass in struct?
 #     # f .= (y .+ A) .* (A .- y)
 #     f[1] = (y[1] + A) * (1.0 - A - y[1])
 #     nothing
@@ -23,12 +23,13 @@ parameters = Parameters(; adaptive, method)
 
 @time sol = evolve_ode(y0, t_span, dy_dt!; parameters)
 
-# y = reduce(hcat, sol.y)'
-# t = sol.t 
-# plot(t, y; size = (900, 600), linewidth = 2,
-#            legend = :outertopright, legendfontsize = 14,
-#            ylabel = "y", yguidefontsize = 14, ytickfontsize = 12,
-#            xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
-
+#=
+y = reduce(hcat, sol.y)'
+t = sol.t 
+plot(t, y; size = (900, 600), linewidth = 2,
+           legend = :outertopright, legendfontsize = 12,
+           ylabel = "y", yguidefontsize = 14, ytickfontsize = 12,
+           xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
+=#
 println("\ndone")
 
