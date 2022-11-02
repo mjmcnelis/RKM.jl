@@ -42,8 +42,8 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 #
 include("methods/getters.jl")
 
-include("parameters.jl")
 include("time_span.jl")
+include("parameters.jl")
 include("evolve.jl")
 
 # Adaptive methods
