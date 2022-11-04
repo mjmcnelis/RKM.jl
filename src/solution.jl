@@ -9,4 +9,3 @@ function Solution(; precision::Type{<:AbstractFloat} = Float64)
     t = Vector{precision}()
     Solution(y, t)
 end
-

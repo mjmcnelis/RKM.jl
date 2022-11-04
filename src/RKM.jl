@@ -9,6 +9,8 @@ import Base.@kwdef
 
 abstract type ODEMethod end
 
+RKM_root = dirname(dirname(@__FILE__))
+
 include("utils.jl")
 include("solution.jl")
 include("embedded.jl")
@@ -80,10 +82,10 @@ export get_code_name
 # ODE solution
 export Solution
 # ODE options
-export Parameters, TimeSpan    # TODO: put TimeSpan in parameters?
+export Parameters, TimeSpan
 # ODE solver
 export evolve_ode
 # Utilities 
-export debug_table, debug_iteration
+export debug_table, debug_iteration, RKM_root
 
 end

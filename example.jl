@@ -5,18 +5,27 @@ using LinearAlgebra
 using Plots 
 using UnPack
 plotly()
-
-# # TODO: need a better interface
-# function dy_dt!(f, t, y)
-#     A = 0.5
-#     f[1] = (y[1] + A) * (1.0 - A - y[1])
-# #     f .= (y .+ A) .* (1.0 .- A .- y)
-#     nothing
+# TODO: wrap into function
+# function load_equations(file_path)
+#     try
+#         dy_dt!    # but this is a global...
+#     catch err
+#         isa(err, UndefVarError) ? include(file_path) : nothing
+#         return dy_dt!
+#     end
 # end
+# file_path = joinpath(RKM_root, "equations.jl")
+# dy_dt! = load_equations(file_path)
+try
+    dy_dt!
+catch err
+    isa(err, UndefVarError) ? include(joinpath(RKM_root, "equations.jl")) : nothing
+end
 
 adaptive   = Fixed()
 method     = Heun2()
 t_span     = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 0.001)
+
 parameters = Parameters(; adaptive, method, t_span)
 
 @unpack t0 = t_span
