@@ -46,3 +46,9 @@ function fsal_prop(butcher::Matrix{<:AbstractFloat})
     end
     fsal
 end
+
+function order_prop(name::Symbol, butcher::Matrix{<:AbstractFloat})
+    precision = typeof(butcher[1,1])
+    order = filter.(isdigit, split(string(name), "_"))
+    parse.(precision, filter(x -> x != "", order))
+end

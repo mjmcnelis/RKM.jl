@@ -20,6 +20,7 @@ include("adaptive.jl")
 include("methods/properties.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
+include("methods/runge_kutta/update.jl")
 include("methods/runge_kutta/utils.jl")
 include("methods/runge_kutta/get_all_tables.jl")
         # explicit/
@@ -49,7 +50,7 @@ include("parameters.jl")
 include("evolve.jl")
 
 # Adaptive methods
-export Fixed, StepDoubling, Embedded, FiniteDiff
+export Fixed, Doubling, Embedded, FiniteDiff
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Numerical ODE methods
@@ -84,7 +85,7 @@ export Solution
 # ODE options
 export Parameters, TimeSpan
 # ODE solver
-export evolve_ode
+export evolve_ode, evolve_one_time_step!
 # Utilities 
 export debug_table, debug_iteration, RKM_root
 

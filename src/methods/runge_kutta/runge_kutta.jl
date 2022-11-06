@@ -1,9 +1,10 @@
 
-struct RungeKutta{T1} <: ODEMethod
+struct RungeKutta{T1, T2} <: ODEMethod
     # TODO: transpose butcher table? 
     # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol
     butcher::Matrix{T1}
+    order::Vector{T2}
     # TODO: should I just wrap this in a Properties struct? 
     iteration::Iteration
     fsal::FirstSameAsLast
@@ -22,8 +23,9 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     # determine properties 
     iteration = iteration_prop(butcher)
     fsal      = fsal_prop(butcher)
+    order     = order_prop(name, butcher)
 
-    RungeKutta(name, butcher, iteration, fsal)
+    RungeKutta(name, butcher, order, iteration, fsal)
 end
 
 function Base.show(io::IO, RK::RungeKutta)
