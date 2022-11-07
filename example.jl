@@ -12,6 +12,8 @@ catch err
     isa(err, UndefVarError) ? include(joinpath(RKM_root, "equations.jl")) : nothing
 end
 
+# TODO: try to see if I can rescale epsilon? 
+
 # adaptive   = Fixed()
 adaptive   = Doubling()
 method     = Heun2()

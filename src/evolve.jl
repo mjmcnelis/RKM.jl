@@ -34,6 +34,7 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min = 1)
     sol = Solution(; precision) 
 
     while true
+        # TODO: is there a way I can avoid copy(y) without bugs?
         push!(sol.y, copy(y))
         push!(sol.t, t)
 
