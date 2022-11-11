@@ -1,12 +1,12 @@
 
-function code_names(::RungeKutta, ::AdaptiveStepSize, ::Explicit)
-    Dict(:Euler_1 => :E1,)
-end
-function code_names(::RungeKutta, ::Embedded, ::Explicit)
-    Dict(:Fehlberg_12 => :F12,)
-end
-
-# nothing yet
-function get_code_name(method)
-    nothing
+function make_code_name(name)
+    name_split = split(string(name), "_")
+    code_name = "" 
+    for person in filter(x -> x != "", filter.(!isdigit, name_split))
+        code_name *= person[1]
+    end
+    for order in filter(x -> x != "", filter.(isdigit, name_split))
+        code_name *= order
+    end
+    code_name
 end

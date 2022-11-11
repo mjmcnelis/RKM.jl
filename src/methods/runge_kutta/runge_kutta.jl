@@ -9,6 +9,7 @@ struct RungeKutta{T1, T2, T3} <: ODEMethod
     # TODO: should I just wrap this in a Properties struct? 
     iteration::Iteration
     fsal::FirstSameAsLast
+    code_name::String
 end
 
 # TODO: implement option to use Euler or generic 2nd order 
@@ -27,7 +28,10 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     iteration = iteration_prop(butcher)
     fsal      = fsal_prop(butcher)
 
-    RungeKutta(name, butcher, precision, order, iteration, fsal)
+    # get code name label 
+    code_name = make_code_name(name) 
+   
+    RungeKutta(name, butcher, precision, order, iteration, fsal, code_name)
 end
 
 function Base.show(io::IO, RK::RungeKutta)

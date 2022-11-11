@@ -30,22 +30,8 @@ y0 = [y0, y02]
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)
 
-function plot_y(sol)
-    y = reduce(hcat, sol.y)'
-    t = sol.t 
-    # TODO: may have Solution outer constructor to compute this
-    dt = sol.t[2:end] .- sol.t[1:end-1]
-    plot(t, y; size = (900, 600), linewidth = 2,
-         legend = :outertopright, legendfontsize = 12,
-         ylabel = "y", yguidefontsize = 14, ytickfontsize = 12,
-         xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
-    plot(t[1:end-1], dt; size = (900, 600), linewidth = 2,
-         label = "", legend = :outertopright, legendfontsize = 12,
-         ylabel = "Δt", yguidefontsize = 14, ytickfontsize = 12,
-         xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
-end
 #=
-plot_y(sol)
+plot_ode(sol, method, Plots.plot)
 =#
 
 println("\ndone")

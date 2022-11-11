@@ -26,6 +26,6 @@ function Feagin108(; precision::Type{<:AbstractFloat} = Float64)
                1 1//30 1//36 1//30 0 1//20 0 1//25 0 2365468476861543627//12500000000000000000 27742918851774317651//100000000000000000000 27742918851774317651//100000000000000000000 2365468476861543627//12500000000000000000 -1//25 -1//20 -1//30 -1//36 1//30]
     butcher = butcher .|> precision 
 
-    RungeKutta(; name = :Feagin_108, butcher)
+    RungeKutta(; name = :Feagin_10_8, butcher)
 end
             

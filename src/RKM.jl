@@ -15,8 +15,10 @@ include("utils.jl")
 include("solution.jl")
 include("embedded.jl")
 include("adaptive.jl")
+include("plots.jl")
 
 # methods/
+include("methods/code_names.jl")
 include("methods/properties.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
@@ -77,7 +79,7 @@ export GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIIC
 export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables, 
        get_runge_kutta_full_implicit_tables, get_runge_kutta_diagonal_implicit_tables
 # Code names
-export get_code_name
+export make_code_name
 # ODE solution
 export Solution
 # ODE options
@@ -86,5 +88,7 @@ export Parameters, TimeSpan
 export evolve_ode, evolve_one_time_step!
 # Utilities 
 export debug_table, debug_iteration, RKM_root
+# Plots 
+export plot_ode
 
 end
