@@ -4,27 +4,28 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min = 1)
     @unpack adaptive, method, t_span = parameters
     @unpack t0, tf, dt0 = t_span
     
-    precision = get_precision(method)
+    precision = method.precision 
 
     # initial conditions
     y  = precision[copy(y0)...]
     t  = t0  |> precision
     dt = dt0 |> precision
     tf = tf  |> precision
-    
-    # TODO: may make t_tmp ~ 2D vector
-    dt_next = dt
 
     time_limit = Dates.now() + Dates.Minute(round(wtime_min))
 
     dimensions = size(y, 1)
     stages = size(method.butcher, 1) - 1
     
-    dy    = zeros(stages, dimensions) 
-    y_tmp = zeros(dimensions)
-    f_tmp = zeros(dimensions)
-    f     = zeros(dimensions)
-
+    dy     = zeros(stages, dimensions) 
+    y_tmp  = zeros(dimensions)
+    f_tmp  = zeros(dimensions)
+    f      = zeros(dimensions)
+    t_vec  = zeros(1)
+    t_vec .= t
+    dt_vec = zeros(2)                       # holds [dt_current, dt_next]
+    dt_vec .= dt
+    
     # TEMP for step doubling
     y1 = zeros(dimensions)
     y2 = zeros(dimensions)
@@ -34,19 +35,16 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min = 1)
     sol = Solution(; precision) 
 
     while true
-        # TODO: is there a way I can avoid copy(y) without bugs?
         push!(sol.y, copy(y))
-        push!(sol.t, t)
+        append!(sol.t, t_vec)
 
-        # TODO: preallocate ~ dt_tmp as 2D vector (holds current, and projected time step)
-        dt, dt_next = evolve_one_time_step!(method, adaptive, y, t, dt_next, dy_dt!, 
-                                            dy, y_tmp, f_tmp, f, y1, y2, error)
+        evolve_one_time_step!(method, adaptive, y, t_vec, dt_vec, dy_dt!, 
+                              dy, y_tmp, f_tmp, f, y1, y2, error)
 
         # TODO: split up into two break lines so can throw LongSolve exception
-        (t < tf && Dates.now() < time_limit) || break
+        (t_vec[1] < tf && Dates.now() < time_limit) || break
 
-        # why is this allocating?..
-        t += dt
+        t_vec .+= dt_vec[1]
     end
     sol
 end

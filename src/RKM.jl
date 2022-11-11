@@ -42,8 +42,6 @@ include("methods/runge_kutta/implicit/fixed/medium_order.jl")
             # implicit/embedded/
 include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
-#
-include("methods/getters.jl")
 
 include("time_span.jl")
 include("parameters.jl")
