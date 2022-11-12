@@ -9,7 +9,7 @@ plotly()
 try
     dy_dt!
 catch err
-    isa(err, UndefVarError) ? include(joinpath(RKM_root, "equations.jl")) : nothing
+    isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
 end
 
 # TODO: try to see if I can rescale epsilon? 

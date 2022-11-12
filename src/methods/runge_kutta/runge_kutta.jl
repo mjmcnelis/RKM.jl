@@ -1,5 +1,7 @@
 
-struct RungeKutta{T1, T2, T3} <: ODEMethod
+struct RungeKutta{T1 <: AbstractFloat, 
+                  T2 <: AbstractFloat, 
+                  T3 <: AbstractFloat} <: ODEMethod
     # TODO: transpose butcher table? 
     # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol

@@ -8,43 +8,40 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min = 1)
 
     # initial conditions
     y  = precision[copy(y0)...]
-    t  = t0  |> precision
-    dt = dt0 |> precision
-    tf = tf  |> precision
+    t  = [t0]
+    dt = [dt0, dt0]
 
     time_limit = Dates.now() + Dates.Minute(round(wtime_min))
 
     dimensions = size(y, 1)
     stages = size(method.butcher, 1) - 1
     
-    dy     = zeros(stages, dimensions) 
-    y_tmp  = zeros(dimensions)
-    f_tmp  = zeros(dimensions)
-    f      = zeros(dimensions)
-    t_vec  = zeros(1)
-    t_vec .= t
-    dt_vec = zeros(2)                       # holds [dt_current, dt_next]
-    dt_vec .= dt
-    
-    # TEMP for step doubling
-    y1 = zeros(dimensions)
-    y2 = zeros(dimensions)
-    error = zeros(dimensions)
+    dy    = zeros(precision, stages, dimensions) 
+    y_tmp = zeros(precision, dimensions)
+    f_tmp = zeros(precision, dimensions)
+    f     = zeros(precision, dimensions)
+   
+    # TEMP for step doubling (embedded too probably)
+    y1 = zeros(precision, dimensions)
+    y2 = zeros(precision, dimensions)
+    error = zeros(precision, dimensions)
 
     # initalize solution
     sol = Solution(; precision) 
 
     while true
         push!(sol.y, copy(y))
-        append!(sol.t, t_vec)
+        append!(sol.t, t)
 
-        evolve_one_time_step!(method, adaptive, y, t_vec, dt_vec, dy_dt!, 
+        evolve_one_time_step!(method, adaptive, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error)
 
-        # TODO: split up into two break lines so can throw LongSolve exception
-        (t_vec[1] < tf && Dates.now() < time_limit) || break
-
-        t_vec .+= dt_vec[1]
+        check_time(t, tf, time_limit) || break
     end
     sol
+end
+
+function check_time(t::Vector{Float64}, tf::Float64, time_limit::Dates.DateTime)
+    # TODO: split up into two break lines so can throw LongSolve exception
+    t[1] < tf && Dates.now() < time_limit
 end

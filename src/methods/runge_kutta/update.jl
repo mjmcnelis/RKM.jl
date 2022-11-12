@@ -32,14 +32,13 @@ end
 function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
                                y, t, dt, dy_dt!, dy, y_tmp, f_tmp, 
                                f, args...) 
-    t = t[1]
-    dt = dt[1]
     # TODO: not sure why putting dy_dt! here this kills allocations
-    dy_dt!(f, t, y)                                     # evalute first state at (t,y
-    dy[1,:] .= dt .* f
+    dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
+    dy[1,:] .= dt[1] .* f
 
-    fixed_runge_kutta_step!(method, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
+    fixed_runge_kutta_step!(method, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
     y .= y_tmp                                          # get iteration
+    t .+= dt[1]
     nothing
 end
 
@@ -52,8 +51,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     order = method.order[1]                             # order of scheme
     high ^= order / (1.0 + order)                       # rescale high based on order
 
-    t = t[1]
-    dy_dt!(f, t, y)                                     # evaluate first stage at (t,y)
+    dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
 
     dt[1] = dt[2]                                       # initialize time step
     rescale = 1.0 
@@ -63,16 +61,16 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         # increase dt for next attempt (a > 1)
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale))       
 
-        dy[1,:] .= dt[1] .* f                          # iterate full time step 
-        fixed_runge_kutta_step!(method, y, t, dt[1], dy_dt!, dy, y_tmp, f_tmp)
+        dy[1,:] .= dt[1] .* f                           # iterate full time step 
+        fixed_runge_kutta_step!(method, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
         y1 .= y_tmp                                     # y1(t+dt)
         
         dy[1,:] .= (dt[1]/2.0) .* f                     # iterate two half time steps
-        fixed_runge_kutta_step!(method, y, t, dt[1]/2.0, dy_dt!, dy, y_tmp, f_tmp)
+        fixed_runge_kutta_step!(method, y, t[1], dt[1]/2.0, dy_dt!, dy, y_tmp, f_tmp)
         y2 .= y_tmp                                     # y2(t+dt/2)
-        dy_dt!(f_tmp, t + dt[1]/2.0, y2)
+        dy_dt!(f_tmp, t[1] + dt[1]/2.0, y2)
         dy[1,:] .= (dt[1]/2.0) .* f_tmp
-        fixed_runge_kutta_step!(method, y2, t + dt[1]/2.0, dt[1]/2.0, 
+        fixed_runge_kutta_step!(method, y2, t[1] + dt[1]/2.0, dt[1]/2.0, 
                                 dy_dt!, dy, y_tmp, f_tmp)
         y2 .= y_tmp                                     # y2(t+dt)
 
@@ -93,7 +91,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
             rescale = (tol / e_norm)^(1.0/(1.0 + order))
             rescale = min(high, max(low, safety*rescale))
         end
-
+        
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
         
         e_norm > tol || break                           # compare error to tolerance
@@ -101,5 +99,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         a += 1
     end
     y .= y2
+    t .+= dt[1]
     nothing
 end
