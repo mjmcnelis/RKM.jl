@@ -1,6 +1,10 @@
 
 # TODO: routine only works for explicit
-function fixed_runge_kutta_step!(method::RungeKutta, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
+function fixed_runge_kutta_step!(method::RungeKutta, y::Vector{<:AbstractFloat}, 
+                                 t::Float64, dt::Float64, dy_dt!::Function, 
+                                 dy::Matrix{<:AbstractFloat}, 
+                                 y_tmp::Vector{<:AbstractFloat}, 
+                                 f_tmp::Vector{<:AbstractFloat})
            
     butcher = method.butcher                            # get butcher tableau
     nrow, ncol = size(butcher) 
@@ -30,8 +34,11 @@ function fixed_runge_kutta_step!(method::RungeKutta, y, t, dt, dy_dt!, dy, y_tmp
 end
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
-                               y, t, dt, dy_dt!, dy, y_tmp, f_tmp, 
-                               f, args...) 
+                               y::Vector{<:AbstractFloat}, t::Vector{Float64}, 
+                               dt::Vector{Float64}, dy_dt!::Function, 
+                               dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat}, 
+                               f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
+                               args...) 
     # TODO: not sure why putting dy_dt! here this kills allocations
     dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
     dy[1,:] .= dt[1] .* f
@@ -43,8 +50,12 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
 end
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
-                               y, t, dt, dy_dt!, dy, y_tmp, f_tmp, 
-                               f, y1, y2, error)   
+                               y::Vector{<:AbstractFloat}, t::Vector{Float64},
+                               dt::Vector{Float64}, dy_dt!::Function,
+                               dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
+                               f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
+                               y1::Vector{<:AbstractFloat}, y2::Vector{<:AbstractFloat},
+                               error::Vector{<:AbstractFloat})
     
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 

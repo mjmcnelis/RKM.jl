@@ -1,5 +1,5 @@
 
-function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min = 1)
+function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int64 = 1)
 
     @unpack adaptive, method, t_span = parameters
     @unpack t0, tf, dt0 = t_span
