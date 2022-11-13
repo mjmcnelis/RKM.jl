@@ -16,9 +16,12 @@ end
 
 # adaptive   = Fixed()
 adaptive   = Doubling()
+# adaptive   = Embedded()
 method     = Heun2()
+# method     = HeunEuler21()
 t_span     = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 0.001)
 
+# do asserts between adaptive, method in parameters outer-constructor
 parameters = Parameters(; adaptive, method, t_span)
 
 @unpack t0 = t_span

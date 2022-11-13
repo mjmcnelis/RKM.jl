@@ -14,7 +14,7 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int
     time_limit = Dates.now() + Dates.Minute(round(wtime_min))
 
     dimensions = size(y, 1)
-    stages = size(method.butcher, 1) - 1
+    stages = size(method.butcher, 2) - 1
     
     dy    = zeros(precision, stages, dimensions) 
     y_tmp = zeros(precision, dimensions)
@@ -37,6 +37,7 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int
                               dy, y_tmp, f_tmp, f, y1, y2, error)
 
         check_time(t, tf, time_limit) || break
+        t .+= dt[1]
     end
     sol
 end
