@@ -18,8 +18,8 @@ N = 40
 
 # upwind forward time 
 function dy_dt!(f, t, y)
-    f[1] = 0.0
-    f[end] = 0.0 
+    f[1] = -(y[2] - y[1]) * a/(2.0*dx)
+    f[end] = -(y[end] - y[end-1]) * a/(2.0*dx)
     for i in 2:length(y)-1
         f[i] = -(y[i+1] - y[i-1]) * a/(2.0*dx)
     end
