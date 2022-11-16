@@ -19,8 +19,9 @@ N = 40
 # upwind forward time 
 function dy_dt!(f, t, y)
     f[1] = 0.0
-    for i in 2:length(y)
-        f[i] = -(y[i] - y[i-1]) * a/dx
+    f[end] = 0.0 
+    for i in 2:length(y)-1
+        f[i] = -(y[i+1] - y[i-1]) * a/(2.0*dx)
     end
     nothing
 end
@@ -43,7 +44,7 @@ plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            xlabel = "t", xguidefontsize = 14, xtickfontsize = 12, 
            legend = :outertopright, legendfontsize = 12)
 for i = 1:3
-    t = t0 + N*i*dt0
+    t = t0 + N*i*dt0 
     y = sol.y[1 + N*i]
     plot!(x, y, color = "indianred", linewidth = 2, label = "t = $t")
 end
