@@ -16,13 +16,23 @@ const a = 1.0
 const dx = x[2] - x[1]
 N = 40
 
-# upwind forward time 
+# lax-friedrichs forward time 
 function dy_dt!(f, t, y)
-    f[1] = -(y[2] - y[1]) * a/(2*dx)
-    f[end] = -(y[end] - y[end-1]) * a/(2*dx)
+    dt = 0.05 # TEMP 
+    
+    # y[0] = y[1]
+    fR = (y[1] + y[2])*a/2.0 - (y[2] - y[1])*dx/(2.0*dt)
+    fL = y[1]*a
+    f[1] = -(fR - fL) / dx
     for i in 2:length(y)-1
-        f[i] = -(y[i+1] - y[i-1]) * a/(2*dx)
+        fR = (y[i] + y[i+1])*a/2.0 - (y[i+1] - y[i])*dx/(2.0*dt)
+        fL = (y[i-1] + y[i])*a/2.0 - (y[i] - y[i-1])*dx/(2.0*dt)
+        f[i] = -(fR - fL) / dx
     end
+    # y[end+1] = y[end]
+    fR = y[end]*a
+    fL = (y[end-1] + y[end])*a/2.0 - (y[end] - y[end-1])*dx/(2.0*dt)
+    f[end] = -(fR - fL) / dx
     nothing
 end
 

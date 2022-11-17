@@ -16,12 +16,23 @@ const a = 1.0
 const dx = x[2] - x[1]
 N = 40
 
-# upwind forward time 
+# linear advection
+function F(y) 
+    a*y
+end
+
+# rusanov forward time (equivalent to upwind for linear advection)
 function dy_dt!(f, t, y)
-    f[1] = -(y[2] - y[1]) * a/(2*dx)
-    f[end] = -(y[end] - y[end-1]) * a/(2*dx)
-    for i in 2:length(y)-1
-        f[i] = -(y[i+1] - y[i-1]) * a/(2*dx)
+    dt = 0.05 # TEMP 
+    L = length(y)
+    for i in 1:L
+        m = max(i-1, 1) # BC: y[0] = y[1]
+        p = min(i+1, L) # BC: y[L+1] = y[L]
+        ym, yc, yp = y[m], y[i], y[p]
+
+        fR = (F(yc) + F(yp))/2 - (yp - yc)*a/2
+        fL = (F(ym) + F(yc))/2 - (yc - ym)*a/2
+        f[i] = -(fR - fL) / dx
     end
     nothing
 end

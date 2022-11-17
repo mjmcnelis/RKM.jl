@@ -50,7 +50,7 @@ end
 
 plot!(x, y0, label = "t = 0 (exact)", color = "black", linewidth = 1, line = :dash)   
 for i = 1:3
-    t = t0 + N*i*dt0 
+    t = t0 + N*i*dt0
     y_exact = gauss.(x .- a*t)
     plot!(x, y_exact, color = "black", linewidth = 1, line = :dash, label = "t = $t (exact)")
 end
