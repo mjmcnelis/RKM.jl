@@ -21,18 +21,15 @@ function F(y)
     a*y
 end
 
-# rusanov forward time (equivalent to upwind for linear advection)
+# central forward time 
 function dy_dt!(f, t, y)
-    dt = 0.05 # TEMP 
     L = length(y)
     for i in 1:L
         m = max(i-1, 1) # BC: y[0] = y[1]
         p = min(i+1, L) # BC: y[L+1] = y[L]
-        ym, yc, yp = y[m], y[i], y[p]
+        ym, yp = y[m], y[p]
 
-        fR = (F(yc) + F(yp))/2 - (yp - yc)*a/2
-        fL = (F(ym) + F(yc))/2 - (yc - ym)*a/2
-        f[i] = -(fR - fL) / dx
+        f[i] = -(F(yp) - F(ym))/(2*dx)
     end
     nothing
 end

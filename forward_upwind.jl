@@ -16,11 +16,20 @@ const a = 1.0
 const dx = x[2] - x[1]
 N = 40
 
+# linear advection
+function F(y) 
+    a*y
+end
+
 # upwind forward time 
 function dy_dt!(f, t, y)
-    f[1] = 0.0
-    for i in 2:length(y)
-        f[i] = -(y[i] - y[i-1]) * a/dx
+    L = length(y)
+    for i in 1:L
+        m = max(i-1, 1) # BC: y[0] = y[1]
+        p = min(i+1, L) # BC: y[L+1] = y[L]
+        ym, yc, yp = y[m], y[i], y[p]
+
+        f[i] = a > 0 ? -(F(yc) - F(ym))/dx : -(F(yp) - F(yc))/dx
     end
     nothing
 end
