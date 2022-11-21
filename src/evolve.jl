@@ -4,7 +4,7 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int
     @unpack adaptive, method, t_span = parameters
     @unpack t0, tf, dt0 = t_span
     
-    precision = method.precision 
+    @unpack precision, iteration = method 
 
     # initial conditions
     y  = precision[copy(y0)...]
@@ -33,7 +33,7 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int
         push!(sol.y, copy(y))
         append!(sol.t, t)
 
-        evolve_one_time_step!(method, adaptive, y, t, dt, dy_dt!, 
+        evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error)
 
         check_time(t, tf, time_limit) || break

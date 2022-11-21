@@ -1,6 +1,7 @@
 
 # TODO: so far, routine only works for an explicit, primary method
-function fixed_runge_kutta_step!(method::RungeKutta, y::Vector{<:AbstractFloat}, 
+function fixed_runge_kutta_step!(method::RungeKutta, iteration::Explicit, 
+                                 y::Vector{<:AbstractFloat}, 
                                  t::Float64, dt::Float64, dy_dt!::Function, 
                                  dy::Matrix{<:AbstractFloat}, 
                                  y_tmp::Vector{<:AbstractFloat}, 
@@ -18,7 +19,10 @@ function fixed_runge_kutta_step!(method::RungeKutta, y::Vector{<:AbstractFloat},
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         y_tmp .= y
         for j = 1:i-1
-            y_tmp .+= A[i,j] * dy[j]
+            # y_tmp .+= A[i,j] * dy[j]                  # think this is a bug 
+            for k in eachindex(y_tmp)
+                y_tmp[k] += A[i,j] * dy[j,k]
+            end
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
         dy[i,:] .= dt .* f_tmp
@@ -52,22 +56,24 @@ function embedded_runge_kutta_step!(method, y, dy, y_tmp)
     nothing
 end
 
-function doubling_runge_kutta_step!(method, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
+function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
+                                    dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
     dy[1,:] .= dt .* f                                  # iterate full time step 
-    fixed_runge_kutta_step!(method, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
+    fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
     y1 .= y_tmp                                         # y1(t+dt)
     
     dy[1,:] .= (dt/2.0) .* f                            # iterate two half time steps
-    fixed_runge_kutta_step!(method, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
+    fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
     y2 .= y_tmp                                         # y2(t+dt/2)
     dy_dt!(f_tmp, t + dt/2.0, y2)
     dy[1,:] .= (dt/2.0) .* f_tmp
-    fixed_runge_kutta_step!(method, y2, t + dt/2.0, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
+    fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, dy_dt!, dy, y_tmp,
+                            f_tmp)
     y2 .= y_tmp                                         # y2(t+dt)
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Fixed,
                                y::Vector{<:AbstractFloat}, t::Vector{Float64}, 
                                dt::Vector{Float64}, dy_dt!::Function, 
                                dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat}, 
@@ -77,12 +83,48 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
     dy[1,:] .= dt[1] .* f
 
-    fixed_runge_kutta_step!(method, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
+    fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
+
     y .= y_tmp                                          # get iteration
+    return nothing 
+
+    # try LxF 
+    # a = 1.0
+    # dx = 0.1 
+    # C = a*dt[1]/dx
+    # L = length(y) 
+    # A = zeros(L, L)
+#=
+    # backward central (Neumann BC)
+    A[1,1] = 1.0 - C/2.0
+    A[1,2] = C/2.0
+    A[end,end-1] = -C/2.0
+    A[end,end] = 1.0 + C/2.0
+    for i = 2:L-1 
+        A[i,i-1] = -C/2.0 
+        A[i,i]   = 1.0
+        A[i,i+1] = C/2.0
+    end
+=#
+
+    # backup backward LxF (Neumann BC)
+#=
+    A[1,1] = (3.0 - C)/2.0
+    A[1,2] = (C - 1.0)/2.0
+    A[end,end-1] = -(C + 1.0)/2.0
+    A[end,end] = (C + 3.0)/2.0
+    for i = 2:L-1 
+        A[i,i-1] = -(C + 1.0)/2.0 
+        A[i,i]   = 2.0
+        A[i,i+1] = (C - 1.0)/2.0
+    end
+=#
+    # y .= A \ y
+
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Doubling,
                                y::Vector{<:AbstractFloat}, t::Vector{Float64},
                                dt::Vector{Float64}, dy_dt!::Function,
                                dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
@@ -104,8 +146,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     while true                                          # start step doubling routine 
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt      
 
-        doubling_runge_kutta_step!(method, y, t[1], dt[1], dy_dt!,
-                                   dy, y_tmp, f_tmp, f, y1, y2)
+        doubling_runge_kutta_step!(method, iteration, y, t[1], dt[1], 
+                                   dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
 
         error .= (y2 .- y1) ./ (2.0^order - 1.0)        # estimate local truncation error
         y2 .+= error                                    # Richardson extrapolation
@@ -135,7 +177,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Embedded,
                                y::Vector{<:AbstractFloat}, t::Vector{Float64},
                                dt::Vector{Float64}, dy_dt!::Function,
                                dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
@@ -149,6 +191,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     order_min = minimum(method.order)
 
     high    ^= (order_min / order_max)                  # rescale high, epsilon parameters
+    # this caused issues (look into this)
     epsilon ^= (order_min / order_max)
 
     dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
@@ -161,7 +204,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt   
 
         dy[1,:] .= dt[1] .* f                           # primary iteration
-        fixed_runge_kutta_step!(method, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
+        fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], 
+                                dy_dt!, dy, y_tmp, f_tmp)
         y1 .= y_tmp
 
         embedded_runge_kutta_step!(method, y, dy, y_tmp)

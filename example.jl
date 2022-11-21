@@ -14,11 +14,17 @@ end
 
 # TODO: try to see if I can rescale epsilon? 
 
-# adaptive   = Fixed()
-adaptive   = Doubling()
+adaptive   = Fixed()
+# adaptive   = Doubling()
 # adaptive   = Embedded()
+
+# method     = BackwardEuler1()
+# method     = Euler1()
 method     = Heun2()
+
 # method     = HeunEuler21()
+# method     = Fehlberg45()
+
 t_span     = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 0.001)
 
 # do asserts between adaptive, method in parameters outer-constructor

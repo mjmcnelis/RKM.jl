@@ -22,10 +22,10 @@ include("methods/code_names.jl")
 include("methods/properties.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
-include("methods/runge_kutta/update.jl")
 include("methods/runge_kutta/utils.jl")
 include("methods/runge_kutta/get_all_tables.jl")
         # explicit/
+include("methods/runge_kutta/explicit/update.jl")
 include("methods/runge_kutta/explicit/get_tables.jl")
             # explicit/fixed/
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
@@ -37,6 +37,7 @@ include("methods/runge_kutta/explicit/embedded/medium_order.jl")
 include("methods/runge_kutta/explicit/embedded/high_order.jl")
 include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
         # implicit/
+include("methods/runge_kutta/implicit/update.jl")
 include("methods/runge_kutta/implicit/get_tables.jl")
             # implicit/fixed/
 include("methods/runge_kutta/implicit/fixed/low_order.jl")
