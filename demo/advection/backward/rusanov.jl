@@ -14,36 +14,34 @@ end
 x = LinRange(0, 10, 101) |> collect
 const a = 1.0
 const dx = x[2] - x[1]
+const dt = 0.05           # just adjust this for courant number 
+const C = a*dt/dx
 N = 40
 
-# lax-friedrichs forward time 
+# linear advection
+function F(y) 
+    a*y
+end
+
 function dy_dt!(f, t, y)
-    dt = 0.05 # TEMP 
-    
-    # y[0] = y[1]
-    fR = (y[1] + y[2])*a/2.0 - (y[2] - y[1])*dx/(2.0*dt)
-    fL = y[1]*a
-    f[1] = -(fR - fL) / dx
-    for i in 2:length(y)-1
-        fR = (y[i] + y[i+1])*a/2.0 - (y[i+1] - y[i])*dx/(2.0*dt)
-        fL = (y[i-1] + y[i])*a/2.0 - (y[i] - y[i-1])*dx/(2.0*dt)
-        f[i] = -(fR - fL) / dx
+    L = length(y) 
+    for i in 1:L
+        m = max(i-1, 1) # BC: y[0] = y[1]
+        p = min(i+1, L) # BC: y[L+1] = y[L]
+        ym, yc, yp = y[m], y[i], y[p]
+
+        f[i] = -(F(yp) - F(ym))/(2.0*dx) + (yp - 2.0*yc + ym)*a/(2.0*dx)
     end
-    # y[end+1] = y[end]
-    fR = y[end]*a
-    fL = (y[end-1] + y[end])*a/2.0 - (y[end] - y[end-1])*dx/(2.0*dt)
-    f[end] = -(fR - fL) / dx
     nothing
 end
 
 adaptive   = Fixed()
-method     = Euler1()
-t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = 0.05)     # website used dt = 0.05
+method     = BackwardEuler1()
+t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)
 parameters = Parameters(; adaptive, method, t_span)
 
 @unpack t0, dt0 = t_span
 y0 = gauss.(x)
-C = a*dt0/dx
 @show C 
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)

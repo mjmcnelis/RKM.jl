@@ -23,6 +23,7 @@ function F(y)
     a*y
 end
 
+# TODO: try newton method to fix instability of backward LxF
 function dy_dt!(f, t, y)
     L = length(y) 
     for i in 1:L
