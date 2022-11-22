@@ -35,6 +35,24 @@ function dy_dt!(f, t, y)
     nothing
 end
 
+function jacobian!(J, t, y)
+    nrow = size(J,1) 
+    # TODO: generalize A, B for nonlinear advection
+    A = a/(2.0*dx)              # TODO: compute jacobian of flux function dF/dy
+    B = a/(2.0*dx)              # TODO: make function that computes characteristic speed 
+    # note: includes NBC
+    J[1,1]       = A - B
+    J[2,1]       = B - A 
+    J[end,end]   = -A - B
+    J[end-1,end] = A + B
+    for i in 2:nrow-1
+        J[i-1,i] = A + B
+        J[i,i]   = -2.0*B
+        J[i+1,i] = B - A
+    end
+    nothing 
+end
+
 adaptive   = Fixed()
 method     = BackwardEuler1()
 t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)
@@ -44,7 +62,7 @@ parameters = Parameters(; adaptive, method, t_span)
 y0 = gauss.(x)
 @show C 
 
-@time sol = evolve_ode(y0, dy_dt!; parameters)
+@time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),

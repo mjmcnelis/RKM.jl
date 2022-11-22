@@ -86,8 +86,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
 
     y .= y_tmp                                          # get iteration
-    return nothing 
 
+    # TODO: construct exact numerical solution in another file
     # try LxF 
     # a = 1.0
     # dx = 0.1 
@@ -130,7 +130,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
                                dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
                                f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
                                y1::Vector{<:AbstractFloat}, y2::Vector{<:AbstractFloat},
-                               error::Vector{<:AbstractFloat})
+                               error::Vector{<:AbstractFloat}, args...)
     
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -183,7 +183,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
                                dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
                                f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
                                y1::Vector{<:AbstractFloat}, y2::Vector{<:AbstractFloat},
-                               error::Vector{<:AbstractFloat})
+                               error::Vector{<:AbstractFloat}, args...)
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 

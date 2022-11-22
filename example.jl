@@ -8,22 +8,22 @@ plotly()
 # reduces allocations but can't redefine it
 try
     dy_dt!
+    jacobian!
 catch err
     isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
 end
 
 # TODO: try to see if I can rescale epsilon? 
 
-adaptive   = Fixed()
-# adaptive   = Doubling()
-# adaptive   = Embedded()
+adaptive = Fixed()
+# adaptive = Doubling()
+# adaptive = Embedded()
 
-# method     = BackwardEuler1()
-# method     = Euler1()
-method     = Heun2()
-
-# method     = HeunEuler21()
-# method     = Fehlberg45()
+# method = BackwardEuler1()
+# method = Euler1()
+method = Heun2()
+# method = HeunEuler21()
+# method = Fehlberg45()
 
 t_span     = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 0.001)
 
@@ -37,7 +37,8 @@ y0 = exp(t0) / (1.0 + exp(t0)) - 0.5
 y02 = exp(t0) / (1.0 + exp(t0)) - 0.25
 y0 = [y0, y02]
 
-@time sol = evolve_ode(y0, dy_dt!; parameters)
+@time sol = evolve_ode(y0, dy_dt!; jacobian!, 
+                                   parameters)
 
 #=
 plot_ode(sol, method, Plots.plot)

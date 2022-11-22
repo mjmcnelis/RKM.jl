@@ -35,6 +35,21 @@ function dy_dt!(f, t, y)
     nothing
 end
 
+function jacobian!(J, t, y)
+    nrow = size(J,1) 
+    A = a/(2.0*dx)
+    # note: includes NBC 
+    J[1,1] = A
+    J[2,1] = -A
+    J[end,end] = -A
+    J[end-1,end] = A
+    for i in 2:nrow-1
+        J[i-1,i] = A
+        J[i+1,i] = -A
+    end
+    nothing 
+end
+
 adaptive   = Fixed()
 method     = BackwardEuler1()
 t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)
@@ -44,7 +59,7 @@ parameters = Parameters(; adaptive, method, t_span)
 y0 = gauss.(x)
 @show C 
 
-@time sol = evolve_ode(y0, dy_dt!; parameters)
+@time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),

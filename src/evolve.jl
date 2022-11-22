@@ -1,5 +1,16 @@
+# TODO: move somewhere else
+struct JacobianException
+    msg::String
+end
+Base.showerror(io::IO, e::JacobianException) = print(io, "JacobianException: ", e.msg)
+function jacobian_error(args...; kwargs...) 
+    msg = "using implicit method but no jacobian has been specified or computed"
+    throw(JacobianException(msg))
+end
 
-function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int64 = 1)
+function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, # TEMP
+                                          parameters::Parameters,
+                                          wtime_min::Int64 = 1)
 
     @unpack adaptive, method, t_span = parameters
     @unpack t0, tf, dt0 = t_span
@@ -33,8 +44,9 @@ function evolve_ode(y0, dy_dt!::Function; parameters::Parameters, wtime_min::Int
         push!(sol.y, copy(y))
         append!(sol.t, t)
 
+        # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
-                              dy, y_tmp, f_tmp, f, y1, y2, error)
+                              dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
         check_time(t, tf, time_limit) || break
         t .+= dt[1]
