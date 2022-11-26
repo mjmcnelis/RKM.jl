@@ -18,10 +18,7 @@ const dt = 0.05           # just adjust this for courant number
 const C = a*dt/dx
 N = 40
 
-# linear advection
-function F(y) 
-    a*y
-end
+F(y) = a*y
 
 function dy_dt!(f, t, y)
     L = length(y)
@@ -49,7 +46,7 @@ y0 = gauss.(x)
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),
            ylabel = "u", yguidefontsize = 14, ytickfontsize = 12, 
-           xlabel = "t", xguidefontsize = 14, xtickfontsize = 12, 
+           xlabel = "x", xguidefontsize = 14, xtickfontsize = 12, 
            legend = :outertopright, legendfontsize = 12)
 for i = 1:3
     t = t0 + N*i*dt0 
