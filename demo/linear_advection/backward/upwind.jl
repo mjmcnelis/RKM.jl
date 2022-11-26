@@ -32,13 +32,14 @@ function dy_dt!(f, t, y)
     nothing
 end
 
-# TODO: genealize to a < 0
+# TODO: generalize to a < 0
 function jacobian!(J, t, y)
     nrow = size(J,1)
+    A = a/dx
     # note: includes NBC
     for i in 2:nrow
-        J[i,i] = -a/dx
-        J[i-1,i] = a/dx
+        J[i,i] = -A
+        J[i,i-1] = A
     end
     nothing 
 end

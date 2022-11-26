@@ -37,12 +37,12 @@ function jacobian!(J, t, y)
     A = a/(2.0*dx)
     # note: includes NBC 
     J[1,1] = A
-    J[2,1] = -A
+    J[1,2] = -A
     J[end,end] = -A
-    J[end-1,end] = A
+    J[end,end-1] = A
     for i in 2:nrow-1
-        J[i-1,i] = A
-        J[i+1,i] = -A
+        J[i,i-1] = A
+        J[i,i+1] = -A
     end
     nothing 
 end

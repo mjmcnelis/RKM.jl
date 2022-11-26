@@ -37,15 +37,15 @@ function jacobian!(J, t, y)
     # TODO: generalize A, B for nonlinear advection
     A = a/(2.0*dx)              # TODO: compute jacobian of flux function dF/dy
     B = a/(2.0*dx)              # TODO: make function that computes characteristic speed 
-    # note: includes NBC
+    # note: includes NBC 
     J[1,1]       = A - B
-    J[2,1]       = B - A 
-    J[end,end]   = -A - B
-    J[end-1,end] = A + B
+    J[1,2]       = B - A 
+    J[end,end]   = -A - B 
+    J[end,end-1] = A + B
     for i in 2:nrow-1
-        J[i-1,i] = A + B
+        J[i,i-1] = A + B
         J[i,i]   = -2.0*B
-        J[i+1,i] = B - A
+        J[i,i+1] = B - A
     end
     nothing 
 end
