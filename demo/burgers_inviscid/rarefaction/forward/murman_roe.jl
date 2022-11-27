@@ -6,6 +6,8 @@ using Plots
 using UnPack
 plotly()
 
+const entropy_fix = false
+
 function rarefaction(x, t)
     x < -t ? -1.0 :
     x > t ? 1.0 : x/(t + 1e-16)
@@ -26,38 +28,33 @@ function dy_dt!(f, t, y)
     for i in 1:L
         m = max(i-1, 1) # BC: y[0] = y[1]
         p = min(i+1, L) # BC: y[L+1] = y[L]
-        ym, yp = y[m], y[p]
-
-        # note: rarefaction fails if use even grid points
-        f[i] = -(F(yp) - F(ym))/(2.0*dx)
+        ym, yc, yp = y[m], y[i], y[p]
+        
+        if entropy_fix
+            ϵR = max(0.0, (yp - yc)/2.0)
+            ϵL = max(0.0, (yc - ym)/2.0)
+            aR = max(ϵR, (yc + yp)/2.0) |> abs
+            aL = max(ϵL, (ym + yc)/2.0) |> abs
+        else 
+            aR = (yc + yp)/2.0 |> abs   # |A_{i+1/2}|
+            aL = (ym + yc)/2.0 |> abs   # |A_{i-1/2}|
+        end
+        # note: stays zero if use even number of x points (unless turn on entropy fix)
+        # note: this also applies to central forward/backward
+        f[i] = -(F(yp) - F(ym))/(2.0*dx) + (aR*(yp-yc) - aL*(yc-ym))/(2.0*dx)
     end
     nothing
 end
 
-function jacobian!(J, t, y)
-    nrow = size(J,1) 
-    A = 1.0/(2.0*dx)
-    # note: includes NBC 
-    J[1,1]       = A*y[1]
-    J[1,2]       = -A*y[2]
-    J[end,end-1] = A*y[end-1]
-    J[end,end]   = -A*y[end]
-    for i in 2:nrow-1
-        J[i,i-1] = A*y[i-1]
-        J[i,i+1] = -A*y[i+1]
-    end
-    nothing 
-end
-
 adaptive   = Fixed()
-method     = BackwardEuler1()
+method     = Euler1()
 t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)
 parameters = Parameters(; adaptive, method, t_span)
 
 @unpack t0, dt0 = t_span
 y0 = rarefaction.(x, t0)
 
-@time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
+@time sol = evolve_ode(y0, dy_dt!; parameters)
 
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-1.25, 1.25),

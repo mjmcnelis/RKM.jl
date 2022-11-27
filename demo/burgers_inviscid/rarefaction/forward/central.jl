@@ -27,6 +27,8 @@ function dy_dt!(f, t, y)
         m = max(i-1, 1) # BC: y[0] = y[1]
         p = min(i+1, L) # BC: y[L+1] = y[L]
         ym, yp = y[m], y[p]
+
+        # note: rarefaction fails if use even grid points
         f[i] = -(F(yp) - F(ym))/(2.0*dx)
     end
     nothing
