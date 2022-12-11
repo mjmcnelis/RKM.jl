@@ -1,9 +1,14 @@
 
+# function dy_dt!(f, t, y)
+#     for i in eachindex(y)
+#         a = 0.5 - (i - 1.0)/4.0
+#         f[i] = (y[i] + a) * (1.0 - a - y[i])
+#     end
+#     nothing
+# end
 function dy_dt!(f, t, y)
-    for i in eachindex(y)
-        a = 0.5 - (i - 1.0)/4.0
-        f[i] = (y[i] + a) * (1.0 - a - y[i])
-    end
+    f[1] = (y[1] + 0.5) * (0.5 - y[1])
+    f[2] = (y[2] + 0.25) * (0.75 - y[2])
     nothing
 end
 
@@ -14,10 +19,3 @@ function jacobian!(J, t, y)
     end
     nothing 
 end
-
-
-# function dy_dt!(f, t, y)
-#     f[1] = (y[1] + 0.5) * (0.5 - y[1])
-#     f[2] = (y[2] + 0.25) * (0.75 - y[2])
-#     nothing
-# end

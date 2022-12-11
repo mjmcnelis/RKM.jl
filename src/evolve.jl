@@ -14,7 +14,7 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     @unpack adaptive, method, t_span, timer = parameters
     @unpack t0, tf, dt0 = t_span
     
-    @unpack precision, iteration = method 
+    @unpack stages, precision, iteration = method 
 
     # initial conditions
     y  = precision[copy(y0)...]
@@ -22,7 +22,6 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     dt = [dt0, dt0]
 
     dimensions = size(y, 1)
-    stages = size(method.butcher, 2) - 1
     
     dy    = zeros(precision, stages, dimensions) 
     y_tmp = zeros(precision, dimensions)

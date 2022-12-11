@@ -1,4 +1,3 @@
-
 using Revise
 using RKM
 using LinearAlgebra
@@ -12,7 +11,6 @@ try
 catch err
     isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
 end
-
 # TODO: try to see if I can rescale epsilon? 
 
 adaptive = Fixed()
@@ -20,13 +18,14 @@ adaptive = Fixed()
 # adaptive = Embedded()
 
 # method = BackwardEuler1()
-method = Euler1()
+# method = Euler1()
 # method = Heun2()
+method = RungeKutta4()
 # @show method
 # method = HeunEuler21()
 # method = Fehlberg45()
 
-t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 5e-6)
+t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 timer = TimeLimit()
 
 # do asserts between adaptive, method in parameters outer-constructor
@@ -41,7 +40,7 @@ y0 = [y0, y02]
 
 GC.gc()
 @time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
-
+GC.gc()
 #=
 plot_ode(sol, method, Plots.plot)
 =#

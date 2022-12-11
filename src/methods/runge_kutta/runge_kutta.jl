@@ -1,13 +1,17 @@
 
-struct RungeKutta{T1 <: AbstractFloat, 
-                  T2 <: AbstractFloat, 
-                  T3 <: AbstractFloat} <: ODEMethod
+struct RungeKutta{T} <: ODEMethod where T <: AbstractFloat
     # TODO: transpose butcher table? 
     # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol
-    butcher::Matrix{T1}
-    precision::Type{T2}
-    order::Vector{T3}
+    c::Vector{T}
+    A::Matrix{T}
+    b::Vector{T}
+    b_hat::Vector{T}
+    stages::Int64
+    nrow::Int64     # TEMP
+    ncol::Int64
+    precision::Type{T}
+    order::Vector{T}
     # TODO: should I just wrap this in a Properties struct? 
     iteration::Iteration
     fsal::FirstSameAsLast
@@ -24,16 +28,24 @@ end
 #                   :)
 
 function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
-    # determine properties
-    precision = precision_prop(butcher)
+    precision = precision_prop(butcher)         # determine properties
     order     = order_prop(name, butcher)
     iteration = iteration_prop(butcher)
     fsal      = fsal_prop(butcher)
+    code_name = make_code_name(name)            # get code name label 
 
-    # get code name label 
-    code_name = make_code_name(name) 
+    nrow, ncol = size(butcher)  
+    stages = ncol - 1
+
+    c = butcher[1:ncol-1, 1]
+    A = butcher[1:ncol-1, 2:ncol]
+    b = butcher[ncol, 2:ncol]
+    # TODO: change nrow -> ncol + i (where i is the ith embedded pair)
+    #       would be necessary when have multiple embedded pairs
+    b_hat = butcher[nrow, 2:ncol]
    
-    RungeKutta(name, butcher, precision, order, iteration, fsal, code_name)
+    RungeKutta(name, c, A, b, b_hat, stages, nrow, ncol, precision, 
+               order, iteration, fsal, code_name)
 end
 
 function Base.show(io::IO, RK::RungeKutta)

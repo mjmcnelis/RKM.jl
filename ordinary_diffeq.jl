@@ -9,8 +9,8 @@ plotly()
 #     nothing
 # end
 # function fp(y, p, t)
-#      SA[(y[1] + 0.5) * (0.5 - y[1]),
-#         (y[2] + 0.25) * (0.75 - y[2])]
+#     SA[(y[1] + 0.5) * (0.5 - y[1]),
+#        (y[2] + 0.25) * (0.75 - y[2])]
 # end
 t0 = -10.0
 # u0 = [exp(t0) / (1.0 + exp(t0)) - 0.5,
@@ -22,9 +22,10 @@ tspan = (t0, 10.0)
 prob = ODEProblem(fp, u0, tspan)
 
 GC.gc()
-integ = init(prob, Euler(), dt = 5e-6)
+integ = init(prob, RK4(), dt = 1e-4, adaptive = false)
 @time solve!(integ)
 sol = integ.sol
+GC.gc()
 
 # @show sol.destats
 println("\ndone")

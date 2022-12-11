@@ -6,52 +6,32 @@ function fixed_runge_kutta_step!(method::RungeKutta, iteration::Explicit,
                                  dy::Matrix{<:AbstractFloat}, 
                                  y_tmp::Vector{<:AbstractFloat}, 
                                  f_tmp::Vector{<:AbstractFloat})
-           
-    butcher = method.butcher                            # get butcher tableau
-    ncol   = size(butcher, 2)  
-    stages = ncol - 1                                   # number of stages 
-
-    c = view(butcher, 1:ncol-1, 1)                      # c_i
-    A = view(butcher, 1:ncol-1, 2:ncol)                 # A_ij
-    b = view(butcher, ncol, 2:ncol)                     # b_i (primary)
-
+    @unpack c, A, b, stages = method
+    
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         y_tmp .= y
+        A_row = view(A, i, 1:i-1)
         for j = 1:i-1
-            # y_tmp .+= A[i,j] * dy[j]                  # think this is a bug 
-            for k in eachindex(y_tmp)
-                y_tmp[k] += A[i,j] * dy[j,k]
-            end
+            y_tmp .+= A_row[j] .* view(dy, j, :)
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
-        dy[i,:] .= dt .* f_tmp
-    end    
+        dy[i,:] .= dt .* f_tmp 
+    end 
 
     y_tmp .= y                                          # evaluate iteration
     for j = 1:stages 
-        for i in eachindex(y_tmp)
-            y_tmp[i] += b[j] * dy[j,i]
-        end
+        y_tmp .+= b[j] .* view(dy, j, :)
     end
     nothing
 end
 
 function embedded_runge_kutta_step!(method, y, dy, y_tmp)
-
-    butcher = method.butcher                            # get butcher tableau
-    nrow, ncol = size(butcher)
-    stages = ncol - 1    
-
-    # TODO: change nrow -> ncol + i (where i is the ith embedded pair)
-    #       would be necessary when have multiple embedded pairs
-    b_tilde = view(butcher, nrow, 2:ncol)               # b_tilde_i
-
+    @unpack stages, b_hat = method
+    
     y_tmp .= y                                          # evaluate iteration
     for j = 1:stages 
-        for i in eachindex(y_tmp)
-            y_tmp[i] += b_tilde[j] * dy[j,i]
-        end
+        y_tmp .+= b_hat[j] .* view(dy, j, :)
     end
     nothing
 end
