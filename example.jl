@@ -20,15 +20,17 @@ adaptive = Fixed()
 # adaptive = Embedded()
 
 # method = BackwardEuler1()
-# method = Euler1()
-method = Heun2()
+method = Euler1()
+# method = Heun2()
+# @show method
 # method = HeunEuler21()
 # method = Fehlberg45()
 
-t_span     = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 0.001)
+t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 5e-6)
+timer = TimeLimit()
 
 # do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_span)
+parameters = Parameters(; adaptive, method, t_span, timer)
 
 @unpack t0 = t_span
 y0 = exp(t0) / (1.0 + exp(t0)) - 0.5
@@ -37,12 +39,11 @@ y0 = exp(t0) / (1.0 + exp(t0)) - 0.5
 y02 = exp(t0) / (1.0 + exp(t0)) - 0.25
 y0 = [y0, y02]
 
-@time sol = evolve_ode(y0, dy_dt!; jacobian!, 
-                                   parameters)
+GC.gc()
+@time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 
 #=
 plot_ode(sol, method, Plots.plot)
 =#
 
 println("\ndone")
-

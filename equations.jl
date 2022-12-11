@@ -14,3 +14,10 @@ function jacobian!(J, t, y)
     end
     nothing 
 end
+
+
+# function dy_dt!(f, t, y)
+#     f[1] = (y[1] + 0.5) * (0.5 - y[1])
+#     f[2] = (y[2] + 0.25) * (0.75 - y[2])
+#     nothing
+# end

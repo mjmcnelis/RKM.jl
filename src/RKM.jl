@@ -46,7 +46,7 @@ include("methods/runge_kutta/implicit/fixed/medium_order.jl")
 include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 
-include("time_span.jl")
+include("time.jl")
 include("parameters.jl")
 include("evolve.jl")
 
@@ -84,7 +84,7 @@ export make_code_name
 # ODE solution
 export Solution
 # ODE options
-export Parameters, TimeSpan
+export Parameters, TimeSpan, TimeLimit
 # ODE solver
 export evolve_ode, evolve_one_time_step!
 # Utilities 

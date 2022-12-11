@@ -9,10 +9,9 @@ function jacobian_error(args...; kwargs...)
 end
 
 function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, # TEMP
-                                          parameters::Parameters,
-                                          wtime_min::Int64 = 1)
+                                          parameters::Parameters)
 
-    @unpack adaptive, method, t_span = parameters
+    @unpack adaptive, method, t_span, timer = parameters
     @unpack t0, tf, dt0 = t_span
     
     @unpack precision, iteration = method 
@@ -21,8 +20,6 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     y  = precision[copy(y0)...]
     t  = [t0]
     dt = [dt0, dt0]
-
-    time_limit = Dates.now() + Dates.Minute(round(wtime_min))
 
     dimensions = size(y, 1)
     stages = size(method.butcher, 2) - 1
@@ -48,13 +45,8 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
         evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
-        check_time(t, tf, time_limit) || break
+        check_time(t, tf, timer) || break
         t .+= dt[1]
     end
     sol
-end
-
-function check_time(t::Vector{Float64}, tf::Float64, time_limit::Dates.DateTime)
-    # TODO: split up into two break lines so can throw LongSolve exception
-    t[1] < tf && Dates.now() < time_limit
 end
