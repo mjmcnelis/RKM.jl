@@ -1,6 +1,7 @@
 using Revise
 using RKM
 using LinearAlgebra
+using StaticArrays
 using Plots 
 using UnPack
 plotly()

@@ -1,7 +1,7 @@
 module RKM
 
 # using DataFrames      # may use to output RK tables
-# using StaticArrays
+using StaticArrays
 using LinearAlgebra
 using Test
 using Dates

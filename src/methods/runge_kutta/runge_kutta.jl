@@ -1,15 +1,13 @@
 
-struct RungeKutta{T} <: ODEMethod where T <: AbstractFloat
+struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
     # TODO: transpose butcher table? 
     # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol
-    c::Vector{T}
-    A::Matrix{T}
-    b::Vector{T}
-    b_hat::Vector{T}
+    c::SVector{S, T}
+    A::SMatrix{S, S, T, S2}
+    b::SVector{S, T}
+    b_hat::SVector{S, T}
     stages::Int64
-    nrow::Int64     # TEMP
-    ncol::Int64
     precision::Type{T}
     order::Vector{T}
     # TODO: should I just wrap this in a Properties struct? 
@@ -37,14 +35,15 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     nrow, ncol = size(butcher)  
     stages = ncol - 1
 
-    c = butcher[1:ncol-1, 1]
-    A = butcher[1:ncol-1, 2:ncol]
-    b = butcher[ncol, 2:ncol]
+    # decompose butcher tableau into static arrays
+    c = butcher[1:ncol-1, 1] |> SVector{stages}
+    A = butcher[1:ncol-1, 2:ncol] |> SMatrix{stages,stages}
+    b = butcher[ncol, 2:ncol] |> SVector{stages}
     # TODO: change nrow -> ncol + i (where i is the ith embedded pair)
     #       would be necessary when have multiple embedded pairs
-    b_hat = butcher[nrow, 2:ncol]
+    b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
    
-    RungeKutta(name, c, A, b, b_hat, stages, nrow, ncol, precision, 
+    RungeKutta(name, c, A, b, b_hat, stages, precision, 
                order, iteration, fsal, code_name)
 end
 
