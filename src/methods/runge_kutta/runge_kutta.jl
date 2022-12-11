@@ -35,12 +35,11 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     nrow, ncol = size(butcher)  
     stages = ncol - 1
 
-    # decompose butcher tableau into static arrays
+    # convert butcher tableau into static arrays
     c = butcher[1:ncol-1, 1] |> SVector{stages}
-    A = butcher[1:ncol-1, 2:ncol] |> SMatrix{stages,stages}
+    A = butcher[1:ncol-1, 2:ncol] |> SMatrix{stages, stages}
     b = butcher[ncol, 2:ncol] |> SVector{stages}
-    # TODO: change nrow -> ncol + i (where i is the ith embedded pair)
-    #       would be necessary when have multiple embedded pairs
+    # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
    
     RungeKutta(name, c, A, b, b_hat, stages, precision, 

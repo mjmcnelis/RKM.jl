@@ -1,19 +1,16 @@
 
 # TODO: so far, routine only works for an explicit, primary method
-function fixed_runge_kutta_step!(method::RungeKutta, iteration::Explicit, 
-                                 y::Vector{<:AbstractFloat}, 
-                                 t::Float64, dt::Float64, dy_dt!::Function, 
-                                 dy::Matrix{<:AbstractFloat}, 
-                                 y_tmp::Vector{<:AbstractFloat}, 
-                                 f_tmp::Vector{<:AbstractFloat})
+function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, 
+             y::Vector{T}, t::Float64, dt::Float64, dy_dt!::Function, 
+             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}) where {T <: AbstractFloat}
+
     @unpack c, A, b, stages = method
     
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         y_tmp .= y
-        A_row = view(A, i, 1:i-1)
         for j = 1:i-1
-            y_tmp .+= A_row[j] .* view(dy, j, :)
+            y_tmp .+= A[i,j] .* view(dy, j, :)
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
         dy[i,:] .= dt .* f_tmp 
@@ -28,7 +25,6 @@ end
 
 function embedded_runge_kutta_step!(method, y, dy, y_tmp)
     @unpack stages, b_hat = method
-    
     y_tmp .= y                                          # evaluate iteration
     for j = 1:stages 
         y_tmp .+= b_hat[j] .* view(dy, j, :)
@@ -53,12 +49,10 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Fixed,
-                               y::Vector{<:AbstractFloat}, t::Vector{Float64}, 
-                               dt::Vector{Float64}, dy_dt!::Function, 
-                               dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat}, 
-                               f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
-                               args...) 
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
+             y::Vector{T}, t::Vector{Float64}, dt::Vector{Float64}, dy_dt!::Function, 
+             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
+             args...) where {T <: AbstractFloat}
     # TODO: not sure why putting dy_dt! here this kills allocations
     dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
     dy[1,:] .= dt[1] .* f
@@ -70,12 +64,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Doubling,
-                               y::Vector{<:AbstractFloat}, t::Vector{Float64},
-                               dt::Vector{Float64}, dy_dt!::Function,
-                               dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
-                               f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
-                               y1::Vector{<:AbstractFloat}, y2::Vector{<:AbstractFloat},
-                               error::Vector{<:AbstractFloat}, args...)
+             y::Vector{T}, t::Vector{Float64}, dt::Vector{Float64}, dy_dt!::Function,
+             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
+             y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
+             args...) where {T <: AbstractFloat}
     
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -123,12 +115,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Embedded,
-                               y::Vector{<:AbstractFloat}, t::Vector{Float64},
-                               dt::Vector{Float64}, dy_dt!::Function,
-                               dy::Matrix{<:AbstractFloat}, y_tmp::Vector{<:AbstractFloat},
-                               f_tmp::Vector{<:AbstractFloat}, f::Vector{<:AbstractFloat},
-                               y1::Vector{<:AbstractFloat}, y2::Vector{<:AbstractFloat},
-                               error::Vector{<:AbstractFloat}, args...)
+             y::Vector{T}, t::Vector{Float64}, dt::Vector{Float64}, dy_dt!::Function,
+             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
+             y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
+             args...) where {T <: AbstractFloat}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 

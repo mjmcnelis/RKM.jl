@@ -1,17 +1,15 @@
 using Revise
 using OrdinaryDiffEq
+import RKM: RKM_root
 using StaticArrays
 using Plots
 plotly()
-# function fp(f, y, p, t)
-#     f[1] = (y[1] + 0.5) * (0.5 - y[1])
-#     f[2] = (y[2] + 0.25) * (0.75 - y[2])
-#     nothing
-# end
-# function fp(y, p, t)
-#     SA[(y[1] + 0.5) * (0.5 - y[1]),
-#        (y[2] + 0.25) * (0.75 - y[2])]
-# end
+try
+    fp
+catch err
+    isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
+end
+
 t0 = -10.0
 # u0 = [exp(t0) / (1.0 + exp(t0)) - 0.5,
 #       exp(t0) / (1.0 + exp(t0)) - 0.25]

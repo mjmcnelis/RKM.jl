@@ -19,3 +19,15 @@ function jacobian!(J, t, y)
     end
     nothing 
 end
+
+# for OrdinaryDiffEq (StaticArray version)
+function fp(y, p, t)
+    SA[(y[1] + 0.5) * (0.5 - y[1]),
+       (y[2] + 0.25) * (0.75 - y[2])]
+end
+# for OrdinaryDiffEq (normal version)
+# function fp(f, y, p, t)
+#     f[1] = (y[1] + 0.5) * (0.5 - y[1])
+#     f[2] = (y[2] + 0.25) * (0.75 - y[2])
+#     nothing
+# end
