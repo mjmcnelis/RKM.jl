@@ -19,7 +19,7 @@ function TimeLimit(; wtime_min = 60, frequency = 100)
     TimeLimit(wtime_min, time_limit, frequency, counter)
 end
 
-function check_time(t::Vector{Float64}, tf::Float64, timer::TimeLimit)
+function check_time(t::MVector{1,Float64}, tf::Float64, timer::TimeLimit)
     t[1] < tf && !past_time_limit(timer)
 end
 

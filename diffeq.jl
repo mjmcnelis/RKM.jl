@@ -1,3 +1,4 @@
+# note: used to benchmark performance against OrdinaryDiffEq
 using Revise
 using OrdinaryDiffEq
 import RKM: RKM_root
@@ -20,7 +21,7 @@ tspan = (t0, 10.0)
 prob = ODEProblem(fp, u0, tspan)
 
 GC.gc()
-integ = init(prob, RK4(), dt = 1e-4, adaptive = false)
+integ = init(prob, RK4(), dt = 1e-4, adaptive = false, saveat = 1000)
 @time solve!(integ)
 sol = integ.sol
 GC.gc()

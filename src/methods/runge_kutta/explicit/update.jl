@@ -50,8 +50,9 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
-             y::Vector{T}, t::Vector{Float64}, dt::Vector{Float64}, dy_dt!::Function, 
-             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::Function,
+             # TODO: try F concrete type instead of Function
+             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, 
              args...) where {T <: AbstractFloat}
     # TODO: not sure why putting dy_dt! here this kills allocations
     dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
@@ -64,7 +65,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Doubling,
-             y::Vector{T}, t::Vector{Float64}, dt::Vector{Float64}, dy_dt!::Function,
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::Function,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
              args...) where {T <: AbstractFloat}
@@ -115,7 +116,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Embedded,
-             y::Vector{T}, t::Vector{Float64}, dt::Vector{Float64}, dy_dt!::Function,
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::Function,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
              args...) where {T <: AbstractFloat}

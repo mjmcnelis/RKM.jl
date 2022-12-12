@@ -14,16 +14,12 @@ catch err
 end
 # TODO: try to see if I can rescale epsilon? 
 
-adaptive = Fixed()
-# adaptive = Doubling()
-# adaptive = Embedded()
+adaptive = Fixed()             # 200k allocs (dt = 1e-4)
+# adaptive = Doubling()          # 281 allocs (Heun2)
+# adaptive = Embedded()            # 60 allocs (Fehlberg45)
 
-# method = BackwardEuler1()
-# method = Euler1()
-# method = Heun2()
 method = RungeKutta4()
-# @show method
-# method = HeunEuler21()
+# method = Heun2()
 # method = Fehlberg45()
 
 t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
