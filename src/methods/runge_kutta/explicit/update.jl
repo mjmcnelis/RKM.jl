@@ -1,8 +1,8 @@
 
 # TODO: so far, routine only works for an explicit, primary method
-function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, 
-             y::Vector{T}, t::Float64, dt::Float64, dy_dt!::Function, 
-             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}) where {T <: AbstractFloat}
+function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T}, 
+             t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, 
+             f_tmp::Vector{T}) where {T <: AbstractFloat, F}
 
     @unpack c, A, b, stages = method
     
@@ -50,11 +50,11 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::Function,
-             # TODO: try F concrete type instead of Function
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, 
-             args...) where {T <: AbstractFloat}
-    # TODO: not sure why putting dy_dt! here this kills allocations
+             args...) where {T <: AbstractFloat, F}
+    # note: since use concrete type F in place of Function
+    #       not longer require first evaluation here 
     dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
     dy[1,:] .= dt[1] .* f
 
@@ -65,10 +65,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Doubling,
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::Function,
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
-             args...) where {T <: AbstractFloat}
+             args...) where {T <: AbstractFloat, F}
     
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -116,10 +116,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Embedded,
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::Function,
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
-             args...) where {T <: AbstractFloat}
+             args...) where {T <: AbstractFloat, F}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 

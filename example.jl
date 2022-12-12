@@ -16,7 +16,7 @@ end
 
 adaptive = Fixed()             # 200k allocs (dt = 1e-4)
 # adaptive = Doubling()          # 281 allocs (Heun2)
-# adaptive = Embedded()            # 60 allocs (Fehlberg45)
+# adaptive = Embedded()          # 60 allocs (Fehlberg45)
 
 method = RungeKutta4()
 # method = Heun2()
