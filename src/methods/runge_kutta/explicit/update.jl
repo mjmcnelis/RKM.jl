@@ -1,8 +1,8 @@
 
 # TODO: so far, routine only works for an explicit, primary method
-function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T}, 
-             t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, 
-             f_tmp::Vector{T}) where {T <: AbstractFloat, F}
+function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::MVector{D,T}, 
+             t::Float64, dt::Float64, dy_dt!::F, dy::MMatrix{S,D,T,SD}, y_tmp::MVector{D,T},
+             f_tmp::MVector{D,T}) where {D, S, SD, T <: AbstractFloat, F}
 
     @unpack c, A, b, stages = method
     
@@ -50,9 +50,9 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
-             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, 
-             args...) where {T <: AbstractFloat, F}
+             y::MVector{D,T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
+             dy::MMatrix{S,D,T,SD}, y_tmp::MVector{D,T}, f_tmp::MVector{D,T}, 
+             f::MVector{D,T}, args...) where {D, S, SD, T <: AbstractFloat, F}
     # note: since use concrete type F in place of Function
     #       not longer require first evaluation here 
     dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)

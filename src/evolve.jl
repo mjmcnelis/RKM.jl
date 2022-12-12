@@ -16,21 +16,20 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     
     @unpack stages, precision, iteration = method 
 
+    dimensions = size(y0, 1)
+
     # initial conditions
-    y  = precision[copy(y0)...]
+    y  = MVector{dimensions, precision}(copy(y0)...)
     t  = MVector{1}(t0)
     dt = MVector{2}(dt0, dt0)
 
-    dimensions = size(y, 1)
-    
-    # note: should not be SA in general but still may want option if size small
+    # note: should not be MVector in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
-    dy    = zeros(precision, stages, dimensions) 
-    y_tmp = zeros(precision, dimensions)
-    f_tmp = zeros(precision, dimensions)
-    f     = zeros(precision, dimensions)
-    # f = @SVector zeros(precision, dimension)  # want to test it out though
-   
+    dy = @MMatrix zeros(precision, stages, dimensions) 
+    y_tmp = @MVector zeros(precision, dimensions)
+    f_tmp = @MVector zeros(precision, dimensions)
+    f = @MVector zeros(precision, dimensions)  # want to test it out though
+
     # TEMP for step doubling (embedded too probably)
     y1 = zeros(precision, dimensions)
     y2 = zeros(precision, dimensions)
@@ -40,7 +39,7 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     sol = Solution(; precision) 
 
     while true
-        push!(sol.y, copy(y))
+        push!(sol.y, y)
         append!(sol.t, t)
 
         # TODO: see if can pass kwargs
