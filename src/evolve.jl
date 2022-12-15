@@ -39,6 +39,8 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     # initalize solution
     sol = Solution(; precision, dimensions) 
 
+    # sizehint_solution!(sol, t_span)
+
     while true
         update_solution!(sol, y, t)
       
@@ -50,13 +52,4 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
         t .+= dt[1]
     end
     sol
-end
-
-function update_solution!(sol, y::Vector{T}, t::MVector{1,T}) where T <: AbstractFloat
-    # push!(sol.y, copy(y))
-    for i in eachindex(y) 
-        append!(sol.y[i], y[i])
-    end
-    append!(sol.t, t)
-    nothing 
 end
