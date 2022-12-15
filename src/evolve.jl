@@ -37,12 +37,11 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     error = zeros(precision, dimensions)
 
     # initalize solution
-    sol = Solution(; precision) 
+    sol = Solution(; precision, dimensions) 
 
     while true
-        push!(sol.y, copy(y))
-        append!(sol.t, t)
-
+        update_solution!(sol, y, t)
+      
         # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
@@ -51,4 +50,13 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
         t .+= dt[1]
     end
     sol
+end
+
+function update_solution!(sol, y::Vector{T}, t::MVector{1,T}) where T <: AbstractFloat
+    # push!(sol.y, copy(y))
+    for i in eachindex(y) 
+        append!(sol.y[i], y[i])
+    end
+    append!(sol.t, t)
+    nothing 
 end
