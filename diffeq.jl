@@ -12,10 +12,9 @@ catch err
 end
 
 t0 = -10.0
-# u0 = [exp(t0) / (1.0 + exp(t0)) - 0.5,
-#       exp(t0) / (1.0 + exp(t0)) - 0.25]
-u0 = SA[exp(t0) / (1.0 + exp(t0)) - 0.5;
-        exp(t0) / (1.0 + exp(t0)) - 0.25]
+N = 2
+
+u0 = SA[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]     
 
 tspan = (t0, 10.0)
 prob = ODEProblem(fp, u0, tspan)

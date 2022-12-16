@@ -29,11 +29,13 @@ timer = TimeLimit()
 parameters = Parameters(; adaptive, method, t_span, timer)
 
 @unpack t0 = t_span
-y0 = exp(t0) / (1.0 + exp(t0)) - 0.5
 
-# TEMP so can see how solver works with vectors
-y02 = exp(t0) / (1.0 + exp(t0)) - 0.25
-y0 = [y0, y02]
+N = 2
+y0 = []
+for i = 1:N
+    a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
+    push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
+end
 
 GC.gc()
 @time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
