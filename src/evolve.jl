@@ -26,11 +26,10 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
     
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
-    dy    = zeros(precision, stages, dimensions) 
+    dy    = zeros(precision, dimensions, stages) 
     y_tmp = zeros(precision, dimensions)
     f_tmp = zeros(precision, dimensions)
     f     = zeros(precision, dimensions)
-    # f = @SVector zeros(precision, dimension)  # want to test it out though
    
     # TEMP for step doubling (embedded too probably)
     y1 = zeros(precision, dimensions)
@@ -48,6 +47,12 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
         # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
+
+        # TODO: see if can pass kwargs
+        # stats = @timed evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
+        #                       dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
+        # @show stats.time stats.bytes
+        # break
 
         check_time(t, tf, timer) || break
         t .+= dt[1]

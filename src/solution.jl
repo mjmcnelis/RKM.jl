@@ -19,7 +19,7 @@ struct Solution{T1 <: Vector{<:Vector{<:AbstractFloat}},
     data_format::T3
 end
 
-function Solution(; precision::Type{<:AbstractFloat} = Float64, dimensions::Int64,
+function Solution(; precision::Type{<:AbstractFloat}, dimensions::Int64,
                     data_format::DataFormat)
 
     y = data_format isa SpaceSlice ? Vector{Vector{precision}}([[] for i = 1:dimensions]) :

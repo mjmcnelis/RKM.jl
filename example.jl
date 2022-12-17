@@ -20,6 +20,7 @@ adaptive = Fixed()             # 200k allocs (dt = 1e-4)
 method = RungeKutta4()
 # method = Heun2()
 # method = Fehlberg45()
+# method = BackwardEuler1()
 
 t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 timer = TimeLimit()

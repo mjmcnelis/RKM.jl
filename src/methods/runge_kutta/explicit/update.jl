@@ -2,23 +2,25 @@
 # TODO: so far, routine only works for an explicit, primary method
 function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T}, 
              t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, 
-             f_tmp::Vector{T}) where {T <: AbstractFloat, F}
+             f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
 
+    # 1e-7 s
     @unpack c, A, b, stages = method
-    
+  
+    # 1.1e-6 s
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         y_tmp .= y
         for j = 1:i-1
-            y_tmp .+= A[i,j] .* view(dy, j, :)
+            y_tmp .+= A[i,j] .* view(dy, :, j)
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
-        dy[i,:] .= dt .* f_tmp 
-    end 
-
+        dy[:,i] .= dt .* f_tmp 
+    end
+    # 4e-7s
     y_tmp .= y                                          # evaluate iteration
-    for j = 1:stages 
-        y_tmp .+= b[j] .* view(dy, j, :)
+    for j = 1:stages
+        y_tmp .+= b[j] .* view(dy, :, j)
     end
     nothing
 end
@@ -27,22 +29,22 @@ function embedded_runge_kutta_step!(method, y, dy, y_tmp)
     @unpack stages, b_hat = method
     y_tmp .= y                                          # evaluate iteration
     for j = 1:stages 
-        y_tmp .+= b_hat[j] .* view(dy, j, :)
+        y_tmp .+= b_hat[j] .* view(dy, :, j)
     end
     nothing
 end
 
 function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
                                     dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
-    dy[1,:] .= dt .* f                                  # iterate full time step 
+    dy[:,1] .= dt .* f                                  # iterate full time step 
     fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
     y1 .= y_tmp                                         # y1(t+dt)
     
-    dy[1,:] .= (dt/2.0) .* f                            # iterate two half time steps
+    dy[:,1] .= (dt/2.0) .* f                            # iterate two half time steps
     fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
     y2 .= y_tmp                                         # y2(t+dt/2)
     dy_dt!(f_tmp, t + dt/2.0, y2)
-    dy[1,:] .= (dt/2.0) .* f_tmp
+    dy[:,1] .= (dt/2.0) .* f_tmp
     fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, dy_dt!, dy, y_tmp,
                             f_tmp)
     y2 .= y_tmp                                         # y2(t+dt)
@@ -50,16 +52,13 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
-             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, 
-             args...) where {T <: AbstractFloat, F}
-    # note: since use concrete type F in place of Function
-    #       not longer require first evaluation here 
-    dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
-    dy[1,:] .= dt[1] .* f
+             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, 
+             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
+             args...) where {T <: AbstractFloat, F}   
+    dy_dt!(f_tmp, t[1], y)                              # evalute first state at (t,y)
+    dy[:,1] .= dt[1] .* f_tmp
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
-
     y .= y_tmp                                          # get iteration
     nothing
 end
@@ -139,7 +138,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
     while true                                          # start embedded routine 
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt   
 
-        dy[1,:] .= dt[1] .* f                           # primary iteration
+        dy[:,1] .= dt[1] .* f                           # primary iteration
         fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], 
                                 dy_dt!, dy, y_tmp, f_tmp)
         y1 .= y_tmp
