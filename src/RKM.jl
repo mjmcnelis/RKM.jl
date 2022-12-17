@@ -88,6 +88,8 @@ export Solution
 export Parameters, TimeSpan, TimeLimit
 # ODE solver
 export evolve_ode, evolve_one_time_step!
+# Data format 
+export TimeSlice, SpaceSlice
 # Utilities 
 export debug_table, debug_iteration, RKM_root
 # Plots 

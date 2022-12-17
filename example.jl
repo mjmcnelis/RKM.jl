@@ -5,7 +5,6 @@ using StaticArrays
 using Plots 
 using UnPack
 plotly()
-# reduces allocations but can't redefine it
 try
     dy_dt!
     jacobian!
@@ -24,16 +23,19 @@ method = RungeKutta4()
 
 t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 timer = TimeLimit()
+ 
+data_format = TimeSlice()
+# data_format = SpaceSlice()
 
 # do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_span, timer)
+parameters = Parameters(; adaptive, method, t_span, timer, data_format)
 
 @unpack t0 = t_span
 
 N = 2
 y0 = []
 for i = 1:N
-    a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
+    global a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 
