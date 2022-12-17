@@ -33,7 +33,7 @@ parameters = Parameters(; adaptive, method, t_span, timer, data_format)
 @unpack t0 = t_span
 
 N = 2
-y0 = []
+y0 = Float64[]
 for i = 1:N
     global a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)

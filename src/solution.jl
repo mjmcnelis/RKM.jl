@@ -5,10 +5,11 @@ struct SpaceSlice <: DataFormat end     # better for small systems
 
 # y(0) = [1, 2]
 # y(1) = [3, 4]
+# y(2) = [5, 6]
 # push! (Time)
-# sol.y = [[1,2], [3,4]]
+# sol.y = [[1,2], [3,4], [5,6]]
 # append! (Space) 
-# sol.y = [[1,3], [2,4]]
+# sol.y = [[1,3,5], [2,4,6]]
 
 struct Solution{T1 <: Vector{<:Vector{<:AbstractFloat}}, 
                 T2 <: Vector{<:AbstractFloat},
@@ -35,7 +36,8 @@ function update_state!(::SpaceSlice, sol, y)
     end
 end
 
-function update_solution!(sol, y::Vector{T}, t::MVector{1,T}) where T <: AbstractFloat
+function update_solution!(sol, y::Vector{T}, t::MVector{1,T2}) where {T <: AbstractFloat, 
+                                                                      T2 <: AbstractFloat}
     update_state!(sol.data_format, sol, y)
     append!(sol.t, t[1])
     nothing 

@@ -8,8 +8,9 @@ function jacobian_error(args...; kwargs...)
     throw(JacobianException(msg))
 end
 
-function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, # TEMP
-                                          parameters::Parameters)
+function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; 
+                    jacobian!::J, parameters::P) where {T <: AbstractFloat, F <: Function,
+                                                        J <: Function, P <: Parameters}
 
     @unpack adaptive, method, t_span, timer, data_format = parameters
     @unpack t0, tf, dt0 = t_span

@@ -84,10 +84,12 @@ export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables,
 export make_code_name
 # ODE solution
 export Solution
-# ODE options
-export Parameters, TimeSpan, TimeLimit
+# Parameters
+export Parameters
+# Time 
+export TimeSpan, TimeLimit
 # ODE solver
-export evolve_ode, evolve_one_time_step!
+export evolve_ode
 # Data format 
 export TimeSlice, SpaceSlice
 # Utilities 
