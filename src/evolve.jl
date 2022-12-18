@@ -48,12 +48,6 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
         evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
-        # TODO: see if can pass kwargs
-        # stats = @timed evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
-        #                       dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
-        # @show stats.time stats.bytes
-        # break
-
         check_time(t, tf, timer) || break
         t .+= dt[1]
     end

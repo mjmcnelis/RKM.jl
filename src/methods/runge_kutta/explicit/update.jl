@@ -5,14 +5,14 @@ function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T},
              f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
 
     # 1e-7 s
-    @unpack c, A, b, stages = method
-  
+    @unpack c, A_T, b, stages = method
+
     # 1.1e-6 s
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         y_tmp .= y
         for j = 1:i-1
-            y_tmp .+= A[i,j] .* view(dy, :, j)
+            y_tmp .+= A_T[j,i] .* view(dy, :, j)
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
         dy[:,i] .= dt .* f_tmp 

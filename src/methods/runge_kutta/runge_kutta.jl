@@ -1,10 +1,8 @@
 
 struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
-    # TODO: transpose butcher table? 
-    # note: transpose operation is ' (e.g. butcher' .|> precision)
     name::Symbol
     c::SVector{S, T}
-    A::SMatrix{S, S, T, S2}
+    A_T::SMatrix{S, S, T, S2}
     b::SVector{S, T}
     b_hat::SVector{S, T}
     stages::Int64
@@ -36,13 +34,13 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     stages = ncol - 1
 
     # convert butcher tableau into static arrays
-    c = butcher[1:ncol-1, 1] |> SVector{stages}
-    A = butcher[1:ncol-1, 2:ncol] |> SMatrix{stages, stages}
-    b = butcher[ncol, 2:ncol] |> SVector{stages}
+    c   = butcher[1:ncol-1, 1] |> SVector{stages}
+    A_T = butcher[1:ncol-1, 2:ncol] |> transpose |> SMatrix{stages, stages}
+    b   = butcher[ncol, 2:ncol] |> SVector{stages}
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
    
-    RungeKutta(name, c, A, b, b_hat, stages, precision, 
+    RungeKutta(name, c, A_T, b, b_hat, stages, precision, 
                order, iteration, fsal, code_name)
 end
 

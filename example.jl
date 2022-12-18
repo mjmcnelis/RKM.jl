@@ -1,5 +1,6 @@
 using Revise
 using RKM
+using BenchmarkTools
 using LinearAlgebra
 using StaticArrays
 using Plots 
@@ -42,9 +43,11 @@ end
 
 GC.gc()
 @time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
-GC.gc()
+# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 5.0
+# @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
+# GC.gc()
 #=
 plot_ode(sol, method, Plots.plot)
 =#
 
-println("\ndone")
+# println("\ndone")
