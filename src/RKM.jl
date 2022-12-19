@@ -1,13 +1,12 @@
 module RKM
 
-# using DataFrames      # may use to output RK tables
 import MuladdMacro: @muladd
 import FastBroadcast: @..
-using StaticArrays
-using LinearAlgebra
-using Test
-using Dates
-using UnPack
+import StaticArrays: SVector, SMatrix, MVector
+import LinearAlgebra: norm, tril, diag
+import Test: @test, @test_broken
+import Dates: now, Minute, DateTime
+import UnPack: @unpack
 import Base.@kwdef
 
 abstract type ODEMethod end

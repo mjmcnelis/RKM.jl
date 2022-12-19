@@ -1,10 +1,11 @@
 
 struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
     name::Symbol
+    butcher::Matrix{T}              # for butcher_test.jl only
     c::SVector{S, T}
-    A_T::SMatrix{S, S, T, S2}
+    A_T::SMatrix{S, S, T, S2}       # TODO: would this not work for high order methods?
     b::SVector{S, T}
-    b_hat::SVector{S, T}
+    b_hat::SVector{S, T}            # TODO: generalize b_hat 
     stages::Int64
     precision::Type{T}
     order::Vector{T}
@@ -23,7 +24,7 @@ end
 #                   :symp
 #                   :)
 
-function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
+function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
     precision = precision_prop(butcher)         # determine properties
     order     = order_prop(name, butcher)
     iteration = iteration_prop(butcher)
@@ -40,7 +41,7 @@ function RungeKutta(; name::Symbol, butcher::Matrix{<:AbstractFloat})
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
    
-    RungeKutta(name, c, A_T, b, b_hat, stages, precision, 
+    RungeKutta(name, butcher, c, A_T, b, b_hat, stages, precision, 
                order, iteration, fsal, code_name)
 end
 

@@ -13,7 +13,7 @@ struct TimeLimit
 end
 
 function TimeLimit(; wtime_min = 60, frequency = 100)
-    time_limit = Dates.now() + Dates.Minute(round(wtime_min))
+    time_limit = now() + Minute(round(wtime_min))
     counter = [0]
 
     TimeLimit(wtime_min, time_limit, frequency, counter)
@@ -26,7 +26,7 @@ end
 function past_time_limit(timer)
     @unpack wtime_min, counter, frequency, time_limit = timer
 
-    if (counter[1] += 1) % frequency == 0 && Dates.now() > time_limit
+    if (counter[1] += 1) % frequency == 0 && now() > time_limit
         @warn "\nExceeded time limit of $wtime_min minutes (stop evolve...)\n"
         true
     else
