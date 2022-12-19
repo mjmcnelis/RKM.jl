@@ -49,7 +49,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
         check_time(t, tf, timer) || break
-        t .+= dt[1]
+        @.. t += dt[1]
     end
     sol
 end

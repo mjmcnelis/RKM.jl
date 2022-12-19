@@ -43,11 +43,12 @@ end
 
 GC.gc()
 @time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
-# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 5.0
+
+# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 10.0
 # @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 # GC.gc()
 #=
 plot_ode(sol, method, Plots.plot)
 =#
 
-# println("\ndone")
+println("\ndone")

@@ -1,26 +1,27 @@
 
 # TODO: so far, routine only works for an explicit, primary method
-function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T}, 
-             t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, 
-             f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
+@muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T}, 
+                     t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, 
+                     f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
 
-    # 1e-7 s
     @unpack c, A_T, b, stages = method
 
-    # 1.1e-6 s
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
-        y_tmp .= y
+        @.. y_tmp = y
+        # TODO: need a better dy cache for performance
         for j = 1:i-1
-            y_tmp .+= A_T[j,i] .* view(dy, :, j)
+            dy_stage = view(dy,:,j)
+            @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
-        dy[:,i] .= dt .* f_tmp 
+        @.. dy[:,i] = dt * f_tmp
     end
-    # 4e-7s
-    y_tmp .= y                                          # evaluate iteration
+
+    @.. y_tmp = y                                        # evaluate iteration
     for j = 1:stages
-        y_tmp .+= b[j] .* view(dy, :, j)
+        dy_stage = view(dy,:,j)
+        @.. y_tmp = y_tmp + b[j]*dy_stage
     end
     nothing
 end
@@ -56,10 +57,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
              dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
              args...) where {T <: AbstractFloat, F}   
     dy_dt!(f_tmp, t[1], y)                              # evalute first state at (t,y)
-    dy[:,1] .= dt[1] .* f_tmp
+    @.. dy[:,1] = dt[1] * f_tmp
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
-    y .= y_tmp                                          # get iteration
+    @.. y = y_tmp                                       # get iteration
     nothing
 end
 

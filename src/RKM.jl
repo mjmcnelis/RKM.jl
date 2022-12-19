@@ -1,6 +1,8 @@
 module RKM
 
 # using DataFrames      # may use to output RK tables
+import MuladdMacro: @muladd
+import FastBroadcast: @..
 using StaticArrays
 using LinearAlgebra
 using Test
