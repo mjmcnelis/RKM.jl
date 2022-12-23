@@ -53,7 +53,30 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
+# TODO: move to new file 
+function add_function_evaluations!(::Explicit, ::Fixed, FE::MVector{1,Int64},
+                                   method::RungeKutta, args...)
+    @.. FE += method.stages
+    nothing
+end
+
+function add_function_evaluations!(::Explicit, ::Doubling, FE::MVector{1,Int64},
+                                   method::RungeKutta, attempts::Int64)
+    evals = 1 + attempts*(3*method.stages - 2)
+    @.. FE += evals
+    nothing
+end
+
+function add_function_evaluations!(::Explicit, ::Embedded, FE::MVector{1,Int64},
+                                   method::RungeKutta, attempts::Int64)
+    # TODO: have not implemented FSAL yet
+    evals = 1 + attempts*(method.stages - 1)
+    @.. FE += evals
+    nothing
+end
+
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
+             adaptive::Fixed, FE::MVector{1,Int64}, 
              y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, 
              dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
              args...) where {T <: AbstractFloat, F}   
@@ -62,10 +85,13 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
     @.. y = y_tmp                                       # get iteration
+
+    add_function_evaluations!(iteration, adaptive, FE, method)
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Doubling,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
+             adaptive::Doubling, FE::MVector{1,Int64},
              y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
@@ -112,11 +138,13 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
         a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
         a += 1
     end
-    @.. y = y2
+    @.. y = y2                                          # get iteration 
+    add_function_evaluations!(iteration, adaptive, FE, method, a)
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Embedded,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
+             adaptive::Embedded, FE::MVector{1,Int64},
              y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
@@ -173,6 +201,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
         a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
         a += 1
     end
-    @.. y = y1
+    @.. y = y1                                          # get iteration
+    add_function_evaluations!(iteration, adaptive, FE, method, a)
     nothing
 end

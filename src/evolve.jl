@@ -19,8 +19,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
 
     # initial conditions
     y  = precision[copy(y0)...]
-    t  = MVector{1}(t0)
-    dt = MVector{2}(dt0, dt0)
+    t  = MVector{1,Float64}(t0)
+    dt = MVector{2,Float64}(dt0, dt0)
 
     dimensions = size(y, 1)
     
@@ -38,6 +38,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
 
     # initalize solution
     sol = Solution(; precision, dimensions, data_format) 
+    @unpack FE = sol
 
     sizehint_solution!(sol, t_span)
 
@@ -45,7 +46,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
         update_solution!(sol, y, t)
       
         # TODO: see if can pass kwargs
-        evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
+        evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
         check_time(t, tf, timer) || break

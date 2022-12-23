@@ -17,6 +17,8 @@ struct Solution{T1 <: Vector{<:Vector{<:AbstractFloat}},
     y::T1 
     t::T2
     data_format::T3
+    # TODO: separate from y(t) solution
+    FE::MVector{1,Int64}
 end
 
 function Solution(; precision::Type{<:AbstractFloat}, dimensions::Int64,
@@ -26,7 +28,9 @@ function Solution(; precision::Type{<:AbstractFloat}, dimensions::Int64,
                                      Vector{Vector{precision}}()
     t = Vector{precision}()
 
-    Solution(y, t, data_format)
+    FE = MVector{1,Int64}(0)
+
+    Solution(y, t, data_format, FE)
 end
 
 update_state!(::TimeSlice, sol, y) = push!(sol.y, copy(y))
