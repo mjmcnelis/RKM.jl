@@ -46,5 +46,5 @@ function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
 end
 
 function Base.show(io::IO, RK::RungeKutta)
-    print(io, "$(str_name(RK.name))")#\n$(DataFrame(RK.butcher, :auto))")
+    print(io, "$(RK.name)\n$(display(RK.butcher))")
 end

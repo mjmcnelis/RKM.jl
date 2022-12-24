@@ -14,7 +14,6 @@ abstract type ODEMethod end
 
 RKM_root = dirname(dirname(@__FILE__))
 
-include("utils.jl")
 include("solution.jl")
 include("embedded.jl")
 include("adaptive.jl")
@@ -26,7 +25,6 @@ include("methods/properties.jl")
     # runge_kutta/
 include("methods/runge_kutta/runge_kutta.jl")
 include("methods/runge_kutta/utils.jl")
-include("methods/runge_kutta/get_all_tables.jl")
         # explicit/
 include("methods/runge_kutta/explicit/update.jl")
 include("methods/runge_kutta/explicit/get_tables.jl")
