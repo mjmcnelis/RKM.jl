@@ -15,15 +15,16 @@ t0 = -10.0
 N = 2
 
 u0 = SA[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]     
+# u0 = Float64[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]      
 
-tspan = (t0, 10.0)
-prob = ODEProblem(fp, u0, tspan)
+# prob = ODEProblem(fp, u0, (t0, t0))
+# integ = init(prob, RK4(), dt = 1e-2, adaptive = false)#, saveat = 1000)
+# @time solve!(integ)
 
 GC.gc()
 integ = init(prob, RK4(), dt = 1e-4, adaptive = false)#, saveat = 1000)
 @time solve!(integ)
 sol = integ.sol
-GC.gc()
 
 # @show sol.destats
 println("\ndone")

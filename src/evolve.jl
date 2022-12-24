@@ -18,7 +18,9 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
     @unpack stages, precision, iteration = method 
 
     # initial conditions
-    y  = precision[copy(y0)...]
+    y  = y0 .|> precision
+    y isa Vector ? nothing : y = [y]
+ 
     t  = MVector{1,Float64}(t0)
     dt = MVector{2,Float64}(dt0, dt0)
 
