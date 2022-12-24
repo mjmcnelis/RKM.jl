@@ -1,7 +1,6 @@
 
-# TODO: so far, routine only works for an explicit, primary method
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T}, 
-                     t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, 
+                     t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T},
                      f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
 
     @unpack c, A_T, b, stages = method
@@ -23,55 +22,6 @@
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
     end
-    nothing
-end
-
-@muladd function embedded_runge_kutta_step!(method, y, dy, y_tmp)
-    @unpack stages, b_hat = method
-    @.. y_tmp = y                                       # evaluate iteration
-    for j = 1:stages 
-        dy_stage = view(dy,:,j)
-        @.. y_tmp = y_tmp + b_hat[j]*dy_stage
-    end
-    nothing
-end
-
-function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
-                                    dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
-    @.. dy[:,1] = dt * f                                # iterate full time step 
-    fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
-    @.. y1 = y_tmp                                      # y1(t+dt)
-    
-    @.. dy[:,1] = (dt/2.0) * f                          # iterate two half time steps
-    fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
-    @.. y2 = y_tmp                                      # y2(t+dt/2)
-    dy_dt!(f_tmp, t + dt/2.0, y2)
-    @.. dy[:,1] = (dt/2.0) * f_tmp
-    fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, dy_dt!, dy, y_tmp,
-                            f_tmp)
-    @.. y2 = y_tmp                                      # y2(t+dt)
-    nothing
-end
-
-# TODO: move to new file 
-function add_function_evaluations!(::Explicit, ::Fixed, FE::MVector{1,Int64},
-                                   method::RungeKutta, args...)
-    @.. FE += method.stages
-    nothing
-end
-
-function add_function_evaluations!(::Explicit, ::Doubling, FE::MVector{1,Int64},
-                                   method::RungeKutta, attempts::Int64)
-    evals = 1 + attempts*(3*method.stages - 2)
-    @.. FE += evals
-    nothing
-end
-
-function add_function_evaluations!(::Explicit, ::Embedded, FE::MVector{1,Int64},
-                                   method::RungeKutta, attempts::Int64)
-    # TODO: have not implemented FSAL yet
-    evals = 1 + attempts*(method.stages - 1)
-    @.. FE += evals
     nothing
 end
 
@@ -203,5 +153,32 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     end
     @.. y = y1                                          # get iteration
     add_function_evaluations!(iteration, adaptive, FE, method, a)
+    nothing
+end
+
+function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
+                                    dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
+    @.. dy[:,1] = dt * f                                # iterate full time step 
+    fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
+    @.. y1 = y_tmp                                      # y1(t+dt)
+
+    @.. dy[:,1] = (dt/2.0) * f                          # iterate two half time steps
+    fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
+    @.. y2 = y_tmp                                      # y2(t+dt/2)
+    dy_dt!(f_tmp, t + dt/2.0, y2)
+    @.. dy[:,1] = (dt/2.0) * f_tmp
+    fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, 
+    dy_dt!, dy, y_tmp, f_tmp)
+    @.. y2 = y_tmp                                      # y2(t+dt)
+    nothing
+end
+
+@muladd function embedded_runge_kutta_step!(method, y, dy, y_tmp)
+    @unpack stages, b_hat = method
+    @.. y_tmp = y                                       # evaluate iteration
+    for j = 1:stages 
+        dy_stage = view(dy,:,j)
+        @.. y_tmp = y_tmp + b_hat[j]*dy_stage
+    end
     nothing
 end
