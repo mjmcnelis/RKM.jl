@@ -1,70 +1,51 @@
 
 # TODO: so far, routine only works for an explicit, primary method
-function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::MVector{D,T}, 
-             t::Float64, dt::Float64, dy_dt!::F, dy::MMatrix{S,D,T,SD}, y_tmp::MVector{D,T},
-             f_tmp::MVector{D,T}) where {D, S, SD, T <: AbstractFloat, F}
+@muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::MVector{D,T}, 
+                     t::Float64, dt::Float64, dy_dt!::F, dy::MMatrix{D,S,T,SD}, 
+                     y_tmp::MVector{D,T}, f_tmp::MVector{D,T}) where {D, S, SD, 
+                                                                      T <: AbstractFloat, 
+                                                                      F <: Function}
 
-    @unpack c, A, b, stages = method
-    
+    @unpack c, A_T, b, stages = method
+
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
-        y_tmp .= y
+        @.. y_tmp = y
+        # TODO: need a better dy cache for performance
         for j = 1:i-1
-            y_tmp .+= A[i,j] .* view(dy, j, :)
+            dy_stage = view(dy,:,j)
+            @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
         dy_dt!(f_tmp, t_tmp, y_tmp)
-        dy[i,:] .= dt .* f_tmp 
-    end 
+        @.. dy[:,i] = dt * f_tmp
+    end
 
-    y_tmp .= y                                          # evaluate iteration
-    for j = 1:stages 
-        y_tmp .+= b[j] .* view(dy, j, :)
+    @.. y_tmp = y                                        # evaluate iteration
+    for j = 1:stages
+        dy_stage = view(dy,:,j)
+        @.. y_tmp = y_tmp + b[j]*dy_stage
     end
     nothing
 end
 
-function embedded_runge_kutta_step!(method, y, dy, y_tmp)
-    @unpack stages, b_hat = method
-    y_tmp .= y                                          # evaluate iteration
-    for j = 1:stages 
-        y_tmp .+= b_hat[j] .* view(dy, j, :)
-    end
-    nothing
-end
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
+             adaptive::Fixed, FE::MVector{1,Int64}, 
+             y::MVector{D,T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, 
+             dy_dt!::F, dy::MMatrix{D,S,T,SD}, y_tmp::MVector{D,T}, f_tmp::MVector{D,T},
+             args...) where {D, S, SD, T <: AbstractFloat, F} 
 
-function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
-                                    dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
-    dy[1,:] .= dt .* f                                  # iterate full time step 
-    fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
-    y1 .= y_tmp                                         # y1(t+dt)
-    
-    dy[1,:] .= (dt/2.0) .* f                            # iterate two half time steps
-    fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
-    y2 .= y_tmp                                         # y2(t+dt/2)
-    dy_dt!(f_tmp, t + dt/2.0, y2)
-    dy[1,:] .= (dt/2.0) .* f_tmp
-    fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, dy_dt!, dy, y_tmp,
-                            f_tmp)
-    y2 .= y_tmp                                         # y2(t+dt)
-    nothing
-end
-
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, ::Fixed,
-             y::MVector{D,T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
-             dy::MMatrix{S,D,T,SD}, y_tmp::MVector{D,T}, f_tmp::MVector{D,T}, 
-             f::MVector{D,T}, args...) where {D, S, SD, T <: AbstractFloat, F}
-    # note: since use concrete type F in place of Function
-    #       not longer require first evaluation here 
-    dy_dt!(f, t[1], y)                                  # evalute first state at (t,y)
-    dy[1,:] .= dt[1] .* f
+    dy_dt!(f_tmp, t[1], y)                              # evalute first state at (t,y)
+    @.. dy[:,1] = dt[1] * f_tmp
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
+    @.. y = y_tmp                                       # get iteration
 
-    y .= y_tmp                                          # get iteration
+    add_function_evaluations!(iteration, adaptive, FE, method)
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Doubling,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
+             adaptive::Doubling, FE::MVector{1,Int64},
              y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
@@ -87,14 +68,14 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
         doubling_runge_kutta_step!(method, iteration, y, t[1], dt[1], 
                                    dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
 
-        error .= (y2 .- y1) ./ (2.0^order - 1.0)        # estimate local truncation error
-        y2 .+= error                                    # Richardson extrapolation
+        @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
+        @.. y2 = y2 + error                             # Richardson extrapolation
 
-        e_norm = LinearAlgebra.norm(error, p_norm)      # compute norms
-        y_norm = LinearAlgebra.norm(y2, p_norm)
+        e_norm = norm(error, p_norm)                    # compute norms
+        y_norm = norm(y2, p_norm)
         Δy = y1
-        Δy .= y2 .- y
-        Δy_norm = LinearAlgebra.norm(Δy, p_norm)
+        @.. Δy = y2 - y
+        Δy_norm = norm(Δy, p_norm)
 
         tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
 
@@ -111,11 +92,13 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
         a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
         a += 1
     end
-    y .= y2
+    @.. y = y2                                          # get iteration 
+    add_function_evaluations!(iteration, adaptive, FE, method, a)
     nothing
 end
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive::Embedded,
+function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
+             adaptive::Embedded, FE::MVector{1,Int64},
              y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T}, 
@@ -139,23 +122,23 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
     while true                                          # start embedded routine 
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt   
 
-        dy[1,:] .= dt[1] .* f                           # primary iteration
+        @.. dy[:,1] = dt[1] * f                         # primary iteration
         fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], 
                                 dy_dt!, dy, y_tmp, f_tmp)
-        y1 .= y_tmp
+        @.. y1 = y_tmp
 
         embedded_runge_kutta_step!(method, y, dy, y_tmp)
-        y2 .= y_tmp                                     # embedded iteration
+        @.. y2 = y_tmp                                  # embedded iteration
 
-        error .= (y2 .- y1)                             # local error of embedded pair
+        @.. error = y2 - y1                             # local error of embedded pair
 
-        e_norm = LinearAlgebra.norm(error, p_norm)      # compute norms
-        y_norm = LinearAlgebra.norm(y1, p_norm)
+        e_norm = norm(error, p_norm)                    # compute norms
+        y_norm = norm(y1, p_norm)
         # TODO: need to use Δy =  y2 since it's secondary method 
         #       but should make labeling consistent w/ doubling
         Δy = y2                         
-        Δy .= y1 .- y
-        Δy_norm = LinearAlgebra.norm(Δy, p_norm)
+        @.. Δy = y1 - y
+        Δy_norm = norm(Δy, p_norm)
 
         tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
 
@@ -172,6 +155,34 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, adaptive
         a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
         a += 1
     end
-    y .= y1
+    @.. y = y1                                          # get iteration
+    add_function_evaluations!(iteration, adaptive, FE, method, a)
+    nothing
+end
+
+function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
+                                    dy_dt!, dy, y_tmp, f_tmp, f, y1, y2)
+    @.. dy[:,1] = dt * f                                # iterate full time step 
+    fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp)
+    @.. y1 = y_tmp                                      # y1(t+dt)
+
+    @.. dy[:,1] = (dt/2.0) * f                          # iterate two half time steps
+    fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp)
+    @.. y2 = y_tmp                                      # y2(t+dt/2)
+    dy_dt!(f_tmp, t + dt/2.0, y2)
+    @.. dy[:,1] = (dt/2.0) * f_tmp
+    fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, 
+    dy_dt!, dy, y_tmp, f_tmp)
+    @.. y2 = y_tmp                                      # y2(t+dt)
+    nothing
+end
+
+@muladd function embedded_runge_kutta_step!(method, y, dy, y_tmp)
+    @unpack stages, b_hat = method
+    @.. y_tmp = y                                       # evaluate iteration
+    for j = 1:stages 
+        dy_stage = view(dy,:,j)
+        @.. y_tmp = y_tmp + b_hat[j]*dy_stage
+    end
     nothing
 end

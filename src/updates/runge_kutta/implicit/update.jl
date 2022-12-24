@@ -40,31 +40,31 @@ function fixed_runge_kutta_step!(method::RungeKutta, iteration::DiagonalImplicit
         y_tmp .= y 
         for j = 1:i-1 
             for k in eachindex(y_tmp)
-                y_tmp[k] += A[i,j] * dy[j,k]
+                y_tmp[k] += A[i,j] * dy[k,j]
             end
         end 
 
         # TEMP iterate w/o any breaks for now 
         for n = 1:max_iterations
             for k in eachindex(y_tmp)
-                y_tmp[k] += A[i,i] * dy[i,k]
+                y_tmp[k] += A[i,i] * dy[k,i]
             end 
             dy_dt!(f_tmp, t_tmp, y_tmp)
             # TEMP undo addition (for minimizing allocations)
             for k in eachindex(y_tmp)
-                y_tmp[k] -= A[i,i] * dy[i,k]
+                y_tmp[k] -= A[i,i] * dy[k,i]
             end
 
             if root_solver == "fixed_point"
-                dy[i,:] .= dt .* f_tmp 
+                dy[:,i] .= dt .* f_tmp 
             elseif root_solver == "newton_fast"
                 # TODO: try to solve for dy directly instead of d(dy)
                 for k in eachindex(f_tmp) 
-                    f_tmp[k] = dy[i,k] - dt*f_tmp[k]
+                    f_tmp[k] = dy[k,i] - dt*f_tmp[k]
                 end
                 # from python 
                 # g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
-                dy[i, :] .-= J \ f_tmp
+                dy[:,i] .-= J \ f_tmp
             end
         end
     end    
@@ -72,7 +72,7 @@ function fixed_runge_kutta_step!(method::RungeKutta, iteration::DiagonalImplicit
     y_tmp .= y                                    
     for j = 1:stages 
         for i in eachindex(y_tmp)
-            y_tmp[i] += b[j] * dy[j,i]
+            y_tmp[i] += b[j] * dy[i,j]
         end
     end
     nothing

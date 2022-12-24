@@ -8,10 +8,11 @@ function jacobian_error(args...; kwargs...)
     throw(JacobianException(msg))
 end
 
-function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, # TEMP
-                                          parameters::Parameters)
+function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; 
+                    jacobian!::J, parameters::P) where {T <: AbstractFloat, F <: Function,
+                                                        J <: Function, P <: Parameters}
 
-    @unpack adaptive, method, t_span, timer = parameters
+    @unpack adaptive, method, t_span, timer, data_format = parameters
     @unpack t0, tf, dt0 = t_span
     
     @unpack stages, precision, iteration = method 
@@ -20,12 +21,16 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
 
     # initial conditions
     y  = MVector{dimensions, precision}(copy(y0)...)
-    t  = MVector{1}(t0)
-    dt = MVector{2}(dt0, dt0)
+ 
+    # y  = y0 .|> precision
+    # y isa Vector ? nothing : y = [y]
+ 
+    t  = MVector{1,Float64}(t0)
+    dt = MVector{2,Float64}(dt0, dt0)
 
     # note: should not be MVector in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
-    dy = @MMatrix zeros(precision, stages, dimensions) 
+    dy = @MMatrix zeros(precision, dimensions, stages) 
     y_tmp = @MVector zeros(precision, dimensions)
     f_tmp = @MVector zeros(precision, dimensions)
     f = @MVector zeros(precision, dimensions)  # want to test it out though
@@ -36,18 +41,20 @@ function evolve_ode(y0, dy_dt!::Function; jacobian!::Function = jacobian_error, 
     error = zeros(precision, dimensions)
 
     # initalize solution
-    sol = Solution(; precision) 
+    sol = Solution(; precision, dimensions, data_format) 
+    @unpack FE = sol
+
+    sizehint_solution!(sol, t_span)
 
     while true
-        push!(sol.y, y)
-        append!(sol.t, t)
-
+        update_solution!(sol, y, t)
+      
         # TODO: see if can pass kwargs
-        evolve_one_time_step!(method, iteration, adaptive, y, t, dt, dy_dt!, 
+        evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!, 
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
         check_time(t, tf, timer) || break
-        t .+= dt[1]
+        @.. t += dt[1]
     end
     sol
 end

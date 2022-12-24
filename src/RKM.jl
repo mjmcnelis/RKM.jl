@@ -1,51 +1,43 @@
 module RKM
 
-# using DataFrames      # may use to output RK tables
-using StaticArrays
-using LinearAlgebra
-using Test
-using Dates
-using UnPack
+# TODO: play arouns with using or import 
+import MuladdMacro: @muladd
+import FastBroadcast: @..
+import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
+import LinearAlgebra: norm, tril, diag
+import Test: @test, @test_broken
+import Dates: now, Minute, DateTime
+import UnPack: @unpack
 import Base.@kwdef
 
 abstract type ODEMethod end
 
 RKM_root = dirname(dirname(@__FILE__))
 
-include("utils.jl")
 include("solution.jl")
 include("embedded.jl")
 include("adaptive.jl")
 include("plots.jl")
 
-# methods/
 include("methods/code_names.jl")
 include("methods/properties.jl")
-    # runge_kutta/
+# Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
-include("methods/runge_kutta/utils.jl")
-include("methods/runge_kutta/get_all_tables.jl")
-        # explicit/
-include("methods/runge_kutta/explicit/update.jl")
-include("methods/runge_kutta/explicit/get_tables.jl")
-            # explicit/fixed/
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
-            # explicit/embedded/
 include("methods/runge_kutta/explicit/embedded/low_order.jl")
 include("methods/runge_kutta/explicit/embedded/medium_order.jl")
 include("methods/runge_kutta/explicit/embedded/high_order.jl")
 include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
-        # implicit/
-include("methods/runge_kutta/implicit/update.jl")
-include("methods/runge_kutta/implicit/get_tables.jl")
-            # implicit/fixed/
 include("methods/runge_kutta/implicit/fixed/low_order.jl")
 include("methods/runge_kutta/implicit/fixed/medium_order.jl")
-            # implicit/embedded/
 include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
+# Runge-Kutta updates
+include("updates/evaluations.jl")
+include("updates/runge_kutta/explicit/update.jl")
+include("updates/runge_kutta/implicit/update.jl")
 
 include("time.jl")
 include("parameters.jl")
@@ -84,10 +76,14 @@ export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables,
 export make_code_name
 # ODE solution
 export Solution
-# ODE options
-export Parameters, TimeSpan, TimeLimit
+# Parameters
+export Parameters
+# Time 
+export TimeSpan, TimeLimit
 # ODE solver
-export evolve_ode, evolve_one_time_step!
+export evolve_ode
+# Data format 
+export TimeSlice, SpaceSlice
 # Utilities 
 export debug_table, debug_iteration, RKM_root
 # Plots 

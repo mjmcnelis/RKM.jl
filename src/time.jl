@@ -13,21 +13,21 @@ struct TimeLimit
 end
 
 function TimeLimit(; wtime_min = 60, frequency = 100)
-    time_limit = Dates.now() + Dates.Minute(round(wtime_min))
+    time_limit = now() + Minute(round(wtime_min))
     counter = [0]
 
     TimeLimit(wtime_min, time_limit, frequency, counter)
 end
 
-function check_time(t::MVector{1,Float64}, tf::Float64, timer::TimeLimit)
+function check_time(t::MVector{1,T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
     t[1] < tf && !past_time_limit(timer)
 end
 
 function past_time_limit(timer)
     @unpack wtime_min, counter, frequency, time_limit = timer
 
-    if (counter[1] += 1) % frequency == 0 && Dates.now() > time_limit
-        @warn "\nExceeded time limit of $(wtime_min) minutes (stopping evolve)\n"
+    if (counter[1] += 1) % frequency == 0 && now() > time_limit
+        @warn "\nExceeded time limit of $wtime_min minutes (stop evolve...)\n"
         true
     else
         false
