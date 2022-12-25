@@ -22,8 +22,8 @@ end
 
 function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
     # TEMP: large fractions in rows 7-15 are not actually exact
-    if precision == BigFloat
-        @warn "DormandPrince87 can't use BigFloat right now (default to Float64)"
+    if precision == BigFloat || precision == Double64
+        @warn "DormandPrince87 can't use $precision right now (default to Float64)"
         precision = Float64
     end
 

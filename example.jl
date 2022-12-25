@@ -1,10 +1,9 @@
 using Revise
 using RKM
-using BenchmarkTools
-using LinearAlgebra
-using StaticArrays
+import BenchmarkTools: @benchmark
+import DoubleFloats: Double64
+import StaticArrays: SA
 using Plots 
-using UnPack
 plotly()
 try
     dy_dt!
@@ -32,12 +31,12 @@ data_format = TimeSlice()
 # do asserts between adaptive, method in parameters outer-constructor
 parameters = Parameters(; adaptive, method, t_span, timer, data_format)
 
-@unpack t0 = t_span
+t0 = t_span.t0
 
 N = 2
 y0 = Float64[]
 for i = 1:N
-    global a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
+    local a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 

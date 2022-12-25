@@ -1,8 +1,8 @@
 
 # TODO: get more digits and try BigFloat
 function Feagin108(; precision::Type{<:AbstractFloat} = Float64)
-    if precision == BigFloat
-        @warn "Feagin108 can't use BigFloat right now (default to Float64)"
+    if precision == BigFloat || precision == Double64
+        @warn "Feagin108 can't use $precision right now (default to Float64)"
         precision = Float64
     end
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

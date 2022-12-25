@@ -1,5 +1,5 @@
 
-function dy_dt!(f::Vector{T}, t::Float64, y::Vector{T}) where T <: AbstractFloat
+function dy_dt!(f, t, y)
     N = length(y)
     for i in 1:N
         a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)

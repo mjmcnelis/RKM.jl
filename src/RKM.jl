@@ -3,6 +3,7 @@ module RKM
 # TODO: play arouns with using or import 
 import MuladdMacro: @muladd
 import FastBroadcast: @..
+import DoubleFloats: Double64
 import StaticArrays: SVector, SMatrix, MVector
 import LinearAlgebra: norm, tril, diag
 import Test: @test, @test_broken
@@ -48,8 +49,9 @@ export Fixed, Doubling, Embedded, FiniteDiff
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Numerical ODE methods
+export RungeKutta
     # Properties 
-export Explicit, DiagonalImplicit, FullImplicit
+export Iteration, Explicit, DiagonalImplicit, FullImplicit
     # Fixed explicit Runge-Kutta
 export Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3, Ralston3, RungeKutta3, 
        ShuOsher3, SpiteriRuuth3, Generic3
