@@ -3,6 +3,7 @@ using Revise
 using OrdinaryDiffEq
 import RKM: RKM_root
 using StaticArrays
+using BenchmarkTools
 using Plots
 plotly()
 try
@@ -23,12 +24,11 @@ u0 = SA[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]
 
 GC.gc()
 prob = ODEProblem(fp, u0, (t0, 10.0))
-integ = init(prob, RK4(), dt = 1e-4, adaptive = false)#, saveat = 1000)
-@time solve!(integ)
-sol = integ.sol
-
+@time sol = solve(prob, RK4(), dt = 1e-4, adaptive = false)#, saveat = 1000)
 # @show sol.destats
 println("\ndone")
+ 
+# @benchmark sol = solve(prob, RK4(), dt = 1e-4, adaptive = false)
 
 #=
 plot(sol,linewidth=5,title="Solution to the linear ODE with a thick line",

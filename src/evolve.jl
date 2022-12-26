@@ -12,7 +12,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
                     jacobian!::J, parameters::P) where {T <: AbstractFloat, F <: Function,
                                                         J <: Function, P <: Parameters}
 
-    @unpack adaptive, method, t_span, timer, data_format = parameters
+    @unpack adaptive, method, t_span, timer = parameters
     @unpack t0, tf, dt0 = t_span
     
     @unpack stages, precision, iteration = method 
@@ -39,10 +39,10 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
     error = zeros(precision, dimensions)
 
     # initalize solution
-    sol = Solution(; precision, dimensions, data_format) 
+    sol = Solution(; precision, dimensions) 
     @unpack FE = sol
 
-    sizehint_solution!(sol, t_span)
+    sizehint_solution!(sol, t_span, dimensions)
 
     while true
         update_solution!(sol, y, t)

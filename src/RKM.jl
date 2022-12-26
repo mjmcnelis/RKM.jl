@@ -6,7 +6,6 @@ import FastBroadcast: @..
 import DoubleFloats: Double64
 import StaticArrays: SVector, SMatrix, MVector
 import LinearAlgebra: norm, tril, diag
-import Test: @test, @test_broken
 import Dates: now, Minute, DateTime
 import UnPack: @unpack
 import Base.@kwdef
@@ -77,15 +76,13 @@ export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables,
 # Code names
 export make_code_name
 # ODE solution
-export Solution
+export Solution, reshape_solution
 # Parameters
 export Parameters
 # Time 
 export TimeSpan, TimeLimit
 # ODE solver
 export evolve_ode
-# Data format 
-export TimeSlice, SpaceSlice
 # Utilities 
 export debug_table, debug_iteration, RKM_root
 # Plots 

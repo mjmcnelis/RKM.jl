@@ -1,6 +1,6 @@
 using Revise
 using RKM
-import BenchmarkTools: @benchmark
+using BenchmarkTools
 import DoubleFloats: Double64
 import StaticArrays: SA
 using Plots 
@@ -24,12 +24,9 @@ method = RungeKutta4()
 
 t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 timer = TimeLimit()
- 
-data_format = TimeSlice()
-# data_format = SpaceSlice()
 
 # do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_span, timer, data_format)
+parameters = Parameters(; adaptive, method, t_span, timer)
 
 t0 = t_span.t0
 
@@ -43,7 +40,11 @@ end
 GC.gc()
 @time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 
-# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 10.0
+# bytes = sizeof(sol.y) + sizeof(sol.t)
+# @show Base.format_bytes(bytes)
+# @time y, t = reshape_solution(sol)
+
+# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 60.0
 # @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 # GC.gc()
 #=
