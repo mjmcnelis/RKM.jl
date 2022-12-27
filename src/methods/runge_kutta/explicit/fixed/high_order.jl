@@ -1,5 +1,9 @@
+"""
+Curtis' eighth-order method. 
 
-function Curtis8(; precision::Type{<:AbstractFloat} = Float64)
+https://link.springer.com/article/10.1007/BF02219778
+"""
+function Curtis8(; precision::Type{T} = Float64) where T <: AbstractFloat
     # TEMP until can fix get more digits
     if precision == BigFloat || precision == Double64
         @warn "Curtis8 can't use $precision right now (default to Float64)"
@@ -23,6 +27,11 @@ function Curtis8(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Curtis_8, butcher)
 end
 
+"""
+Shanks' eighth-order method. 
+
+https://ntrs.nasa.gov/citations/19650022581
+"""
 function Shanks8(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0
                1//9 1//9 0 0 0 0 0 0 0 0 0 0 0
@@ -42,6 +51,11 @@ function Shanks8(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Shanks_8, butcher)
 end
 
+"""
+Shanks' pseudo eighth-order method. 
+
+https://ntrs.nasa.gov/citations/19650022581
+"""
 function ShanksPseudo8(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0 0 0 0 0 0 0
                4//27 4//27 0 0 0 0 0 0 0 0 0

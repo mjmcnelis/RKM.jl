@@ -15,7 +15,7 @@ Heun's second-order method.
 
 Note: strong stability preserving (SSP)
 """
-function Heun2(; precision::Type{<:AbstractFloat} = Float64)
+function Heun2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0
                1 1 0
                1 1//2 1//2]
@@ -27,7 +27,7 @@ end
 """
 Second-order midpoint rule.
 """
-function Midpoint2(; precision::Type{<:AbstractFloat} = Float64)
+function Midpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0
                1//2 1//2 0
                1 0 1]
@@ -38,8 +38,10 @@ end
 
 """
 Ralston's second-order method.
+
+https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
 """
-function Ralston2(; precision::Type{<:AbstractFloat} = Float64)
+function Ralston2(; precision::Type{T} = Float64) where T <: AbstractFloat
     # TODO: had load module issues with ChangePrecision
     butcher = [0 0 0
                2//3 2//3 0
@@ -73,7 +75,7 @@ end
 """
 Heun's third-order method.
 """
-function Heun3(; precision::Type{<:AbstractFloat} = Float64)
+function Heun3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0
                1//3 1//3 0 0
                2//3 0 2//3 0
@@ -85,8 +87,10 @@ end
 
 """
 Ralston's third-order method.
+
+https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
 """
-function Ralston3(; precision::Type{<:AbstractFloat} = Float64)
+function Ralston3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0
                1//2 1//2 0 0
                3//4 0 3//4 0
@@ -99,7 +103,7 @@ end
 """
 Kutta's third-order method.
 """
-function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
+function RungeKutta3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0
                1//2 1//2 0 0
                3//4 0 3//4 0
@@ -110,11 +114,11 @@ function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 """
-Shu and Osher's third-order method.
+Shu and Osher's third-order SSP method.
 
-Note: strong stability preserving (SSP)
+https://www.sciencedirect.com/science/article/pii/0021999188901775
 """
-function ShuOsher3(; precision::Type{<:AbstractFloat} = Float64)
+function ShuOsher3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0
                1 1 0 0
                1//2 1//4 1//4 0
@@ -125,11 +129,11 @@ function ShuOsher3(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 """
-Spiteri and Ruuth's third-order method.
+Spiteri and Ruuth's third-order SSP method.
 
-Note: strong stability preserving (SSP)
+https://epubs.siam.org/doi/10.1137/S0036142902419284
 """
-function SpiteriRuuth3(; precision::Type{<:AbstractFloat} = Float64)
+function SpiteriRuuth3(; precision::Type{T} = Float64) where T <: AbstractFloat
     # SSP
     butcher = [0 0 0 0 0
                1//2 1//2 0 0 0
