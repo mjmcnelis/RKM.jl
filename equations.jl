@@ -13,7 +13,7 @@ function jacobian!(J, t, y)
         a = 0.5 - (i - 1.0)/4.0
         J[i,i] = 1.0 - 2.0*(y[i] + a)
     end
-    nothing 
+    nothing
 end
 
 # for OrdinaryDiffEq (StaticArray version)

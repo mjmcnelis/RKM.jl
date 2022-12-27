@@ -15,8 +15,8 @@ end
 t0 = -10.0
 N = 2
 
-u0 = SA[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]     
-# u0 = Float64[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]      
+u0 = SA[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]
+# u0 = Float64[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]
 
 # prob = ODEProblem(fp, u0, (t0, t0))
 # integ = init(prob, RK4(), dt = 1e-2, adaptive = false)#, saveat = 1000)
@@ -27,7 +27,7 @@ prob = ODEProblem(fp, u0, (t0, 10.0))
 @time sol = solve(prob, RK4(), dt = 1e-4, adaptive = false)#, saveat = 1000)
 # @show sol.destats
 println("\ndone")
- 
+
 # @benchmark sol = solve(prob, RK4(), dt = 1e-4, adaptive = false)
 
 #=

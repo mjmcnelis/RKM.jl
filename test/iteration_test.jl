@@ -19,6 +19,3 @@ for precision in floats
 end
 
 println("\ndone\n")
-
-
-

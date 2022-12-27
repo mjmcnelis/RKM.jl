@@ -1,8 +1,8 @@
 
 # TODO: for Fehlberg4, etc, take Fehlberg45 except 2nd-last (last) row
 # TODO: make dictionary with code names
-# TODO: make doc strings with links 
-# TODO: make documentation page 
+# TODO: make doc strings with links
+# TODO: make documentation page
 
 function RungeKutta4(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0
@@ -10,7 +10,7 @@ function RungeKutta4(; precision::Type{<:AbstractFloat} = Float64)
                1//2 0 1//2 0 0
                1 0 0 1 0
                1 1//6 1//3 1//3 1//6]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Runge_Kutta_4, butcher)
 end
@@ -21,7 +21,7 @@ function ThreeEightsRule4(; precision::Type{<:AbstractFloat} = Float64)
                2//3 -1//3 1 0 0
                1 1 -1 1 0
                1 1//8 3//8 3//8 1//8]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Three_Eights_Rule_4, butcher)
 end
@@ -29,13 +29,13 @@ end
 function Ralston4(; precision::Type{<:AbstractFloat} = Float64)
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(5))       # sqrt(5)
-                                  
+
     butcher = [0 0 0 0 0
                2//5 2//5 0 0 0
                7//8-3s/16 (-2889+1428s)/1024 (3785-1620s)/1024 0 0
                1 (-3365+2094s)/6040 (-975-3046s)/2552 (467040+203968s)/240845 0
                1 (263+24s)/1812 (125-1000s)/3828 1024(3346+1623s)/5924787 (30-4s)/123]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Ralston_4, butcher)
 end
@@ -53,7 +53,7 @@ function Ketcheson4(; precision::Type{<:AbstractFloat} = Float64)
                5//6 1//15 1//15 1//15 1//15 1//15 1//6 1//6 1//6 0 0
                1 1//15 1//15 1//15 1//15 1//15 1//6 1//6 1//6 1//6 0
                1 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Ketcheson_4, butcher)
 end
@@ -67,7 +67,7 @@ function Butcher5(; precision::Type{<:AbstractFloat} = Float64)
                1 -3//7 2//7 12//7 -12//7 8//7 0
                1 7//90 0 32//90 12//90 32//90 7//90]
     butcher = butcher .|> precision
-     
+
     RungeKutta(; name = :Butcher_5, butcher)
 end
 
@@ -80,8 +80,7 @@ function Butcher6(; precision::Type{<:AbstractFloat} = Float64)
                1//6 -1//360 -11//36 -1//8 1//2 1//10 0 0
                1 -41//260 22//13 43//156 -118//39 32//195 80//39 0
                1 13//200 0 11//40 11//40 4//25 4//25 13//200]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Butcher_6, butcher)
 end
-

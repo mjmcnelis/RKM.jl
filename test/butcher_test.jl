@@ -1,5 +1,5 @@
 using Revise
-using RKM 
+using RKM
 using DoubleFloats
 using Test
 include(joinpath(RKM_root, "test/tables/get_explicit_tables.jl"))

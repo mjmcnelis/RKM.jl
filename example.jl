@@ -3,7 +3,7 @@ using RKM
 using BenchmarkTools
 import DoubleFloats: Double64
 import StaticArrays: SA
-using Plots 
+using Plots
 plotly()
 try
     dy_dt!
@@ -11,7 +11,7 @@ try
 catch err
     isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
 end
-# TODO: try to see if I can rescale epsilon? 
+# TODO: try to see if I can rescale epsilon?
 
 adaptive = Fixed()             # 200k allocs (dt = 1e-4)
 # adaptive = Doubling()          # 281 allocs (Heun2)

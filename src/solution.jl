@@ -48,7 +48,7 @@ end
 """
     sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
 
-Applies `sizehint!` to vector fields in the solution `sol`.
+Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
 
 Required parameters: `sol`, `t_span`, `dimensions`
 """
@@ -56,24 +56,24 @@ function sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
     # TODO: whether or not I call this depends if save at regular intervals
     @unpack t0, tf, dt0 = t_span
     steps = round((tf - t0)/dt0) |> Int64
-    # TODO: why is steps+1 not sufficient?        
+    # TODO: why is steps+1 not sufficient?
     sizehint!(sol.y, dimensions*(steps + 2))
     sizehint!(sol.t, steps + 2)
     nothing
 end
 
 """
-    reshape_solution(sol::Solution)
+    get_solution(sol::Solution)
 
-Reshapes a solution vector `sol.y` of length `D*N` into a `N x D` matrix format 
-(`N` = time steps, `D` = dimensions).
+Returns the solution tuple `(y,t)` from `sol`. The solution vector `y`, which has a length
+`D*N`, is reshaped into an `N x D` matrix (`N` = time steps, `D` = dimensions).
 
-For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
+For example, the solution `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
 is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`.
 
-The solution set is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
+The solution is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 """
-function reshape_solution(sol::Solution)
+function get_solution(sol::Solution)
     y, t = sol.y, sol.t
     # TODO: replace length(t) if use deleteat for PDEs
     y = reshape(y, sol.dimensions, length(t))'

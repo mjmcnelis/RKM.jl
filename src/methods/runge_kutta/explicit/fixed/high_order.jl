@@ -18,7 +18,7 @@ function Curtis8(; precision::Type{<:AbstractFloat} = Float64)
                8.2732683535398854e-1 -1.6186994529880696 0 0 8.4859361993123450 -1.6000746209745174 -1.6706963865871344e1 5.6707296863985979e-1 2.6892514721246741 9.0108041351110444 0 0
                1 8.7651711673654731e-1 0 0 -4.1138940838927622 4.7294741782224714e-1 1.3785374631587118e1 2.8529348484093164e-2 -16//27 -9.7062986315222215 2.4941679337757211e-1 0
                1 1//20 0 0 0 0 13//180 1//5 16//45 1//5 13//180 1//20]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Curtis_8, butcher)
 end
@@ -37,7 +37,7 @@ function Shanks8(; precision::Type{<:AbstractFloat} = Float64)
                5//6 1303//1620 0 0 -4260//1620 -6875//1620 9990//1620 1030//1620 0 0 1//10 0 0
                1 -8595//4428 0 0 30720//4428 48750//4428 -66096//4428 378//4428 -729//4428 -1944//4428 -1296//4428 3240//4428 0
                1 41//840 0 0 0 0 216//840 272//840 27//840 27//840 36//840 180//840 41//840]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Shanks_8, butcher)
 end
@@ -58,5 +58,3 @@ function ShanksPseudo8(; precision::Type{<:AbstractFloat} = Float64)
 
     RungeKutta(; name = :Shanks_Pseudo_8, butcher)
 end
-
-    

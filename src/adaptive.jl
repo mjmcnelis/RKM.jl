@@ -4,21 +4,21 @@ abstract type AdaptiveStepSize end
 struct Fixed <: AdaptiveStepSize end
 
 struct FiniteDiff <: AdaptiveStepSize end
-struct Doubling <: AdaptiveStepSize 
+struct Doubling <: AdaptiveStepSize
     epsilon::Float64
     low::Float64
     high::Float64
     safety::Float64
     p_norm::Float64
-    dt_min::Float64 
+    dt_min::Float64
     dt_max::Float64
     max_attempts::Int
-end 
+end
 
 function Doubling(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm = 2,
                     dt_min = eps(1.0), dt_max = Inf, max_attempts = 10)
 
-    check_adaptive_parameters(epsilon, low, high, safety, p_norm, 
+    check_adaptive_parameters(epsilon, low, high, safety, p_norm,
                               dt_min, dt_max, max_attempts)
 
     Doubling(epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts)
@@ -30,7 +30,7 @@ struct Embedded <: AdaptiveStepSize
     high::Float64
     safety::Float64
     p_norm::Float64
-    dt_min::Float64 
+    dt_min::Float64
     dt_max::Float64
     max_attempts::Int
 end
@@ -38,17 +38,17 @@ end
 function Embedded(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm = 2,
                     dt_min = eps(1.0), dt_max = Inf, max_attempts = 10)
 
-    check_adaptive_parameters(epsilon, low, high, safety, p_norm, 
+    check_adaptive_parameters(epsilon, low, high, safety, p_norm,
                               dt_min, dt_max, max_attempts)
 
     Embedded(epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts)
 end
 
-function check_adaptive_parameters(epsilon, low, high, safety, p_norm, 
+function check_adaptive_parameters(epsilon, low, high, safety, p_norm,
                                    dt_min, dt_max, max_attempts)
-                                   
+
     @assert epsilon > 0.0 "epsilon = $epsilon is not positive"
-    @assert 0.0 <= low < 1.0 "low = $low is out of bounds [0, 1)" 
+    @assert 0.0 <= low < 1.0 "low = $low is out of bounds [0, 1)"
     @assert 1.0 < high <= Inf "high = $high is out of bounds (1, Inf]"
     @assert 0.0 < safety < 1.0 "safety = $safety is out of bounds (0, 1)"
     @assert safety*high > low "safety*high = $(safety*high) is less than low = $low"
