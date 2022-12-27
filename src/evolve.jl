@@ -42,8 +42,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F;
     sol = Solution(; precision, dimensions)
     @unpack FE = sol
 
-    sizehint_solution!(sol, t_span, dimensions)
-
+    adaptive isa Fixed ? sizehint_solution!(sol, t_span, dimensions) : nothing
+    
     while true
         update_solution!(sol, y, t)
 

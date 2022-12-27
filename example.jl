@@ -13,9 +13,9 @@ catch err
 end
 # TODO: try to see if I can rescale epsilon?
 
-adaptive = Fixed()             # 200k allocs (dt = 1e-4)
-# adaptive = Doubling()          # 281 allocs (Heun2)
-# adaptive = Embedded()          # 60 allocs (Fehlberg45)
+adaptive = Fixed()             # 25 allocs (dt = 1e-4)
+# adaptive = Doubling()          # 30 allocs (Heun2)
+# adaptive = Embedded()          # 27 allocs (Fehlberg45)
 
 method = RungeKutta4()
 # method = Heun2()
@@ -48,7 +48,7 @@ GC.gc()
 # @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
 # GC.gc()
 #=
-plot_ode(sol, method, Plots.plot)
+@time plot_ode(sol, method, Plots.plot)
 =#
 
 println("\ndone")

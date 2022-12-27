@@ -36,7 +36,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
     @.. y = y_tmp                                       # get iteration
 
-    add_function_evaluations!(iteration, adaptive, FE, method)
+    add_function_evaluations!(FE, iteration, adaptive, method)
     nothing
 end
 
@@ -89,7 +89,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         a += 1
     end
     @.. y = y2                                          # get iteration
-    add_function_evaluations!(iteration, adaptive, FE, method, a)
+    add_function_evaluations!(FE, iteration, adaptive, method, a)
     nothing
 end
 
@@ -152,7 +152,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         a += 1
     end
     @.. y = y1                                          # get iteration
-    add_function_evaluations!(iteration, adaptive, FE, method, a)
+    add_function_evaluations!(FE, iteration, adaptive, method, a)
     nothing
 end
 

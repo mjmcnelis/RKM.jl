@@ -1,13 +1,12 @@
 module RKM
 
-# TODO: play arouns with using or import
-import MuladdMacro: @muladd
-import FastBroadcast: @..
+import Dates: now, Minute, DateTime
+import LinearAlgebra: norm, tril, diag
 import DoubleFloats: Double64
 import StaticArrays: SVector, SMatrix, MVector
-import LinearAlgebra: norm, tril, diag
-import Dates: now, Minute, DateTime
-import UnPack: @unpack
+import MuladdMacro.@muladd
+import FastBroadcast.@..
+import UnPack.@unpack
 import Base.@kwdef
 
 abstract type ODEMethod end

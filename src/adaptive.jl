@@ -12,7 +12,7 @@ struct Doubling <: AdaptiveStepSize
     p_norm::Float64
     dt_min::Float64
     dt_max::Float64
-    max_attempts::Int
+    max_attempts::Int64
 end
 
 function Doubling(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm = 2,
