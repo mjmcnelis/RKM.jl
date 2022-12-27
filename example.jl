@@ -17,7 +17,7 @@ adaptive = Fixed()             # 25 allocs (dt = 1e-4)
 # adaptive = Doubling()          # 30 allocs (Heun2)
 # adaptive = Embedded()          # 27 allocs (Fehlberg45)
 
-method = RungeKutta4(;precision=Double64)
+method = RungeKutta4()
 # method = Heun2()
 # method = Fehlberg45()
 # method = BackwardEuler1()

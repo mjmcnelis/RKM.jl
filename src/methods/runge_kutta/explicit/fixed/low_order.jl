@@ -1,8 +1,8 @@
 # TODO: include stability region table/calculator?
-# TODO: BigFloat(1)/BigFloat(3) works but BigFloat(1/3) doesn't
-#       can I rewrite this more elegantly so BigFloat works
-
-function Euler1(; precision::Type{<:AbstractFloat} = Float64)
+"""
+Euler's first-order method.
+"""
+function Euler1(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0
                1 1]
     butcher = butcher .|> precision
@@ -10,8 +10,12 @@ function Euler1(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Euler_1, butcher)
 end
 
+"""
+Heun's second-order method.
+
+Note: strong stability preserving (SSP)
+"""
 function Heun2(; precision::Type{<:AbstractFloat} = Float64)
-    # SSP
     butcher = [0 0 0
                1 1 0
                1 1//2 1//2]
@@ -20,6 +24,9 @@ function Heun2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Heun_2, butcher)
 end
 
+"""
+Second-order midpoint rule.
+"""
 function Midpoint2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0
                1//2 1//2 0
@@ -29,6 +36,9 @@ function Midpoint2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Midpoint_2, butcher)
 end
 
+"""
+Ralston's second-order method.
+"""
 function Ralston2(; precision::Type{<:AbstractFloat} = Float64)
     # TODO: had load module issues with ChangePrecision
     butcher = [0 0 0
@@ -39,8 +49,16 @@ function Ralston2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Ralston_2, butcher)
 end
 
+"""
+    Generic2(; alpha::Union{Int, Rational},
+               precision::Type{T} = Float64) where T <: AbstractFloat
+
+A generic second-order Runge-Kutta method.
+
+Required parameters: `alpha`
+"""
 function Generic2(; alpha::Union{Int, Rational},
-                    precision::Type{<:AbstractFloat} = Float64)
+                    precision::Type{T} = Float64) where T <: AbstractFloat
     @assert alpha != 0 "choose alpha != 0"
     a = alpha
 
@@ -52,6 +70,9 @@ function Generic2(; alpha::Union{Int, Rational},
     RungeKutta(; name = :Generic_2, butcher)
 end
 
+"""
+Heun's third-order method.
+"""
 function Heun3(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//3 1//3 0 0
@@ -62,6 +83,9 @@ function Heun3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Heun_3, butcher)
 end
 
+"""
+Ralston's third-order method.
+"""
 function Ralston3(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//2 1//2 0 0
@@ -72,6 +96,9 @@ function Ralston3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Ralston_3, butcher)
 end
 
+"""
+Kutta's third-order method.
+"""
 function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//2 1//2 0 0
@@ -82,8 +109,12 @@ function RungeKutta3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Runge_Kutta_3, butcher)
 end
 
+"""
+Shu and Osher's third-order method.
+
+Note: strong stability preserving (SSP)
+"""
 function ShuOsher3(; precision::Type{<:AbstractFloat} = Float64)
-    # SSP
     butcher = [0 0 0 0
                1 1 0 0
                1//2 1//4 1//4 0
@@ -93,6 +124,11 @@ function ShuOsher3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Shu_Osher_3, butcher)
 end
 
+"""
+Spiteri and Ruuth's third-order method.
+
+Note: strong stability preserving (SSP)
+"""
 function SpiteriRuuth3(; precision::Type{<:AbstractFloat} = Float64)
     # SSP
     butcher = [0 0 0 0 0
@@ -105,8 +141,16 @@ function SpiteriRuuth3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Spiteri_Ruuth_3, butcher)
 end
 
+"""
+    Generic3(; alpha::Union{Int, Rational},
+               precision::Type{T} = Float64) where T <: AbstractFloat
+
+A generic third-order Runge-Kutta method.
+
+Required parameters: `alpha`
+"""
 function Generic3(; alpha::Union{Int, Rational},
-                    precision::Type{<:AbstractFloat} = Float64)
+                    precision::Type{T} = Float64) where T <: AbstractFloat
     @assert !(alpha in [0, 2//3, 1]) "choose alpha ∉ [0, 2//3, 1]"
     a = alpha
 
