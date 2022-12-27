@@ -14,20 +14,20 @@ function add_function_evaluations!(FE::MVector{1,Int64}, iteration::Iteration,
 end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Fixed, 
-                                   method::RungeKutta, args...)::Nothing
+                                   method::RungeKutta, args...)
     @.. FE += method.stages
     nothing
 end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Doubling,
-                                   method::RungeKutta, attempts::Int64)::Nothing
+                                   method::RungeKutta, attempts::Int64)
     evals = 1 + attempts*(3*method.stages - 2)
     @.. FE += evals
     nothing
 end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Embedded,
-                                   method::RungeKutta, attempts::Int64)::Nothing
+                                   method::RungeKutta, attempts::Int64)
     # TODO: have not implemented FSAL yet
     evals = 1 + attempts*(method.stages - 1)
     @.. FE += evals

@@ -32,7 +32,7 @@ end
 
 """
     update_solution!(sol::Solution, y::Vector{T},
-                     t::MVector{1,T2})::Nothing where {T <: AbstractFloat, T2 <: AbstractFloat}
+                     t::MVector{1,T2}) where {T <: AbstractFloat, T2 <: AbstractFloat}
 
 Appends the state vector `y` at the current time `t` to the solution `sol`.
 
@@ -41,7 +41,7 @@ Required parameters: `sol`, `y`, `t`
 Note: currently `y` and `t` can be different float types.
 """
 function update_solution!(sol::Solution, y::Vector{T},
-                          t::MVector{1,T2})::Nothing where {T <: AbstractFloat, T2 <: AbstractFloat}
+                          t::MVector{1,T2}) where {T <: AbstractFloat, T2 <: AbstractFloat}
     append!(sol.y, y)
     append!(sol.t, t[1])
     nothing

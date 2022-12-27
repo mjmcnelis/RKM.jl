@@ -39,25 +39,25 @@ function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
 end
 
 """
-    check_time(t::MVector{1,T}, tf::T, timer::TimeLimit)::Bool where T <: AbstractFloat
+    check_time(t::MVector{1,T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
 
 Checks whether to continue running the ODE solver. The solver stops (`false`) if either
 the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `timer`.
 
 Required parameters: `t`, `tf`, `timer`
 """
-function check_time(t::MVector{1,T}, tf::T, timer::TimeLimit)::Bool where T <: AbstractFloat
+function check_time(t::MVector{1,T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
     t[1] < tf && !past_time_limit(timer)
 end
 
 """
-    past_time_limit(timer::TimeLimit)::Bool
+    past_time_limit(timer::TimeLimit)
 
 Checks whether the runtime has exceeded the time limit set by `timer`.
 
 Required parameters: `timer`
 """
-function past_time_limit(timer::TimeLimit)::Bool
+function past_time_limit(timer::TimeLimit)
     @unpack counter, frequency, time_limit = timer
 
     @.. counter += 1
