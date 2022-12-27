@@ -2,12 +2,12 @@
 Stores the solution vector `y(t)` of the ODE system in linear column format.
 
 For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
-is stored as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], t = [0.0, 0.5]`
+is stored as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], t = [0.0, 0.5]`.
 """
 struct Solution{T <: AbstractFloat}
-    """Solution vector (stored as linear column)"""
+    """State vector of solution (stored as linear column)"""
     y::Vector{T}
-    """Time vector"""
+    """Time vector of solution"""
     t::Vector{T}
     """Number of function evaluations"""
     FE::MVector{1,Int64}
@@ -16,9 +16,11 @@ struct Solution{T <: AbstractFloat}
 end
 
 """
+    Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
+
 Outer constructor for `Solution`.
 
-Required parameters: `precision`, `dimensions`.
+Required parameters: `precision`, `dimensions`
 """
 function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
     y = Vector{precision}()
@@ -30,7 +32,7 @@ end
 
 """
     update_solution!(sol::Solution, y::Vector{T},
-                     t::MVector{1,T2}) where {T <: AbstractFloat, T2 <: AbstractFloat}
+                     t::MVector{1,T2})::Nothing where {T <: AbstractFloat, T2 <: AbstractFloat}
 
 Appends the state vector `y` at the current time `t` to the solution `sol`.
 
@@ -39,7 +41,7 @@ Required parameters: `sol`, `y`, `t`
 Note: currently `y` and `t` can be different float types.
 """
 function update_solution!(sol::Solution, y::Vector{T},
-                          t::MVector{1,T2}) where {T <: AbstractFloat, T2 <: AbstractFloat}
+                          t::MVector{1,T2})::Nothing where {T <: AbstractFloat, T2 <: AbstractFloat}
     append!(sol.y, y)
     append!(sol.t, t[1])
     nothing
