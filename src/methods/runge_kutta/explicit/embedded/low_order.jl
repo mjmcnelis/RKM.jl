@@ -1,4 +1,8 @@
+"""
+Fehlberg's first(second)-order method.
 
+https://ntrs.nasa.gov/citations/19690021375
+"""
 function Fehlberg12(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0
                1//2 1//2 0 0
@@ -10,6 +14,9 @@ function Fehlberg12(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Fehlberg_1_2, butcher)
 end
 
+"""
+Heun and Euler's second(first)-order method.
+"""
 function HeunEuler21(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0
                1 1 0
@@ -20,6 +27,11 @@ function HeunEuler21(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Heun_Euler_2_1, butcher)
 end
 
+"""
+Bogacki and Shampine's third(second)-order method.
+
+https://www.sciencedirect.com/science/article/pii/0893965989900797
+"""
 function BogackiShampine32(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0
                1//2 1//2 0 0 0

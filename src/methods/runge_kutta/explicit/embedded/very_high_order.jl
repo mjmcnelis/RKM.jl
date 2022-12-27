@@ -1,6 +1,9 @@
 
-# TODO: get more digits and try BigFloat
+"""
+Feagin's tenth(eighth)-order method. 
+"""
 function Feagin108(; precision::Type{<:AbstractFloat} = Float64)
+    # TODO: get more digits
     if precision == BigFloat || precision == Double64
         @warn "Feagin108 can't use $precision right now (default to Float64)"
         precision = Float64

@@ -1,4 +1,8 @@
+"""
+Fehlberg's seventh(eighth)-order method.
 
+https://ntrs.nasa.gov/citations/19680027281
+"""
 function Fehlberg78(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0
                2//27 2//27 0 0 0 0 0 0 0 0 0 0 0 0
@@ -20,6 +24,11 @@ function Fehlberg78(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Fehlberg_78, butcher)
 end
 
+"""
+Dormand and Prince's eighth(seventh)-order method. 
+
+https://link.springer.com/book/10.1007/978-3-540-78862-1
+"""
 function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
     # TEMP: large fractions in rows 7-15 are not actually exact
     if precision == BigFloat || precision == Double64
