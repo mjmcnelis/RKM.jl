@@ -17,7 +17,7 @@ adaptive = Fixed()             # 25 allocs (dt = 1e-4)
 # adaptive = Doubling()          # 30 allocs (Heun2)
 # adaptive = Embedded()          # 27 allocs (Fehlberg45)
 
-method = RungeKutta4()
+method = RungeKutta4(;precision=Double64)
 # method = Heun2()
 # method = Fehlberg45()
 # method = BackwardEuler1()
@@ -42,7 +42,7 @@ GC.gc()
 
 # bytes = sizeof(sol.y) + sizeof(sol.t)
 # @show Base.format_bytes(bytes)
-# @time y, t = reshape_solution(sol)
+# @time y, t = get_solution(sol)
 
 # BenchmarkTools.DEFAULT_PARAMETERS.seconds = 60.0
 # @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)

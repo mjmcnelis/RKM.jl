@@ -36,6 +36,7 @@ include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 # Runge-Kutta updates
 include("updates/evaluations.jl")
+include("updates/jacobian.jl")
 include("updates/runge_kutta/explicit/update.jl")
 include("updates/runge_kutta/implicit/update.jl")
 
