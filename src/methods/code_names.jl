@@ -10,3 +10,7 @@ function make_code_name(name)
     end
     code_name
 end
+
+adaptive_code_label(::AdaptiveStepSize) = ""
+adaptive_code_label(::Doubling) = "D"
+adaptive_code_label(::FiniteDiff) = "M"

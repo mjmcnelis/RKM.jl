@@ -29,7 +29,12 @@ end
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Embedded,
                                    method::RungeKutta, attempts::Int64)
     # TODO: have not implemented FSAL yet
-    evals = 1 + attempts*(method.stages - 1)
+    @unpack stages, fsal = method
+    fsal_stage = fsal isa FSAL ? 1 : 0
+   
+    # note: fsal does not count for rejected attempts
+    evals = stages - fsal_stage + (attempts - 1)*(stages - 1)
+    # evals = 1 + attempts*(method.stages - 1) 
     @.. FE += evals
     nothing
 end

@@ -23,3 +23,7 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function)
     #      xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
     nothing
 end
+
+get_linestyle(::AdaptiveStepSize) = :solid 
+get_linestyle(::Doubling) = :dot
+get_linestyle(::Embedded) = :dash

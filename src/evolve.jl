@@ -1,4 +1,15 @@
+# TODO update docstring
+"""
+evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; jacobian!::J = jacobian_error,
+           parameters::P) where {T <: AbstractFloat, F <: Function,
+                                 J <: Function, P <: Parameters}
 
+The ODE solver loop. 
+
+Required parameters: `y0`, `dy_dt!`, `parameters`
+
+Note: `jacobian!` argument is temporary
+"""
 function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; jacobian!::J = jacobian_error,
                     parameters::P) where {T <: AbstractFloat, F <: Function,
                                           J <: Function, P <: Parameters}

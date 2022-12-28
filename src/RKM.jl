@@ -2,12 +2,15 @@ module RKM
 
 import Dates: now, Minute, DateTime
 import LinearAlgebra: norm, tril, diag
+import Statistics: mean
 import DoubleFloats: Double64
 import StaticArrays: SVector, SMatrix, MVector
-import MuladdMacro.@muladd
-import FastBroadcast.@..
-import UnPack.@unpack
-import Base.@kwdef
+import DataStructures: OrderedDict
+import MuladdMacro: @muladd
+import FastBroadcast: @..
+import UnPack: @unpack
+import Setfield: @set
+import Base: @kwdef
 
 abstract type ODEMethod end
 
@@ -42,6 +45,7 @@ include("updates/runge_kutta/implicit/update.jl")
 
 include("parameters.jl")
 include("evolve.jl")
+include("efficiency.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff
@@ -83,6 +87,8 @@ export Parameters
 export TimeSpan, TimeLimit
 # ODE solver
 export evolve_ode
+# Efficiency 
+export efficiency_curve
 # Utilities
 export debug_table, debug_iteration, RKM_root
 # Plots
