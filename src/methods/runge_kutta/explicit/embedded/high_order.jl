@@ -1,4 +1,8 @@
+"""
+Fehlberg's seventh(eighth)-order method.
 
+https://ntrs.nasa.gov/citations/19680027281
+"""
 function Fehlberg78(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0
                2//27 2//27 0 0 0 0 0 0 0 0 0 0 0 0
@@ -15,15 +19,20 @@ function Fehlberg78(; precision::Type{<:AbstractFloat} = Float64)
                1 -1777//4100 0 0 -341//164 4496//1025 -289//82 2193//4100 51//82 33//164 12//41 0 1 0
                1 41//840 0 0 0 0 34//105 9//35 9//35 9//280 9//280 41//840 0 0
                1 0 0 0 0 0 34//105 9//35 9//35 9//280 9//280 0 41//840 41//840]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Fehlberg_78, butcher)
 end
 
+"""
+Dormand and Prince's eighth(seventh)-order method. 
+
+https://link.springer.com/book/10.1007/978-3-540-78862-1
+"""
 function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
     # TEMP: large fractions in rows 7-15 are not actually exact
-    if precision == BigFloat
-        @warn "DormandPrince87 can't use BigFloat right now (default to Float64)"
+    if precision == BigFloat || precision == Double64
+        @warn "DormandPrince87 can't use $precision right now (default to Float64)"
         precision = Float64
     end
 
@@ -42,7 +51,7 @@ function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
                1 403863854//491063109 0 0 -5068492393//434740067 -411421997//543043805 652783627//914296604 11173962825//925320556 -13158990841//6184727034 3936647629//1978049680 -160528059//685178525 248638103//1413531060 0 0
                1 13451932//455176623 0 0 0 0 -808719846//976000145 1757004468//5645159321 656045339//265891186 -3867574721//1518517206 465885868//322736535  53011238//667516719 2//45 0
                1 14005451//335480064 0 0 0 0 -59238493//1068277825 181606767//758867731 561292985//797845732 -1041891430//1371343529 760417239//1151165299 118820643//751138087 -528747749//2220607170 1//4]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Dormand_Prince_87, butcher)
 end

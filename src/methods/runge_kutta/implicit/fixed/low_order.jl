@@ -2,7 +2,7 @@
 function BackwardEuler1(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [1 1
                1 1]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Backward_Euler_1, butcher)
 end
@@ -19,7 +19,7 @@ function QinZhang2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [1//4 1//4 0
                3//4 1//2 1//4
                1 1//2 1//2]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Qin_Zhang_2, butcher)
 end
@@ -28,7 +28,7 @@ function KraaijevangerSpijker2(; precision::Type{<:AbstractFloat} = Float64)
     butcher = [1//2 1//2 0
                3//2 -1//2 2
                1 -1//2 3//2]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Kraaijevanger_Spijker_2, butcher)
 end
@@ -37,7 +37,7 @@ function PareschiRusso2(; precision::Type{<:AbstractFloat} = Float64)
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s             # gamma
-    
+
     butcher = [g g 0
                1-g 1-2g g
                1 1//2 1//2]
@@ -46,13 +46,13 @@ function PareschiRusso2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Pareschi_Russo_2, butcher)
 end
 
-# TODO: maybe use generic formula from 
+# TODO: maybe use generic formula from
 #       https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 function PareschiRusso3(; precision::Type{<:AbstractFloat} = Float64)
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s             # gamma, other options were 1/4 (Qin-Zhang), 1+1/sqrt(2)
-    
+
     butcher = [g g 0 0
                1-g 1-2g g 0
                1//2 1//2-g 0 g

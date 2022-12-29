@@ -1,15 +1,15 @@
 
-# TODO: break up properties in directory 
+# TODO: break up properties in directory
 
-abstract type Iteration end 
+abstract type Iteration end
 abstract type Implicit <: Iteration end
 
 struct Explicit <: Iteration end
 struct DiagonalImplicit <: Implicit end
 struct FullImplicit <: Implicit end
 
-abstract type FirstSameAsLast end 
-struct FSAL <: FirstSameAsLast end 
+abstract type FirstSameAsLast end
+struct FSAL <: FirstSameAsLast end
 struct NotFSAL <: FirstSameAsLast end
 
 precision_prop(butcher::Matrix{<:AbstractFloat}) = typeof(butcher[1,1])
@@ -20,15 +20,15 @@ function iteration_prop(butcher::Matrix{<:AbstractFloat})
     ncol = size(butcher, 2)
     A = butcher[1:(ncol-1), 2:end]
 
-    # check if submatrix A_{ij} is lower triangular 
+    # check if submatrix A_{ij} is lower triangular
     if tril(A) == A
         # check if diagonal elements of A are all zero
         if all(x -> x == 0, diag(A))
-            iteration = Explicit() 
+            iteration = Explicit()
         else
             iteration = DiagonalImplicit()
         end
-    else                                
+    else
         iteration = FullImplicit()
     end
     iteration
@@ -42,7 +42,7 @@ function fsal_prop(butcher::Matrix{<:AbstractFloat})
 
     # check if last, second-last rows are identical
     if B_square[end, :] == B_square[end-1, :]
-        fsal = FSAL() 
+        fsal = FSAL()
     else
         fsal = NotFSAL()
     end

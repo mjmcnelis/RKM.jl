@@ -35,6 +35,7 @@ end
 adaptive   = Fixed()
 method     = Euler1()
 t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)     # website used dt = 0.05
+timer      = TimeLimit()
 parameters = Parameters(; adaptive, method, t_span)
 
 @unpack t0, dt0 = t_span
@@ -43,6 +44,8 @@ y0 = gauss.(x)
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)
 
+y = get_solution(sol)[1]
+
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),
            ylabel = "u", yguidefontsize = 14, ytickfontsize = 12,
@@ -50,8 +53,8 @@ plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            legend = :outertopright, legendfontsize = 12, dpi = 200)
 for i = 1:3
     t = t0 + N*i*dt0
-    y = sol.y[1 + N*i]
-    plot!(x, y, color = "indianred", linewidth = 2, label = "t = $t")
+    yi = y[1 + N*i, :]
+    plot!(x, yi, color = "indianred", linewidth = 2, label = "t = $t")
 end
 
 plot!(x, y0, label = "t = 0 (exact)", color = "black", linewidth = 1, line = :dash)

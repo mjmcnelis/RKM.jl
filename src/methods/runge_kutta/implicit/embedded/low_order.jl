@@ -1,10 +1,10 @@
 
 function CrankNicolson21(; precision::Type{<:AbstractFloat} = Float64)
-    butcher = [0 0 0 
+    butcher = [0 0 0
                1 1//2 1//2
                1 1//2 1//2
                1 1 0]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Crank_Nicolson_2_1, butcher)
 end
@@ -14,7 +14,7 @@ function LobattoIIIB21(; precision::Type{<:AbstractFloat} = Float64)
                1//2 1//2 0
                1 1//2 1//2
                1 1 0]
-    butcher = butcher .|> precision 
+    butcher = butcher .|> precision
 
     RungeKutta(; name = :Lobatto_IIIB_2_1, butcher)
 end

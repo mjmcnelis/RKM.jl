@@ -1,68 +1,85 @@
+"""
+Stores the solution vector `y(t)` of the ODE system in linear column format.
 
-abstract type DataFormat end 
-struct TimeSlice <: DataFormat end      # better for large systems
-struct SpaceSlice <: DataFormat end     # better for small systems
-
-# y(0) = [1, 2]
-# y(1) = [3, 4]
-# y(2) = [5, 6]
-# push! (Time)
-# sol.y = [[1,2], [3,4], [5,6]]
-# append! (Space) 
-# sol.y = [[1,3,5], [2,4,6]]
-
-struct Solution{T1 <: Vector{<:Vector{<:AbstractFloat}}, 
-                T2 <: Vector{<:AbstractFloat},
-                T3 <: DataFormat}
-    y::T1 
-    t::T2
-    data_format::T3
-    # TODO: separate from y(t) solution
+For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
+is stored as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], t = [0.0, 0.5]`.
+"""
+struct Solution{T <: AbstractFloat}
+    """State vector of solution (stored as linear column)"""
+    y::Vector{T}
+    """Time vector of solution"""
+    t::Vector{T}
+    """Number of function evaluations"""
     FE::MVector{1,Int64}
+    """Number of dynamical variables"""
+    dimensions::Int64
 end
 
-function Solution(; precision::Type{<:AbstractFloat}, dimensions::Int64,
-                    data_format::DataFormat)
+"""
+    Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
 
-    y = data_format isa SpaceSlice ? Vector{Vector{precision}}([[] for i = 1:dimensions]) :
-                                     Vector{Vector{precision}}()
+Outer constructor for `Solution`.
+
+Required parameters: `precision`, `dimensions`
+"""
+function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
+    y = Vector{precision}()
     t = Vector{precision}()
-
     FE = MVector{1,Int64}(0)
 
-    Solution(y, t, data_format, FE)
+    Solution(y, t, FE, dimensions)
 end
 
-# update_state!(::TimeSlice, sol, y) = push!(sol.y, copy(y))
-update_state!(::TimeSlice, sol, y) = push!(sol.y, y)
-function update_state!(::SpaceSlice, sol, y)
-    for i in eachindex(y) 
-        append!(sol.y[i], y[i])
-    end
-end
+"""
+    update_solution!(sol::Solution, y::MVector{D,T},
+                     t::MVector{1,T2}) where {D, T <: AbstractFloat, 
+                                              T2 <: AbstractFloat}
 
-function update_solution!(sol, y::MVector{D,T}, 
-                          t::MVector{1,T2}) where {D, T <: AbstractFloat,
-                                                      T2 <: AbstractFloat}
-    update_state!(sol.data_format, sol, y)
+Appends the state vector `y` at the current time `t` to the solution `sol`.
+
+Required parameters: `sol`, `y`, `t`
+
+Note: currently `y` and `t` can be different float types.
+"""
+function update_solution!(sol::Solution, y::MVector{D,T},
+                          t::MVector{1,T2}) where {D, T <: AbstractFloat, 
+                                                   T2 <: AbstractFloat}
+    append!(sol.y, y)
     append!(sol.t, t[1])
-    nothing 
+    nothing
 end
 
-sizehint_state!(::TimeSlice, sol, N) = sizehint!(sol.y, N + 2)
-function sizehint_state!(::SpaceSlice, sol, N)
-    for i in eachindex(sol.y)
-        # TODO: why is steps + 1 not sufficient?
-        sizehint!(sol.y[i], N + 2)
-    end
-end
+"""
+    sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
 
-# TODO: whether or not I call this depends if save at regular intervals
-function sizehint_solution!(sol, t_span)
+Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
+
+Required parameters: `sol`, `t_span`, `dimensions`
+"""
+function sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
+    # TODO: whether or not I call this depends if save at regular intervals
     @unpack t0, tf, dt0 = t_span
     steps = round((tf - t0)/dt0) |> Int64
-
-    sizehint_state!(sol.data_format, sol, steps)
+    # TODO: why is steps+1 not sufficient?
+    sizehint!(sol.y, dimensions*(steps + 2))
     sizehint!(sol.t, steps + 2)
     nothing
+end
+
+"""
+    get_solution(sol::Solution)
+
+Returns the solution tuple `(y,t)` from `sol`. The solution vector `y`, which has a length
+`D*N`, is reshaped into an `N x D` matrix (`N` = time steps, `D` = dimensions).
+
+For example, the solution `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
+is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`.
+
+The solution is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
+"""
+function get_solution(sol::Solution)
+    y, t = sol.y, sol.t
+    # TODO: replace length(t) if use deleteat for PDEs
+    y = reshape(y, sol.dimensions, length(t))'
+    y, t
 end
