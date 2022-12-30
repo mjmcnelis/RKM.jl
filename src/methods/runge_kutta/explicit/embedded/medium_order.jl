@@ -3,7 +3,7 @@ Fehlberg's fourth(fifth)-order method.
 
 https://ntrs.nasa.gov/citations/19690021375
 """
-function Fehlberg45(; precision::Type{<:AbstractFloat} = Float64)
+function Fehlberg45(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0
                1//4 1//4 0 0 0 0 0
                3//8 3//32 9//32 0 0 0 0
@@ -22,7 +22,7 @@ Cash and Karp's fifth(fourth)-order method.
 
 http://www.elegio.it/mc2/rk/doc/p201-cash-karp.pdf
 """
-function CashKarp54(; precision::Type{<:AbstractFloat} = Float64)
+function CashKarp54(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0
                1//5 1//5 0 0 0 0 0
                3//10 3//40 9//40 0 0 0 0
@@ -41,7 +41,7 @@ Dormand and Prince's fifth(fourth)-order method.
 
 https://www.sciencedirect.com/science/article/pii/0771050X80900133?via%3Dihub
 """
-function DormandPrince54(; precision::Type{<:AbstractFloat} = Float64)
+function DormandPrince54(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0 0
                1//5 1//5 0 0 0 0 0 0
                3//10 3//40 9//40 0 0 0 0 0
@@ -59,7 +59,7 @@ end
 """
 Bogacki and Shampine's fifth(fourth)-order method.
 """
-function BogackiShampine54(; precision::Type{<:AbstractFloat} = Float64)
+function BogackiShampine54(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0 0
                1//6 1//6 0 0 0 0 0 0
                2//9 2//27 4//27 0 0 0 0 0
@@ -79,7 +79,7 @@ Tsitouras' fifth(fourth)-order method.
 
 https://www.sciencedirect.com/science/article/pii/S0898122111004706
 """
-function Tsitouras54(; precision::Type{<:AbstractFloat} = Float64)
+function Tsitouras54(; precision::Type{T} = Float64) where T <: AbstractFloat
     # TODO: not sure why other tilde pair (commented row) sums to (0.97, paper)
     #       or (0, OrdinaryDiffEq) instead of 1
     butcher = [0 0 0 0 0 0 0 0
@@ -102,7 +102,7 @@ Verner's fifth(sixth)-order method (1978).
 
 https://www.jstor.org/stable/2156853
 """
-function Verner56(; precision::Type{<:AbstractFloat} = Float64)
+function Verner56(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0 0 0
                1//18 1//18 0 0 0 0 0 0 0
                1//6 -1//12 1//4 0 0 0 0 0 0
@@ -123,7 +123,7 @@ Verner's sixth(fifth)-order method.
 
 https://link.springer.com/book/10.1007/978-3-540-78862-1
 """
-function Verner65(; precision::Type{<:AbstractFloat} = Float64)
+function Verner65(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0 0 0
                1//6 1//6 0 0 0 0 0 0 0
                4//15 4//75 16//75 0 0 0 0 0 0

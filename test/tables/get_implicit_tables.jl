@@ -2,7 +2,7 @@
 
 # TODO: make docstring
 function get_runge_kutta_diagonal_implicit_tables(; precision::Type{<:AbstractFloat})
-    (
+    [
         # fixed
         BackwardEuler1(; precision),
         ImplicitMidpoint2(; precision),
@@ -20,12 +20,12 @@ function get_runge_kutta_diagonal_implicit_tables(; precision::Type{<:AbstractFl
         LobattoIIIB21(; precision),
 
         LobattoIIICS42(; precision),
-    )
+    ]
 end
 
 # TODO: make docstring
 function get_runge_kutta_full_implicit_tables(; precision::Type{<:AbstractFloat})
-    (
+    [
         # fixed
         RadauIA3(; precision),
         RadauIIA3(; precision),
@@ -41,5 +41,5 @@ function get_runge_kutta_full_implicit_tables(; precision::Type{<:AbstractFloat}
         LobattoIIID42(; precision),
         RaduaIIA52(; precision),
         GaussLegendre64(; precision),
-    )
+    ]
 end

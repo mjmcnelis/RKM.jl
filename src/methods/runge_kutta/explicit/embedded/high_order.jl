@@ -3,7 +3,7 @@ Fehlberg's seventh(eighth)-order method.
 
 https://ntrs.nasa.gov/citations/19680027281
 """
-function Fehlberg78(; precision::Type{<:AbstractFloat} = Float64)
+function Fehlberg78(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0
                2//27 2//27 0 0 0 0 0 0 0 0 0 0 0 0
                1//9 1//36 1//12 0 0 0 0 0 0 0 0 0 0 0
@@ -29,13 +29,8 @@ Dormand and Prince's eighth(seventh)-order method.
 
 https://link.springer.com/book/10.1007/978-3-540-78862-1
 """
-function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
-    # TEMP: large fractions in rows 7-15 are not actually exact
-    # if precision == BigFloat || precision == Double64
-    #     @warn "DormandPrince87 can't use $precision right now (default to Float64)"
-    #     precision = Float64
-    # end
-
+function DormandPrince87(; precision::Type{T} = Float64) where T <: AbstractFloat
+    # note: large fractions in rows 7-15 are only Float64 precise
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0
                1//18 1//18 0 0 0 0 0 0 0 0 0 0 0 0
                1//12 1//48 1//16 0 0 0 0 0 0 0 0 0 0 0

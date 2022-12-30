@@ -1,8 +1,9 @@
 # TODO update docstring
 """
-evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; jacobian!::J = jacobian_error,
-           parameters::P) where {T <: AbstractFloat, F <: Function,
-                                 J <: Function, P <: Parameters}
+    evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacobian_error,
+               parameters::Parameters
+               precision::Type{T2} = Float64) where {T <: AbstractFloat,
+                                                     T2 <: AbstractFloat}
 
 The ODE solver loop. 
 
@@ -10,18 +11,15 @@ Required parameters: `y0`, `dy_dt!`, `parameters`
 
 Note: `jacobian!` argument is temporary
 """
-function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; jacobian!::J = jacobian_error,
-                    parameters::P, precision::Type{T2}) where {T <: AbstractFloat, 
-                                                               T2 <: AbstractFloat,
-                                                               F <: Function, 
-                                                               J <: Function,
-                                                               P <: Parameters}
+function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacobian_error,
+                    parameters::Parameters,  
+                    precision::Type{T2} = Float64) where {T <: AbstractFloat,
+                                                          T2 <: AbstractFloat}
+
     @unpack adaptive, method, t_span, timer = parameters
     @unpack t0, tf, dt0 = t_span
 
-    # reconstruct method with specified precision (TODO: wrap in function)
-    name = replace(String(method.name), "_" => "")
-    method = getfield(RKM, Symbol(name))(; precision)
+    method = reconstruct_method(method, precision)
     @unpack stages, iteration = method
 
     dimensions = size(y0, 1)
@@ -60,7 +58,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::F; jacobian!::J = jacobian_
         evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!,
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
-        check_time(t, tf, timer) || break
+        continue_solver(t, tf, timer) || break
         @.. t += dt[1]
     end
     sol

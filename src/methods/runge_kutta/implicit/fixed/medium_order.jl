@@ -1,6 +1,6 @@
 
 # TODO: see roots https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
-function Norsett4(; precision::Type{<:AbstractFloat} = Float64)
+function Norsett4(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(3))       # sqrt(3)
     c = cos(pi/BigFloat(18))    # cos(pi/18)
@@ -16,7 +16,7 @@ function Norsett4(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Norsett_4, butcher)
 end
 
-function RaduaIA5(; precision::Type{<:AbstractFloat} = Float64)
+function RaduaIA5(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(6))       # sqrt(6)
 
