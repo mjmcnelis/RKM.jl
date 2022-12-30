@@ -5,13 +5,7 @@ import DoubleFloats: Double64
 import StaticArrays: SA
 using Plots
 plotly()
-try
-    dy_dt!
-    jacobian!
-catch err
-    isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
-end
-# TODO: try to see if I can rescale epsilon?
+!(@isdefined dy_dt!) ? include("$RKM_root/equations.jl") : nothing 
 
 adaptive = Fixed()             # 25 allocs (dt = 1e-4)
 # adaptive = Doubling()          # 30 allocs (Heun2)
@@ -38,7 +32,7 @@ for i = 1:N
 end
 
 GC.gc()
-@time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
+@time sol = evolve_ode(y0, dy_dt!; parameters)
 
 # bytes = sizeof(sol.y) + sizeof(sol.t)
 # @show Base.format_bytes(bytes)

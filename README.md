@@ -5,20 +5,22 @@ using RKM
 using Plots; plotly() 
 
 # differential equation
-const a = 0.5
-function dy_dt!(f, t, y)
-    f[1] = (y[1] + a) * (1.0 - a - y[1])
-    nothing
+const C = 0.5
+if !(@isdefined dy_dt!)
+    function dy_dt!(f, t, y)
+        f[1] = (y[1] + C) * (1.0 - C - y[1])
+        nothing
+    end
 end
 
 # initial conditions
 t0 = -10.0
-y0 = exp(t0) / (1.0 + exp(t0)) - a
+y0 = exp(t0)/(1.0 + exp(t0)) - C
 
 # parameters and solver options
 adaptive = Fixed()
 method = RungeKutta4()
-t_span = TimeSpan(; t0, tf = 10.0, dt0 = 1e-4) # time interval
+t_span = TimeSpan(; t0, tf = 10.0, dt0 = 1e-4)
 parameters = Parameters(; adaptive, method, t_span)
 
 # evolve ODE

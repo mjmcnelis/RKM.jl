@@ -4,25 +4,14 @@ import DoubleFloats: Double64
 import DataStructures: OrderedDict
 import Plots: plot, plot!, plotly
 plotly()
-try
-    dy_dt!
-    y_exact
-catch err
-    isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
-end
-            
+!(@isdefined dy_dt!) ? include("$RKM_root/equations.jl") : nothing 
+ 
+precision = Double64 
 t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 
-# precision = Double64 
-precision = BigFloat 
-
+const C = 0.5 
 t0 = t_span.t0 |> precision
-N = 1
-y0 = precision[]
-for i = 1:N
-    local a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
-    push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
-end
+y0 = exp(t0)/(1.0 + exp(t0)) - C |> precision
 
 methods = OrderedDict(
     Doubling() => [Heun2(; precision), Midpoint2(; precision), Ralston2(; precision), 
