@@ -1,6 +1,6 @@
 
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T},
-                     t::Float64, dt::Float64, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T},
+                     t::T, dt::T, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T},
                      f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
 
     @unpack c, A_T, b, stages = method
@@ -27,7 +27,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::Fixed, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64},
+             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T},
              dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T},
              args...) where {T <: AbstractFloat, F}
     dy_dt!(f_tmp, t[1], y)                              # evalute first state at (t,y)
@@ -42,7 +42,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::Doubling, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
+             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T},
              args...) where {T <: AbstractFloat, F}
@@ -96,7 +96,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::Embedded, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
+             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T},
              args...) where {T <: AbstractFloat, F}
@@ -112,6 +112,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
 
     dt[1] = dt[2]                                       # initialize time step
+
+    # TODO: float type can change from Float64 to Double64
     rescale = 1.0
 
     a = 1

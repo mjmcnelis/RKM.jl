@@ -46,7 +46,8 @@ the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `
 
 Required parameters: `t`, `tf`, `timer`
 """
-function check_time(t::MVector{1,T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
+function check_time(t::MVector{1,T}, tf::T2, timer::TimeLimit) where {T <: AbstractFloat,
+                                                                      T2 <: AbstractFloat}
     t[1] < tf && !past_time_limit(timer)
 end
 

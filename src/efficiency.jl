@@ -1,8 +1,8 @@
 
 function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Function; 
-                          methods::OrderedDict{<:AdaptiveStepSize, <:Vector}, 
-                          epsilon_vect::Vector{Float64}, t_span::TimeSpan,
-                          plot::Function, plot!::Function) where {T <: AbstractFloat}
+             precision::Type{T2}, methods::OrderedDict{<:AdaptiveStepSize, <:Vector}, 
+             epsilon_vect::Vector{Float64}, t_span::TimeSpan, plot::Function, 
+             plot!::Function) where {T <: AbstractFloat, T2 <: AbstractFloat}
     plt = plot()
     for key in keys(methods)
             adaptive = key
@@ -12,10 +12,11 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
 
             # TODO: sort out how to do efficiency for fixed time step
             for epsilon in epsilon_vect
+                # @show epsilon
                 adaptive = @set adaptive.epsilon = epsilon 
                 parameters = Parameters(; adaptive, method, t_span)
 
-                sol = evolve_ode(y0, dy_dt!; parameters)
+                sol = evolve_ode(y0, dy_dt!; parameters, precision)
                 y, t = get_solution(sol)
 
                 y_ex = zeros(Double64, size(y)...)
@@ -38,7 +39,9 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
                   legend = :outertopright, legendtitlefontsize = 12, legendfontsize = 12,
                   ylabel = "Mean norm error", yguidefontsize = 14, ytickfontsize = 12,
                   xlabel = "Function evaluations", xguidefontsize = 14, xtickfontsize = 12,
-                  ylims = (1e-16, 1e0), xlims = (1e2, 1e5), xaxis = :log, yaxis = :log)
+                #   ylims = (1e-30, 1e0), xlims = (1e2, 1e7), 
+                  ylims = (1e-16, 1e0), xlims = (1e2, 1e5), 
+                  xaxis = :log, yaxis = :log)
         end
     end
     plt

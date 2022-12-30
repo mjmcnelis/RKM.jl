@@ -14,29 +14,29 @@ t0 = t_span.t0 |> precision
 y0 = exp(t0)/(1.0 + exp(t0)) - C |> precision
 
 methods = OrderedDict(
-    Doubling() => [Heun2(; precision), Midpoint2(; precision), Ralston2(; precision), 
-                   Heun3(; precision), Ralston3(; precision), RungeKutta3(; precision),
-                   ShuOsher3(; precision), SpiteriRuuth3(; precision), 
-                   RungeKutta4(; precision), ThreeEightsRule4(; precision), 
-                   Ralston4(; precision), Ketcheson4(; precision), 
-                   Butcher5(; precision), 
-                   Butcher6(; precision),
-                   Curtis8(; precision), Shanks8(; precision), ShanksPseudo8(; precision),
+    Doubling() => [Heun2(), Midpoint2(), Ralston2(), 
+                   Heun3(), Ralston3(), RungeKutta3(), ShuOsher3(), SpiteriRuuth3(), 
+                   RungeKutta4(), ThreeEightsRule4(), Ralston4(), Ketcheson4(), 
+                   Butcher5(), 
+                   Butcher6(),
+                   Curtis8(), Shanks8(), ShanksPseudo8(),
                 ],      
-    Embedded() => [HeunEuler21(; precision),
-                   BogackiShampine32(; precision), 
-                   Fehlberg45(; precision),
-                   CashKarp54(; precision), DormandPrince54(; precision), 
-                   BogackiShampine54(; precision), Tsitouras54(; precision), 
-                   Verner56(; precision), 
-                   Verner65(; precision), 
-                   DormandPrince87(; precision),
-                   Feagin108(; precision),
+    Embedded() => [
+                   HeunEuler21(),
+                   BogackiShampine32(), 
+                   Fehlberg45(),
+                   CashKarp54(), DormandPrince54(), BogackiShampine54(), Tsitouras54(), Verner56(),
+                   Verner65(), 
+                   DormandPrince87(),
+                   Feagin108(),
                 ],
 )
 epsilon_vect = 10.0.^LinRange(-4, -17, 14)
+# for Verner65
+# epsilon_vect = 10.0.^LinRange(-4, -36, 33)
 
-@time plt = efficiency_curve(y0, y_exact, dy_dt!; methods, epsilon_vect, t_span, plot, plot!)
+@time plt = efficiency_curve(y0, y_exact, dy_dt!; precision, methods, 
+                             epsilon_vect, t_span, plot, plot!)
 
 display(plt)
 
