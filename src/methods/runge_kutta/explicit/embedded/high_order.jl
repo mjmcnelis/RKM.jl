@@ -31,10 +31,10 @@ https://link.springer.com/book/10.1007/978-3-540-78862-1
 """
 function DormandPrince87(; precision::Type{<:AbstractFloat} = Float64)
     # TEMP: large fractions in rows 7-15 are not actually exact
-    if precision == BigFloat || precision == Double64
-        @warn "DormandPrince87 can't use $precision right now (default to Float64)"
-        precision = Float64
-    end
+    # if precision == BigFloat || precision == Double64
+    #     @warn "DormandPrince87 can't use $precision right now (default to Float64)"
+    #     precision = Float64
+    # end
 
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0 0 0
                1//18 1//18 0 0 0 0 0 0 0 0 0 0 0 0

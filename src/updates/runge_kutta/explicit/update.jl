@@ -51,6 +51,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 
     order = method.order[1]                             # order of scheme
     high ^= order / (1.0 + order)                       # rescale high based on order
+    epsilon ^= order / (1.0 + order)
 
     dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
 
@@ -106,7 +107,6 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     order_min = minimum(method.order)
 
     high    ^= (order_min / order_max)                  # rescale high, epsilon parameters
-    # this caused issues (look into this)
     epsilon ^= (order_min / order_max)
 
     dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
@@ -148,7 +148,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         e_norm > tol || break                           # compare error to tolerance
-        a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
+        a <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
         a += 1
     end
     @.. y = y1                                          # get iteration
