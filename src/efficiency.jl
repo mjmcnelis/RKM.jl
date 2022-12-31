@@ -34,13 +34,14 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
             code_name = method.code_name*adaptive_code_label(adaptive)
             linestyle = get_linestyle(adaptive)
 
+            # TODO: separate legends for SDRK, ERK
             plot!(FE, mean_err; 
                   size = (900, 600), linewidth = 2, linestyle, label = code_name,
                   legend = :outertopright, legendtitlefontsize = 12, legendfontsize = 12,
                   ylabel = "Mean norm error", yguidefontsize = 14, ytickfontsize = 12,
                   xlabel = "Function evaluations", xguidefontsize = 14, xtickfontsize = 12,
                 #   ylims = (1e-30, 1e0), xlims = (1e2, 1e7), 
-                  ylims = (1e-16, 1e0), xlims = (1e2, 1e5), 
+                  ylims = (1e-15, 1e0), xlims = (1e2, 1e5), 
                   xaxis = :log, yaxis = :log)
         end
     end

@@ -14,24 +14,25 @@ t0 = t_span.t0 |> precision
 y0 = exp(t0)/(1.0 + exp(t0)) - C |> precision
 
 methods = OrderedDict(
-    Doubling() => [Heun2(), Midpoint2(), Ralston2(), 
+    Doubling() => [Euler1(), 
+                   Heun2(), Midpoint2(), Ralston2(), 
                    Heun3(), Ralston3(), RungeKutta3(), ShuOsher3(), SpiteriRuuth3(), 
                    RungeKutta4(), ThreeEightsRule4(), Ralston4(), Ketcheson4(), 
                    Butcher5(), 
                    Butcher6(),
                    Curtis8(), Shanks8(), ShanksPseudo8(),
                 ],      
-    Embedded() => [
-                   HeunEuler21(),
+    Embedded() => [HeunEuler21(),
                    BogackiShampine32(), 
                    Fehlberg45(),
                    CashKarp54(), DormandPrince54(), BogackiShampine54(), Tsitouras54(), Verner56(),
                    Verner65(), 
+                   Fehlberg78(), 
                    DormandPrince87(),
                    Feagin108(),
                 ],
 )
-epsilon_vect = 10.0.^LinRange(-4, -17, 14)
+epsilon_vect = 10.0.^LinRange(-4, -20, 17)
 # for Verner65
 # epsilon_vect = 10.0.^LinRange(-4, -36, 33)
 

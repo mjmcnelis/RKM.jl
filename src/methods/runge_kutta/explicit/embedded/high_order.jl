@@ -21,7 +21,7 @@ function Fehlberg78(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 0 0 0 0 0 34//105 9//35 9//35 9//280 9//280 0 41//840 41//840]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Fehlberg_78, butcher)
+    RungeKutta(; name = :Fehlberg_7_8, butcher)
 end
 
 """
@@ -48,5 +48,5 @@ function DormandPrince87(; precision::Type{T} = Float64) where T <: AbstractFloa
                1 14005451//335480064 0 0 0 0 -59238493//1068277825 181606767//758867731 561292985//797845732 -1041891430//1371343529 760417239//1151165299 118820643//751138087 -528747749//2220607170 1//4]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Dormand_Prince_87, butcher)
+    RungeKutta(; name = :Dormand_Prince_8_7, butcher)
 end
