@@ -7,10 +7,10 @@ plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/equations.jl") : nothing 
  
 precision = Double64 
-t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
+t_range = TimeRange(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 
 const C = 0.5 
-t0 = t_span.t0 |> precision
+t0 = t_range.t0 |> precision
 y0 = exp(t0)/(1.0 + exp(t0)) - C |> precision
 
 methods = OrderedDict(
@@ -37,7 +37,7 @@ epsilon_vect = 10.0.^LinRange(-4, -20, 17)
 # epsilon_vect = 10.0.^LinRange(-4, -36, 33)
 
 @time plt = efficiency_curve(y0, y_exact, dy_dt!; precision, methods, 
-                             epsilon_vect, t_span, plot, plot!)
+                             epsilon_vect, t_range, plot, plot!)
 
 display(plt)
 

@@ -16,8 +16,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T2 <: AbstractFloat}
 
-    @unpack adaptive, method, t_span, timer = parameters
-    @unpack t0, tf, dt0 = t_span
+    @unpack adaptive, method, t_range, timer = parameters
+    @unpack t0, tf, dt0 = t_range
 
     method = reconstruct_method(method, precision)
     @unpack stages, iteration = method
@@ -49,7 +49,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     @unpack FE = sol
 
     # TODO: is resize and fill faster than append? 
-    adaptive isa Fixed ? sizehint_solution!(sol, t_span, dimensions) : nothing
+    adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
     while true
         update_solution!(sol, y, t)

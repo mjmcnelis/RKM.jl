@@ -85,7 +85,7 @@ export Solution, get_solution
 # Parameters
 export Parameters
 # Time
-export TimeSpan, TimeLimit
+export TimeRange, TimeLimit
 # ODE solver
 export evolve_ode
 # Efficiency 

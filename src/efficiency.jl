@@ -1,7 +1,7 @@
 
 function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Function; 
              precision::Type{T2}, methods::OrderedDict{<:AdaptiveStepSize, <:Vector}, 
-             epsilon_vect::Vector{Float64}, t_span::TimeSpan, plot::Function, 
+             epsilon_vect::Vector{Float64}, t_range::TimeRange, plot::Function, 
              plot!::Function) where {T <: AbstractFloat, T2 <: AbstractFloat}
     plt = plot()
     for key in keys(methods)
@@ -14,7 +14,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
             for epsilon in epsilon_vect
                 # @show epsilon
                 adaptive = @set adaptive.epsilon = epsilon 
-                parameters = Parameters(; adaptive, method, t_span)
+                parameters = Parameters(; adaptive, method, t_range)
 
                 sol = evolve_ode(y0, dy_dt!; parameters, precision)
                 y, t = get_solution(sol)

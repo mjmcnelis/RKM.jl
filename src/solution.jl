@@ -48,15 +48,15 @@ function update_solution!(sol::Solution, y::Vector{T},
 end
 
 """
-    sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
+    sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
 
 Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
 
-Required parameters: `sol`, `t_span`, `dimensions`
+Required parameters: `sol`, `t_range`, `dimensions`
 """
-function sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
+function sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
     # TODO: whether or not I call this depends if save at regular intervals
-    @unpack t0, tf, dt0 = t_span
+    @unpack t0, tf, dt0 = t_range
     steps = round((tf - t0)/dt0) |> Int64
     # TODO: why is steps+1 not sufficient?
     sizehint!(sol.y, dimensions*(steps + 2))

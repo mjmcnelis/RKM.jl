@@ -19,13 +19,13 @@ method = RungeKutta4()
 # method = Fehlberg45()
 # method = BackwardEuler1()
 
-t_span = TimeSpan(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
+t_range = TimeRange(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 timer = TimeLimit()
 
 # do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_span, timer)
+parameters = Parameters(; adaptive, method, t_range, timer)
 
-t0 = t_span.t0
+t0 = t_range.t0
 
 N = 2
 y0 = Float64[]
