@@ -1,7 +1,7 @@
 """
 Specifies the time evolution interval and initial time step.
 """
-@kwdef struct TimeSpan
+@kwdef struct TimeRange
     """Initial time"""
     t0::Float64
     """Final time"""
@@ -28,8 +28,6 @@ end
     function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
 
 Outer constructor for `TimeLimit`.
-
-Required parameters: `wime_min`, `frequency`
 """
 function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
     time_limit = now() + Minute(round(wtime_min))
@@ -39,14 +37,16 @@ function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
 end
 
 """
-    check_time(t::MVector{1,T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
+    continue_solver(t::MVector{1,T}, tf::T2, 
+                    timer::TimeLimit) where {T <: AbstractFloat, T2 <: AbstractFloat}
 
 Checks whether to continue running the ODE solver. The solver stops (`false`) if either
 the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `timer`.
 
 Required parameters: `t`, `tf`, `timer`
 """
-function check_time(t::MVector{1,T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
+function continue_solver(t::MVector{1,T}, tf::T2, 
+                         timer::TimeLimit) where {T <: AbstractFloat, T2 <: AbstractFloat}
     t[1] < tf && !past_time_limit(timer)
 end
 
@@ -61,7 +61,7 @@ function past_time_limit(timer::TimeLimit)
     @unpack counter, frequency, time_limit = timer
 
     @.. counter += 1
-    if (counter[1]) % frequency == 0 && now() > time_limit
+    if counter[1] % frequency == 0 && now() > time_limit
         @warn "\nExceeded time limit of $(timer.wtime_min) minutes (stop evolve...)\n"
         true
     else

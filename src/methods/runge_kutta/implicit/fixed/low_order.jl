@@ -1,5 +1,5 @@
 
-function BackwardEuler1(; precision::Type{<:AbstractFloat} = Float64)
+function BackwardEuler1(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1 1
                1 1]
     butcher = butcher .|> precision
@@ -7,7 +7,7 @@ function BackwardEuler1(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Backward_Euler_1, butcher)
 end
 
-function ImplicitMidpoint2(; precision::Type{<:AbstractFloat} = Float64)
+function ImplicitMidpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//2 1//2
                1 1]
     butcher = butcher .|> precision
@@ -15,7 +15,7 @@ function ImplicitMidpoint2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Implicit_Midpoint_2, butcher)
 end
 
-function QinZhang2(; precision::Type{<:AbstractFloat} = Float64)
+function QinZhang2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//4 1//4 0
                3//4 1//2 1//4
                1 1//2 1//2]
@@ -24,7 +24,7 @@ function QinZhang2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Qin_Zhang_2, butcher)
 end
 
-function KraaijevangerSpijker2(; precision::Type{<:AbstractFloat} = Float64)
+function KraaijevangerSpijker2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//2 1//2 0
                3//2 -1//2 2
                1 -1//2 3//2]
@@ -33,7 +33,7 @@ function KraaijevangerSpijker2(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Kraaijevanger_Spijker_2, butcher)
 end
 
-function PareschiRusso2(; precision::Type{<:AbstractFloat} = Float64)
+function PareschiRusso2(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s             # gamma
@@ -48,7 +48,7 @@ end
 
 # TODO: maybe use generic formula from
 #       https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
-function PareschiRusso3(; precision::Type{<:AbstractFloat} = Float64)
+function PareschiRusso3(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s             # gamma, other options were 1/4 (Qin-Zhang), 1+1/sqrt(2)
@@ -62,7 +62,7 @@ function PareschiRusso3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Pareschi_Russo_3, butcher)
 end
 
-function Crouzeix3(; precision::Type{<:AbstractFloat} = Float64)
+function Crouzeix3(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(3))   # sqrt(3)
 
@@ -74,7 +74,7 @@ function Crouzeix3(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Crouzeix_3, butcher)
 end
 
-function RadauIA3(; precision::Type{<:AbstractFloat} = Float64)
+function RadauIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 1//4 -1//4
                2//3 1//4 5//12
                1 1//4 3//4]
@@ -84,7 +84,7 @@ function RadauIA3(; precision::Type{<:AbstractFloat} = Float64)
 end
 
 
-function RadauIIA3(; precision::Type{<:AbstractFloat} = Float64)
+function RadauIIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//3 5//12 -1//12
                1 3//4 1//4
                1 3//4 1//4]
@@ -95,7 +95,7 @@ end
 
 # TODO: from https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 #       but had no specific name
-function DIRKL3(; precision::Type{<:AbstractFloat} = Float64)
+function DIRKL3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//2 1//2 0 0 0
                2//3 1//6 1//2 0 0
                1//2 -1//2 1//2 1//2 0

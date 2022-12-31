@@ -42,23 +42,22 @@ Required parameters: `sol`, `y`, `t`
 Note: currently `y` and `t` can be different float types.
 """
 function update_solution!(sol::Solution, y::MVector{D,T},
-                          t::MVector{1,T2}) where {D, T <: AbstractFloat, 
-                                                   T2 <: AbstractFloat}
+                          t::MVector{1,T}) where {D, T <: AbstractFloat}
     append!(sol.y, y)
     append!(sol.t, t[1])
     nothing
 end
 
 """
-    sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
+    sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
 
 Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
 
-Required parameters: `sol`, `t_span`, `dimensions`
+Required parameters: `sol`, `t_range`, `dimensions`
 """
-function sizehint_solution!(sol::Solution, t_span::TimeSpan, dimensions::Int64)
+function sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
     # TODO: whether or not I call this depends if save at regular intervals
-    @unpack t0, tf, dt0 = t_span
+    @unpack t0, tf, dt0 = t_range
     steps = round((tf - t0)/dt0) |> Int64
     # TODO: why is steps+1 not sufficient?
     sizehint!(sol.y, dimensions*(steps + 2))

@@ -1,5 +1,5 @@
 
-function GaussLegendre42(; precision::Type{<:AbstractFloat} = Float64)
+function GaussLegendre42(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(3))       # sqrt(3)
 
@@ -12,7 +12,7 @@ function GaussLegendre42(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Gauss_Legendre_4_2, butcher)
 end
 
-function LobattoIIIA42(; precision::Type{<:AbstractFloat} = Float64)
+function LobattoIIIA42(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0
                1//2 5//24 1//3 -1//24
                1 1//6 2//3 1//6
@@ -23,7 +23,7 @@ function LobattoIIIA42(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Lobatto_IIIA_4_2, butcher)
 end
 
-function LobattoIIIB42(; precision::Type{<:AbstractFloat} = Float64)
+function LobattoIIIB42(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 1//6 -1//6 0
                1//2 1//6 1//3 0
                1 1//6 5//6 0
@@ -34,7 +34,7 @@ function LobattoIIIB42(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Lobatto_IIIB_4_2, butcher)
 end
 
-function LobattoIIIC42(; precision::Type{<:AbstractFloat} = Float64)
+function LobattoIIIC42(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 1//6 -1//3 1//6
                1//2 1//6 5//12 -1//12
                1 1//6 2//3 1//6
@@ -45,7 +45,7 @@ function LobattoIIIC42(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Lobatto_IIIC_4_2, butcher)
 end
 
-function LobattoIIICS42(; precision::Type{<:AbstractFloat} = Float64)
+function LobattoIIICS42(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0
                1//2 1//4 1//4 0
                1 0 1 0
@@ -56,7 +56,7 @@ function LobattoIIICS42(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Lobatto_IIICS_4_2, butcher)
 end
 
-function LobattoIIID42(; precision::Type{<:AbstractFloat} = Float64)
+function LobattoIIID42(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 1//6 0 -1//6
                1//2 1//12 5//12 0
                1 1//2 1//3 1//6
@@ -67,7 +67,7 @@ function LobattoIIID42(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Lobatto_IIID_4_2, butcher)
 end
 
-function RaduaIIA52(; precision::Type{<:AbstractFloat} = Float64)
+function RaduaIIA52(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(6))       # sqrt(6)
 
@@ -81,7 +81,7 @@ function RaduaIIA52(; precision::Type{<:AbstractFloat} = Float64)
     RungeKutta(; name = :Radau_IIA_5_2, butcher)
 end
 
-function GaussLegendre64(; precision::Type{<:AbstractFloat} = Float64)
+function GaussLegendre64(; precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(15))  # sqrt(15)
 

@@ -6,8 +6,8 @@ Parameters for the ODE solver.
     adaptive::AdaptiveStepSize
     """ODE solver method"""
     method::ODEMethod
-    """Time span of ODE evolution"""
-    t_span::TimeSpan
+    """Time range of ODE evolution"""
+    t_range::TimeRange
     """Timer for ODE solver"""
     timer::TimeLimit = TimeLimit(; wtime_min = 60, frequency = 100)
 end

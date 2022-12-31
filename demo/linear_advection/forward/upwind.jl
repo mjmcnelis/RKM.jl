@@ -34,11 +34,11 @@ end
 
 adaptive   = Fixed()
 method     = Euler1()
-t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)     # website used dt = 0.05
+t_range    = TimeRange(; t0 = 0.0, tf = 6.0, dt0 = dt)     # website used dt = 0.05
 timer      = TimeLimit()
-parameters = Parameters(; adaptive, method, t_span)
+parameters = Parameters(; adaptive, method, t_range)
 
-@unpack t0, dt0 = t_span
+@unpack t0, dt0 = t_range
 y0 = gauss.(x)
 @show C
 

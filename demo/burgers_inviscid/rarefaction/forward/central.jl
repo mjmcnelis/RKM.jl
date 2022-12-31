@@ -36,10 +36,10 @@ end
 
 adaptive   = Fixed()
 method     = Euler1()
-t_span     = TimeSpan(; t0 = 0.0, tf = 6.0, dt0 = dt)
-parameters = Parameters(; adaptive, method, t_span)
+t_range    = TimeRange(; t0 = 0.0, tf = 6.0, dt0 = dt)
+parameters = Parameters(; adaptive, method, t_range)
 
-@unpack t0, dt0 = t_span
+@unpack t0, dt0 = t_range
 y0 = rarefaction.(x, t0)
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)

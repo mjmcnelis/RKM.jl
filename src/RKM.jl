@@ -24,6 +24,7 @@ include("plots.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")
+include("methods/utils.jl")
 # Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
@@ -84,7 +85,7 @@ export Solution, get_solution
 # Parameters
 export Parameters
 # Time
-export TimeSpan, TimeLimit
+export TimeRange, TimeLimit
 # ODE solver
 export evolve_ode
 # Efficiency 

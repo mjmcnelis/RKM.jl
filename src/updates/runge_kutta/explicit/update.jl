@@ -1,7 +1,7 @@
 
 # TODO: so far, routine only works for an explicit, primary method
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::MVector{D,T}, 
-                     t::Float64, dt::Float64, dy_dt!::F, dy::MMatrix{D,S,T,SD}, 
+                     t::T, dt::T, dy_dt!::F, dy::MMatrix{D,S,T,SD}, 
                      y_tmp::MVector{D,T}, f_tmp::MVector{D,T}) where {D, S, SD, 
                                                                       T <: AbstractFloat, 
                                                                       F <: Function}
@@ -30,7 +30,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit, 
              adaptive::Fixed, FE::MVector{1,Int64}, 
-             y::MVector{D,T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, 
+             y::MVector{D,T}, t::MVector{1,T}, dt::MVector{2,T}, 
              dy_dt!::F, dy::MMatrix{D,S,T,SD}, y_tmp::MVector{D,T}, f_tmp::MVector{D,T},
              args...) where {D, S, SD, T <: AbstractFloat, F} 
 
@@ -46,7 +46,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::Doubling, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
+             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T},
              args...) where {T <: AbstractFloat, F}
@@ -55,6 +55,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 
     order = method.order[1]                             # order of scheme
     high ^= order / (1.0 + order)                       # rescale high based on order
+    epsilon ^= order / (1.0 + order)
 
     dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
 
@@ -99,7 +100,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::Embedded, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,Float64}, dt::MVector{2,Float64}, dy_dt!::F,
+             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T}, dy_dt!::F,
              dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
              y1::Vector{T}, y2::Vector{T}, error::Vector{T},
              args...) where {T <: AbstractFloat, F}
@@ -110,12 +111,13 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     order_min = minimum(method.order)
 
     high    ^= (order_min / order_max)                  # rescale high, epsilon parameters
-    # this caused issues (look into this)
     epsilon ^= (order_min / order_max)
 
     dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
 
     dt[1] = dt[2]                                       # initialize time step
+
+    # TODO: float type can change from Float64 to Double64
     rescale = 1.0
 
     a = 1
@@ -152,7 +154,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         e_norm > tol || break                           # compare error to tolerance
-        a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
+        a <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
         a += 1
     end
     @.. y = y1                                          # get iteration

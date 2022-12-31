@@ -1,3 +1,5 @@
+import LinearAlgebra: norm
+
 """
     debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 10.0)
 
@@ -38,7 +40,7 @@ function debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 
     nothing
 end
 
-function debug_iteration(method::RungeKutta, iteration::Type{<:Iteration})
+function debug_iteration(method::RungeKutta, iteration::Type{I}) where I <: Iteration
     # TODO: test macro returns a message if failed
     prop = getproperty(method, :iteration)
 

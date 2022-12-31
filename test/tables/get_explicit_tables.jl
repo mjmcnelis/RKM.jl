@@ -1,7 +1,7 @@
 
 # TODO: make docstring
-function get_runge_kutta_explicit_tables(; precision::Type{<:AbstractFloat})
-    (
+function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: AbstractFloat
+    [
         # fixed
         Euler1(; precision),
         Heun2(; precision),
@@ -43,5 +43,5 @@ function get_runge_kutta_explicit_tables(; precision::Type{<:AbstractFloat})
         DormandPrince87(; precision),
 
         Feagin108(; precision),
-    )
+    ]
 end
