@@ -27,8 +27,14 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     # initial conditions
     y  = y0 .|> precision
     y isa Vector ? nothing : y = [y]
-    t  = MVector{1,precision}(t0)
-    dt = MVector{2,precision}(dt0, dt0)
+
+    # note: testing 
+    t0 = rationalize(t0)
+    tf = rationalize(tf) |> precision
+    dt0 = rationalize(dt0)
+
+    t  = precision == BigFloat ? precision[t0] : MVector{1,precision}(t0)
+    dt = precision == BigFloat ? precision[dt0, dt0] : MVector{2,precision}(dt0, dt0)
 
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
@@ -58,6 +64,13 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
 
         continue_solver(t, tf, timer) || break
         @.. t += dt[1]
+
+        # TODO: make a function monitoring evolution progress
     end
     sol
+end
+
+# TODO: move to utils?
+function rationalize(x; sigdigits = 16)
+    Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1)
 end

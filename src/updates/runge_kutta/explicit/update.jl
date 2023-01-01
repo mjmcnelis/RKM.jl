@@ -26,8 +26,8 @@
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Fixed, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T},
+             adaptive::Fixed, FE::MVector{1,Int64}, y::Vector{T}, 
+             t::Union{Vector{T}, MVector{1,T}}, dt::Union{Vector{T}, MVector{2,T}},
              dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T},
              args...) where {T <: AbstractFloat, F}
     dy_dt!(f_tmp, t[1], y)                              # evalute first state at (t,y)
@@ -41,10 +41,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Doubling, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T}, dy_dt!::F,
-             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
-             y1::Vector{T}, y2::Vector{T}, error::Vector{T},
+             adaptive::Doubling, FE::MVector{1,Int64}, y::Vector{T}, 
+             t::Union{Vector{T}, MVector{1,T}}, dt::Union{Vector{T}, MVector{2,T}}, 
+             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
+             f::Vector{T}, y1::Vector{T}, y2::Vector{T}, error::Vector{T},
              args...) where {T <: AbstractFloat, F}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
@@ -95,10 +95,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Embedded, FE::MVector{1,Int64},
-             y::Vector{T}, t::MVector{1,T}, dt::MVector{2,T}, dy_dt!::F,
-             dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T},
-             y1::Vector{T}, y2::Vector{T}, error::Vector{T},
+             adaptive::Embedded, FE::MVector{1,Int64}, y::Vector{T}, 
+             t::Union{Vector{T}, MVector{1,T}}, dt::Union{Vector{T}, MVector{2,T}},
+             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
+             f::Vector{T}, y1::Vector{T}, y2::Vector{T}, error::Vector{T},
              args...) where {T <: AbstractFloat, F}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
