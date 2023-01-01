@@ -7,11 +7,13 @@ plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/equations.jl") : nothing 
  
 precision = Double64 
+# precision = BigFloat
+
 t_range = TimeRange(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 
 const C = 0.5 
 t0 = t_range.t0 |> precision
-y0 = exp(t0)/(1.0 + exp(t0)) - C |> precision
+y0 = exp(t0)/(1.0 + exp(t0)) - C 
 
 methods = OrderedDict(
     Doubling() => [

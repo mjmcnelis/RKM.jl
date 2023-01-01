@@ -19,11 +19,13 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
                 sol = evolve_ode(y0, dy_dt!; parameters, precision)
                 y, t = get_solution(sol)
 
-                y_ex = zeros(Double64, size(y)...)
-                err = zeros(Double64, length(t))
+                # TODO: redo this for better memory efficiency
+                y_ex = zeros(BigFloat, size(y)...)
+                err = zeros(BigFloat, length(t))
 
                 # TODO: how to skip passing dimensions?
                 for i in eachindex(t)
+                    i == 1 ? continue : nothing
                     y_ex[i,:] = y_exact(t[i], sol.dimensions)
                     err[i] = norm(y[i,:] .- y_ex[i,:], adaptive.p_norm)
                 end
@@ -40,8 +42,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
                   legend = :outertopright, legendtitlefontsize = 12, legendfontsize = 12,
                   ylabel = "Mean norm error", yguidefontsize = 14, ytickfontsize = 12,
                   xlabel = "Function evaluations", xguidefontsize = 14, xtickfontsize = 12,
-                #   ylims = (1e-30, 1e0), xlims = (1e2, 1e7), 
-                  ylims = (1e-15, 1e0), xlims = (1e2, 1e5), 
+                  ylims = (1e-20, 1e0), xlims = (1e2, 1e5), 
                   xaxis = :log, yaxis = :log)
         end
     end

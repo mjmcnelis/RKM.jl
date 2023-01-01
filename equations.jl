@@ -9,8 +9,8 @@ function dy_dt!(f, t, y)
 end
 
 function y_exact(t, N)
-    y_ex = Double64[]
-    t = Double64(t)
+    y_ex = BigFloat[]
+    t = BigFloat(t)
     for i = 1:N
         a = N == 1 ? 0.5 : 0.5 - 0.25*(i-1.0)/(N-1.0)
         push!(y_ex, exp(t) / (1.0 + exp(t)) - a)
