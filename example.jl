@@ -10,14 +10,12 @@ plotly()
 precision = Float64
 # precision = Double64
 
-adaptive = Fixed()             # 25 allocs (dt = 1e-4)
-# adaptive = Doubling()          # 30 allocs (Heun2)
-# adaptive = Embedded()          # 27 allocs (Fehlberg45)
-
+adaptive = Fixed()         
 method = RungeKutta4()
+# adaptive = Doubling()        
 # method = Heun2()
+# adaptive = Embedded()       
 # method = Fehlberg45()
-# method = BackwardEuler1()
 
 t_range = TimeRange(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
 timer = TimeLimit()

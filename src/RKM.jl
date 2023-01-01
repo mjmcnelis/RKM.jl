@@ -7,6 +7,7 @@ import DoubleFloats: Double64
 import StaticArrays: SVector, SMatrix, MVector
 import DataStructures: OrderedDict
 import MuladdMacro: @muladd
+# note: fast broadcasting doesn't work with BigFloat MVector (t, dt)
 import FastBroadcast: @..
 import UnPack: @unpack
 import Setfield: @set

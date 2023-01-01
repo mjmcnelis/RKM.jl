@@ -27,8 +27,6 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     # initial conditions
     y  = y0 .|> precision
     y isa Vector ? nothing : y = [y]
-
-    # note: MVector doesn't work for BigFloat
     t  = MVector{1,precision}(t0)
     dt = MVector{2,precision}(dt0, dt0)
 
