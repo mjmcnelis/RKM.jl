@@ -37,8 +37,6 @@ methods = OrderedDict(
                 ],
 )
 epsilon_vect = 10.0.^LinRange(-4, -20, 17)
-# for Verner65
-# epsilon_vect = 10.0.^LinRange(-4, -36, 33)
 
 @time plt = efficiency_curve(y0, y_exact, dy_dt!; precision, methods, 
                              epsilon_vect, t_range, plot, plot!)

@@ -10,9 +10,11 @@
         @.. y_tmp = y
         # TODO: need a better dy cache for performance
         for j = 1:i-1
+            # TODO: continue if A = 0?
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
+        # TODO: skip if intermediate update not needed in next row(s)? 
         dy_dt!(f_tmp, t_tmp, y_tmp)
         @.. dy[:,i] = dt * f_tmp
     end
