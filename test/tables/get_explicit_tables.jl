@@ -40,8 +40,11 @@ function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: Abstra
         Verner65(; precision),
 
         Fehlberg78(; precision),
+
         DormandPrince87(; precision),
 
         Feagin108(; precision),
+        
+        Feagin1210(; precision),
     ]
 end

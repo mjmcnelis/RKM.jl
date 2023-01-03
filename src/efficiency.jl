@@ -13,10 +13,11 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
 
             # TODO: sort out how to do efficiency for fixed time step
             for epsilon in epsilon_vect
+                @show epsilon
                 adaptive = @set adaptive.epsilon = epsilon 
                 parameters = Parameters(; adaptive, method, t_range)
 
-                sol = evolve_ode(y0, dy_dt!; parameters, precision)
+                @time sol = evolve_ode(y0, dy_dt!; parameters, precision)
                 y, t = get_solution(sol)
 
                 # TODO: redo this for better memory efficiency
@@ -44,7 +45,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
                   xlabel = "Function evaluations", ylabel = "Mean L$norm_label error",
                   yguidefontsize = 14, ytickfontsize = 12, yaxis = :log,
                   xguidefontsize = 14, xtickfontsize = 12, xaxis = :log,
-                  ylims = (1e-20, 1e0), xlims = (1e2, 1e5)
+                  ylims = (1e-65, 1e0), xlims = (1e2, 1e8)
                 )
         end
     end
