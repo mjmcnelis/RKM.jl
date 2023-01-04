@@ -56,7 +56,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
     while true
-        update_solution!(sol, y, t)
+        append_solution!(sol, y, t)
 
         # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!,

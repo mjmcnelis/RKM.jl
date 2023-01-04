@@ -2,15 +2,11 @@ module RKM
 
 import Dates: now, Minute, DateTime
 import LinearAlgebra: norm, tril, diag
-import Statistics: mean
-import DoubleFloats: Double64
 import StaticArrays: SVector, SMatrix, MVector
 import DataStructures: OrderedDict
 import MuladdMacro: @muladd
-# note: fast broadcasting doesn't work with BigFloat MVector (t, dt)
 import FastBroadcast: @..
 import UnPack: @unpack
-import Setfield: @set
 import Base: @kwdef
 
 abstract type ODEMethod end
@@ -47,7 +43,6 @@ include("updates/runge_kutta/implicit/update.jl")
 
 include("parameters.jl")
 include("evolve.jl")
-include("efficiency.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff

@@ -31,16 +31,14 @@ function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFl
 end
 
 """
-    update_solution!(sol::Solution, y::Vector{T},
+    append_solution!(sol::Solution, y::Vector{T},
                      t::Union{Vector{T}, MVector{1,T}}) where T <: AbstractFloat
 
 Appends the state vector `y` at the current time `t` to the solution `sol`.
 
 Required parameters: `sol`, `y`, `t`
-
-Note: currently `y` and `t` can be different float types.
 """
-function update_solution!(sol::Solution, y::Vector{T}, 
+function append_solution!(sol::Solution, y::Vector{T}, 
                           t::Union{Vector{T}, MVector{1,T}}) where T <: AbstractFloat
     append!(sol.y, y)
     append!(sol.t, t[1])
@@ -70,10 +68,9 @@ end
 Returns the solution tuple `(y,t)` from `sol`. The solution vector `y`, which has a length
 `D*N`, is reshaped into an `N x D` matrix (`N` = time steps, `D` = dimensions).
 
-For example, the solution `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
-is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`.
-
-The solution is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
+For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
+is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`. The solution 
+vector is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 """
 function get_solution(sol::Solution)
     y, t = sol.y, sol.t
