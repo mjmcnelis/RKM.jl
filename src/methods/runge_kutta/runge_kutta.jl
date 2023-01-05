@@ -1,6 +1,7 @@
 
 struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
     name::Symbol
+    # TODO: see if using a SMatrix helps with speeding up butcher_test
     butcher::Matrix{T}              # for butcher_test.jl only
     c::SVector{S, T}
     A_T::SMatrix{S, S, T, S2}       # TODO: would this not work for high order methods?

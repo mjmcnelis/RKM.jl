@@ -29,12 +29,14 @@ function debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 
             if (err > tol_fact_iter*tol && i >= size(B, 2)) || err > tol_fact_stage*tol
                 @error msg          # row should be fixed
                 @test false         # test fail
+                # @test_broken false    # for debugging
             else
                 @warn msg           # row might need fixing
                 @test_broken false  # test broken
             end
         else
-            @test true              # test passed
+            # try to see if this helps with runtest time
+            # @test true              # test passed
         end
     end
     nothing

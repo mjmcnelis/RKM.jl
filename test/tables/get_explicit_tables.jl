@@ -46,5 +46,7 @@ function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: Abstra
         Feagin108(; precision),
         
         Feagin1210(; precision),
+
+        Feagin1412(; precision),
     ]
 end

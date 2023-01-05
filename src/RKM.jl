@@ -64,6 +64,7 @@ export Fehlberg45, CashKarp54, DormandPrince54, BogackiShampine54, Tsitouras54, 
 export Fehlberg78, DormandPrince87
 export Feagin108
 export Feagin1210
+export Feagin1412
     # Fixed implicit Runge-Kutta
 export BackwardEuler1, ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2, PareschiRusso2,
        PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3
