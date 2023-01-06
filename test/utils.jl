@@ -34,9 +34,6 @@ function debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 
                 @warn msg           # row might need fixing
                 @test_broken false  # test broken
             end
-        else
-            # try to see if this helps with runtest time
-            # @test true              # test passed
         end
     end
     nothing
@@ -46,9 +43,7 @@ function debug_iteration(method::RungeKutta, iteration::Type{I}) where I <: Iter
     # TODO: test macro returns a message if failed
     prop = getproperty(method, :iteration)
 
-    if prop isa iteration
-        @test true
-    else
+    if !(prop isa iteration)
         @error "$(method.name) iteration = $(typeof(prop)) but should be $iteration"
         @test false
     end
