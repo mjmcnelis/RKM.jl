@@ -60,7 +60,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     dt[1] = dt[2]                                       # initialize time step
     rescale = 1.0
 
-    a = 1
+    attempts = 1
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
@@ -88,11 +88,11 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         e_norm > tol || break                           # compare error to tolerance
-        a <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
-        a += 1
+        attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
+        attempts += 1
     end
     @.. y = y2                                          # get iteration
-    add_function_evaluations!(FE, iteration, adaptive, method, a)
+    add_function_evaluations!(FE, iteration, adaptive, method, attempts)
     nothing
 end
 
@@ -118,7 +118,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     # TODO: float type can change from Float64 to Double64
     rescale = 1.0
 
-    a = 1
+    attempts = 1
     while true                                          # start embedded routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
@@ -152,11 +152,11 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         e_norm > tol || break                           # compare error to tolerance
-        a <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
-        a += 1
+        attempts <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
+        attempts += 1
     end
     @.. y = y1                                          # get iteration
-    add_function_evaluations!(FE, iteration, adaptive, method, a)
+    add_function_evaluations!(FE, iteration, adaptive, method, attempts)
     nothing
 end
 

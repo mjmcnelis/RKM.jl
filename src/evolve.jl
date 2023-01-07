@@ -52,22 +52,23 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     sol = Solution(; precision, dimensions)
     @unpack FE = sol
 
-    # TODO: is resize and fill faster than append? 
+    # TODO: is resize and indexing faster than append? 
     adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
     while true
         append_solution!(sol, y, t)
+        
+        continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!,
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
-        continue_solver(t, tf, timer) || break
         @.. t += dt[1]
-
         # TODO: make a function monitoring evolution progress
     end
-    sol
+    compute_step_rejection_rate!(sol, method, adaptive, timer)
+    return sol
 end
 
 # TODO: move to utils?

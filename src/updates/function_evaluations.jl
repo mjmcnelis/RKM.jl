@@ -32,9 +32,8 @@ function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Embedded,
     @unpack stages, fsal = method
     fsal_stage = fsal isa FSAL ? 1 : 0
    
-    # note: fsal does not count for rejected attempts
-    evals = stages - fsal_stage + (attempts - 1)*(stages - 1)
-    # evals = 1 + attempts*(method.stages - 1) 
+    # note: fsal advantage does not count for rejected attempts
+    evals = 1 - fsal_stage + attempts*(stages - 1)
     @.. FE += evals
     nothing
 end
