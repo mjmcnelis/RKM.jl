@@ -1,6 +1,7 @@
 module RKM
 
 import Dates: now, Minute, DateTime
+import ProgressMeter: Progress, next!
 import LinearAlgebra: norm, tril, diag
 import StaticArrays: SVector, SMatrix, MVector
 import DataStructures: OrderedDict

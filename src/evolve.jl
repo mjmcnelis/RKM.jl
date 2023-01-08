@@ -1,7 +1,7 @@
 # TODO update docstring
 """
     evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacobian_error,
-               parameters::Parameters
+               show_progress::Bool = true, parameters::Parameters
                precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                      T2 <: AbstractFloat}
 
@@ -12,13 +12,14 @@ Required parameters: `y0`, `dy_dt!`, `parameters`
 Note: `jacobian!` argument is temporary
 """
 function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacobian_error,
-                    parameters::Parameters,  
+                    show_progress::Bool = true, parameters::Parameters,  
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T2 <: AbstractFloat}
 
     @unpack adaptive, method, t_range, timer = parameters
     @unpack t0, tf, dt0 = t_range
 
+    timer = reset_timer(timer)
     method = reconstruct_method(method, precision)
     @unpack stages, iteration = method
 
@@ -29,12 +30,12 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     y isa Vector ? nothing : y = [y]
 
     # note: testing 
-    t0 = rationalize(t0)
+    t0 = rationalize(t0) |> precision
     tf = rationalize(tf) |> precision
-    dt0 = rationalize(dt0)
+    dt0 = rationalize(dt0) |> precision
 
-    t  = precision == BigFloat ? precision[t0] : MVector{1,precision}(t0)
-    dt = precision == BigFloat ? precision[dt0, dt0] : MVector{2,precision}(dt0, dt0)
+    t  = precision == BigFloat ? [t0] : MVector{1}(t0)
+    dt = precision == BigFloat ? [dt0, dt0] : MVector{2}(dt0, dt0)
 
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
@@ -55,9 +56,13 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
     # TODO: is resize and indexing faster than append? 
     adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
+    # for progress meter
+    checkpoints = collect(LinRange(t0, tf, 101))[2:end]
+    progress = Progress(100)
+
     while true
         append_solution!(sol, y, t)
-        
+        show_progress && monitor_progess(t, progress, checkpoints)
         continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
@@ -65,7 +70,6 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; jacobian! = jacob
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
         @.. t += dt[1]
-        # TODO: make a function monitoring evolution progress
     end
     compute_step_rejection_rate!(sol, method, adaptive, timer)
     return sol
@@ -73,5 +77,7 @@ end
 
 # TODO: move to utils?
 function rationalize(x; sigdigits = 16)
-    Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1)
+    # TODO: generalize sigdigits for any precision 
+    fraction = Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1)
+    return fraction
 end

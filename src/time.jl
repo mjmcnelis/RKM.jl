@@ -36,6 +36,22 @@ function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
     TimeLimit(wtime_min, time_limit, frequency, counter)
 end
 
+# TODO: make docstring
+function reset_timer(timer::TimeLimit)
+    @unpack wtime_min, frequency = timer 
+    return TimeLimit(; wtime_min, frequency)
+end
+
+function monitor_progess(t::Union{Vector{T}, MVector{1,T}}, 
+                         progress, checkpoints::Vector{T}) where T <: AbstractFloat
+
+    if t[1] > checkpoints[1]
+        next!(progress) 
+        popfirst!(checkpoints)
+    end
+    return nothing
+end
+
 """
     continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
                     timer::TimeLimit) where T <: AbstractFloat
@@ -61,10 +77,12 @@ function past_time_limit(timer::TimeLimit)
     @unpack counter, frequency, time_limit = timer
 
     @.. counter += 1
-    if counter[1] % frequency == 0 && now() > time_limit
-        @warn "\nExceeded time limit of $(timer.wtime_min) minutes (stop evolve...)\n"
-        true
-    else
-        false
-    end
+    # check timer for every N = frequency time steps
+    if counter[1] % frequency == 0
+        if now() > time_limit
+            @warn "\nExceeded time limit of $(timer.wtime_min) minutes (stop evolve...)\n"
+            return true
+        end
+    end 
+    return false
 end

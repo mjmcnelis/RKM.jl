@@ -9,7 +9,7 @@ plotly()
 
 precision = Float64
 # precision = Double64
-# precision = BigFloat
+# precision = BigFloat        # 31.60 M allocations (fixed time step)
 
 adaptive = Fixed()         
 method = RungeKutta4()
@@ -40,7 +40,7 @@ GC.gc()
 # @show Base.format_bytes(bytes)
 
 # BenchmarkTools.DEFAULT_PARAMETERS.seconds = 60.0
-# @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
+# @benchmark sol = evolve_ode(y0, dy_dt!; jacobian!, parameters, show_progress = false)
 
 # plot_ode(sol, method, Plots.plot)
 
