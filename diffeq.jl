@@ -6,11 +6,7 @@ using StaticArrays
 using BenchmarkTools
 using Plots
 plotly()
-try
-    fp
-catch err
-    isa(err, UndefVarError) ? include("$RKM_root/equations.jl") : nothing
-end
+!(@isdefined fp) ? include("$RKM_root/equations.jl") : nothing 
 
 t0 = -10.0
 N = 2
@@ -24,7 +20,7 @@ u0 = SA[[exp(t0)/(1.0 + exp(t0)) - get_a(i,N) for i = 1:N]...]
 
 GC.gc()
 prob = ODEProblem(fp, u0, (t0, 10.0))
-@time sol = solve(prob, RK4(), dt = 1e-4, adaptive = false)#, saveat = 1000)
+@btime sol = solve(prob, RK4(), dt = 1e-4, adaptive = false)#, saveat = 1000)
 # @show sol.destats
 println("\ndone")
 
