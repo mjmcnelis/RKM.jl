@@ -36,7 +36,14 @@ function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
     TimeLimit(wtime_min, time_limit, frequency, counter)
 end
 
-# TODO: make docstring
+"""
+    reset_timer(timer::TimeLimit)
+
+Constructs a new `TimeLimit` from `timer` by updating `time_limit`
+and `counter` fields.
+
+Required parameters: `timer`
+"""
 function reset_timer(timer::TimeLimit)
     @unpack wtime_min, frequency = timer 
     return TimeLimit(; wtime_min, frequency)

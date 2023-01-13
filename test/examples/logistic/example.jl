@@ -1,11 +1,7 @@
-using Revise
-using RKM
-using BenchmarkTools
+using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
-import StaticArrays: SA
-using Plots
-plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/equations.jl") : nothing 
+using Plots; plotly()
+!(@isdefined dy_dt!) ? include("$RKM_root/test/examples/logistic/equations.jl") : nothing 
 
 precision = Float64
 # precision = Double64
@@ -18,11 +14,10 @@ method = RungeKutta4()
 # adaptive = Embedded()       
 # method = Fehlberg45()
 
-t_range = TimeRange(; t0 = -10.0, tf = 10.0, dt0 = 1e-4)
-timer = TimeLimit()
+t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
 
 # do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_range, timer)
+parameters = Parameters(; adaptive, method, t_range)
 
 t0 = t_range.t0
 
@@ -33,8 +28,6 @@ for i = 1:N
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 
-GC.gc()
-
 show_progress = true
 # show_progress = false
 
@@ -42,7 +35,7 @@ show_progress = true
 # @btime sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
 
 # @show Base.format_bytes(sizeof(sol.y) + sizeof(sol.t))
-
 # plot_ode(sol, method, Plots.plot)
 
+GC.gc()
 println("\ndone")
