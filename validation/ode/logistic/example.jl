@@ -32,7 +32,7 @@ show_progress = true
 # show_progress = false
 
 @time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
-# @btime sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
+# sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
 
 # @show Base.format_bytes(sizeof(sol.y) + sizeof(sol.t))
 # plot_ode(sol, method, Plots.plot)

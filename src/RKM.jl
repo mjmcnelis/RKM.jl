@@ -12,6 +12,8 @@ import Base: @kwdef
 
 abstract type ODEMethod end
 
+const VectorMVector = Union{Vector{T}, MVector{D,T}} where {D, T <: AbstractFloat} 
+
 RKM_root = dirname(dirname(@__FILE__))
 
 include("time.jl")

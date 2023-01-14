@@ -35,14 +35,14 @@ end
 
 """
     append_solution!(sol::Solution, y::Vector{T},
-                     t::Union{Vector{T}, MVector{1,T}}) where T <: AbstractFloat
+                     t::VectorMVector{1,T}) where T <: AbstractFloat
 
 Appends the state vector `y` at the current time `t` to the solution `sol`.
 
 Required parameters: `sol`, `y`, `t`
 """
 function append_solution!(sol::Solution, y::Vector{T}, 
-                          t::Union{Vector{T}, MVector{1,T}}) where T <: AbstractFloat
+                          t::VectorMVector{1,T}) where T <: AbstractFloat
     append!(sol.y, y)
     append!(sol.t, t[1])
     return nothing
