@@ -7,5 +7,5 @@ Required parameters: `method`, `precision`
 """
 function reconstruct_method(method::ODEMethod, precision::Type{T}) where T <: AbstractFloat
     name = replace(String(method.name), "_" => "") |> Symbol
-    getfield(RKM, name)(; precision)
+    return getfield(RKM, name)(; precision)
 end

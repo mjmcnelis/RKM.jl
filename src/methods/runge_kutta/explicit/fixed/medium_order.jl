@@ -11,7 +11,7 @@ function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//6 1//3 1//3 1//6]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Runge_Kutta_4, butcher)
+    return RungeKutta(; name = :Runge_Kutta_4, butcher)
 end
 
 """
@@ -25,7 +25,7 @@ function ThreeEightsRule4(; precision::Type{T} = Float64) where T <: AbstractFlo
                1 1//8 3//8 3//8 1//8]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Three_Eights_Rule_4, butcher)
+    return RungeKutta(; name = :Three_Eights_Rule_4, butcher)
 end
 
 """
@@ -43,7 +43,7 @@ function Ralston4(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 (263+24s5)/1812 (125-1000s5)/3828 1024(3346+1623s5)/5924787 (30-4s5)/123]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Ralston_4, butcher)
+    return RungeKutta(; name = :Ralston_4, butcher)
 end
 
 """
@@ -65,7 +65,7 @@ function Ketcheson4(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10 1//10]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Ketcheson_4, butcher)
+    return RungeKutta(; name = :Ketcheson_4, butcher)
 end
 
 """
@@ -81,7 +81,7 @@ function Butcher5(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 7//90 0 32//90 12//90 32//90 7//90]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Butcher_5, butcher)
+    return RungeKutta(; name = :Butcher_5, butcher)
 end
 
 """
@@ -98,5 +98,5 @@ function Butcher6(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 13//200 0 11//40 11//40 4//25 4//25 13//200]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Butcher_6, butcher)
+    return RungeKutta(; name = :Butcher_6, butcher)
 end

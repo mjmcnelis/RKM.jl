@@ -29,7 +29,7 @@ function Feagin108(; precision::Type{T} = Float64) where T <: AbstractFloat
             ]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Feagin_10_8, butcher)
+    return RungeKutta(; name = :Feagin_10_8, butcher)
 end
 
 """
@@ -74,7 +74,7 @@ function Feagin1210(; precision::Type{T} = Float64) where T <: AbstractFloat
             ]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Feagin_12_10, butcher)
+    return RungeKutta(; name = :Feagin_12_10, butcher)
 end
 
 """
@@ -131,5 +131,5 @@ function Feagin1412(; precision::Type{T} = Float64) where T <: AbstractFloat
     # combine tables
     butcher = vcat(butcher_1, butcher_2) .|> precision
 
-    RungeKutta(; name = :Feagin_14_12, butcher)
+    return RungeKutta(; name = :Feagin_14_12, butcher)
 end

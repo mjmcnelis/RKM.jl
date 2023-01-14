@@ -10,7 +10,7 @@
         @.. y_tmp = y
         # TODO: need a better dy cache for performance
         for j = 1:i-1
-            # TODO: continue if A = 0?
+            # TODO: continue if A,b = 0?
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
@@ -24,7 +24,7 @@
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
     end
-    nothing
+    return nothing
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
@@ -39,7 +39,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     @.. y = y_tmp                                       # get iteration
 
     add_function_evaluations!(FE, iteration, adaptive, method)
-    nothing
+    return nothing
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
@@ -93,7 +93,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     end
     @.. y = y2                                          # get iteration
     add_function_evaluations!(FE, iteration, adaptive, method, attempts)
-    nothing
+    return nothing
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
@@ -157,7 +157,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     end
     @.. y = y1                                          # get iteration
     add_function_evaluations!(FE, iteration, adaptive, method, attempts)
-    nothing
+    return nothing
 end
 
 function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
@@ -174,7 +174,7 @@ function doubling_runge_kutta_step!(method, iteration::Explicit, y, t, dt,
     fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0,
     dy_dt!, dy, y_tmp, f_tmp)
     @.. y2 = y_tmp                                      # y2(t+dt)
-    nothing
+    return nothing
 end
 
 @muladd function embedded_runge_kutta_step!(method, y, dy, y_tmp)
@@ -184,5 +184,5 @@ end
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b_hat[j]*dy_stage
     end
-    nothing
+    return nothing
 end

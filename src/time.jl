@@ -33,7 +33,7 @@ function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
     time_limit = now() + Minute(round(wtime_min))
     counter = MVector{1,Int64}(0)
 
-    TimeLimit(wtime_min, time_limit, frequency, counter)
+    return TimeLimit(wtime_min, time_limit, frequency, counter)
 end
 
 """
@@ -88,7 +88,7 @@ Required parameters: `t`, `tf`, `timer`
 """
 function continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
                          timer::TimeLimit) where T <: AbstractFloat
-    t[1] < tf && !past_time_limit(timer)
+    return t[1] < tf && !past_time_limit(timer)
 end
 
 """
@@ -103,11 +103,9 @@ function past_time_limit(timer::TimeLimit)
 
     @.. counter += 1
     # check timer for every N = frequency time steps
-    if counter[1] % frequency == 0
-        if now() > time_limit
-            @warn "\nExceeded time limit of $(timer.wtime_min) minutes (stop evolve...)\n"
-            return true
-        end
+    if counter[1] % frequency == 0 && now() > time_limit
+        @warn "\nExceeded time limit of $(timer.wtime_min) minutes (stop evolve...)\n"
+        return true
     end 
     return false
 end

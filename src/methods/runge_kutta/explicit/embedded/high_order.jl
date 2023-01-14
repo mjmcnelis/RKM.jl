@@ -25,7 +25,7 @@ function Fehlberg78(; precision::Type{T} = Float64) where T <: AbstractFloat
                ]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Fehlberg_7_8, butcher)
+    return RungeKutta(; name = :Fehlberg_7_8, butcher)
 end
 
 """
@@ -55,5 +55,5 @@ function DormandPrince87(; precision::Type{T} = Float64) where T <: AbstractFloa
                ]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Dormand_Prince_8_7, butcher)
+    return RungeKutta(; name = :Dormand_Prince_8_7, butcher)
 end

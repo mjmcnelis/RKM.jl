@@ -8,7 +8,7 @@ function make_code_name(name)
     for order in filter(x -> x != "", filter.(isdigit, name_split))
         code_name *= order
     end
-    code_name
+    return code_name
 end
 
 adaptive_code_label(::AdaptiveStepSize) = ""

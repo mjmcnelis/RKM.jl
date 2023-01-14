@@ -1,7 +1,7 @@
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/test/examples/logistic/equations.jl") : nothing 
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
 precision = Float64
 # precision = Double64

@@ -94,7 +94,7 @@ function Tsitouras54(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 big"9.468075576583945807478876255758922856117527357724631226139574065785592789071072e-2" big"9.183565540343253096776363936645313759813746240984095238905939532922955247253601e-3" big"4.877705284247615707855642599631228241516691959761363774365216240304071651579553e-1" big"1.234297566930478985655109673884237654035539930748192848315425833500484878378053" -big"2.707712349983525454881109975059321670689605166938197378763992255714444407154911" big"1.866628418170587035753719399566211498666255505244122593996591602841258328965763" 1//66]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Tsitouras_5_4, butcher)
+    return RungeKutta(; name = :Tsitouras_5_4, butcher)
 end
 
 """
@@ -115,7 +115,7 @@ function Verner56(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 57//640 0 -16//65 1377//2240 121//320 0 891//8320 2//35]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Verner_5_6, butcher)
+    return RungeKutta(; name = :Verner_5_6, butcher)
 end
 
 """
@@ -136,5 +136,5 @@ function Verner65(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 13//160 0 2375//5984 5//16 12//85 3//44 0 0]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Verner_6_5, butcher)
+    return RungeKutta(; name = :Verner_6_5, butcher)
 end

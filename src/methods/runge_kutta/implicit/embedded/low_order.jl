@@ -6,7 +6,7 @@ function CrankNicolson21(; precision::Type{T} = Float64) where T <: AbstractFloa
                1 1 0]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Crank_Nicolson_2_1, butcher)
+    return RungeKutta(; name = :Crank_Nicolson_2_1, butcher)
 end
 
 function LobattoIIIB21(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -16,7 +16,7 @@ function LobattoIIIB21(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1 0]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIIB_2_1, butcher)
+    return RungeKutta(; name = :Lobatto_IIIB_2_1, butcher)
 end
 
 function LobattoIIIC21(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -26,5 +26,5 @@ function LobattoIIIC21(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1 0]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIIC_2_1, butcher)
+    return RungeKutta(; name = :Lobatto_IIIC_2_1, butcher)
 end

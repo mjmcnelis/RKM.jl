@@ -1,7 +1,7 @@
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/test/examples/sine/equations.jl") : nothing 
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/sine/equations.jl") : nothing 
 
 const ω = 100.0       # frequency
 const R = 20          # cycles

@@ -9,7 +9,7 @@ function GaussLegendre42(; precision::Type{T} = Float64) where T <: AbstractFloa
                 1 1//2+s/2 1//2-s/2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Gauss_Legendre_4_2, butcher)
+    return RungeKutta(; name = :Gauss_Legendre_4_2, butcher)
 end
 
 function LobattoIIIA42(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -20,7 +20,7 @@ function LobattoIIIA42(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 -1//2 2 -1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIIA_4_2, butcher)
+    return RungeKutta(; name = :Lobatto_IIIA_4_2, butcher)
 end
 
 function LobattoIIIB42(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -31,7 +31,7 @@ function LobattoIIIB42(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 -1//2 2 -1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIIB_4_2, butcher)
+    return RungeKutta(; name = :Lobatto_IIIB_4_2, butcher)
 end
 
 function LobattoIIIC42(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -42,7 +42,7 @@ function LobattoIIIC42(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 -1//2 2 -1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIIC_4_2, butcher)
+    return RungeKutta(; name = :Lobatto_IIIC_4_2, butcher)
 end
 
 function LobattoIIICS42(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -53,7 +53,7 @@ function LobattoIIICS42(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 -1//2 2 -1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIICS_4_2, butcher)
+    return RungeKutta(; name = :Lobatto_IIICS_4_2, butcher)
 end
 
 function LobattoIIID42(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -64,7 +64,7 @@ function LobattoIIID42(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 -1//2 2 -1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Lobatto_IIID_4_2, butcher)
+    return RungeKutta(; name = :Lobatto_IIID_4_2, butcher)
 end
 
 function RaduaIIA52(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -78,7 +78,7 @@ function RaduaIIA52(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1-7s/12 1+7s/12 -1]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Radau_IIA_5_2, butcher)
+    return RungeKutta(; name = :Radau_IIA_5_2, butcher)
 end
 
 function GaussLegendre64(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -92,5 +92,5 @@ function GaussLegendre64(; precision::Type{T} = Float64) where T <: AbstractFloa
                1 -5//6 8//3 -5//6]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Gauss_Legendre_6_4, butcher)
+    return RungeKutta(; name = :Gauss_Legendre_6_4, butcher)
 end

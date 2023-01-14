@@ -30,7 +30,7 @@ function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFl
     FE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
 
-    Solution(y, t, FE, rejection_rate, dimensions)
+    return Solution(y, t, FE, rejection_rate, dimensions)
 end
 
 """
@@ -45,7 +45,7 @@ function append_solution!(sol::Solution, y::Vector{T},
                           t::Union{Vector{T}, MVector{1,T}}) where T <: AbstractFloat
     append!(sol.y, y)
     append!(sol.t, t[1])
-    nothing
+    return nothing
 end
 
 """
@@ -62,7 +62,7 @@ function sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64
     # TODO: why is steps+1 not sufficient?
     sizehint!(sol.y, dimensions*(steps + 2))
     sizehint!(sol.t, steps + 2)
-    nothing
+    return nothing
 end
 
 """
@@ -79,5 +79,5 @@ function get_solution(sol::Solution)
     y, t = sol.y, sol.t
     # TODO: replace length(t) if use deleteat for PDEs
     y = reshape(y, sol.dimensions, length(t))'
-    y, t
+    return y, t
 end

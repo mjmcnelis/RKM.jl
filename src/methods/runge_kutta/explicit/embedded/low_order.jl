@@ -11,7 +11,7 @@ function Fehlberg12(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//512 255//256 1//512]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Fehlberg_1_2, butcher)
+    return RungeKutta(; name = :Fehlberg_1_2, butcher)
 end
 
 """
@@ -24,7 +24,7 @@ function HeunEuler21(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1 0]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Heun_Euler_2_1, butcher)
+    return RungeKutta(; name = :Heun_Euler_2_1, butcher)
 end
 
 """
@@ -41,5 +41,5 @@ function BogackiShampine32(; precision::Type{T} = Float64) where T <: AbstractFl
                1 7//24 1//4 1//3 1//8]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Bogacki_Shampine_3_2, butcher)
+    return RungeKutta(; name = :Bogacki_Shampine_3_2, butcher)
 end

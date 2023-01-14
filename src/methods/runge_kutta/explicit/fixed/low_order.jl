@@ -7,7 +7,7 @@ function Euler1(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Euler_1, butcher)
+    return RungeKutta(; name = :Euler_1, butcher)
 end
 
 """
@@ -21,7 +21,7 @@ function Heun2(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//2 1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Heun_2, butcher)
+    return RungeKutta(; name = :Heun_2, butcher)
 end
 
 """
@@ -33,7 +33,7 @@ function Midpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 0 1]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Midpoint_2, butcher)
+    return RungeKutta(; name = :Midpoint_2, butcher)
 end
 
 """
@@ -48,7 +48,7 @@ function Ralston2(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//4 3//4]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Ralston_2, butcher)
+    return RungeKutta(; name = :Ralston_2, butcher)
 end
 
 """
@@ -69,7 +69,7 @@ function Generic2(; alpha::Union{Int, Rational},
                1 1-1//2a 1//2a]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Generic_2, butcher)
+    return RungeKutta(; name = :Generic_2, butcher)
 end
 
 """
@@ -82,7 +82,7 @@ function Heun3(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1/4 0 3//4]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Heun_3, butcher)
+    return RungeKutta(; name = :Heun_3, butcher)
 end
 
 """
@@ -97,7 +97,7 @@ function Ralston3(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 2//9 1//3 4//9]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Ralston_3, butcher)
+    return RungeKutta(; name = :Ralston_3, butcher)
 end
 
 """
@@ -110,7 +110,7 @@ function RungeKutta3(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 2//9 1//3 4//9]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Runge_Kutta_3, butcher)
+    return RungeKutta(; name = :Runge_Kutta_3, butcher)
 end
 
 """
@@ -125,7 +125,7 @@ function ShuOsher3(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//6 1//6 2//3]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Shu_Osher_3, butcher)
+    return RungeKutta(; name = :Shu_Osher_3, butcher)
 end
 
 """
@@ -142,7 +142,7 @@ function SpiteriRuuth3(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//6 1//6 1//6 1//2]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Spiteri_Ruuth_3, butcher)
+    return RungeKutta(; name = :Spiteri_Ruuth_3, butcher)
 end
 
 """
@@ -164,5 +164,5 @@ function Generic3(; alpha::Union{Int, Rational},
                1 1//2-1//6a 1//(6a*(1-a)) (2-3a)//6(1-a)]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Generic_3, butcher)
+    return RungeKutta(; name = :Generic_3, butcher)
 end

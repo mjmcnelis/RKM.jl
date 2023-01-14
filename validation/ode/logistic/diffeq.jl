@@ -1,7 +1,7 @@
 using Revise, OrdinaryDiffEq, StaticArrays, BenchmarkTools
 import RKM: RKM_root
 # using Plots; plotly()
-!(@isdefined fp) ? include("$RKM_root/test/logistic/equations.jl") : nothing 
+!(@isdefined fp) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
 t0 = -10.0
 N = 2

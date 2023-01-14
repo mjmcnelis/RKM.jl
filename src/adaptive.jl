@@ -21,7 +21,7 @@ function Doubling(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm 
     check_adaptive_parameters(epsilon, low, high, safety, p_norm,
                               dt_min, dt_max, max_attempts)
 
-    Doubling(epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts)
+    return Doubling(epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts)
 end
 
 struct Embedded <: AdaptiveStepSize
@@ -41,7 +41,7 @@ function Embedded(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm 
     check_adaptive_parameters(epsilon, low, high, safety, p_norm,
                               dt_min, dt_max, max_attempts)
 
-    Embedded(epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts)
+    return Embedded(epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts)
 end
 
 function check_adaptive_parameters(epsilon, low, high, safety, p_norm,
@@ -56,4 +56,5 @@ function check_adaptive_parameters(epsilon, low, high, safety, p_norm,
     @assert dt_min > 0 && dt_max > 0 "dt_min, dt_max = ($dt_min, $dt_max) are not positive"
     @assert dt_max > dt_min "dt_max = $dt_max is less than dt_min = $dt_min"
     @assert max_attempts > 0 "max_attempts = $max_attempts is not greater than 0"
+    return nothing
 end

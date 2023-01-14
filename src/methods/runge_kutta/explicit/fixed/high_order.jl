@@ -21,7 +21,7 @@ function Curtis8(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//20 0 0 0 0 13//180 1//5 16//45 1//5 13//180 1//20]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Curtis_8, butcher)
+    return RungeKutta(; name = :Curtis_8, butcher)
 end
 
 """
@@ -45,7 +45,7 @@ function Shanks8(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 41//840 0 0 0 0 216//840 272//840 27//840 27//840 36//840 180//840 41//840]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Shanks_8, butcher)
+    return RungeKutta(; name = :Shanks_8, butcher)
 end
 
 """
@@ -67,5 +67,5 @@ function ShanksPseudo8(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 41//840 0 0 9//280 34//105 9//280 9//35 0 9//35 41//840]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Shanks_Pseudo_8, butcher)
+    return RungeKutta(; name = :Shanks_Pseudo_8, butcher)
 end

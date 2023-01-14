@@ -21,7 +21,7 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function)
     #      label = code_name, legend = :outertopright, legendfontsize = 12,
     #      ylabel = "Δt", yguidefontsize = 14, ytickfontsize = 12,
     #      xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
-    nothing
+    return nothing
 end
 
 get_linestyle(::AdaptiveStepSize) = :solid 

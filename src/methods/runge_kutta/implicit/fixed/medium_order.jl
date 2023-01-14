@@ -13,7 +13,7 @@ function Norsett4(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1/(6(1-2x)^2) 1-1/(3(1-2x)^2) 1/(6(1-2x)^2)]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Norsett_4, butcher)
+    return RungeKutta(; name = :Norsett_4, butcher)
 end
 
 function RaduaIA5(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -26,5 +26,5 @@ function RaduaIA5(; precision::Type{T} = Float64) where T <: AbstractFloat
                1 1//9 4//9+s/36 4//9-s/36]
     butcher = butcher .|> precision
 
-    RungeKutta(; name = :Radau_IA_5, butcher)
+    return RungeKutta(; name = :Radau_IA_5, butcher)
 end

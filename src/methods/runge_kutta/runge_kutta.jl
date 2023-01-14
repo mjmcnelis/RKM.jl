@@ -42,8 +42,8 @@ function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
 
-    RungeKutta(name, butcher, c, A_T, b, b_hat, stages, precision,
-               order, iteration, fsal, code_name)
+    return RungeKutta(name, butcher, c, A_T, b, b_hat, stages, precision,
+                      order, iteration, fsal, code_name)
 end
 
 function Base.show(io::IO, RK::RungeKutta)
