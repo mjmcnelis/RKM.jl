@@ -5,7 +5,7 @@ using Plots; plotly()
 
 precision = Float64
 # precision = Double64
-# precision = BigFloat        # 31.60 M allocations (fixed time step)
+# precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
 
 adaptive = Fixed()         
 method = RungeKutta4()
