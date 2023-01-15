@@ -9,5 +9,5 @@ Parameters for the ODE solver.
     """Time range of ODE evolution"""
     t_range::TimeRange
     """Timer for ODE solver"""
-    timer::TimeLimit = TimeLimit(; wtime_min = 60, frequency = 100)
+    timer::TimeLimit = TimeLimit(; wtime_min = 60)
 end

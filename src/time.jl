@@ -14,39 +14,70 @@ end
 Sets a timer for the ODE solver.
 """
 struct TimeLimit
-    """Wall time time (minutes)"""
+    """Wall time (minutes)"""
     wtime_min::Int64
-    """Time limit in terms of DateTime"""
-    time_limit::DateTime
-    """Check timer after this number of time steps"""
-    frequency::Int64
-    """Counter for number of time steps done so far by the solver"""
+    """Determines whether or not the runtime has exceeded the time limit"""
+    past_time::MVector{1,Bool}
+    """Counter for the number of time steps done so far by the solver"""
     counter::MVector{1,Int64}
 end
 
 """
-    function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
+    function TimeLimit(; wtime_min::Int64 = 60)
 
 Outer constructor for `TimeLimit`.
 """
-function TimeLimit(; wtime_min::Int64 = 60, frequency::Int64 = 100)
-    time_limit = now() + Minute(round(wtime_min))
+function TimeLimit(; wtime_min::Int64 = 60)
+    past_time = MVector{1,Bool}(false)
     counter = MVector{1,Int64}(0)
 
-    return TimeLimit(wtime_min, time_limit, frequency, counter)
+    return TimeLimit(wtime_min, past_time, counter)
 end
 
 """
-    reset_timer(timer::TimeLimit)
+    reset_timer!(timer::TimeLimit)
 
-Constructs a new `TimeLimit` from `timer` by updating `time_limit`
-and `counter` fields.
+Resets the `timer` fields `past_time` to `false` and `counter` to `0`.
 
 Required parameters: `timer`
 """
-function reset_timer(timer::TimeLimit)
-    @unpack wtime_min, frequency = timer 
-    return TimeLimit(; wtime_min, frequency)
+function reset_timer!(timer::TimeLimit)
+    timer.past_time[1] = false 
+    timer.counter[1] = 0
+    return nothing
+end
+
+"""
+    start_timer!(timer::TimeLimit)
+
+Starts the `timer` and set the field `past_time` to 
+`true` when the runtime exceeds the time limit.
+
+Required parameters: `timer`
+"""
+function start_timer!(timer::TimeLimit)
+    @unpack wtime_min, past_time = timer 
+    @async begin 
+        sleep(60 * wtime_min)
+        @warn "\nExceeded time limit of $wtime_min minutes (stopping evolve_ode...)\n"
+        past_time[1] = true
+    end 
+end
+
+"""
+    continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
+                    timer::TimeLimit) where T <: AbstractFloat
+
+Checks whether to continue running the ODE solver. The solver stops (`false`) if either
+the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `timer`.
+
+Required parameters: `t`, `tf`, `timer`
+"""
+function continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
+                         timer::TimeLimit) where T <: AbstractFloat
+    # TODO: add counter somewhere else? 
+    timer.counter[1] += 1
+    return t[1] < tf && !timer.past_time[1]
 end
 
 """
@@ -75,37 +106,4 @@ function monitor_progess(t::Union{Vector{T}, MVector{1,T}}, progress::Progress,
         end
     end
     return nothing
-end
-
-"""
-    continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
-                    timer::TimeLimit) where T <: AbstractFloat
-
-Checks whether to continue running the ODE solver. The solver stops (`false`) if either
-the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `timer`.
-
-Required parameters: `t`, `tf`, `timer`
-"""
-function continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
-                         timer::TimeLimit) where T <: AbstractFloat
-    return t[1] < tf && !past_time_limit(timer)
-end
-
-"""
-    past_time_limit(timer::TimeLimit)
-
-Checks whether the runtime has exceeded the time limit set by `timer`.
-
-Required parameters: `timer`
-"""
-function past_time_limit(timer::TimeLimit)
-    @unpack counter, frequency, time_limit = timer
-
-    @.. counter += 1
-    # check timer for every N = frequency time steps
-    if counter[1] % frequency == 0 && now() > time_limit
-        @warn "\nExceeded time limit of $(timer.wtime_min) minutes (stop evolve...)\n"
-        return true
-    end 
-    return false
 end

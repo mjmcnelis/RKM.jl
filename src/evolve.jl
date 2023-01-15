@@ -21,7 +21,9 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     @unpack adaptive, method, t_range, timer = parameters
     @unpack t0, tf, dt0 = t_range
 
-    timer = reset_timer(timer)
+    reset_timer!(timer)
+    start_timer!(timer)
+
     method = reconstruct_method(method, precision)
     @unpack stages, iteration = method
 
@@ -73,7 +75,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!,
                               dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
-        @.. t += dt[1]
+        t[1] += dt[1]
     end
     compute_step_rejection_rate!(sol, method, adaptive, timer)
     return sol
