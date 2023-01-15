@@ -31,7 +31,10 @@ end
 show_progress = true
 # show_progress = false
 
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
+static_array = false
+# static_array = true
+
+@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array)
 # sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
 
 # @show Base.format_bytes(sizeof(sol.y) + sizeof(sol.t))

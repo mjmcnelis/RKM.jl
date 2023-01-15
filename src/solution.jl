@@ -34,21 +34,6 @@ function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFl
 end
 
 """
-    append_solution!(sol::Solution, y::Vector{T},
-                     t::VectorMVector{1,T}) where T <: AbstractFloat
-
-Appends the state vector `y` at the current time `t` to the solution `sol`.
-
-Required parameters: `sol`, `y`, `t`
-"""
-function append_solution!(sol::Solution, y::Vector{T}, 
-                          t::VectorMVector{1,T}) where T <: AbstractFloat
-    append!(sol.y, y)
-    append!(sol.t, t[1])
-    return nothing
-end
-
-"""
     sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
 
 Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.

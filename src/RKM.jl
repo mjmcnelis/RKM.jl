@@ -3,7 +3,7 @@ module RKM
 import Dates: now, Minute, DateTime
 import ProgressMeter: Progress, next!
 import LinearAlgebra: norm, tril, diag
-import StaticArrays: SVector, SMatrix, MVector
+import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import DataStructures: OrderedDict
 import MuladdMacro: @muladd
 import FastBroadcast: @..
@@ -13,6 +13,8 @@ import Base: @kwdef
 abstract type ODEMethod end
 
 const VectorMVector = Union{Vector{T}, MVector{D,T}} where {D, T <: AbstractFloat} 
+const MatrixMMatrix = Union{Matrix{T}, MMatrix{D,S,T,DS}} where {D, S, DS, 
+                                                                 T <: AbstractFloat}
 
 RKM_root = dirname(dirname(@__FILE__))
 
@@ -21,6 +23,7 @@ include("solution.jl")
 include("embedded.jl")
 include("adaptive.jl")
 include("plots.jl")
+include("utils.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")

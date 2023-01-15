@@ -1,8 +1,8 @@
 
-@muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, y::Vector{T},
-                     t::T, dt::T, dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T},
-                     f_tmp::Vector{T}) where {T <: AbstractFloat, F <: Function}
-
+@muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, 
+                     y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix, 
+                     y_tmp::VectorMVector, f_tmp::VectorMVector) where {T <: AbstractFloat,
+                                                                        F <: Function}
     @unpack c, A_T, b, stages = method
 
     for i = 2:stages                                    # evaluate remaining stages
@@ -28,10 +28,11 @@
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Fixed, FE::MVector{1,Int64}, y::Vector{T}, 
-             t::VectorMVector{1,T}, dt::VectorMVector{2,T},
-             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T},
-             args...) where {T <: AbstractFloat, F}
+             adaptive::Fixed, FE::MVector{1,Int64}, y::VectorMVector, 
+             t::VectorMVector{1,T}, dt::VectorMVector{2,T},dy_dt!::F,
+             dy::MatrixMMatrix, y_tmp::VectorMVector, 
+             f_tmp::VectorMVector, args...) where {T <: AbstractFloat, F}
+             
     dy_dt!(f_tmp, t[1], y)                              # evalute first state at (t,y)
     @.. dy[:,1] = dt[1] * f_tmp
 
