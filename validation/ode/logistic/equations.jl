@@ -29,13 +29,13 @@ function jacobian!(J, t, y)
 end
 
 # for OrdinaryDiffEq (StaticArray version)
-function fp_static(y, p, t)
+function f_ord_static(y, p, t)
     N = length(y)
     SA[((y[i] + get_a(i,N))*(1.0 - get_a(i,N) - y[i]) for i in eachindex(y))...]
 end
 
 # for OrdinaryDiffEq (normal version)
-function fp(f, y, p, t)
+function f_ord(f, y, p, t)
     N = length(y)
     for i in eachindex(y)
         a = get_a(i, N)

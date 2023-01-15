@@ -3,34 +3,39 @@ import StaticArrays: SA
 import BenchmarkTools: @benchmark, @btime, mean
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
+GC.gc()
 
 t0 = -10.0
 tf = 10.0
-dt0_vect = 10.0.^LinRange(-1, -5, 5)
 
 time_ord = Float64[]
 memory_ord = Float64[]
 time_rkm = Float64[]
 memory_rkm = Float64[]
 
-# static = false
-static = true
+static = false
+# static = true
 
-GC.gc()
+N = 1 
+y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
+dt0_vect = 10.0.^(-(1:1:5))
+
+# vary time step (fix number of state variables)
 for dt0 in dt0_vect  
     @show dt0
+
     # OrdinaryDiffEq
-    f = static ? fp_static : fp 
-    y0 = static ? SA[exp(t0)/(1.0 + exp(t0)) - 0.5] : [exp(t0)/(1.0 + exp(t0)) - 0.5]
-    prob = ODEProblem(f, y0, (t0, tf))
+    f = static ? f_ord_static : f_ord
+    y = static ? SA[y0...] : y0
+    prob = ODEProblem(f, y, (t0, tf))
     ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false)
     push!(time_ord, mean(ord).time/1e9)     # convert from ns to s
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
+    GC.gc()
     # RKM
-    y0 = exp(t0)/(1.0 + exp(t0)) - 0.5
     ps = Parameters(; adaptive = Fixed(), method = RungeKutta4(), 
                       t_range = TimeRange(; t0, tf, dt0))
-    rkm = @benchmark evolve_ode($y0, dy_dt!; parameters = $ps, show_progress = false, 
+    rkm = @benchmark evolve_ode($y0, dy_dt!; parameters = $ps, show_progress = false,
                                 static_array = $static)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
@@ -45,14 +50,59 @@ plot_kwargs = (title = "Logistic equation", titlefontsize = 16, size = (1000, 60
 # Plot runtimes vs time step
 plt = plot(dt0_vect, time_ord; label = "OrdinaryDiffEq", 
            xlabel = "Time step [s]", ylabel = "Runtime [s]",
-           xlims = (1e-5, 1e-1), ylims = (1e-5, 1e1), plot_kwargs...)
-plot!(dt0_vect, time_rkm; label = "RKM", plot_kwargs...)
+           xlims = (1e-5, 1e-1), ylims = (1e-5, 1e1), plot_kwargs...);
+plot!(dt0_vect, time_rkm; label = "RKM", plot_kwargs...);
 display(plt)
 
-# Plot runtimes vs time step
+# Plot memory usage vs time step
 plt = plot(dt0_vect, memory_ord; label = "OrdinaryDiffEq", 
-           xlabel = "Time step [s]", ylabel = "Memory [MiB]",
+           xlabel = "Time step [s]", ylabel = "Memory usage [MiB]",
            xlims = (1e-5, 1e-1), ylims = (1e-2, 1e3),
-            plot_kwargs...)
-plot!(dt0_vect, memory_rkm; label = "RKM", plot_kwargs...)
+            plot_kwargs...);
+plot!(dt0_vect, memory_rkm; label = "RKM", plot_kwargs...);
+display(plt)
+
+#-----------------------------------------------------------------
+
+time_ord = Float64[]
+memory_ord = Float64[]
+time_rkm = Float64[]
+memory_rkm = Float64[]
+
+dt0 = 1e-1
+N_vect = (10).^(0:1:6)
+
+# vary state variables (fix time step)
+for N in N_vect 
+    @show N 
+    # don't use static arrays
+    y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
+
+    # OrdinaryDiffEq
+    prob = ODEProblem(f_ord, y0, (t0, tf))
+    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false)
+    push!(time_ord, mean(ord).time/1e9)     # convert from ns to s
+    push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
+    GC.gc()
+    # RKM
+    ps = Parameters(; adaptive = Fixed(), method = RungeKutta4(), 
+                      t_range = TimeRange(; t0, tf, dt0))
+    rkm = @benchmark evolve_ode($y0, dy_dt!; parameters = $ps, show_progress = false)
+    push!(time_rkm, mean(rkm).time/1e9)
+    push!(memory_rkm, rkm.memory/1024^2)
+    GC.gc()
+end
+
+# Plot runtimes vs number of state variables
+plt = plot(N_vect, time_ord; label = "OrdinaryDiffEq", 
+           xlabel = "Number of state variables", ylabel = "Runtime [s]",
+           xlims = (1e0, 1e6), ylims = (1e-5, 1e2), plot_kwargs...);
+plot!(N_vect, time_rkm; label = "RKM", plot_kwargs...);
+display(plt)
+
+# Plot memory usage vs number of state variables
+plt = plot(N_vect, memory_ord; label = "OrdinaryDiffEq", 
+           xlabel = "Number of state variables", ylabel = "Memory usage [MiB]",
+           xlims = (1e0, 1e6), ylims = (1e-2, 1e4), plot_kwargs...);
+plot!(N_vect, memory_rkm; label = "RKM", plot_kwargs...);
 display(plt)
