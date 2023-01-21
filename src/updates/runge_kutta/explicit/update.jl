@@ -1,4 +1,5 @@
-
+# benchmark.jl note: don't see as much benefit to @muladd as @..
+# benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, 
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix, 
                      y_tmp::VectorMVector, f_tmp::VectorMVector) where {T <: AbstractFloat,

@@ -15,14 +15,14 @@ end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Fixed, 
                                    method::RungeKutta, args...)
-    @.. FE += method.stages
+    FE[1] += method.stages
     return nothing
 end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Doubling,
                                    method::RungeKutta, attempts::Int64)
     evals = 1 + attempts*(3*method.stages - 2)
-    @.. FE += evals
+    FE[1] += evals
     return nothing
 end
 
@@ -34,6 +34,6 @@ function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Embedded,
    
     # note: fsal advantage does not count for rejected attempts
     evals = 1 - fsal_stage + attempts*(stages - 1)
-    @.. FE += evals
+    FE[1] += evals
     return nothing
 end

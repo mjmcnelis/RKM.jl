@@ -1,4 +1,22 @@
 import LinearAlgebra: norm
+import UnPack: @unpack
+
+function reconstruct_butcher(method::RungeKutta)
+    @unpack stages, precision, c, A_T, b, b_hat = method 
+
+    ncol = stages + 1
+    nrow = b_hat == b ? ncol : ncol + 1 
+    butcher = zeros(precision, nrow, ncol)
+
+    butcher[1:ncol-1, 2:ncol] .= A_T'
+    butcher[1:ncol-1, 1] .= c
+    butcher[ncol, 2:ncol] .= b
+    butcher[nrow, 2:ncol] .= b_hat
+    butcher[ncol, 1] = 1.0
+    butcher[nrow, 1] = 1.0
+
+    return butcher 
+end
 
 """
     debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 10.0)
@@ -12,7 +30,7 @@ error exceeds the tolerance by the factor `tol_fact_iter`).
 Note: `tol_fact_iter = 1.86` is the lowest factor I currently can reach.
 """
 function debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 10.0)
-    B = method.butcher
+    B = reconstruct_butcher(method)
 
     for i in 1:size(B, 1)
         err = abs(B[i, 1] - sum(B[i, 2:end]))

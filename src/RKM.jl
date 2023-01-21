@@ -3,7 +3,6 @@ module RKM
 import ProgressMeter: Progress, next!
 import LinearAlgebra: norm, tril, diag
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
-import DataStructures: OrderedDict
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
@@ -16,6 +15,7 @@ const MatrixMMatrix = Union{Matrix{T}, MMatrix{D,S,T,DS}} where {D, S, DS,
                                                                  T <: AbstractFloat}
 
 RKM_root = dirname(dirname(@__FILE__))
+export RKM_root
 
 include("time.jl")
 include("solution.jl")
@@ -60,42 +60,28 @@ export RungeKutta
 export Iteration, Explicit, DiagonalImplicit, FullImplicit
     # Fixed explicit Runge-Kutta
 export Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3, Ralston3, RungeKutta3,
-       ShuOsher3, SpiteriRuuth3, Generic3
-export RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4, Butcher5, Butcher6
-export Curtis8, Shanks8, ShanksPseudo8
+       ShuOsher3, SpiteriRuuth3, Generic3, RungeKutta4, ThreeEightsRule4, Ralston4, 
+       Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
     # Embedded explicit Runge-Kutta
-export Fehlberg12, HeunEuler21, BogackiShampine32
-export Fehlberg45, CashKarp54, DormandPrince54, BogackiShampine54, Tsitouras54, Verner56,
-       Verner65
-export Fehlberg78, DormandPrince87
-export Feagin108
-export Feagin1210
-export Feagin1412
+export Fehlberg12, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, DormandPrince54, 
+       BogackiShampine54, Tsitouras54, Verner56, Verner65, Fehlberg78, DormandPrince87,
+       Feagin108, Feagin1210, Feagin1412
     # Fixed implicit Runge-Kutta
 export BackwardEuler1, ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2, PareschiRusso2,
-       PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3
-export Norsett4, RaduaIA5
+       PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3, Norsett4, RaduaIA5
     # Embedded implicit Runge-Kutta
-export CrankNicolson21, LobattoIIIB21, LobattoIIIC21
-export GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIICS42,
-       LobattoIIID42, RaduaIIA52, GaussLegendre64
-# Get Runge-Kutta tables
-export get_all_runge_kutta_tables, get_runge_kutta_explicit_tables,
-       get_runge_kutta_full_implicit_tables, get_runge_kutta_diagonal_implicit_tables
+export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42, 
+       LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52, GaussLegendre64
 # Code names
 export make_code_name
 # ODE solution
-export Solution, get_solution
+export get_solution
 # Parameters
 export Parameters
 # Time
 export TimeRange, TimeLimit
 # ODE solver
 export evolve_ode
-# Efficiency 
-export efficiency_curve
-# Utilities
-export debug_table, debug_iteration, RKM_root
 # Plots
 export plot_ode
 
