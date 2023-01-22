@@ -1,5 +1,5 @@
 
-# High-order methods (7-9)
+# High-order (7-9) explicit Runge-Kutta methods
 
 ## Standard 
 
@@ -15,6 +15,8 @@ The following embedded methods are compatible with all adaptive time step option
 
 - `Fehlberg78()`: Fehlberg's seventh(eighth)-order method
 - `DormandPrince87()`: Dormand and Prince's eighth(seventh)-order method
+
+## API Reference 
 
 ```@autodocs
 Modules = [RKM]

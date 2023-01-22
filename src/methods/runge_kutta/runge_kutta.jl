@@ -6,7 +6,6 @@ struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
     b::SVector{S, T}
     b_hat::SVector{S, T}            # TODO: generalize b_hat
     stages::Int64
-    precision::Type{T}
     order::Vector{T}
     # TODO: should I just wrap this in a Properties struct?
     iteration::Iteration
@@ -23,6 +22,13 @@ end
 #                   :symp
 #                   :)
 
+"""
+    RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
+
+Outer constructor for `RungeKutta`. 
+
+Required parameters: `name`, `butcher`
+"""
 function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
     precision = precision_prop(butcher)         # determine properties
     order     = order_prop(name, butcher)
@@ -40,8 +46,8 @@ function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
 
-    return RungeKutta(name, c, A_T, b, b_hat, stages, precision,
-                      order, iteration, fsal, code_name)
+    return RungeKutta(name, c, A_T, b, b_hat, stages, order, 
+                      iteration, fsal, code_name)
 end
 
 function Base.show(io::IO, RK::RungeKutta)

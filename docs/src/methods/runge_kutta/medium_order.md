@@ -1,5 +1,5 @@
 
-# Medium-order methods (4-6)
+# Medium-order (4-6) explicit Runge-Kutta methods
 
 ## Standard 
 
@@ -25,6 +25,8 @@ The following embedded methods are compatible with all adaptive time step option
 - `Verner65()`: Verner's sixth(fifth)-order method
 
 *Note: SSP stands for strong stability preserving*
+
+## API Reference 
 
 ```@autodocs
 Modules = [RKM]
