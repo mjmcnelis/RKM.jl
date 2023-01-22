@@ -34,5 +34,7 @@ converted to the type `precision`, which is set by the user.
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/runge_kutta.jl"]
+Pages   = ["methods/runge_kutta/runge_kutta.jl", 
+           "methods/properties.jl", 
+           "methods/code_names.jl"]
 ```

@@ -1,4 +1,6 @@
-
+"""
+Stores the Butcher tableau and properties of the selected Runge-Kutta method.
+"""
 struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
     name::Symbol
     c::SVector{S, T}
@@ -30,8 +32,7 @@ Outer constructor for `RungeKutta`.
 Required parameters: `name`, `butcher`
 """
 function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
-    precision = precision_prop(butcher)         # determine properties
-    order     = order_prop(name, butcher)
+    order     = order_prop(name, butcher)       # determine properties
     iteration = iteration_prop(butcher)
     fsal      = fsal_prop(butcher)
     code_name = make_code_name(name)            # get code name label

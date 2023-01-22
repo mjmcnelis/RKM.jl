@@ -12,8 +12,6 @@ abstract type FirstSameAsLast end
 struct FSAL <: FirstSameAsLast end
 struct NotFSAL <: FirstSameAsLast end
 
-precision_prop(butcher::Matrix{<:AbstractFloat}) = typeof(butcher[1,1])
-
 # TODO: determine if butcher table fixed (square matrix) or embedded (not square matrix)
 
 function iteration_prop(butcher::Matrix{<:AbstractFloat})
