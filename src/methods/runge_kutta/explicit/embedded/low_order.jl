@@ -1,4 +1,6 @@
 """
+    Fehlberg12(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Fehlberg's first(second)-order method.
 
 https://ntrs.nasa.gov/citations/19690021375
@@ -15,7 +17,9 @@ function Fehlberg12(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
-Heun and Euler's second(first)-order method.
+    HeunEuler21(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Heun-Euler second(first)-order method.
 """
 function HeunEuler21(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0
@@ -28,6 +32,8 @@ function HeunEuler21(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    BogackiShampine32(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Bogacki and Shampine's third(second)-order method.
 
 https://www.sciencedirect.com/science/article/pii/0893965989900797

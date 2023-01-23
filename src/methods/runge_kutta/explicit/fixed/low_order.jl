@@ -1,5 +1,7 @@
 # TODO: include stability region table/calculator?
 """
+    Euler1(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Euler's first-order method.
 """
 function Euler1(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -11,6 +13,8 @@ function Euler1(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Heun2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Heun's second-order method.
 
 Note: strong stability preserving (SSP)
@@ -25,6 +29,8 @@ function Heun2(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Midpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Second-order midpoint rule.
 """
 function Midpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -37,6 +43,8 @@ function Midpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Ralston2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Ralston's second-order method.
 
 https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
@@ -73,6 +81,8 @@ function Generic2(; alpha::Union{Int, Rational},
 end
 
 """
+    Heun3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Heun's third-order method.
 """
 function Heun3(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -86,6 +96,8 @@ function Heun3(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Ralston3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Ralston's third-order method.
 
 https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
@@ -101,6 +113,8 @@ function Ralston3(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    RungeKutta3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Kutta's third-order method.
 """
 function RungeKutta3(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -114,6 +128,8 @@ function RungeKutta3(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    ShuOsher3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Shu and Osher's third-order SSP method.
 
 https://www.sciencedirect.com/science/article/pii/0021999188901775
@@ -129,6 +145,8 @@ function ShuOsher3(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    SpiteriRuuth3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Spiteri and Ruuth's third-order SSP method.
 
 https://epubs.siam.org/doi/10.1137/S0036142902419284

@@ -1,4 +1,6 @@
 """
+    Fehlberg45(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Fehlberg's fourth(fifth)-order method.
 
 https://ntrs.nasa.gov/citations/19690021375
@@ -18,6 +20,8 @@ function Fehlberg45(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    CashKarp54(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Cash and Karp's fifth(fourth)-order method.
 
 http://www.elegio.it/mc2/rk/doc/p201-cash-karp.pdf
@@ -37,6 +41,8 @@ function CashKarp54(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    DormandPrince54(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Dormand and Prince's fifth(fourth)-order method.
 
 https://www.sciencedirect.com/science/article/pii/0771050X80900133?via%3Dihub
@@ -57,6 +63,8 @@ function DormandPrince54(; precision::Type{T} = Float64) where T <: AbstractFloa
 end
 
 """
+    BogackiShampine54(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Bogacki and Shampine's fifth(fourth)-order method.
 """
 function BogackiShampine54(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -75,6 +83,8 @@ function BogackiShampine54(; precision::Type{T} = Float64) where T <: AbstractFl
 end
 
 """
+    Tsitouras54(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Tsitouras' fifth(fourth)-order method.
 
 https://www.sciencedirect.com/science/article/pii/S0898122111004706
@@ -98,6 +108,8 @@ function Tsitouras54(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Verner56(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Verner's fifth(sixth)-order method (1978). 
 
 https://www.jstor.org/stable/2156853
@@ -119,6 +131,8 @@ function Verner56(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Verner65(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Verner's sixth(fifth)-order method.
 
 https://link.springer.com/book/10.1007/978-3-540-78862-1

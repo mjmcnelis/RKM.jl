@@ -1,4 +1,6 @@
 """
+    Fehlberg78(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Fehlberg's seventh(eighth)-order method.
 
 https://ntrs.nasa.gov/citations/19680027281
@@ -29,6 +31,8 @@ function Fehlberg78(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    DormandPrince87(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Dormand and Prince's eighth(seventh)-order method. 
 
 https://www.sciencedirect.com/science/article/pii/0771050X81900103

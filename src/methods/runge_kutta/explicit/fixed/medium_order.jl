@@ -1,6 +1,8 @@
 # TODO: for Fehlberg4, etc, take Fehlberg45 except 2nd-last (last) row
-# TODO: make documentation page
+
 """
+    RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Classic fourth-order Runge-Kutta method.
 """
 function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -15,6 +17,8 @@ function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    ThreeEightsRule4(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Fourth-order 3/8 rule.
 """
 function ThreeEightsRule4(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -29,6 +33,8 @@ function ThreeEightsRule4(; precision::Type{T} = Float64) where T <: AbstractFlo
 end
 
 """
+    Ralston4(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Ralston's fourth-order method.
 
 https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
@@ -47,6 +53,8 @@ function Ralston4(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Ketcheson4(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Ketcheson's fourth-order SSP method. 
 
 https://epubs.siam.org/doi/10.1137/07070485X
@@ -69,6 +77,8 @@ function Ketcheson4(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Butcher5(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Butcher's fifth-order method.
 """
 function Butcher5(; precision::Type{T} = Float64) where T <: AbstractFloat
@@ -85,6 +95,8 @@ function Butcher5(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Butcher6(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Butcher's sixth-order method.
 """
 function Butcher6(; precision::Type{T} = Float64) where T <: AbstractFloat

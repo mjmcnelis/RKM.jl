@@ -1,4 +1,6 @@
 """
+    Curtis8(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Curtis' eighth-order method. 
 
 https://link.springer.com/article/10.1007/BF02219778
@@ -25,6 +27,8 @@ function Curtis8(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    Shanks8(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Shanks' eighth-order method. 
 
 https://ntrs.nasa.gov/citations/19650022581
@@ -49,6 +53,8 @@ function Shanks8(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    ShanksPseudo8(; precision::Type{T} = Float64) where T <: AbstractFloat
+
 Shanks' pseudo eighth-order method. 
 
 https://ntrs.nasa.gov/citations/19650022581

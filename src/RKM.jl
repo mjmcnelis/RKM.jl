@@ -7,6 +7,8 @@ import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
 import Base: @kwdef
+import Test: @test, @test_broken
+import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
 abstract type ODEMethod end
 
@@ -29,6 +31,7 @@ include("methods/properties.jl")
 include("methods/utils.jl")
 # Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
+include("methods/runge_kutta/debug_table.jl")
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
@@ -57,7 +60,8 @@ export DefaultPair, EulerPair, SecondPair
 # Numerical ODE methods
 export RungeKutta
     # Properties
-export Iteration, Explicit, DiagonalImplicit, FullImplicit
+export Iteration, Explicit, DiagonalImplicit, FullImplicit, 
+       FirstSameAsLast, FSAL, NotFSAL
     # Fixed explicit Runge-Kutta
 export Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3, Ralston3, RungeKutta3,
        ShuOsher3, SpiteriRuuth3, Generic3, RungeKutta4, ThreeEightsRule4, Ralston4, 
@@ -84,5 +88,7 @@ export TimeRange, TimeLimit
 export evolve_ode
 # Plots
 export plot_ode
+# Utilities
+export debug_table
 
 end
