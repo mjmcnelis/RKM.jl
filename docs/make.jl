@@ -14,7 +14,7 @@ makedocs(
     # strict   = true # See https://juliadocs.github.io/Documenter.jl/stable/lib/public/#Documenter.makedocs
 )
 
-# deploydocs(
-#     repo         = "https://github.com/mjmcnelis/RKM.jl.git";
-#     push_preview = true
-# )
+deploydocs(
+    repo         = https://mjmcnelis.github.io/RKM.jl/;
+    push_preview = true
+)
