@@ -15,6 +15,6 @@ makedocs(
 )
 
 deploydocs(
-    repo         = https://mjmcnelis.github.io/RKM.jl/;
+    repo         = "https://mjmcnelis.github.io/RKM.jl/";
     push_preview = true
 )

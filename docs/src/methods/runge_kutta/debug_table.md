@@ -21,10 +21,10 @@ julia> using RKM
 julia> import DoubleFloats: Double64 
 julia> method = Feagin1412(; precision = Double64);
 julia> debug_table(method)
-┌ Warning: |B[18,1] - ∑_{j>1} B[18,j]| = 7.7e-34 > 4.84e-34. Check row 18 in Feagin1412.
-└ @ RKM ~/Desktop/RKM.jl/src/methods/runge_kutta/debug_table.jl:50
-┌ Warning: |B[20,1] - ∑_{j>1} B[20,j]| = 2.1e-31 > 1.8599999999999997e-31. Check row 20 in Feagin1412.
-└ @ RKM ~/Desktop/RKM.jl/src/methods/runge_kutta/debug_table.jl:50
+#┌ Warning: |B[18,1] - ∑_{j>1} B[18,j]| = 7.7e-34 > 4.84e-34. Check row 18 in Feagin1412.
+#└ @ RKM ~/Desktop/RKM.jl/src/methods/runge_kutta/debug_table.jl:50
+#┌ Warning: |B[20,1] - ∑_{j>1} B[20,j]| = 2.1e-31 > 1.8599999999999997e-31. Check row 20 in Feagin1412.
+#└ @ RKM ~/Desktop/RKM.jl/src/methods/runge_kutta/debug_table.jl:50
 ```
 We see that two stages are broken, . However. We caution that this is. 
 It may not detect a faulty row where the errors of

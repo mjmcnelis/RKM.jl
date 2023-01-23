@@ -1,4 +1,8 @@
+"""
+    BackwardEuler1(; precision::Type{T} = Float64) where T <: AbstractFloat
 
+First-order backward Euler method (L-stable).
+"""
 function BackwardEuler1(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1 1
                1 1]
@@ -7,6 +11,25 @@ function BackwardEuler1(; precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(; name = :Backward_Euler_1, butcher)
 end
 
+"""
+    CrankNicolson2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Crank and Nicolson's second-order method (A-stable).
+"""
+function CrankNicolson2(; precision::Type{T} = Float64) where T <: AbstractFloat
+    butcher = [0 0 0 
+               1 1//2 1//2 
+               1 1//2 1//2]
+    butcher = butcher .|> precision
+
+    return RungeKutta(; name = :Crank_Nicolson_2, butcher)
+end
+
+"""
+    ImplicitMidpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Second-order implicit mid-point rule (A-stable).
+"""
 function ImplicitMidpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//2 1//2
                1 1]
@@ -15,6 +38,11 @@ function ImplicitMidpoint2(; precision::Type{T} = Float64) where T <: AbstractFl
     return RungeKutta(; name = :Implicit_Midpoint_2, butcher)
 end
 
+"""
+    QinZhang2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Qin and Zhang's econd-order method. 
+"""
 function QinZhang2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//4 1//4 0
                3//4 1//2 1//4
@@ -24,6 +52,11 @@ function QinZhang2(; precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(; name = :Qin_Zhang_2, butcher)
 end
 
+"""
+    KraaijevangerSpijker2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Kraaijevanger and Spijker's second-order method. 
+"""
 function KraaijevangerSpijker2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//2 1//2 0
                3//2 -1//2 2
@@ -33,10 +66,14 @@ function KraaijevangerSpijker2(; precision::Type{T} = Float64) where T <: Abstra
     return RungeKutta(; name = :Kraaijevanger_Spijker_2, butcher)
 end
 
+"""
+    PareschiRusso2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Pareschi and Russo's second-order method. 
+"""
 function PareschiRusso2(; precision::Type{T} = Float64) where T <: AbstractFloat
-    # note: used BigFloat to reduce float error propagation before .|> precision line
-    s = sqrt(BigFloat(2))   # sqrt(2)
-    g = 1 - 1/s             # gamma
+    s2 = sqrt(BigFloat(2))   # sqrt(2)
+    g = 1 - 1/s2             # gamma
 
     butcher = [g g 0
                1-g 1-2g g
@@ -46,12 +83,16 @@ function PareschiRusso2(; precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(; name = :Pareschi_Russo_2, butcher)
 end
 
-# TODO: maybe use generic formula from
-#       https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+"""
+    PareschiRusso3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Pareschi and Russo's third-order method. 
+"""
 function PareschiRusso3(; precision::Type{T} = Float64) where T <: AbstractFloat
-    # note: used BigFloat to reduce float error propagation before .|> precision line
-    s = sqrt(BigFloat(2))   # sqrt(2)
-    g = 1 - 1/s             # gamma, other options were 1/4 (Qin-Zhang), 1+1/sqrt(2)
+    # TODO: maybe use generic formula from
+    #       https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+    s2 = sqrt(BigFloat(2))   # sqrt(2)
+    g = 1 - 1/s2             # gamma, other options were 1/4 (Qin-Zhang), 1+1/sqrt(2)
 
     butcher = [g g 0 0
                1-g 1-2g g 0
@@ -62,18 +103,27 @@ function PareschiRusso3(; precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(; name = :Pareschi_Russo_3, butcher)
 end
 
-function Crouzeix3(; precision::Type{T} = Float64) where T <: AbstractFloat
-    # note: used BigFloat to reduce float error propagation before .|> precision line
-    s = sqrt(BigFloat(3))   # sqrt(3)
+"""
+    Crouzeix3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-    butcher = [1//2+s/6 1//2+s/6 0
-               1//2-s/6 -s/3 1//2+s/6
+Crouzeix's third-order method. 
+"""
+function Crouzeix3(; precision::Type{T} = Float64) where T <: AbstractFloat
+    s3 = sqrt(BigFloat(3))   # sqrt(3)
+
+    butcher = [1//2+s3/6 1//2+s3/6 0
+               1//2-s3/6 -s3/3 1//2+s3/6
                1 1//2 1//2]
     butcher = butcher .|> precision
 
     return RungeKutta(; name = :Crouzeix_3, butcher)
 end
 
+"""
+    RadauIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Radau IA3 third-order method. 
+"""
 function RadauIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 1//4 -1//4
                2//3 1//4 5//12
@@ -83,7 +133,11 @@ function RadauIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(; name = :Radau_IA_3, butcher)
 end
 
+"""
+    RadauIIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
+Radau IIA3 third-order method. 
+"""
 function RadauIIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//3 5//12 -1//12
                1 3//4 1//4
@@ -93,9 +147,16 @@ function RadauIIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(; name = :Radau_IIA_3, butcher)
 end
 
-# TODO: from https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
-#       but had no specific name
+
+"""
+    DIRKL3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Third-order L-stable diagonal implicit method. 
+
+https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+"""
 function DIRKL3(; precision::Type{T} = Float64) where T <: AbstractFloat
+    # TODO: find more specific name
     butcher = [1//2 1//2 0 0 0
                2//3 1//6 1//2 0 0
                1//2 -1//2 1//2 1//2 0
