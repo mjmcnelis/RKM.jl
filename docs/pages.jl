@@ -1,5 +1,7 @@
 pages = [
     "Home" => "index.md",
+    "Overview" => "overview.md",
+    "Module" => "module.md",
     "Methods" => ["Runge-Kutta" => ["methods/runge_kutta/runge_kutta.md",
                                     "methods/runge_kutta/tableau.md",
                                     "methods/runge_kutta/debug_table.md",
