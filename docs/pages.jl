@@ -13,5 +13,11 @@ pages = [
                                                           ]
                                    ],
                  ],
- ]
-
+    "Adaptive Time Step" => ["adaptive/constructor.md", 
+                             "Algorithms" => ["adaptive/algorithms/doubling.md", 
+                                              "adaptive/algorithms/embedded.md",
+                                              "adaptive/algorithms/finite_diff.md"
+                                             ],
+                            #  "Stepsize control" => ["adaptive/basic_control.md"]
+                            ]
+]

@@ -4,14 +4,31 @@ abstract type AdaptiveStepSize end
 struct Fixed <: AdaptiveStepSize end
 
 struct FiniteDiff <: AdaptiveStepSize end
+
+"""
+$(TYPEDEF)
+
+Step doubling adaptive time step algorithm
+
+# Fields
+$(TYPEDFIELDS)
+"""
 struct Doubling <: AdaptiveStepSize
+    """Relative and incremental error tolerance"""
     epsilon::Float64
+    """Lower bound on the time step's rate of change"""
     low::Float64
+    """Upper bound on the time step's rate of change"""
     high::Float64
+    """Safety factor to scale down estimate for new time step"""
     safety::Float64
+    """Integer used to compute L--norms"""
     p_norm::Float64
+    """Minimum time step"""
     dt_min::Float64
+    """Maximum time step"""
     dt_max::Float64
+    """Maximum number of attempts to search for new time step"""
     max_attempts::Int64
 end
 
