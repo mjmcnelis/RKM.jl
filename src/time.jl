@@ -18,6 +18,8 @@ struct TimeLimit
     wtime_min::Int64
     """Determines whether or not the runtime has exceeded the time limit"""
     past_time::MVector{1,Bool}
+    """Determines whether or not the ODE solver has finished running""" 
+    solver_finished::MVector{1,Bool}
     """Counter for the number of time steps done so far by the solver"""
     counter::MVector{1,Int64}
 end
@@ -29,20 +31,22 @@ Outer constructor for `TimeLimit`.
 """
 function TimeLimit(; wtime_min::Int64 = 60)
     past_time = MVector{1,Bool}(false)
+    solver_finished = MVector{1,Bool}(false)
     counter = MVector{1,Int64}(0)
 
-    return TimeLimit(wtime_min, past_time, counter)
+    return TimeLimit(wtime_min, past_time, solver_finished, counter)
 end
 
 """
     reset_timer!(timer::TimeLimit)
 
-Resets the `timer` fields `past_time` to `false` and `counter` to `0`.
+Resets the `timer` fields to values given by `TimeLimit` outer constructor
 
 Required parameters: `timer`
 """
 function reset_timer!(timer::TimeLimit)
     timer.past_time[1] = false 
+    timer.solver_finished[1] = false
     timer.counter[1] = 0
     return nothing
 end
@@ -56,10 +60,13 @@ Starts the `timer` and set the field `past_time` to
 Required parameters: `timer`
 """
 function start_timer!(timer::TimeLimit)
-    @unpack wtime_min, past_time = timer 
+    @unpack wtime_min, past_time, solver_finished = timer 
     @async begin 
+        # @info "Timer set to $wtime_min minute(s)"
         sleep(60 * wtime_min)
-        @warn "\nExceeded time limit of $wtime_min minutes (stopping evolve_ode...)\n"
+        if !solver_finished[1]
+            @warn "\nExceeded time limit of $wtime_min minutes (stopping evolve_ode...)\n"
+        end
         past_time[1] = true
     end 
 end
@@ -77,6 +84,9 @@ function continue_solver(t::Union{Vector{T}, MVector{1,T}}, tf::T,
                          timer::TimeLimit) where T <: AbstractFloat
     # TODO: add counter somewhere else? 
     timer.counter[1] += 1
+    if t[1] >= tf 
+        timer.solver_finished[1] = true 
+    end
     return t[1] < tf && !timer.past_time[1]
 end
 
