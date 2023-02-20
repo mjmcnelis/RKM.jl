@@ -30,7 +30,7 @@ end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::Fixed, FE::MVector{1,Int64}, y::VectorMVector, 
-             t::VectorMVector{1,T}, dt::VectorMVector{2,T},dy_dt!::F,
+             t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
              dy::MatrixMMatrix, y_tmp::VectorMVector, 
              f_tmp::VectorMVector, args...) where {T <: AbstractFloat, F}
              
@@ -99,25 +99,32 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Embedded, FE::MVector{1,Int64}, y::Vector{T}, 
-             t::Union{Vector{T}, MVector{1,T}}, dt::Union{Vector{T}, MVector{2,T}},
-             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
-             f::Vector{T}, y1::Vector{T}, y2::Vector{T}, error::Vector{T},
+             adaptive::Embedded, FE::MVector{1,Int64}, y::VectorMVector, 
+             t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
+             dy::MatrixMMatrix, y_tmp::VectorMVector, f_tmp::VectorMVector, 
+             f::VectorMVector, y1::VectorMVector, y2::VectorMVector, error::VectorMVector,
              args...) where {T <: AbstractFloat, F}
-
+           
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
+
+    y_norm = norm(y, p_norm)                            # compute norm of current state
 
     order_max = maximum(method.order)                   # max/min orders in embedded scheme
     order_min = minimum(method.order)
 
+    # note: comment if benchmark against OrdinaryDiffEq (add boolean?)
     high    ^= (order_min / order_max)                  # rescale high, epsilon parameters
     epsilon ^= (order_min / order_max)
 
-    dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
+    # TODO: dispatch fsal
+    if !(method.fsal isa FSAL && FE[1] > 0)
+        dy_dt!(f, t[1], y)                                  # evaluate first stage at (t,y)
+    end
 
     dt[1] = dt[2]                                       # initialize time step
 
     # TODO: float type can change from Float64 to Double64
+    # note: is that why benchmark vs OrdinaryDiffEq bad for Double64?
     rescale = 1.0
 
     attempts = 1
@@ -135,17 +142,18 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         @.. error = y2 - y1                             # local error of embedded pair
 
         e_norm = norm(error, p_norm)                    # compute norms
-        y_norm = norm(y1, p_norm)
-        # TODO: need to use Δy =  y2 since it's secondary method
+        y1_norm = norm(y1, p_norm)
+        # TODO: need to use Δy = y2 since it's secondary method
         #       but should make labeling consistent w/ doubling
         Δy = y2
         @.. Δy = y1 - y
         Δy_norm = norm(Δy, p_norm)
 
-        tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
+        # compute tolerance
+        tol = epsilon * max(y_norm, y1_norm, Δy_norm)
 
         if e_norm == 0.0                                # compute scaling factor for dt
-            rescale = 1.0
+            rescale = high          
         else
             rescale = (tol / e_norm)^(1.0/(1.0 + order_min))
             rescale = min(high, max(low, safety*rescale))
@@ -157,6 +165,12 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         attempts <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
         attempts += 1
     end
+    
+    # TODO: dispatch fsal
+    if method.fsal isa FSAL
+        @.. f = f_tmp 
+    end
+
     @.. y = y1                                          # get iteration
     add_function_evaluations!(FE, iteration, adaptive, method, attempts)
     return nothing

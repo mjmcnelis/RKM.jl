@@ -28,7 +28,6 @@ end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Embedded,
                                    method::RungeKutta, attempts::Int64)
-    # TODO: have not implemented FSAL yet
     @unpack stages, fsal = method
     fsal_stage = fsal isa FSAL ? 1 : 0
    
