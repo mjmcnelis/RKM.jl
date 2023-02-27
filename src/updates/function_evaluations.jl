@@ -10,14 +10,20 @@ Required parameters: `FE`, `iteration`, `adaptive`, `method`
 function add_function_evaluations!(FE::MVector{1,Int64}, iteration::Iteration, 
                                    adaptive::AdaptiveStepSize, method::ODEMethod, 
                                    args...)
-    @error "No function for $iteration, $adaptive method $(method.name)"
+    throw("No function for $iteration, $adaptive method $(method.name)")
 end
 
-function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Fixed, 
+function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::AdaptiveStepSize, 
                                    method::RungeKutta, args...)
     FE[1] += method.stages
     return nothing
 end
+# TODO: see if can combine fixed + finitediff
+# function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::FiniteDiff, 
+#                                    method::RungeKutta, args...)
+#     FE[1] += method.stages
+#     return nothing
+# end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Doubling,
                                    method::RungeKutta, attempts::Int64)

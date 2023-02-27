@@ -21,6 +21,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     @unpack adaptive, method, t_range, timer = parameters
     @unpack t0, tf, dt0 = t_range
 
+    # note: if code errors out from bug and doesn't not update
+    #       solver_finished variable, then can print time's up warning
     reset_timer!(timer)
     start_timer!(timer)
 
@@ -63,6 +65,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     # for progress meter
     checkpoints = collect(LinRange(t0, tf, 101))[2:end]
     progress = Progress(100)
+
+    # @show dt
 
     while true
         append!(sol.y, y) 
