@@ -78,29 +78,25 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         y_norm = norm(y, p_norm)
         f_norm = norm(f_tmp, p_norm)
 
-        dt[1] = dt[2]                                   # store previous time step in dt[1]
-
         # TODO: solve more complicated algebraic equation from VAH paper
         if C_norm == 0.0                                # compute new time step in dt[2]
             dt[2] = high*dt[1]
-            # dt[2] = dt[1]
         else
             if C_norm*y_norm > 2.0*epsilon*f_norm^2
                 dt[2] = sqrt(2.0*epsilon*y_norm/C_norm)
             else
                 dt[2] = 2.0*epsilon*f_norm/C_norm
             end
-            # note: comment was original 
-            # dt[2] = min(high*dt[1], max(low*dt[1], dt[2]))
         end
         dt[2] = min(high*dt[1], max(low*dt[1], dt[2]))  # control growth rate
         dt[2] = min(dt_max, max(dt_min, dt[2]))         # impose min/max bounds
     end
     # evaluate first stage iteration w/ new time step (i.e. dt[2])
-    @.. dy[:,1] = dt[2] * f_tmp                       
+    @.. dy[:,1] = dt[2] * f_tmp    
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[2], dy_dt!, dy, y_tmp, f_tmp)
 
-    @.. y_prev = y                                      # store previous solution
+    dt[1] = dt[2]                                       # store current time step
+    @.. y_prev = y                                      # store current solution
     @.. y = y_tmp                                       # get iteration
 
     add_function_evaluations!(FE, iteration, adaptive, method)
