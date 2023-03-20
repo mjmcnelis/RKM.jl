@@ -68,11 +68,18 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         # TODO: check if this is allocating (don't set new time step)
         # note: seems like it's allocating even for fixed time step 
 
-        @.. y_tmp = y + dt[1]*f_tmp                     # compute y_star (stored in y_tmp)
+        # @.. y_tmp = y + dt[1]*f_tmp                     # compute y_star (stored in y_tmp)
     
         # approximate C w/ central differences (stored in y_tmp)
-        @.. y_tmp = y_tmp - 2.0*y + y_prev
+        # @.. y_tmp = y_tmp - 2.0*y + y_prev
+        @.. y_tmp = dt[1]*f_tmp - y + y_prev
         @.. y_tmp *= 2.0/dt[1]^2
+
+        # dy_dt!(y_tmp, t[1], y_prev)
+        # @.. y_tmp = f_tmp - y_tmp
+        # @.. y_tmp *= 2.0/dt[1]
+        # C = 2/dt^2 * (dt*f - y + y_prev)
+        # C = 2/dt * (f - (y - y_prev)/dt ) ~ 2/dt * (f_n - f_n-1)
       
         C_norm = norm(y_tmp, p_norm)
         y_norm = norm(y, p_norm)

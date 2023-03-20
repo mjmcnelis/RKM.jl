@@ -66,8 +66,6 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     checkpoints = collect(LinRange(t0, tf, 101))[2:end]
     progress = Progress(100)
 
-    # @show dt
-
     while true
         append!(sol.y, y) 
         append!(sol.t, t[1])
