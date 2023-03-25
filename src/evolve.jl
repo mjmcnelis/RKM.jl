@@ -18,7 +18,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
                     jacobian! = jacobian_error) where {T <: AbstractFloat,
                                                        T2 <: AbstractFloat}
 
-    @unpack adaptive, method, t_range, timer = parameters
+    @unpack adaptive, controller, method, t_range, timer = parameters
     @unpack t0, tf, dt0 = t_range
 
     # note: if code errors out from bug and doesn't not update
@@ -27,6 +27,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     start_timer!(timer)
 
     method = reconstruct_method(method, precision)
+    controller = reconstruct_controller(controller, precision)
+
     @unpack stages, iteration = method
 
     dimensions = size(y0, 1)
@@ -74,8 +76,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
-        evolve_one_time_step!(method, iteration, adaptive, FE, y, t, dt, dy_dt!,
-                              dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
+        evolve_one_time_step!(method, iteration, adaptive, controller, FE, y, t, dt, 
+                              dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
 
         t[1] += dt[1]
     end

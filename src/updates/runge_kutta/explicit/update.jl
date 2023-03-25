@@ -111,11 +111,11 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Doubling, FE::MVector{1,Int64}, y::Vector{T}, 
-             t::Union{Vector{T}, MVector{1,T}}, dt::Union{Vector{T}, MVector{2,T}}, 
-             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
-             f::Vector{T}, y1::Vector{T}, y2::Vector{T}, error::Vector{T},
-             args...) where {T <: AbstractFloat, F}
+             adaptive::Doubling, controller::Controller, FE::MVector{1,Int64},  
+             y::Vector{T}, t::Union{Vector{T}, MVector{1,T}}, 
+             dt::Union{Vector{T}, MVector{2,T}}, dy_dt!::F, dy::Matrix{T}, 
+             y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, y1::Vector{T}, 
+             y2::Vector{T}, error::Vector{T}, args...) where {T <: AbstractFloat, F}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -146,16 +146,23 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 
         tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
 
+        if FE[1] == 0                                   # initialize controller
+            set_previous_control_error!(controller, e_norm)
+        end
+
         if e_norm == 0.0                                # compute scaling factor for dt
             rescale = 1.0
         else
-            rescale = (tol / e_norm)^(1.0/(1.0 + order))
+            rescale = rescale_time_step(controller, tol, e_norm, order)
             rescale = min(high, max(low, safety*rescale))
         end
 
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
-        e_norm > tol || break                           # compare error to tolerance
+        if e_norm <= tol                                # compare error to tolerance
+            set_previous_control_error!(controller, e_norm)
+            break 
+        end
         attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
         attempts += 1
     end

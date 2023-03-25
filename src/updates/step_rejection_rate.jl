@@ -16,7 +16,7 @@ end
 
 function compute_step_rejection_rate!(sol::Solution, method::ODEMethod, 
                                       adaptive::AdaptiveStepSize, timer::TimeLimit)
-    steps = timer.counter[1]
+    steps = timer.counter[1] - 1
     FE = sol.FE[1]
     @unpack stages, fsal, iteration = method
     @unpack rejection_rate = sol    

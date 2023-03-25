@@ -22,6 +22,7 @@ export RKM_root
 include("time.jl")
 include("solution.jl")
 include("embedded.jl")
+include("controller.jl")
 include("adaptive.jl")
 include("plots.jl")
 include("utils.jl")
@@ -55,6 +56,8 @@ include("evolve.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff
+# Time step controller
+export PIDController
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 

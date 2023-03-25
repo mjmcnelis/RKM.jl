@@ -10,4 +10,6 @@ Parameters for the ODE solver.
     t_range::TimeRange
     """Timer for ODE solver"""
     timer::TimeLimit = TimeLimit(; wtime_min = 60)
+    """Adaptive time step controller"""
+    controller::Controller = PIDController()
 end
