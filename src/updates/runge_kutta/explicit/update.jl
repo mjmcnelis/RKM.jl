@@ -29,9 +29,9 @@
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Fixed, FE::MVector{1,Int64}, y::VectorMVector, 
-             t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
-             dy::MatrixMMatrix, y_tmp::VectorMVector, 
+             adaptive::Fixed, ::Controller, FE::MVector{1,Int64}, 
+             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, 
+             dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
              f_tmp::VectorMVector, args...) where {T <: AbstractFloat, F}
              
     dy_dt!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
@@ -151,7 +151,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
-            rescale = 1.0
+            rescale = high
         else
             rescale = rescale_time_step(controller, tol, e_norm, order)
             rescale = min(high, max(low, safety*rescale))
@@ -172,8 +172,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Embedded, FE::MVector{1,Int64}, y::VectorMVector, 
-             t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
+             adaptive::Embedded, controller::Controller, FE::MVector{1,Int64},
+             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
              dy::MatrixMMatrix, y_tmp::VectorMVector, f_tmp::VectorMVector, 
              f::VectorMVector, y1::VectorMVector, y2::VectorMVector, error::VectorMVector,
              args...) where {T <: AbstractFloat, F}
@@ -225,16 +225,23 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         # compute tolerance
         tol = epsilon * max(y_norm, y1_norm, Δy_norm)
 
+        if FE[1] == 0                                   # initialize controller
+            set_previous_control_error!(controller, e_norm)
+        end
+
         if e_norm == 0.0                                # compute scaling factor for dt
             rescale = high          
         else
-            rescale = (tol / e_norm)^(1.0/(1.0 + order_min))
+            rescale = rescale_time_step(controller, tol, e_norm, order_min)
             rescale = min(high, max(low, safety*rescale))
         end
 
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
-        e_norm > tol || break                           # compare error to tolerance
+        if e_norm <= tol                                # compare error to tolerance
+            set_previous_control_error!(controller, e_norm)
+            break 
+        end
         attempts <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
         attempts += 1
     end
