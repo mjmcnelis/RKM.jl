@@ -45,9 +45,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::FiniteDiff, FE::MVector{1,Int64}, y::Vector{T}, 
-             t::Union{Vector{T}, MVector{1,T}}, dt::Union{Vector{T}, MVector{2,T}}, 
-             dy_dt!::F, dy::Matrix{T}, y_tmp::Vector{T}, f_tmp::Vector{T}, 
+             adaptive::FiniteDiff, controller::Controller, FE::MVector{1,Int64}, 
+             y::Vector{T}, t::Union{Vector{T}, MVector{1,T}}, 
+             dt::Union{Vector{T}, MVector{2,T}}, dy_dt!::F, dy::Matrix{T},
+             y_tmp::Vector{T}, f_tmp::Vector{T}, 
              # TODO: may want to do kwargs for different caches used in adaptive methods
              # note: next argument was f but renamed it to y_prev here
              y_prev::Vector{T}, args...) where {T <: AbstractFloat, F}
@@ -95,6 +96,9 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
                 dt[2] = 2.0*epsilon*f_norm/C_norm
             end
         end
+
+        # set_previous_control_error!(controller, e_norm)
+
         dt[2] = min(high*dt[1], max(low*dt[1], dt[2]))  # control growth rate
         dt[2] = min(dt_max, max(dt_min, dt[2]))         # impose min/max bounds
     end

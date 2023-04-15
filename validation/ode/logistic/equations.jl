@@ -10,7 +10,7 @@ function dy_dt!(f, t, y)
     nothing
 end
 
-function y_exact(t, N)
+function y_exact(t; N = 1)
     y_ex = BigFloat[]
     t = BigFloat(t)
     for i = 1:N

@@ -18,12 +18,6 @@ function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::AdaptiveS
     FE[1] += method.stages
     return nothing
 end
-# TODO: see if can combine fixed + finitediff
-# function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::FiniteDiff, 
-#                                    method::RungeKutta, args...)
-#     FE[1] += method.stages
-#     return nothing
-# end
 
 function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Doubling,
                                    method::RungeKutta, attempts::Int64)
