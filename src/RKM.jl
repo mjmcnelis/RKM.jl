@@ -57,7 +57,7 @@ include("evolve.jl")
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff
 # Time step controller
-export PIDController
+export PIDController, PIDControllerK, PIDControllerBeta
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 

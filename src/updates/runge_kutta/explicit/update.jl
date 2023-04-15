@@ -96,9 +96,6 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
                 dt[2] = 2.0*epsilon*f_norm/C_norm
             end
         end
-
-        # set_previous_control_error!(controller, e_norm)
-
         dt[2] = min(high*dt[1], max(low*dt[1], dt[2]))  # control growth rate
         dt[2] = min(dt_max, max(dt_min, dt[2]))         # impose min/max bounds
     end

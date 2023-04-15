@@ -9,18 +9,21 @@ precision = Float64
 
 # adaptive = Fixed()         
 # method = RungeKutta4()
-# adaptive = Doubling()        
-# method = Heun2()
+adaptive = Doubling()        
+method = Heun2()
 # adaptive = Embedded()
 # method = HeunEuler21()        
 # method = Fehlberg45()
-adaptive = FiniteDiff() 
-method = Heun2() 
+# adaptive = FiniteDiff() 
+# method = Heun2() 
+
+controller = PIDControllerK(; kI = 0.3, kP = 0.4)
+# controller = PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4)
 
 t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
 
 # do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_range)
+parameters = Parameters(; adaptive, method, t_range, controller)
 
 t0 = t_range.t0
 
