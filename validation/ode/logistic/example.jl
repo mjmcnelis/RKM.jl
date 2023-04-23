@@ -17,8 +17,9 @@ method = Heun2()
 # adaptive = FiniteDiff() 
 # method = Heun2() 
 
-controller = PIDControllerK(; kI = 0.3, kP = 0.4)
-# controller = PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4)
+# controller = PIDControllerK(; kI = 0.3, kP = 0.4)
+controller = PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4)
+# controller = PIDControllerBeta(; beta1 = 1/18, beta2 = 1/9, beta3 = 1/18, predictive = false)
 
 t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
 

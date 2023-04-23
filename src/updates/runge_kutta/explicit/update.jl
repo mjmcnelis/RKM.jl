@@ -148,7 +148,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
 
         if FE[1] == 0                                   # initialize controller
-            set_previous_control_error!(controller, e_norm)
+            initialize_controller!(controller, e_norm, dt[1])
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
@@ -161,7 +161,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         if e_norm <= tol                                # compare error to tolerance
-            set_previous_control_error!(controller, e_norm)
+            set_previous_control_vars!(controller, e_norm, dt[1])
             break 
         end
         attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
@@ -227,7 +227,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         tol = epsilon * max(y_norm, y1_norm, Δy_norm)
 
         if FE[1] == 0                                   # initialize controller
-            set_previous_control_error!(controller, e_norm)
+            initialize_controller!(controller, e_norm, dt[1])
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
@@ -240,7 +240,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         if e_norm <= tol                                # compare error to tolerance
-            set_previous_control_error!(controller, e_norm)
+            set_previous_control_vars!(controller, e_norm, dt[1])
             break 
         end
         attempts <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
