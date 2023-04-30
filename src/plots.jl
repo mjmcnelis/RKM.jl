@@ -16,11 +16,11 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function)
          ylabel = "y", yguidefontsize = 14, ytickfontsize = 12,
          xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
 
-    dt = t[2:end] .- t[1:end-1]
-    plot(t[1:end-1], dt; size = (900, 600), linewidth = 2,
-         label = code_name, legend = :outertopright, legendfontsize = 12,
-         ylabel = "Δt", yguidefontsize = 14, ytickfontsize = 12,
-         xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
+    # dt = t[2:end] .- t[1:end-1]
+    # plot(t[1:end-1], dt; size = (900, 600), linewidth = 2,
+    #      label = code_name, legend = :outertopright, legendfontsize = 12,
+    #      ylabel = "Δt", yguidefontsize = 14, ytickfontsize = 12,
+    #      xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
     return nothing
 end
 

@@ -1,7 +1,7 @@
 module RKM
 
 import ProgressMeter: Progress, next!
-import LinearAlgebra: norm, tril, diag
+import LinearAlgebra: norm, tril, diag, diagind
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import MuladdMacro: @muladd
 import FastBroadcast: @..

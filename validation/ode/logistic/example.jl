@@ -7,10 +7,11 @@ precision = Float64
 # precision = Double64
 # precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
 
-# adaptive = Fixed()         
+adaptive = Fixed()         
 # method = RungeKutta4()
-adaptive = Doubling()        
-method = Heun2()
+method = BackwardEuler1()
+# adaptive = Doubling()        
+# method = Heun2()
 # adaptive = Embedded()
 # method = HeunEuler21()        
 # method = Fehlberg45()
@@ -41,7 +42,9 @@ show_progress = true
 static_array = false
 # static_array = true
 
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array)
+@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array, 
+                       jacobian!
+                       )
 # sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
 #=
 @show Base.format_bytes(sizeof(sol.y) + sizeof(sol.t))
