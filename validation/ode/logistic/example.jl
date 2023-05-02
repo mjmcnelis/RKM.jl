@@ -36,13 +36,14 @@ for i = 1:N
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 
-show_progress = true
-# show_progress = false
+# show_progress = true
+show_progress = false
 
 static_array = false
 # static_array = true
 
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array, 
+@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, 
+                       static_array, 
                        jacobian!
                        )
 # sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)

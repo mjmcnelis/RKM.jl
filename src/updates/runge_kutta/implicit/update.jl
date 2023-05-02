@@ -4,23 +4,31 @@
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix,
                      y_tmp::VectorMVector, f_tmp::VectorMVector, 
-                     jacobian!::Function) where {T <: AbstractFloat, F <: Function}
+                     jacobian!::Function, J::MatrixMMatrix, 
+                     linsolve) where {T <: AbstractFloat, F <: Function}
 
     @unpack c, A_T, b, stages = method
 
-    root_solver = "fixed_point"        # will just use fixed point iteration for now
-    # root_solver = "newton_fast"
+    # root_solver = "fixed_point"        # will just use fixed point iteration for now
+    root_solver = "newton_fast"
     eps_root = 1e-8
     max_iterations = 10
-
-    # TEMP
-    L = length(y)
-    J = zeros(L, L)                 # allocates
 
     for i = 1:stages
         # evaluate jacobian
         if root_solver == "newton_fast" # newton fast
             jacobian!(J, t, y)
+
+            # # TODO: how to avoid this?...
+            # y_prime! = let t = t
+            #     (f, y) -> 
+            #     begin
+            #         return dy_dt!(f, t, y)
+            #     end
+            # end
+            # # OrdinaryDiffEq had some kind of wrapper 
+            # ForwardDiff.jacobian!(J, y_prime!, f_tmp, y)
+
             J .*= (-A_T[i,i]*dt)
             for i in diagind(J)
                 J[i] += 1.0
@@ -54,8 +62,17 @@
                 end
                 # from python
                 # g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
-                # TODO: isn't there a way set \ as linear solver of your choice? 
-                dy[:,i] .-= J \ f_tmp
+
+                # w = lu!(J)
+                # ldiv!(w, f_tmp)
+                # @.. dy[:,i] -= f_tmp
+
+                linsolve = set_A(linsolve, J)
+                linsolve = set_b(linsolve, f_tmp)
+
+                linsol = solve(linsolve)      # allocating...
+
+                @.. dy[:,i] -= linsol.u
             end
         end
     end
@@ -74,14 +91,14 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
             dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
             f_tmp::VectorMVector, f::VectorMVector, y1, y2, error, 
-            jacobian!, args...) where {T <: AbstractFloat, F}
+            jacobian!, J::MatrixMMatrix, linsol, args...) where {T <: AbstractFloat, F}
     # TODO: not sure why putting dy_dt! here this kills allocations
     # costs an extra stage but saves on allocations
     # TODO: want to ultimately remove this
     dy_dt!(f, t[1], y)
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp,
-                            jacobian!)
+                            jacobian!, J, linsol)
     y .= y_tmp
     nothing
 end

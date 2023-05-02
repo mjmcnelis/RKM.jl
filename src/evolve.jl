@@ -51,11 +51,16 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     y_tmp = calloc_vector(static_array, precision, dimensions)
     f_tmp = calloc_vector(static_array, precision, dimensions)
     f     = calloc_vector(static_array, precision, dimensions)
+    # TODO: should have option to make it sparse
+    J     = calloc_matrix(static_array, precision, dimensions, dimensions)
 
     # TEMP for step doubling (embedded too probably)
     y1 = calloc_vector(static_array, precision, dimensions)
     y2 = calloc_vector(static_array, precision, dimensions)
     error = calloc_vector(static_array, precision, dimensions)
+
+    # configure linear solver cache (see how LinearProblem used in OrdinaryDiffEq)
+    linsolve = init(LinearProblem(J, f); alias_A = true, alias_b = true)
 
     # initalize solution
     sol = Solution(; precision, dimensions)
@@ -77,8 +82,9 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
-        allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, FE, y, t, dt, 
-                              dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, jacobian!)
+        allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
+                                 FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
+                                 jacobian!, J, linsolve)
         t[1] += dt[1]
     end
     @info "Number of memory allocations during solve = $allocs"
