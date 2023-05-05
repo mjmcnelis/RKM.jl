@@ -59,9 +59,11 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     y2 = calloc_vector(static_array, precision, dimensions)
     error = calloc_vector(static_array, precision, dimensions)
 
-    # configure linear solver cache (see how LinearProblem used in OrdinaryDiffEq)
-    linsolve = init(LinearProblem(J, f); alias_A = true, alias_b = true)
-
+    # configure linear cache
+    linear_cache = init(LinearProblem(J, f); alias_A = true, alias_b = true)
+    # @time solve!(linear_cache)
+    # @show linear_cache.u
+    
     # initalize solution
     sol = Solution(; precision, dimensions)
     @unpack FE = sol
@@ -84,7 +86,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         # TODO: see if can pass kwargs
         allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
                                  FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
-                                 jacobian!, J, linsolve)
+                                 jacobian!, J, linear_cache)
         t[1] += dt[1]
     end
     @info "Number of memory allocations during solve = $allocs"

@@ -1,3 +1,15 @@
+function solve!(cache::LinearCache, args...; kwargs...)
+    solve!(cache, cache.alg, args...; kwargs...)
+end
+function solve!(cache::LinearCache, alg::AbstractFactorization; kwargs...)
+    # at least understand that it's allocating on factorization
+    if cache.isfresh
+        # but you would think that there is a cache for the factorized matrix somewhere...
+        fact = do_factorization(alg, cache.A, cache.b, cache.u)  # allocates here
+        cache = set_cacheval(cache, fact)
+    end
+    _ldiv!(cache.u, cache.cacheval, cache.b)
+end
 
 # TODO: so far, routine only works for an explicit, primary method
 # TODO: try using the where {T} notation
@@ -5,7 +17,7 @@
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix,
                      y_tmp::VectorMVector, f_tmp::VectorMVector, 
                      jacobian!::Function, J::MatrixMMatrix, 
-                     linsolve) where {T <: AbstractFloat, F <: Function}
+                     linear_cache) where {T <: AbstractFloat, F <: Function}
 
     @unpack c, A_T, b, stages = method
 
@@ -67,12 +79,11 @@
                 # ldiv!(w, f_tmp)
                 # @.. dy[:,i] -= f_tmp
 
-                linsolve = set_A(linsolve, J)
-                linsolve = set_b(linsolve, f_tmp)
+                linear_cache = set_A(linear_cache, J)
+                linear_cache = set_b(linear_cache, f_tmp)
+                solve!(linear_cache)
 
-                linsol = solve(linsolve)      # allocating...
-
-                @.. dy[:,i] -= linsol.u
+                @.. dy[:,i] -= linear_cache.u
             end
         end
     end
@@ -91,14 +102,14 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
             dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
             f_tmp::VectorMVector, f::VectorMVector, y1, y2, error, 
-            jacobian!, J::MatrixMMatrix, linsol, args...) where {T <: AbstractFloat, F}
+            jacobian!, J::MatrixMMatrix, linear_cache, args...) where {T <: AbstractFloat, F}
     # TODO: not sure why putting dy_dt! here this kills allocations
     # costs an extra stage but saves on allocations
     # TODO: want to ultimately remove this
     dy_dt!(f, t[1], y)
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp,
-                            jacobian!, J, linsol)
+                            jacobian!, J, linear_cache)
     y .= y_tmp
     nothing
 end

@@ -1,11 +1,11 @@
 module RKM
 
-using ForwardDiff
-# import ForwardDiff: jacobian!
-import SciMLBase: init, solve
-import LinearSolve: LinearProblem, set_A, set_b
+import ForwardDiff: jacobian!
+import SciMLBase: init#, solve
+import LinearSolve: LinearProblem, set_A, set_b, LinearCache, AbstractFactorization, 
+                    _ldiv!, do_factorization, set_cacheval
 import ProgressMeter: Progress, next!
-import LinearAlgebra: norm, tril, diag, diagind, ldiv!, lu!
+import LinearAlgebra: norm, tril, diag, diagind#, ldiv!, lu!
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import MuladdMacro: @muladd
 import FastBroadcast: @..
