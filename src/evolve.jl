@@ -8,15 +8,12 @@
 
 The ODE solver loop. 
 
-Required parameters: `y0`, `dy_dt!`, `parameters`
-
-Note: `jacobian!` argument is temporary
+Required parameters: `y0`, `dy_dt!`, `parameters`, `dy_dt_wrap!`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; 
                     static_array::Bool = false, show_progress::Bool = true, 
                     precision::Type{T2} = Float64, parameters::Parameters, 
-                    jacobian! = jacobian_error, dy_dt_wrap!) where {T <: AbstractFloat,
-                                                       T2 <: AbstractFloat}
+                    dy_dt_wrap!) where {T <: AbstractFloat, T2 <: AbstractFloat}
 
     @unpack adaptive, controller, method, t_range, timer = parameters
     @unpack t0, tf, dt0 = t_range
@@ -64,6 +61,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     finitediff_cache = JacobianCache(y)
 
     # TODO: figure out to make dy_dt! wrapper that can update t
+    # https://github.com/JuliaDiff/ForwardDiff.jl/issues/402
     jacobian_config = JacobianConfig(dy_dt_wrap!, f_tmp, y)
     
     # initalize solution
@@ -88,7 +86,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         # TODO: see if can pass kwargs
         allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
                                  FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
-                                 jacobian!, J, linear_cache, finitediff_cache, 
+                                 J, linear_cache, finitediff_cache, 
                                  jacobian_config, dy_dt_wrap!)
         t[1] += dt[1]
     end

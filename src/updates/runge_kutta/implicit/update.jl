@@ -1,14 +1,9 @@
 
-# TODO: so far, routine only works for an explicit, primary method
-# TODO: try using the where {T} notation
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix,
-                     y_tmp::VectorMVector, f_tmp::VectorMVector, 
-                     jacobian!::Function, J::MatrixMMatrix, 
-                     linear_cache, finitediff_cache, 
-                     jacobian_config, 
-                     dy_dt_wrap!
-                     ) where {T <: AbstractFloat, F <: Function}
+                     y_tmp::VectorMVector, f_tmp::VectorMVector, J::MatrixMMatrix,
+                     linear_cache, finitediff_cache, jacobian_config, 
+                     dy_dt_wrap!) where {T <: AbstractFloat, F <: Function}
 
     @unpack c, A_T, b, stages = method
 
@@ -20,12 +15,10 @@
     for i = 1:stages
         # evaluate jacobian
         if root_solver == "newton_fast" 
-            # jacobian!(J, t, y)
-            # @show J
             # TODO: how to reduce allocations here, take it apart or make a wrapper?
             # so in order for jacobian config to work, dy_dt_wrap! argument
             # has to be the same object stored in jacobian_config
-            ForwardDiff.jacobian!(J, dy_dt_wrap!, f_tmp, y, jacobian_config)
+            jacobian!(J, dy_dt_wrap!, f_tmp, y, jacobian_config)
             # @show J
             # finite_difference_jacobian!(J, dy_dt_wrap!, y, finitediff_cache) 
             # @show J; q()
@@ -87,15 +80,11 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
             dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
             f_tmp::VectorMVector, f::VectorMVector, y1, y2, error, 
-            jacobian!, J::MatrixMMatrix, linear_cache, finitediff_cache,
+            J::MatrixMMatrix, linear_cache, finitediff_cache,
             jacobian_config, dy_dt_wrap!, args...) where {T <: AbstractFloat, F}
-    # TODO: not sure why putting dy_dt! here this kills allocations
-    # costs an extra stage but saves on allocations
-    # TODO: want to ultimately remove this
-    dy_dt!(f, t[1], y)
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp,
-                            jacobian!, J, linear_cache, finitediff_cache, jacobian_config,
+                            J, linear_cache, finitediff_cache, jacobian_config,
                             dy_dt_wrap!
                             )
     y .= y_tmp

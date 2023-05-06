@@ -30,14 +30,6 @@ function y_exact(t; N = 1)
     y_ex
 end
 
-function jacobian!(J, t, y)
-    for i in eachindex(y)
-        a = 0.5 - (i - 1.0)/4.0
-        J[i,i] = 1.0 - 2.0*(y[i] + a)
-    end
-    nothing
-end
-
 # for OrdinaryDiffEq (StaticArray version)
 function f_ord_static(y, p, t)
     N = length(y)

@@ -1,18 +1,17 @@
 module RKM
 
 import SciMLBase: init
-using ForwardDiff
-import ForwardDiff: JacobianConfig
+import ForwardDiff: jacobian!, JacobianConfig
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LinearCache, set_A, set_b, do_factorization, 
                     set_cacheval, _ldiv!
-import ProgressMeter: Progress, next!
 import LinearAlgebra: norm, tril, diag, diagind
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
 import Base: @kwdef
+import ProgressMeter: Progress, next!
 import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
