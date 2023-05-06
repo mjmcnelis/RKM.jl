@@ -59,10 +59,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     y2 = calloc_vector(static_array, precision, dimensions)
     error = calloc_vector(static_array, precision, dimensions)
 
-    # configure linear cache
-    linear_cache = init(LinearProblem(J, f); alias_A = true, alias_b = true)
-    # @time solve!(linear_cache)
-    # @show linear_cache.u
+    # configure linear cache (see src/common.jl in LinearSolve.jl)
+    linear_cache = init(LinearProblem(J, f))
     
     # initalize solution
     sol = Solution(; precision, dimensions)

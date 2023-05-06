@@ -1,15 +1,3 @@
-function solve!(cache::LinearCache, args...; kwargs...)
-    solve!(cache, cache.alg, args...; kwargs...)
-end
-function solve!(cache::LinearCache, alg::AbstractFactorization; kwargs...)
-    # at least understand that it's allocating on factorization
-    if cache.isfresh
-        # but you would think that there is a cache for the factorized matrix somewhere...
-        fact = do_factorization(alg, cache.A, cache.b, cache.u)  # allocates here
-        cache = set_cacheval(cache, fact)
-    end
-    _ldiv!(cache.u, cache.cacheval, cache.b)
-end
 
 # TODO: so far, routine only works for an explicit, primary method
 # TODO: try using the where {T} notation
@@ -30,8 +18,7 @@ end
         # evaluate jacobian
         if root_solver == "newton_fast" # newton fast
             jacobian!(J, t, y)
-
-            # # TODO: how to avoid this?...
+            # TODO: how to avoid this?...
             # y_prime! = let t = t
             #     (f, y) -> 
             #     begin
@@ -40,11 +27,12 @@ end
             # end
             # # OrdinaryDiffEq had some kind of wrapper 
             # ForwardDiff.jacobian!(J, y_prime!, f_tmp, y)
-
             J .*= (-A_T[i,i]*dt)
             for i in diagind(J)
                 J[i] += 1.0
             end
+            # pass jacobian to linear cache
+            linear_cache = set_A(linear_cache, J)
         end
         t_tmp = t + c[i]*dt
         # sum over known stages
@@ -75,14 +63,8 @@ end
                 # from python
                 # g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
 
-                # w = lu!(J)
-                # ldiv!(w, f_tmp)
-                # @.. dy[:,i] -= f_tmp
-
-                linear_cache = set_A(linear_cache, J)
                 linear_cache = set_b(linear_cache, f_tmp)
-                solve!(linear_cache)
-
+                linear_cache = solve_linear_tmp(linear_cache)
                 @.. dy[:,i] -= linear_cache.u
             end
         end

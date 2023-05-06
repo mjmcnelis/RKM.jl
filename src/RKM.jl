@@ -1,11 +1,11 @@
 module RKM
 
-import ForwardDiff: jacobian!
-import SciMLBase: init#, solve
-import LinearSolve: LinearProblem, set_A, set_b, LinearCache, AbstractFactorization, 
-                    _ldiv!, do_factorization, set_cacheval
+# import ForwardDiff: jacobian!
+import SciMLBase: init
+import LinearSolve: LinearProblem, LinearCache, set_A, set_b, do_factorization, 
+                    set_cacheval, _ldiv!
 import ProgressMeter: Progress, next!
-import LinearAlgebra: norm, tril, diag, diagind#, ldiv!, lu!
+import LinearAlgebra: norm, tril, diag, diagind
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import MuladdMacro: @muladd
 import FastBroadcast: @..
@@ -28,6 +28,7 @@ include("solution.jl")
 include("embedded.jl")
 include("adaptive.jl")
 include("controller.jl")
+include("linear_solver.jl")
 include("plots.jl")
 include("utils.jl")
 
