@@ -42,9 +42,13 @@ show_progress = false
 static_array = false
 # static_array = true
 
+# note: pretty rudimentary but covers examples where isn't used
+dy_dt_wrap! = create_dy_dt_wrap(t0)
+
 @time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, 
                        static_array, 
-                       jacobian!
+                       jacobian!, 
+                       dy_dt_wrap!
                        )
 # sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
 #=

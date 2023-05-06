@@ -15,7 +15,7 @@ Note: `jacobian!` argument is temporary
 function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; 
                     static_array::Bool = false, show_progress::Bool = true, 
                     precision::Type{T2} = Float64, parameters::Parameters, 
-                    jacobian! = jacobian_error) where {T <: AbstractFloat,
+                    jacobian! = jacobian_error, dy_dt_wrap!) where {T <: AbstractFloat,
                                                        T2 <: AbstractFloat}
 
     @unpack adaptive, controller, method, t_range, timer = parameters
@@ -61,6 +61,10 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
 
     # configure linear cache (see src/common.jl in LinearSolve.jl)
     linear_cache = init(LinearProblem(J, f))
+    finitediff_cache = JacobianCache(y)
+
+    # TODO: figure out to make dy_dt! wrapper that can update t
+    jacobian_config = JacobianConfig(dy_dt_wrap!, f_tmp, y)
     
     # initalize solution
     sol = Solution(; precision, dimensions)
@@ -84,7 +88,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         # TODO: see if can pass kwargs
         allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
                                  FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
-                                 jacobian!, J, linear_cache)
+                                 jacobian!, J, linear_cache, finitediff_cache, 
+                                 jacobian_config, dy_dt_wrap!)
         t[1] += dt[1]
     end
     @info "Number of memory allocations during solve = $allocs"

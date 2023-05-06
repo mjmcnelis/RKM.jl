@@ -9,7 +9,7 @@ N = 1
 y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
 
 prob = ODEProblem(f_ord, y0, (t0, 10.0))
-@time sol = solve(prob, ImplicitEuler(), dt = 1e-4, reltol = 1e-6, abstol = 0.0,
+@time sol = solve(prob, ImplicitEuler(; autodiff = true), dt = 1e-4, reltol = 1e-6, abstol = 0.0,
                   # if adaptive is false will compute Jacobian at each timestep
                   adaptive = false
                   # qmin = 0.2, qmax = 10.0, gamma = 0.9,

@@ -10,6 +10,16 @@ function dy_dt!(f, t, y)
     nothing
 end
 
+function create_dy_dt_wrap(t)
+    func = let t = t
+        (f, y) -> 
+        begin
+            return dy_dt!(f, t, y)
+        end
+    end
+    return func
+end
+
 function y_exact(t; N = 1)
     y_ex = BigFloat[]
     t = BigFloat(t)

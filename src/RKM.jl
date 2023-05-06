@@ -1,7 +1,9 @@
 module RKM
 
-# import ForwardDiff: jacobian!
 import SciMLBase: init
+using ForwardDiff
+import ForwardDiff: JacobianConfig
+import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LinearCache, set_A, set_b, do_factorization, 
                     set_cacheval, _ldiv!
 import ProgressMeter: Progress, next!
