@@ -1,12 +1,14 @@
 module RKM
 
-import SciMLBase: init
+import SciMLBase: init, solve
 import ForwardDiff: jacobian!, JacobianConfig
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LinearCache, set_A, set_b, do_factorization, 
-                    set_cacheval, _ldiv!
-import LinearAlgebra: norm, tril, diag, diagind
+                    set_cacheval, _ldiv!, KLUFactorization, LUFactorization, 
+                    AbstractFactorization
+import LinearAlgebra: norm, tril, diag, diagind, lu, lu!
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
+import SparseArrays: SparseMatrixCSC, sparse
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
@@ -18,8 +20,8 @@ import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 abstract type ODEMethod end
 
 const VectorMVector = Union{Vector{T}, MVector{D,T}} where {D, T <: AbstractFloat} 
-const MatrixMMatrix = Union{Matrix{T}, MMatrix{D,S,T,DS}} where {D, S, DS, 
-                                                                 T <: AbstractFloat}
+const MatrixMMatrix = Union{Matrix{T}, MMatrix{D,S,T,DS}, 
+                            SparseMatrixCSC{T}} where {D, S, DS, T <: AbstractFloat}
 
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root

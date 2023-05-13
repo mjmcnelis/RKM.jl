@@ -7,10 +7,10 @@ precision = Float64
 # precision = Double64
 # precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
 
-adaptive = Fixed()         
+# adaptive = Fixed()         
 # method = RungeKutta4()
 method = BackwardEuler1()
-# adaptive = Doubling()        
+adaptive = Doubling()        
 # method = Heun2()
 # adaptive = Embedded()
 # method = HeunEuler21()        
@@ -18,9 +18,11 @@ method = BackwardEuler1()
 # adaptive = FiniteDiff() 
 # method = Heun2() 
 
-# controller = PIDControllerK(; kI = 0.3, kP = 0.4)
-controller = PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4)
-# controller = PIDControllerBeta(; beta1 = 1/18, beta2 = 1/9, beta3 = 1/18, predictive = false)
+controller = PIDControllerK(; kI = 0.3, kP = 0.4)
+# controller = PIDControllerK(; kI = 1.0, kP = 0.0, kD = 0.0)
+
+# controller = PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4)
+# controller = PIDControllerBeta(; beta1 = 1/18, beta2 = 1/9, beta3 = 1/18, predictive = true)
 
 t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
 

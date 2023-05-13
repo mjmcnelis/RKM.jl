@@ -56,8 +56,14 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     y2 = calloc_vector(static_array, precision, dimensions)
     error = calloc_vector(static_array, precision, dimensions)
 
+    J[diagind(J)] .= 1.0 
+    # TODO: have option to use sparse jacobian
+    # J = sparse(J)
+    fact = lu(J) 
+
     # configure linear cache (see src/common.jl in LinearSolve.jl)
-    linear_cache = init(LinearProblem(J, f))
+    linear_cache = init(LinearProblem(J, f),#=LUFactorization()=#)
+    linear_cache = set_cacheval(linear_cache, fact)
     finitediff_cache = JacobianCache(y)
 
     # TODO: figure out to make dy_dt! wrapper that can update t
