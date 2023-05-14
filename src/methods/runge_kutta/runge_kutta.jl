@@ -22,10 +22,12 @@ struct RungeKutta{T, S, S2} <: ODEMethod where {T <: AbstractFloat, S, S2}
     """Order of the primary (and embedded) update(s) of the Runge-Kutta method"""
     order::Vector{T}
     # TODO: should I just wrap this in a Properties struct?
-    """Determinates whether the method is explicit or implicit"""
+    """Determines whether the method is explicit or implicit"""
     iteration::Iteration
     """Determines whether the method has the FSAL property"""
     fsal::FirstSameAsLast
+    """Determines which stages are explicit"""
+    explicit_stage::SVector{S, Bool}
     """Abbreviated name for the Runge-Kutta method"""
     code_name::String
 end
@@ -47,10 +49,11 @@ Outer constructor for `RungeKutta`.
 Required parameters: `name`, `butcher`
 """
 function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
-    order     = order_prop(name, butcher)       # determine properties
-    iteration = iteration_prop(butcher)
-    fsal      = fsal_prop(butcher)
-    code_name = make_code_name(name)            # get code name label
+    order          = order_prop(name, butcher)      # determine properties
+    iteration      = iteration_prop(butcher)
+    fsal           = fsal_prop(butcher)
+    explicit_stage = explicit_stage_prop(butcher)
+    code_name      = make_code_name(name)           # get code name label
 
     nrow, ncol = size(butcher)
     stages = ncol - 1
@@ -63,7 +66,7 @@ function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
 
     return RungeKutta(name, c, A_T, b, b_hat, stages, order, 
-                      iteration, fsal, code_name)
+                      iteration, fsal, explicit_stage, code_name)
 end
 
 function Base.show(io::IO, RK::RungeKutta)

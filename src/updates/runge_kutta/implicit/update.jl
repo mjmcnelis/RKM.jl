@@ -5,7 +5,7 @@
                      linear_cache, finitediff_cache, jacobian_config, 
                      dy_dt_wrap!) where {T <: AbstractFloat, F <: Function}
 
-    @unpack c, A_T, b, stages = method
+    @unpack c, A_T, b, stages, explicit_stage = method
 
     # root_solver = "fixed_point"        # will just use fixed point iteration for now
     root_solver = "newton"
@@ -34,54 +34,60 @@
         end
         =#
         t_tmp = t + c[i]*dt
-        # sum over previously known stages
+        # sum over known stages
         @.. y_tmp = y 
         for j = 1:i-1
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
-        # zero current stage before iterating
-        @.. dy[:,i] = 0.0
 
-        # TEMP iterate w/o any breaks for now
-        for n = 1:max_iterations
-            dy_stage = view(dy,:,i)
-            @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
-
-            # do this before or after y_tmp evaluation? 
-            if root_solver == "newton"
-                jacobian!(J, dy_dt_wrap!, f_tmp, y_tmp, jacobian_config)
-                J .*= (-A_T[i,i]*dt)
-                for i in diagind(J)
-                    J[i] += 1.0
-                end
-                linear_cache = set_A(linear_cache, J)
-            end
-        
-            # evaluate ODE at previous iteration (could maybe just iterate y_tmp itself)
+        if explicit_stage[i]
             dy_dt!(f_tmp, t_tmp, y_tmp)
+            @.. dy[:,i] = dt * f_tmp
+        else
+            # zero current stage before iterating
+            @.. dy[:,i] = 0.0
 
-            # TEMP undo addition (for minimizing allocations)
-            @.. y_tmp = y_tmp - A_T[i,i]*dy_stage
+            # TEMP iterate w/o any breaks for now
+            for n = 1:max_iterations
+                dy_stage = view(dy,:,i)
+                @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
 
-            if root_solver == "fixed_point"
-                @.. dy[:,i] = dt * f_tmp
-            elseif root_solver == "newton"
-                # TODO: try to solve for dy directly instead of d(dy)
-                for k in eachindex(f_tmp)
-                    # TODO: shouldn't this include the stage coefficient?
-                    #       maybe not, double check stage math
-                    f_tmp[k] = dy[k,i] - dt*f_tmp[k]
+                # do this before or after y_tmp evaluation? 
+                if root_solver == "newton"
+                    jacobian!(J, dy_dt_wrap!, f_tmp, y_tmp, jacobian_config)
+                    J .*= (-A_T[i,i]*dt)
+                    for i in diagind(J)
+                        J[i] += 1.0
+                    end
+                    linear_cache = set_A(linear_cache, J)
                 end
-                # from python
-                # g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
+            
+                # evaluate ODE at previous iteration (could maybe just iterate y_tmp itself)
+                dy_dt!(f_tmp, t_tmp, y_tmp)
 
-                linear_cache = set_b(linear_cache, f_tmp)
-                # note: may not need this if use regular newton method 
-                linear_cache = solve_linear_tmp(linear_cache)
-                @.. dy[:,i] -= linear_cache.u
-                # sol = solve(linear_cache)
-                # @.. dy[:,i] -= sol.u
+                # TEMP undo addition (for minimizing allocations)
+                @.. y_tmp = y_tmp - A_T[i,i]*dy_stage
+
+                if root_solver == "fixed_point"
+                    @.. dy[:,i] = dt * f_tmp
+                elseif root_solver == "newton"
+                    # TODO: try to solve for dy directly instead of d(dy)
+                    for k in eachindex(f_tmp)
+                        # TODO: shouldn't this include the stage coefficient?
+                        #       maybe not, double check stage math
+                        f_tmp[k] = dy[k,i] - dt*f_tmp[k]
+                    end
+                    # from python
+                    # g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
+
+                    linear_cache = set_b(linear_cache, f_tmp)
+                    # note: may not need this if use regular newton method 
+                    linear_cache = solve_linear_tmp(linear_cache)
+                    @.. dy[:,i] -= linear_cache.u
+                    # sol = solve(linear_cache)
+                    # @.. dy[:,i] -= sol.u
+                end
             end
         end
     end
