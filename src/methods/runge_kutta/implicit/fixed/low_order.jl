@@ -26,6 +26,28 @@ function CrankNicolson2(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    TrapezoidRuleBDF2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+R.E. Bank, W.M. Coughran, W. Fichtner, E.H. Grosse, D.J.
+Rose, and R.K. Smith. Transient simulation of silicon devices
+and circuits. IEEE Transactions on Electron Devices, 32:1992–
+2007, 1985.
+"""
+function TrapezoidRuleBDF2(; precision::Type{T} = Float64) where T <: AbstractFloat
+    s2 = sqrt(BigFloat(2))   # sqrt(2)
+    g = 2 - s2               # gamma
+
+    # note: is it FSAL? 
+    butcher = [0 0 0 0
+               g g/2 g/2 0
+               1 1/(2(2-g)) 1/(2(2-g)) g/2   
+               1 1/(2(2-g)) 1/(2(2-g)) g/2]
+    butcher = butcher .|> precision
+
+    return RungeKutta(; name = :Trapezoid_Rule_B_D_F_2, butcher)
+end
+
+"""
     ImplicitMidpoint2(; precision::Type{T} = Float64) where T <: AbstractFloat
 
 Second-order implicit mid-point rule (A-stable).

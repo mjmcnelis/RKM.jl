@@ -69,6 +69,8 @@
             elseif root_solver == "newton"
                 # TODO: try to solve for dy directly instead of d(dy)
                 for k in eachindex(f_tmp)
+                    # TODO: shouldn't this include the stage coefficient?
+                    #       maybe not, double check stage math
                     f_tmp[k] = dy[k,i] - dt*f_tmp[k]
                 end
                 # from python

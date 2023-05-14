@@ -90,6 +90,10 @@ export Fehlberg12, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, Dorma
 export BackwardEuler1, CrankNicolson2, ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2,
        PareschiRusso2, PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3, Norsett4, 
        RaduaIA5
+
+# not sure which category it belongs to yet 
+export TrapezoidRuleBDF2
+
     # Embedded implicit Runge-Kutta
 export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42, 
        LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52, GaussLegendre64
