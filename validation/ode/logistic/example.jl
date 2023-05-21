@@ -13,9 +13,9 @@ adaptive = Fixed()
 
 # TODO: if stage 2 and 3 have "same jacobian", then can reuse it?
 #       not entirely sure what it implies
-# method = TrapezoidRuleBDF2()
+method = TrapezoidRuleBDF2()
 
-method = CrankNicolson21()     # don't need to iterate first stage, but there's no logic atm
+# method = CrankNicolson21()     # don't need to iterate first stage, but there's no logic atm
 # adaptive = Doubling()        
 # method = Heun2()
 # adaptive = Embedded()

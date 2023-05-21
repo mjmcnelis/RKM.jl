@@ -7,32 +7,13 @@
 
     @unpack c, A_T, b, stages, explicit_stage = method
 
-    # root_solver = "fixed_point"        # will just use fixed point iteration for now
+    # root_solver = "fixed_point"
     root_solver = "newton"
-    # root_solver = "newton_fast"
-    eps_root = 1e-8
-    max_iterations = 2                   # 2 for benchmarking ImplicitEuler(), fixed dt
+    # TODO: reuse adaptive epsilon? (or 100x smaller than it?)
+    epsilon_root = 1e-8
+    max_iterations = 10
 
-    for i = 1:stages
-        # evaluate jacobian
-        #=
-        if root_solver == "newton_fast" 
-            # TODO: how to reduce allocations here, take it apart or make a wrapper?
-            # so in order for jacobian config to work, dy_dt_wrap! argument
-            # has to be the same object stored in jacobian_config
-            jacobian!(J, dy_dt_wrap!, f_tmp, y, jacobian_config)
-            # @show J
-            # finite_difference_jacobian!(J, dy_dt_wrap!, y, finitediff_cache) 
-            # @show J; q()
-
-            J .*= (-A_T[i,i]*dt)
-            for i in diagind(J)
-                J[i] += 1.0
-            end
-            # pass jacobian to linear cache
-            linear_cache = set_A(linear_cache, J)
-        end
-        =#
+    for i = 1:stages        
         t_tmp = t + c[i]*dt
         # sum over known stages
         @.. y_tmp = y 
@@ -48,38 +29,51 @@
             # zero current stage before iterating
             @.. dy[:,i] = 0.0
 
-            # TEMP iterate w/o any breaks for now
             for n = 1:max_iterations
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
 
-                # do this before or after y_tmp evaluation? 
-                if root_solver == "newton"
+                if root_solver == "newton"               # evaluate current Jacobian
+                    # TODO: how to reduce allocations here, take it apart or make a wrapper?
+                    # so in order for jacobian config to work, dy_dt_wrap! argument
+                    # has to be the same object stored in jacobian_config
                     jacobian!(J, dy_dt_wrap!, f_tmp, y_tmp, jacobian_config)
-                    J .*= (-A_T[i,i]*dt)
+                    J .*= (-A_T[i,i]*dt)                 # J <- I - A.dt.J
                     for i in diagind(J)
                         J[i] += 1.0
                     end
-                    linear_cache = set_A(linear_cache, J)
+                    linear_cache = set_A(linear_cache, J)# pass Jacobian to linear cache
                 end
-            
-                # evaluate ODE at previous iteration (could maybe just iterate y_tmp itself)
-                dy_dt!(f_tmp, t_tmp, y_tmp)
 
-                # TEMP undo addition (for minimizing allocations)
-                @.. y_tmp = y_tmp - A_T[i,i]*dy_stage
+                dy_dt!(f_tmp, t_tmp, y_tmp)              # evaluate current slope
+
+                @.. y_tmp = y_tmp - A_T[i,i]*dy_stage    # undo addition to y_tmp
 
                 if root_solver == "fixed_point"
                     @.. dy[:,i] = dt * f_tmp
                 elseif root_solver == "newton"
-                    # TODO: try to solve for dy directly instead of d(dy)
+                    # TODO: initialize predictor for dy other than zero
+
+                    # sort out @.. equivalent
                     for k in eachindex(f_tmp)
-                        # TODO: shouldn't this include the stage coefficient?
-                        #       maybe not, double check stage math
                         f_tmp[k] = dy[k,i] - dt*f_tmp[k]
                     end
-                    # from python
-                    # g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
+
+                    # compute residual error of root equation:
+                    # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
+                    res = norm(f_tmp)
+
+                    dy_norm = norm(view(dy,:,i))         # compute error tolerance 
+                    tol = epsilon_root * dy_norm
+               
+                    if n > 1 && res < tol                # check if Newton method covnerges
+                        break
+                    end
+                    # if n == max_iterations
+                    #     @warn "exceeded max Newton iterations at t = $t"
+                    #     @show res tol
+                    #     println("")
+                    # end
 
                     linear_cache = set_b(linear_cache, f_tmp)
                     # note: may not need this if use regular newton method 
@@ -91,7 +85,6 @@
             end
         end
     end
-
     @.. y_tmp = y                                        # evaluate iteration
     for j = 1:stages
         dy_stage = view(dy,:,j)
