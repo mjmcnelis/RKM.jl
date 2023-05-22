@@ -31,6 +31,7 @@ include("solution.jl")
 include("embedded.jl")
 include("adaptive.jl")
 include("controller.jl")
+include("stage_finder.jl")
 include("linear_solver.jl")
 include("plots.jl")
 include("utils.jl")
@@ -66,6 +67,8 @@ include("evolve.jl")
 export Fixed, Doubling, Embedded, FiniteDiff
 # Time step controller
 export PIDController, PIDControllerK, PIDControllerBeta
+# Implicit stage finder 
+export ImplicitStageFinder, Newton
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 

@@ -2,16 +2,12 @@
 @muladd function fixed_runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix,
                      y_tmp::VectorMVector, f_tmp::VectorMVector, J::MatrixMMatrix,
-                     linear_cache, finitediff_cache, jacobian_config, 
-                     dy_dt_wrap!) where {T <: AbstractFloat, F <: Function}
+                     linear_cache, finitediff_cache, jacobian_config, dy_dt_wrap!,
+                     stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, 
+                                                               F <: Function}
 
     @unpack c, A_T, b, stages, explicit_stage = method
-
-    # root_solver = "fixed_point"
-    root_solver = "newton"
-    # TODO: reuse adaptive epsilon? (or 100x smaller than it?)
-    epsilon_root = 1e-8
-    max_iterations = 10
+    @unpack root_method, epsilon, max_iterations = stage_finder
 
     for i = 1:stages        
         t_tmp = t + c[i]*dt
@@ -33,7 +29,7 @@
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
 
-                if root_solver == "newton"               # evaluate current Jacobian
+                if root_method isa Newton                # evaluate current Jacobian
                     # TODO: how to reduce allocations here, take it apart or make a wrapper?
                     # so in order for jacobian config to work, dy_dt_wrap! argument
                     # has to be the same object stored in jacobian_config
@@ -49,12 +45,11 @@
 
                 @.. y_tmp = y_tmp - A_T[i,i]*dy_stage    # undo addition to y_tmp
 
-                if root_solver == "fixed_point"
+                if root_method isa FixedPoint
                     @.. dy[:,i] = dt * f_tmp
-                elseif root_solver == "newton"
-                    # TODO: initialize predictor for dy other than zero
-
-                    # sort out @.. equivalent
+                elseif root_method isa Newton
+                    # TODO: initialize predictor for dy other than zero,
+                    #       and sort out @.. equivalent
                     for k in eachindex(f_tmp)
                         f_tmp[k] = dy[k,i] - dt*f_tmp[k]
                     end
@@ -64,7 +59,7 @@
                     res = norm(f_tmp)
 
                     dy_norm = norm(view(dy,:,i))         # compute error tolerance 
-                    tol = epsilon_root * dy_norm
+                    tol = epsilon * dy_norm
                
                     if n > 1 && res < tol                # check if Newton method covnerges
                         break
@@ -100,11 +95,12 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
             dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
             f_tmp::VectorMVector, f::VectorMVector, y1, y2, error, 
             J::MatrixMMatrix, linear_cache, finitediff_cache,
-            jacobian_config, dy_dt_wrap!, args...) where {T <: AbstractFloat, F}
+            jacobian_config, dy_dt_wrap!, 
+            stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, F}
 
     fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp,
                             J, linear_cache, finitediff_cache, jacobian_config,
-                            dy_dt_wrap!)
+                            dy_dt_wrap!, stage_finder)
     y .= y_tmp
     nothing
 end
@@ -115,7 +111,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
              f_tmp::VectorMVector, f::VectorMVector, y1::VectorMVector, 
              y2::VectorMVector, error::VectorMVector, 
              J::MatrixMMatrix, linear_cache, finitediff_cache, 
-             jacobian_config, dy_dt_wrap!, args...) where {T <: AbstractFloat, F}
+             jacobian_config, dy_dt_wrap!, 
+             stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, F}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -135,7 +132,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
         doubling_runge_kutta_step!(method, iteration, y, t[1], dt[1],
                                 dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, J, 
                                 linear_cache, finitediff_cache, jacobian_config, 
-                                dy_dt_wrap!)
+                                dy_dt_wrap!, stage_finder)
 
         @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
         @.. y2 = y2 + error                             # Richardson extrapolation
@@ -182,7 +179,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
              f_tmp::VectorMVector, f::VectorMVector, y1::VectorMVector, 
              y2::VectorMVector, error::VectorMVector, 
              J::MatrixMMatrix, linear_cache, finitediff_cache, 
-             jacobian_config, dy_dt_wrap!, args...) where {T <: AbstractFloat, F}
+             jacobian_config, dy_dt_wrap!, 
+             stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, F}
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -209,7 +207,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::DiagonalImplicit,
                        
         fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, 
                                 f_tmp, J, linear_cache, finitediff_cache, 
-                                jacobian_config, dy_dt_wrap!)
+                                jacobian_config, dy_dt_wrap!, stage_finder)
         @.. y1 = y_tmp                                  # primary iteration
 
         embedded_runge_kutta_step!(method, y, dy, y_tmp)
@@ -262,20 +260,20 @@ end
 function doubling_runge_kutta_step!(method, iteration::DiagonalImplicit, y, t, dt,
                                     dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, J, 
                                     linear_cache, finitediff_cache, jacobian_config, 
-                                    dy_dt_wrap!)
+                                    dy_dt_wrap!, stage_finder)
     # iterate full time step 
     fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, 
                             J, linear_cache, finitediff_cache, jacobian_config, 
-                            dy_dt_wrap!)
+                            dy_dt_wrap!, stage_finder)
     @.. y1 = y_tmp                                      # y1(t+dt)   
     # iterate two half time steps
     fixed_runge_kutta_step!(method, iteration, y, t, dt/2.0, dy_dt!, dy, y_tmp, f_tmp,
                             J, linear_cache, finitediff_cache, jacobian_config, 
-                            dy_dt_wrap!)
+                            dy_dt_wrap!, stage_finder)
     @.. y2 = y_tmp                                      # y2(t+dt/2)
     fixed_runge_kutta_step!(method, iteration, y2, t + dt/2.0, dt/2.0, dy_dt!, dy, y_tmp, 
                             f_tmp, J, linear_cache, finitediff_cache, jacobian_config, 
-                            dy_dt_wrap!)
+                            dy_dt_wrap!, stage_finder)
     @.. y2 = y_tmp                                      # y2(t+dt)
     return nothing
 end

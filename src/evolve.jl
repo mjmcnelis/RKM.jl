@@ -15,7 +15,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
                     precision::Type{T2} = Float64, parameters::Parameters, 
                     dy_dt_wrap!) where {T <: AbstractFloat, T2 <: AbstractFloat}
 
-    @unpack adaptive, controller, method, t_range, timer = parameters
+    @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
     @unpack t0, tf, dt0 = t_range
 
     # note: if code errors out from bug and doesn't not update
@@ -93,7 +93,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
                                  FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
                                  J, linear_cache, finitediff_cache, 
-                                 jacobian_config, dy_dt_wrap!)
+                                 jacobian_config, dy_dt_wrap!, stage_finder
+                                )
         t[1] += dt[1]
     end
     @info "Number of memory allocations during solve = $allocs"
