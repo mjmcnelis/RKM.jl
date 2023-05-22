@@ -56,7 +56,6 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 # Runge-Kutta updates
 include("updates/function_evaluations.jl")
 include("updates/step_rejection_rate.jl")
-include("updates/jacobian.jl")
 include("updates/runge_kutta/explicit/update.jl")
 include("updates/runge_kutta/implicit/update.jl")
 
@@ -68,7 +67,7 @@ export Fixed, Doubling, Embedded, FiniteDiff
 # Time step controller
 export PIDController, PIDControllerK, PIDControllerBeta
 # Implicit stage finder 
-export ImplicitStageFinder, Newton
+export ImplicitStageFinder, Newton, ForwardJacobian, FiniteJacobian
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 

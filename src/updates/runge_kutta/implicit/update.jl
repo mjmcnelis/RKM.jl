@@ -7,33 +7,29 @@
                                                                F <: Function}
 
     @unpack c, A_T, b, stages, explicit_stage = method
-    @unpack root_method, epsilon, max_iterations = stage_finder
+    @unpack root_method, jacobian_method, epsilon, max_iterations = stage_finder
 
     for i = 1:stages        
         t_tmp = t + c[i]*dt
-        # sum over known stages
-        @.. y_tmp = y 
+        @.. y_tmp = y                                    # sum over known stages
         for j = 1:i-1
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
-
+        
         if explicit_stage[i]
             dy_dt!(f_tmp, t_tmp, y_tmp)
             @.. dy[:,i] = dt * f_tmp
         else
-            # zero current stage before iterating
-            @.. dy[:,i] = 0.0
+            @.. dy[:,i] = 0.0                            # zero stage before iterating 
 
             for n = 1:max_iterations
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
 
                 if root_method isa Newton                # evaluate current Jacobian
-                    # TODO: how to reduce allocations here, take it apart or make a wrapper?
-                    # so in order for jacobian config to work, dy_dt_wrap! argument
-                    # has to be the same object stored in jacobian_config
-                    jacobian!(J, dy_dt_wrap!, f_tmp, y_tmp, jacobian_config)
+                    evaluate_system_jacobian!(jacobian_method, J, dy_dt_wrap!, f_tmp, 
+                                              y_tmp, jacobian_config, finitediff_cache)
                     J .*= (-A_T[i,i]*dt)                 # J <- I - A.dt.J
                     for i in diagind(J)
                         J[i] += 1.0
