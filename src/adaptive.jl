@@ -3,7 +3,7 @@ abstract type AdaptiveStepSize end
 
 struct Fixed <: AdaptiveStepSize end
 
-struct FiniteDiff <: AdaptiveStepSize 
+struct CentralDiff <: AdaptiveStepSize 
     """Relative and incremental error tolerance"""
     epsilon::Float64
     """Lower bound on the time step's rate of change"""
@@ -18,12 +18,12 @@ struct FiniteDiff <: AdaptiveStepSize
     dt_max::Float64
 end
 
-function FiniteDiff(; epsilon = 1e-6, low = 0.2, high = 1.5, p_norm = 2,
+function CentralDiff(; epsilon = 1e-6, low = 0.2, high = 1.5, p_norm = 2,
                       dt_min = eps(1.0), dt_max = Inf)
 
     check_adaptive_parameters_1(; epsilon, low, high, p_norm, dt_min, dt_max)
 
-    return FiniteDiff(epsilon, low, high, p_norm, dt_min, dt_max)
+    return CentralDiff(epsilon, low, high, p_norm, dt_min, dt_max)
 end
 
 """

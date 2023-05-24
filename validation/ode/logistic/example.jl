@@ -30,6 +30,7 @@ controller = PIDControllerK(; kI = 0.3, kP = 0.4)
 # controller = PIDControllerBeta(; beta1 = 1/18, beta2 = 1/9, beta3 = 1/18, predictive = true)
 
 stage_finder = ImplicitStageFinder()
+# stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian())
 
 t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
 

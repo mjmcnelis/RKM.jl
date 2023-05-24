@@ -64,7 +64,12 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     # configure linear cache (see src/common.jl in LinearSolve.jl)
     linear_cache = init(LinearProblem(J, f),#=LUFactorization()=#)
     linear_cache = set_cacheval(linear_cache, fact)
-    finitediff_cache = JacobianCache(y)
+
+
+    
+    stage_finder = set_jacobian_cache(stage_finder, y)
+
+
 
     # TODO: figure out to make dy_dt! wrapper that can update t
     # https://github.com/JuliaDiff/ForwardDiff.jl/issues/402
@@ -92,8 +97,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         # TODO: see if can pass kwargs
         allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
                                  FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
-                                 J, linear_cache, finitediff_cache, 
-                                 jacobian_config, dy_dt_wrap!, stage_finder
+                                 J, linear_cache, jacobian_config, dy_dt_wrap!, 
+                                 stage_finder
                                 )
         t[1] += dt[1]
     end

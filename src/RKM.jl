@@ -16,6 +16,7 @@ import Base: @kwdef
 import ProgressMeter: Progress, next!
 import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
+import Setfield: @set!
 
 abstract type ODEMethod end
 

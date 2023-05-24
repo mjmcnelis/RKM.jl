@@ -45,7 +45,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
 end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::FiniteDiff, controller::Controller, FE::MVector{1,Int64}, 
+             adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64}, 
              y::Vector{T}, t::Union{Vector{T}, MVector{1,T}}, 
              dt::Union{Vector{T}, MVector{2,T}}, dy_dt!::F, dy::Matrix{T},
              y_tmp::Vector{T}, f_tmp::Vector{T}, 

@@ -13,4 +13,4 @@ end
 
 adaptive_code_label(::AdaptiveStepSize) = ""
 adaptive_code_label(::Doubling) = "D"
-adaptive_code_label(::FiniteDiff) = "M"
+adaptive_code_label(::CentralDiff) = "M"
