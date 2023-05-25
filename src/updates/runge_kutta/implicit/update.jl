@@ -21,7 +21,9 @@
             dy_dt!(f_tmp, t_tmp, y_tmp)
             @.. dy[:,i] = dt * f_tmp
         else
-            @.. dy[:,i] = 0.0                            # zero stage before iterating 
+            # TODO: look into predictors
+            dy_dt!(f_tmp, t_tmp, y_tmp)                  # guess stage before iterating
+            @.. dy[:,i] = dt * f_tmp
 
             for n = 1:max_iterations
                 dy_stage = view(dy,:,i)
@@ -58,6 +60,7 @@
                     tol = epsilon * dy_norm
                
                     if n > 1 && res < tol                # check if Newton method covnerges
+                        # print(n)
                         break
                     end
                     # if n == max_iterations
