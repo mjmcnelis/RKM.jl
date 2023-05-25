@@ -59,6 +59,7 @@ include("updates/function_evaluations.jl")
 include("updates/step_rejection_rate.jl")
 include("updates/runge_kutta/explicit/update.jl")
 include("updates/runge_kutta/implicit/update.jl")
+include("updates/runge_kutta/step_doubling.jl")
 
 include("parameters.jl")
 include("evolve.jl")
