@@ -4,7 +4,10 @@ struct Newton <: RootMethod end         # TODO: add line search later
 struct FixedPoint <: RootMethod end
 
 abstract type JacobianMethod end
-struct ForwardJacobian <: JacobianMethod end
+
+@kwdef struct ForwardJacobian{JC} <: JacobianMethod where JC <: JacobianConfig
+    cache::JC = JacobianConfig(nothing, [0.0], [0.0])
+end
 
 @kwdef struct FiniteJacobian{JC} <: JacobianMethod where JC <: JacobianCache
     cache::JC = JacobianCache([0.0]) 
@@ -22,24 +25,27 @@ abstract type StageFinder end
     # add iterations_per_stage, p_norm
 end
 
-function set_jacobian_cache(stage_finder::ImplicitStageFinder, y)
-    if stage_finder.jacobian_method isa FiniteJacobian
-        @set! stage_finder.jacobian_method.cache = JacobianCache(y)
+function set_jacobian_cache(stage_finder::ImplicitStageFinder, dy_dt!, f, y)
+    @unpack jacobian_method = stage_finder
+    if jacobian_method isa FiniteJacobian
+        cache = JacobianCache(y)
+    elseif jacobian_method isa ForwardJacobian 
+        cache = JacobianConfig(dy_dt!, f, y)
     end
+    @set! stage_finder.jacobian_method.cache = cache
     return stage_finder
 end
 
-function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, J, dy_dt!, f, y,
-                                   jacobian_config)
+function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, J, dy_dt!, y, f)
     # TODO: how to reduce allocations here, take it apart or make a wrapper?
-    # so in order for jacobian config to work, dy_dt_wrap! argument
-    # has to be the same object stored in jacobian_config
-    jacobian!(J, dy_dt!, f, y, jacobian_config)
+    # so in order for jacobian config (i.e. cache) to work, dy_dt! argument
+    # has to be the same object stored in jacobian_method.cache
+    @unpack cache = jacobian_method 
+    jacobian!(J, dy_dt!, f, y, cache)
     return nothing 
 end
 
-function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, J, dy_dt!, f, y, 
-                                   jacobian_config)
+function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, J, dy_dt!, y, args...)
     @unpack cache = jacobian_method
     finite_difference_jacobian!(J, dy_dt!, y, cache)
     return nothing 
