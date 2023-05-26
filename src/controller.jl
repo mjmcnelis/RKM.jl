@@ -9,6 +9,7 @@ struct PIDController{T} <: Controller where {T <: AbstractFloat}
     e_prev::MVector{2,T}
     dt_prev::MVector{2,T}
     predictive::Bool
+    initialized::MVector{1,Bool}
 end 
 
 function PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4, beta3 = 0.0, 
@@ -21,7 +22,8 @@ function PIDControllerBeta(; beta1 = 0.7, beta2 = -0.4, beta3 = 0.0,
 
     e_prev = MVector{2, precision}(1.0, 1.0)
     dt_prev = MVector{2, precision}(1.0, 1.0)
-    return PIDController(kI, kP, kD, e_prev, dt_prev, predictive)
+    initialized = MVector{1, Bool}(false)
+    return PIDController(kI, kP, kD, e_prev, dt_prev, predictive, initialized)
 end
 
 function PIDControllerK(; kI = 0.3, kP = 0.4, kD = 0.0,
@@ -29,7 +31,8 @@ function PIDControllerK(; kI = 0.3, kP = 0.4, kD = 0.0,
                           precision::Type{T} = Float64) where {T <: AbstractFloat}
     e_prev = MVector{2, precision}(1.0, 1.0)
     dt_prev = MVector{2, precision}(1.0, 1.0)
-    return PIDController(kI, kP, kD, e_prev, dt_prev, predictive)
+    initialized = MVector{1, Bool}(false)
+    return PIDController(kI, kP, kD, e_prev, dt_prev, predictive, initialized)
 end
 
 function rescale_time_step(controller::PIDController, tol::T, 

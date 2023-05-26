@@ -10,17 +10,11 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     if iteration isa Explicit
         dy_dt!(f_tmp, t[1], y)                          # evaluate first stage at (t,y)
         @.. dy[:,1] = dt[1] * f_tmp
+        FE[1] += 1
     end
 
     runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, 
-                      f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
+                      f_tmp, FE, J, linear_cache, dy_dt_wrap!, stage_finder)
     @.. y = y_tmp
-    
-    if iteration isa Explicit
-        add_function_evaluations!(FE, iteration, adaptive, method)
-    else 
-        # TMP 
-        FE[1] += 10
-    end
     return nothing
 end

@@ -1,4 +1,5 @@
 
+# TODO: not really working that well right now, debug later (also out of date)
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64}, 
              y::Vector{T}, t::Union{Vector{T}, MVector{1,T}}, 
@@ -56,7 +57,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
     end
     # evaluate first stage iteration w/ new time step (i.e. dt[2])
     @.. dy[:,1] = dt[2] * f_tmp    
-    fixed_runge_kutta_step!(method, iteration, y, t[1], dt[2], dy_dt!, dy, y_tmp, f_tmp)
+    runge_kutta_step!(method, iteration, y, t[1], dt[2], dy_dt!, dy, y_tmp, f_tmp)
 
     dt[1] = dt[2]                                       # store current time step
     @.. y_prev = y                                      # store current solution

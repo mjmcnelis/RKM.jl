@@ -2,8 +2,8 @@
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit, y::VectorMVector, t::T, 
                      dt::T, dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
-                     f_tmp::VectorMVector, args...) where {T <: AbstractFloat, 
-                                                           F <: Function}
+                     f_tmp::VectorMVector, FE::MVector{1,Int64}, 
+                     args...) where {T <: AbstractFloat, F <: Function}
     @unpack c, A_T, b, stages = method
 
     for i = 2:stages                                    # evaluate remaining stages
@@ -18,6 +18,7 @@
         # TODO: skip if intermediate update not needed in next row(s)? 
         dy_dt!(f_tmp, t_tmp, y_tmp)
         @.. dy[:,i] = dt * f_tmp
+        FE[1] += 1
     end
     @.. y_tmp = y                                        # evaluate iteration
     for j = 1:stages
@@ -29,11 +30,10 @@ end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix,
-                     y_tmp::VectorMVector, f_tmp::VectorMVector, J::MatrixMMatrix,
-                     linear_cache, dy_dt_wrap!,
+                     y_tmp::VectorMVector, f_tmp::VectorMVector, FE::MVector{1,Int64},
+                     J::MatrixMMatrix, linear_cache, dy_dt_wrap!,
                      stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, 
                                                                F <: Function}
-
     @unpack c, A_T, b, stages, explicit_stage = method
     @unpack root_method, jacobian_method, epsilon, max_iterations = stage_finder
 
@@ -48,6 +48,7 @@ end
         if explicit_stage[i]
             dy_dt!(f_tmp, t_tmp, y_tmp)
             @.. dy[:,i] = dt * f_tmp
+            FE[1] += 1
         else
             # TODO: look into predictors
             dy_dt!(f_tmp, t_tmp, y_tmp)                  # guess stage before iterating
@@ -68,7 +69,8 @@ end
                 end
 
                 dy_dt!(f_tmp, t_tmp, y_tmp)              # evaluate current slope
-
+                FE[1] += 1
+                
                 @.. y_tmp = y_tmp - A_T[i,i]*dy_stage    # undo addition to y_tmp
 
                 if root_method isa FixedPoint

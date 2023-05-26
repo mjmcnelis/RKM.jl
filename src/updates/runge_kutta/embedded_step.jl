@@ -21,6 +21,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     # TODO: dispatch fsal
     if iteration isa Explicit && !(method.fsal isa FSAL && FE[1] > 0)
         dy_dt!(f, t[1], y)                              # evaluate first stage at (t,y)
+        FE[1] += 1
     end
 
     dt[1] = dt[2]                                       # initialize time step
@@ -35,7 +36,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
         runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, 
-                          f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
+                          f_tmp, FE, J, linear_cache, dy_dt_wrap!, stage_finder)
         @.. y1 = y_tmp
 
         embedded_step!(method, y, dy, y_tmp)
@@ -54,7 +55,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         # compute tolerance
         tol = epsilon * max(y_norm, y1_norm, Δy_norm)
 
-        if FE[1] == 0                                   # initialize controller
+        if !controller.initialized[1]                   # initialize controller
             initialize_controller!(controller, e_norm, dt[1])
         end
 
@@ -74,6 +75,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         attempts <= max_attempts || (@warn "embedded exceeded $max_attempts attempts"; break)
         attempts += 1
     end
+    controller.initialized[1] = true
     
     # TODO: dispatch fsal
     if iteration isa Explicit && method.fsal isa FSAL
@@ -81,12 +83,6 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     end
 
     @.. y = y1                                          # get iteration
-    if iteration isa Explicit
-        add_function_evaluations!(FE, iteration, adaptive, method, attempts)
-    else 
-        # TMP
-        FE[1] += 10
-    end
     return nothing
 end
 
