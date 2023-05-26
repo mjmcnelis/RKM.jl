@@ -1,49 +1,4 @@
-# benchmark.jl note: don't see as much benefit to @muladd as @..
-# benchmark.jl note: @.. doesn't help much when switch to MVector
-@muladd function fixed_runge_kutta_step!(method::RungeKutta, ::Explicit, 
-                     y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix, 
-                     y_tmp::VectorMVector, f_tmp::VectorMVector, 
-                     args...) where {T <: AbstractFloat, F <: Function}
-    @unpack c, A_T, b, stages = method
 
-    for i = 2:stages                                    # evaluate remaining stages
-        t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
-        @.. y_tmp = y
-        # TODO: need a better dy cache for performance
-        for j = 1:i-1
-            # TODO: continue if A,b = 0?
-            dy_stage = view(dy,:,j)
-            @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
-        end
-        # TODO: skip if intermediate update not needed in next row(s)? 
-        dy_dt!(f_tmp, t_tmp, y_tmp)
-        @.. dy[:,i] = dt * f_tmp
-    end
-
-    @.. y_tmp = y                                        # evaluate iteration
-    for j = 1:stages
-        dy_stage = view(dy,:,j)
-        @.. y_tmp = y_tmp + b[j]*dy_stage
-    end
-    return nothing
-end
-
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
-             adaptive::Fixed, ::Controller, FE::MVector{1,Int64}, 
-             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, 
-             dy_dt!::F, dy::MatrixMMatrix, y_tmp::VectorMVector, 
-             f_tmp::VectorMVector, args...) where {T <: AbstractFloat, F}
-      
-    # note: I can comment this out and loop i = 1:stages w/o allocating
-    dy_dt!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
-    @.. dy[:,1] = dt[1] * f_tmp
-
-    fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
-    @.. y = y_tmp                                       # get iteration
-
-    add_function_evaluations!(FE, iteration, adaptive, method)
-    return nothing
-end
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64}, 
@@ -146,8 +101,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
-        fixed_runge_kutta_step!(method, iteration, y, t[1], dt[1],
-                                dy_dt!, dy, y_tmp, f_tmp)
+        runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp)
         @.. y1 = y_tmp
 
         embedded_runge_kutta_step!(method, y, dy, y_tmp)

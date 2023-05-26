@@ -27,9 +27,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        doubling_runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp,
-                                   f_tmp, f, y1, y2, J, linear_cache, dy_dt_wrap!,
-                                   stage_finder)
+        double_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, f_tmp, 
+                     f, y1, y2, J, linear_cache, dy_dt_wrap!, stage_finder)
 
         @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
         @.. y2 = y2 + error                             # Richardson extrapolation
@@ -72,30 +71,28 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     return nothing
 end
 
-function doubling_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp,
-                                    f, y1, y2, J, linear_cache, dy_dt_wrap!, stage_finder)
+function double_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, f_tmp,
+                      f, y1, y2, J, linear_cache, dy_dt_wrap!, stage_finder)
 
     # note: dy = dt * f lines only matter for explicit or ESDIRK methods
     #       in implicit version, those lines and dy_dt! weren't needed
-
     # iterate full time step
     @.. dy[:,1] = dt * f
-    fixed_runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, 
-                            f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
-    @.. y1 = y_tmp                                      # y1(t+dt)  
+    runge_kutta_step!(method, iteration, y, t, dt, dy_dt!, dy, y_tmp, 
+                      f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
+    @.. y1 = y_tmp
 
     # iterate two half time steps
     @.. dy[:,1] = (dt/2.0) * f
-    fixed_runge_kutta_step!(method, iteration, y, t, dt/2., dy_dt!, dy, y_tmp, 
-                            f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
-    @.. y2 = y_tmp                                      # y2(t+dt/2)
-
+    runge_kutta_step!(method, iteration, y, t, dt/2., dy_dt!, dy, y_tmp, 
+                      f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
+    @.. y2 = y_tmp
     # note: for some reason, dy_dt! step reduces allocations in implicit
     # TODO: always evaluate stage at t + c[1]*dt (if explicit)
     dy_dt!(f_tmp, t + dt/2.0, y2)#; skip = false)
     @.. dy[:,1] = (dt/2.0) * f_tmp
-    fixed_runge_kutta_step!(method, iteration, y2, t+dt/2.0, dt/2.0, dy_dt!, dy, y_tmp,
-                            f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
-    @.. y2 = y_tmp                                      # y2(t+dt)
+    runge_kutta_step!(method, iteration, y2, t+dt/2.0, dt/2.0, dy_dt!, dy, y_tmp,
+                      f_tmp, J, linear_cache, dy_dt_wrap!, stage_finder)
+    @.. y2 = y_tmp
     return nothing
 end
