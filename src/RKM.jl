@@ -57,11 +57,11 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 # Runge-Kutta updates
 include("updates/function_evaluations.jl")
 include("updates/step_rejection_rate.jl")
-include("updates/runge_kutta/explicit/update.jl")
-include("updates/runge_kutta/implicit/update.jl")
 include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")
 include("updates/runge_kutta/double_step.jl")
+include("updates/runge_kutta/embedded_step.jl")
+include("updates/runge_kutta/central_step.jl")
 
 include("parameters.jl")
 include("evolve.jl")
