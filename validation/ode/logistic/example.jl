@@ -7,14 +7,14 @@ precision = Float64
 # precision = Double64
 # precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
 
-adaptive = Fixed()          
+adaptive = Fixed()           
 # method = RungeKutta4()
-# method = BackwardEuler1()     # (400.29 k allocations: 35.113 MiB, max_iterations = 2)
+# method = BackwardEuler1       # 200.31 k allocations: 19.856 MiB
 
 # TODO: if stage 2 and 3 have "same jacobian", then can reuse it?
 #       not entirely sure what it implies
-method = TrapezoidRuleBDF2()
-# method = CrankNicolson21()     # don't need to iterate first stage, but there's no logic atm
+method = TrapezoidRuleBDF2()  # 400.41 k allocations: 35.122 MiB (fixed time step)
+# method = CrankNicolson21()    # 200.34 k allocations: 19.858 MiB (fixed time step)
 # method = Heun2()
 
 # adaptive = Doubling() 

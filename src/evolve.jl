@@ -43,8 +43,8 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     dt = precision == BigFloat ? [dt0, dt0] : MVector{2}(dt0, dt0)
 
     # create ODE wrapper function
-    # note: use copy(t), otherwise causes bug in time accumulation
-    dy_dt_wrap! = ODEWrapper(copy(t), dy_dt!)
+    # note: used copy(t) to prevent bug in time accumulation
+    ode_wrap = ODEWrapper(copy(t), dy_dt!)
 
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
@@ -72,7 +72,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     # TODO: figure out to make dy_dt! wrapper that can update t
     # https://github.com/JuliaDiff/ForwardDiff.jl/issues/402
 
-    stage_finder = set_jacobian_cache(stage_finder, dy_dt_wrap!, f_tmp, y)
+    stage_finder = set_jacobian_cache(stage_finder, ode_wrap, f_tmp, y)
     
     # initalize solution
     sol = Solution(; precision, dimensions)
@@ -94,9 +94,9 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
-        allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller, 
-                                 FE, y, t, dt, dy_dt!, dy, y_tmp, f_tmp, f, y1, y2, error, 
-                                 J, linear_cache, dy_dt_wrap!, stage_finder
+        allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller,
+                                 FE, y, t, dt, ode_wrap, dy, y_tmp, f_tmp, f, y1, y2, 
+                                 error, J, linear_cache, stage_finder
                                 )
         t[1] += dt[1]
     end

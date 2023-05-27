@@ -1,11 +1,11 @@
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              adaptive::Embedded, controller::Controller, FE::MVector{1,Int64},
-             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
-             dy::MatrixMMatrix, y_tmp::VectorMVector, f_tmp::VectorMVector, 
-             f::VectorMVector, y1::VectorMVector, y2::VectorMVector, error::VectorMVector,
-             J::MatrixMMatrix, linear_cache, dy_dt_wrap!::ODEWrapper,
-             stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, F}
+             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, 
+             ode_wrap::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector, 
+             f_tmp::VectorMVector, f::VectorMVector, y1::VectorMVector, y2::VectorMVector, 
+             error::VectorMVector, J::MatrixMMatrix, linear_cache,
+             stage_finder::ImplicitStageFinder) where T <: AbstractFloat
            
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
 
@@ -20,7 +20,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
 
     # TODO: dispatch fsal
     if iteration isa Explicit && !(method.fsal isa FSAL && FE[1] > 0)
-        dy_dt!(f, t[1], y)                              # evaluate first stage at (t,y)
+        ode_wrap.dy_dt!(f, t[1], y)                     # evaluate first stage at (t,y)
         FE[1] += 1
     end
 
@@ -35,8 +35,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
-        runge_kutta_step!(method, iteration, y, t[1], dt[1], dy_dt!, dy, y_tmp, 
-                          f_tmp, FE, J, linear_cache, dy_dt_wrap!, stage_finder)
+        runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, 
+                          y_tmp, f_tmp, FE, J, linear_cache, stage_finder)
         @.. y1 = y_tmp
 
         embedded_step!(method, y, dy, y_tmp)
