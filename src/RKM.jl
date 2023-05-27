@@ -72,7 +72,7 @@ export Fixed, Doubling, Embedded, FiniteDiff
 # Time step controller
 export PIDController, PIDControllerK, PIDControllerBeta
 # Implicit stage finder 
-export ImplicitStageFinder, Newton, ForwardJacobian, FiniteJacobian
+export ImplicitStageFinder, FixedPoint, Newton, ForwardJacobian, FiniteJacobian
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 

@@ -9,7 +9,7 @@ precision = Float64
 
 adaptive = Fixed()           
 # method = RungeKutta4()
-# method = BackwardEuler1       # 200.31 k allocations: 19.856 MiB
+# method = BackwardEuler1()     # 200.31 k allocations: 19.856 MiB
 
 # TODO: if stage 2 and 3 have "same jacobian", then can reuse it?
 #       not entirely sure what it implies
@@ -17,7 +17,7 @@ method = TrapezoidRuleBDF2()  # 400.41 k allocations: 35.122 MiB (fixed time ste
 # method = CrankNicolson21()    # 200.34 k allocations: 19.858 MiB (fixed time step)
 # method = Heun2()
 
-# adaptive = Doubling() 
+adaptive = Doubling() 
 # adaptive = Embedded()
 # method = HeunEuler21()        
 # method = Fehlberg45()
@@ -30,6 +30,7 @@ controller = PIDControllerK(; kI = 0.3, kP = 0.4)
 # controller = PIDControllerBeta(; beta1 = 1/18, beta2 = 1/9, beta3 = 1/18, predictive = true)
 
 stage_finder = ImplicitStageFinder()
+# stage_finder = ImplicitStageFinder(; root_method = FixedPoint())
 # stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian())
 
 t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)

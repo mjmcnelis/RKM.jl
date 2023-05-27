@@ -17,8 +17,8 @@
         end
         # TODO: skip if intermediate update not needed in next row(s)? 
         ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)
-        @.. dy[:,i] = dt * f_tmp
         FE[1] += 1
+        @.. dy[:,i] = dt * f_tmp
     end
     @.. y_tmp = y                                        # evaluate iteration
     for j = 1:stages
@@ -47,15 +47,12 @@ end
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
         
-        if explicit_stage[i]
-            ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)
-            @.. dy[:,i] = dt * f_tmp
-            FE[1] += 1
-        else
-            # TODO: look into predictors
-            ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)        # guess stage before iterating
-            @.. dy[:,i] = dt * f_tmp
+        # TODO: look into predictors
+        ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)             # guess stage before iterating
+        FE[1] += 1
+        @.. dy[:,i] = dt * f_tmp
 
+        if !explicit_stage[i]
             for n = 1:max_iterations
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
@@ -75,32 +72,26 @@ end
                 
                 @.. y_tmp = y_tmp - A_T[i,i]*dy_stage    # undo addition to y_tmp
 
+                # store residual error of root equation:
+                # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
+                @.. f_tmp = dy_stage - dt*f_tmp          
+
+                res     = norm(f_tmp)                   # compute residual error norm
+                dy_norm = norm(view(dy,:,i))            # compute error tolerance 
+                tol     = epsilon * dy_norm
+            
+                if n > 1 && res < tol                   # check for root convergence
+                    break
+                end
+                # if n == max_iterations
+                #     @warn "exceeded max Newton iterations at t = $t"
+                #     @show res tol
+                #     println("")
+                # end
+
                 if root_method isa FixedPoint
-                    @.. dy[:,i] = dt * f_tmp
+                    @.. dy[:,i] -= f_tmp
                 elseif root_method isa Newton
-                    # TODO: initialize predictor for dy other than zero,
-                    #       and sort out @.. equivalent
-                    for k in eachindex(f_tmp)
-                        f_tmp[k] = dy[k,i] - dt*f_tmp[k]
-                    end
-
-                    # compute residual error of root equation:
-                    # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
-                    res = norm(f_tmp)
-
-                    dy_norm = norm(view(dy,:,i))         # compute error tolerance 
-                    tol = epsilon * dy_norm
-               
-                    if n > 1 && res < tol                # check if Newton method covnerges
-                        # print(n)
-                        break
-                    end
-                    # if n == max_iterations
-                    #     @warn "exceeded max Newton iterations at t = $t"
-                    #     @show res tol
-                    #     println("")
-                    # end
-
                     linear_cache = set_b(linear_cache, f_tmp)
                     # note: may not need this if use regular newton method 
                     linear_cache = solve_linear_tmp(linear_cache)

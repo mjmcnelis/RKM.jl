@@ -10,8 +10,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     # note: for explicit, can comment this and loop i = 1:stages w/o allocating
     if iteration isa Explicit
         ode_wrap.dy_dt!(f_tmp, t[1], y)                 # evaluate first stage at (t,y)
-        @.. dy[:,1] = dt[1] * f_tmp
         FE[1] += 1
+        @.. dy[:,1] = dt[1] * f_tmp
     end
 
     runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, y_tmp, 
