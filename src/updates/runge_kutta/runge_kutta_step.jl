@@ -31,7 +31,7 @@ end
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      y::VectorMVector, t::T, dt::T, dy_dt!::F, dy::MatrixMMatrix,
                      y_tmp::VectorMVector, f_tmp::VectorMVector, FE::MVector{1,Int64},
-                     J::MatrixMMatrix, linear_cache, dy_dt_wrap!,
+                     J::MatrixMMatrix, linear_cache, dy_dt_wrap!::ODEWrapper,
                      stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, 
                                                                F <: Function}
     @unpack c, A_T, b, stages, explicit_stage = method
@@ -39,6 +39,8 @@ end
 
     for i = 1:stages        
         t_tmp = t + c[i]*dt
+        dy_dt_wrap!.t[1] = t_tmp                         # set intermediate time in wrapper
+
         @.. y_tmp = y                                    # sum over known stages
         for j = 1:i-1
             dy_stage = view(dy,:,j)

@@ -12,8 +12,8 @@ Required parameters: `y0`, `dy_dt!`, `parameters`, `dy_dt_wrap!`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; 
                     static_array::Bool = false, show_progress::Bool = true, 
-                    precision::Type{T2} = Float64, parameters::Parameters, 
-                    dy_dt_wrap!) where {T <: AbstractFloat, T2 <: AbstractFloat}
+                    precision::Type{T2} = Float64, 
+                    parameters::Parameters) where {T <: AbstractFloat, T2 <: AbstractFloat}
 
     @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
     @unpack t0, tf, dt0 = t_range
@@ -41,6 +41,10 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
 
     t  = precision == BigFloat ? [t0] : MVector{1}(t0)
     dt = precision == BigFloat ? [dt0, dt0] : MVector{2}(dt0, dt0)
+
+    # create ODE wrapper function
+    # note: use copy(t), otherwise causes bug in time accumulation
+    dy_dt_wrap! = ODEWrapper(copy(t), dy_dt!)
 
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT

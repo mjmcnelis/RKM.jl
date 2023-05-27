@@ -4,7 +4,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, dy_dt!::F,
              dy::MatrixMMatrix, y_tmp::VectorMVector, f_tmp::VectorMVector, 
              f::VectorMVector, y1::VectorMVector, y2::VectorMVector, error::VectorMVector,
-             J::MatrixMMatrix, linear_cache, dy_dt_wrap!, 
+             J::MatrixMMatrix, linear_cache, dy_dt_wrap!::ODEWrapper,
              stage_finder::ImplicitStageFinder) where {T <: AbstractFloat, F}
            
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive

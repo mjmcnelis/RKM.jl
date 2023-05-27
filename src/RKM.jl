@@ -29,6 +29,7 @@ export RKM_root
 
 include("time.jl")
 include("solution.jl")
+include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
 include("controller.jl")
