@@ -35,7 +35,7 @@ end
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage = method
-    @unpack root_method, jacobian_method, epsilon, max_iterations = stage_finder
+    @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
 
     for i = 1:stages        
         t_tmp = t + c[i]*dt
@@ -58,8 +58,8 @@ end
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
 
                 if root_method isa Newton                # evaluate current Jacobian
-                    evaluate_system_jacobian!(jacobian_method, J, ode_wrap, 
-                                              y_tmp, f_tmp)
+                    evaluate_system_jacobian!(jacobian_method, FE, J, 
+                                              ode_wrap, y_tmp, f_tmp)
                     J .*= (-A_T[i,i]*dt)                 # J <- I - A.dt.J
                     for i in diagind(J)
                         J[i] += 1.0
@@ -76,8 +76,8 @@ end
                 # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
                 @.. f_tmp = dy_stage - dt*f_tmp          
 
-                res     = norm(f_tmp)                   # compute residual error norm
-                dy_norm = norm(view(dy,:,i))            # compute error tolerance 
+                res     = norm(f_tmp, p_norm)           # compute residual error norm
+                dy_norm = norm(view(dy,:,i), p_norm)    # compute error tolerance 
                 tol     = epsilon * dy_norm
             
                 if n > 1 && res < tol                   # check for root convergence

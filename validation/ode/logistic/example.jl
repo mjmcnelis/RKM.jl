@@ -17,7 +17,7 @@ method = TrapezoidRuleBDF2()  # 400.41 k allocations: 35.122 MiB (fixed time ste
 # method = CrankNicolson21()    # 200.34 k allocations: 19.858 MiB (fixed time step)
 # method = Heun2()
 
-adaptive = Doubling() 
+# adaptive = Doubling() 
 # adaptive = Embedded()
 # method = HeunEuler21()        
 # method = Fehlberg45()

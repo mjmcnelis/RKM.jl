@@ -22,7 +22,9 @@ abstract type StageFinder end
     jacobian_method::JM     = FiniteJacobian()
     epsilon::Float64        = 1e-8  # TODO: reuse adaptive epsilon or 100x smaller?
     max_iterations::Int64   = 10
-    # add iterations_per_stage, p_norm
+    # TODO: make outer constructor to check p_norm value 
+    p_norm::Float64         = 2.0
+    # add iterations_per_stage
 end
 
 function set_jacobian_cache(stage_finder::ImplicitStageFinder, dy_dt!, f, y)
@@ -36,17 +38,19 @@ function set_jacobian_cache(stage_finder::ImplicitStageFinder, dy_dt!, f, y)
     return stage_finder
 end
 
-function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, J, dy_dt!, y, f)
+function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, FE, J, dy_dt!, y, f)
     # TODO: how to reduce allocations here, take it apart or make a wrapper?
     # so in order for jacobian config (i.e. cache) to work, dy_dt! argument
     # has to be the same object stored in jacobian_method.cache
     @unpack cache = jacobian_method 
     jacobian!(J, dy_dt!, f, y, cache)
+    FE[1] += ceil(Int64, length(y)/DEFAULT_CHUNK_THRESHOLD)
     return nothing 
 end
 
-function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, J, dy_dt!, y, args...)
+function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, FE, J, dy_dt!, y, args...)
     @unpack cache = jacobian_method
     finite_difference_jacobian!(J, dy_dt!, y, cache)
+    FE[1] += length(y) + 1
     return nothing 
 end
