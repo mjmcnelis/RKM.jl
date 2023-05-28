@@ -15,7 +15,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     end
 
     runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, y_tmp, 
-                      f_tmp, FE, J, linear_cache, stage_finder)
+                      f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y = y_tmp
     return nothing
 end

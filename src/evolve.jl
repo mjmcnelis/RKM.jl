@@ -103,5 +103,6 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     @info "Number of memory allocations during solve = $allocs"
 
     compute_step_rejection_rate!(sol, method, adaptive, timer)
+    sol.JE .= stage_finder.jacobian_method.evaluations
     return sol
 end

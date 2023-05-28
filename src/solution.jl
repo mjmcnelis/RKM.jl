@@ -11,6 +11,8 @@ struct Solution{T <: AbstractFloat}
     t::Vector{T}
     """Number of function evaluations"""
     FE::MVector{1,Int64}
+    """Number of Jacobian evaluations"""
+    JE::MVector{1,Int64}
     """Step rejection rate (percentage)"""
     rejection_rate::MVector{1,Float64}
     """Number of dynamical variables"""
@@ -28,9 +30,10 @@ function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFl
     y = Vector{precision}()
     t = Vector{precision}()
     FE = MVector{1,Int64}(0)
+    JE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
 
-    return Solution(y, t, FE, rejection_rate, dimensions)
+    return Solution(y, t, FE, JE, rejection_rate, dimensions)
 end
 
 """

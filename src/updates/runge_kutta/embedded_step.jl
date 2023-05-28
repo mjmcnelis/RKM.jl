@@ -35,8 +35,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
-        runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, 
-                          y_tmp, f_tmp, FE, J, linear_cache, stage_finder)
+        runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, y_tmp, 
+                          f_tmp, FE, error, J, linear_cache, stage_finder)
         @.. y1 = y_tmp
 
         embedded_step!(method, y, dy, y_tmp)
