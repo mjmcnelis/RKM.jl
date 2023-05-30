@@ -12,7 +12,7 @@ import SparseArrays: SparseMatrixCSC, sparse
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
-import Base: @kwdef
+import Base: @kwdef, format_bytes
 import ProgressMeter: Progress, next!
 import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
@@ -107,7 +107,7 @@ export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoII
 # Code names
 export make_code_name
 # ODE solution
-export get_solution
+export get_solution, get_stats
 # Parameters
 export Parameters
 # Time

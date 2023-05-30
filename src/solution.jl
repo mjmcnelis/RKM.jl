@@ -15,6 +15,14 @@ struct Solution{T <: AbstractFloat}
     JE::MVector{1,Int64}
     """Step rejection rate (percentage)"""
     rejection_rate::MVector{1,Float64}
+    """Runtime of ODE solver (excludes configuration)"""
+    runtime::MVector{1,Float64}
+    """Memory used to store solution set (t,y)"""
+    memory_storage::Vector{String}
+    """Excess memory used in time evolution loop"""
+    excess_memory::Vector{String}
+    """Excess number of allocations in time evolution loop"""
+    excess_allocations::MVector{1,Int64}
     """Number of dynamical variables"""
     dimensions::Int64
 end
@@ -32,8 +40,13 @@ function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFl
     FE = MVector{1,Int64}(0)
     JE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
+    runtime = MVector{1,Float64}(0.0)
+    memory_storage = [""]
+    excess_memory = [""]
+    excess_allocations = MVector{1,Int64}(0)
 
-    return Solution(y, t, FE, JE, rejection_rate, dimensions)
+    return Solution(y, t, FE, JE, rejection_rate, runtime, memory_storage,
+                    excess_memory, excess_allocations, dimensions)
 end
 
 """
@@ -68,4 +81,15 @@ function get_solution(sol::Solution)
     # TODO: replace length(t) if use deleteat for PDEs
     y = reshape(y, sol.dimensions, length(t))'
     return y, t
+end
+
+function get_stats(sol::Solution)
+    println("time steps           = $(length(sol.t))")
+    println("step rejection rate  = $(sol.rejection_rate[1]) %")
+    println("function evaluations = $(sol.FE[1])")
+    println("jacobian evaluations = $(sol.JE[1])")
+    println("solver runtime       = $(round(sol.runtime[1], sigdigits = 4)) seconds")
+    println("solution storage     = $(sol.memory_storage[1])")
+    println("excess memory        = $(sol.excess_memory[1])")
+    println("excess allocations   = $(sol.excess_allocations[1])")
 end

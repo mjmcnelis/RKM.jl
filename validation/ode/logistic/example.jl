@@ -54,12 +54,10 @@ static_array = false
 # static_array = true
 
 @time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array)
-
 # sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
-#=
-@show Base.format_bytes(sizeof(sol.y) + sizeof(sol.t))
-plot_ode(sol, method, Plots.plot)
-=#
+
+get_stats(sol)
+# plot_ode(sol, method, Plots.plot)
 
 GC.gc()
 println("\ndone")

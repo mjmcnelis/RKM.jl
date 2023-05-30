@@ -85,8 +85,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     checkpoints = collect(LinRange(t0, tf, 101))[2:end]
     progress = Progress(100)
 
-    allocs = 0
-    while true
+    stats = @timed allocs = @allocated while true
         append!(sol.y, y) 
         append!(sol.t, t[1])
 
@@ -94,15 +93,20 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
         continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
-        allocs += @allocated evolve_one_time_step!(method, iteration, adaptive, controller,
-                                 FE, y, t, dt, ode_wrap, dy, y_tmp, f_tmp, f, y1, y2, 
-                                 error, J, linear_cache, stage_finder
-                                )
+        evolve_one_time_step!(method, iteration, adaptive, controller,
+                              FE, y, t, dt, ode_wrap, dy, y_tmp, f_tmp, f, y1, y2, 
+                              error, J, linear_cache, stage_finder
+                            )
         t[1] += dt[1]
     end
-    @info "Number of memory allocations during solve = $allocs"
 
+    # TODO: look into @code_warntype 
+    # TODO: wrap into compute_stats function 
     compute_step_rejection_rate!(sol, method, adaptive, timer)
     sol.JE .= stage_finder.jacobian_method.evaluations
+    sol.memory_storage .= format_bytes(sizeof(sol.y) + sizeof(sol.t))
+    sol.excess_memory .= format_bytes(stats.bytes)
+    sol.excess_allocations .= allocs
+    sol.runtime .= stats.time
     return sol
 end
