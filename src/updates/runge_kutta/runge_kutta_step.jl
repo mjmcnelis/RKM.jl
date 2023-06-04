@@ -36,7 +36,8 @@ end
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage = method
-    @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
+    @unpack root_method, jacobian_method, epsilon, 
+            max_iterations, p_norm, iterations = stage_finder
 
     for i = 1:stages        
         t_tmp = t + c[i]*dt
@@ -52,6 +53,8 @@ end
         ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)             # guess stage before iterating
         FE[1] += 1
         @.. dy[:,i] = dt * f_tmp
+
+        # error_prev = [0.0, 0.0] 
 
         if !explicit_stage[i]
             for n = 1:max_iterations
@@ -70,19 +73,18 @@ end
                 tol = epsilon * dy_norm                 # compute tolerance
             
                 if e_norm < tol                         # check for root convergence
+                    # append!(iterations, n - 1)
                     break
                 end
 
                 if root_method isa FixedPoint
+                    # undo addition to y_tmp
+                    @.. y_tmp = y_tmp - A_T[i,i]*dy_stage
                     @.. dy[:,i] -= error
                 elseif root_method isa Newton
                     # evaluate current Jacobian
-                    evaluate_system_jacobian!(jacobian_method, FE, J, 
-                                              ode_wrap, y_tmp, f_tmp)
-                    J .*= (-A_T[i,i]*dt)                 # J <- I - A.dt.J
-                    for i in diagind(J)
-                        J[i] += 1.0
-                    end
+                    evaluate_system_jacobian!(jacobian_method, root_method, n, FE, J,
+                                                ode_wrap, y_tmp, dt, A_T[i,i], f_tmp)                       
                     # undo addition to y_tmp
                     @.. y_tmp = y_tmp - A_T[i,i]*dy_stage
 
@@ -90,15 +92,20 @@ end
                     linear_cache = set_A(linear_cache, J)
                     linear_cache = set_b(linear_cache, error)
                     # note: may not need this if use regular newton method 
-                    # linear_cache = solve_linear_tmp(linear_cache)
-                    # @.. dy[:,i] -= linear_cache.u
-                    sol = solve(linear_cache)
-                    @.. dy[:,i] -= sol.u
-                end
+                    linear_cache = solve_linear_tmp(linear_cache)
+                    @.. dy[:,i] -= linear_cache.u
+                    # sol = solve(linear_cache)
+                    # @.. dy[:,i] -= sol.u
+                end  
                 if n == max_iterations
                     # TODO: mark convergence failure 0 instead of warn statement
-                end
+                    append!(iterations, n)
+                end  
+
+                # error_prev .= error
+
             end
+            # println("done")
         end
     end
     @.. y_tmp = y                                        # evaluate iteration

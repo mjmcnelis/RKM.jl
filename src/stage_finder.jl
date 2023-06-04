@@ -1,6 +1,10 @@
 
 abstract type RootMethod end 
-struct Newton <: RootMethod end         # TODO: add line search later
+# struct Newton <: RootMethod end
+@kwdef struct Newton <: RootMethod 
+    switch_broyden::Bool = true 
+end         # TODO: add line search later
+
 struct FixedPoint <: RootMethod end
 
 abstract type JacobianMethod end
@@ -27,6 +31,7 @@ abstract type StageFinder end
     # TODO: make outer constructor to check p_norm value 
     p_norm::Float64         = 2.0
     # add iterations_per_stage
+    iterations::Vector{UInt16} = UInt16[]
 end
 
 function set_jacobian_cache(stage_finder::ImplicitStageFinder, dy_dt!, f, y)
@@ -41,20 +46,71 @@ function set_jacobian_cache(stage_finder::ImplicitStageFinder, dy_dt!, f, y)
     return stage_finder
 end
 
-function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, FE, J, dy_dt!, y, f)
+function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, 
+                                   root_method::Newton, n,
+                                   FE, J, dy_dt!, y, dt, A, f)
     # TODO: how to reduce allocations here, take it apart or make a wrapper?
     # so in order for jacobian config (i.e. cache) to work, dy_dt! argument
     # has to be the same object stored in jacobian_method.cache
     @unpack cache, evaluations = jacobian_method 
-    jacobian!(J, dy_dt!, f, y, cache)
+    @unpack switch_broyden = root_method 
+
+    if n > 1 && switch_broyden
+        # TODO: wrap function 
+        dx2 = dot(linear_cache.u, linear_cache.u)
+        for i in 1:2 
+            for k = 1:2 
+                error_prev[i] -= J[i,k] * linear_cache.u[k]
+            end 
+        end
+        for i in 1:2
+            for j in 1:2
+                J[i,j] -= (error[i] - error_prev[i]) * linear_cache.u[j] / dx2
+            end
+        end
+        @show J 
+        println("")
+    else
+        jacobian!(J, dy_dt!, f, y, cache)
+        J .*= -A*dt                                         # J <- I - A.dt.J
+        for i in diagind(J)
+            J[i] += 1.0
+        end
+    end
     FE[1] += ceil(Int64, length(y)/DEFAULT_CHUNK_THRESHOLD)
     evaluations[1] += 1
     return nothing 
 end
 
-function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, FE, J, dy_dt!, y, args...)
+function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, 
+                                   root_method::Newton, n,
+                                   FE, J, dy_dt!, y, dt, A, args...)
     @unpack cache, evaluations = jacobian_method
-    finite_difference_jacobian!(J, dy_dt!, y, cache)
+    @unpack switch_broyden = root_method
+
+    if n > 1 && switch_broyden
+        # TODO: wrap function 
+        dx2 = dot(linear_cache.u, linear_cache.u)
+        for i in 1:2 
+            for k = 1:2 
+                error_prev[i] -= J[i,k] * linear_cache.u[k]
+            end 
+        end
+        for i in 1:2
+            for j in 1:2
+                J[i,j] -= (error[i] - error_prev[i]) * linear_cache.u[j] / dx2
+            end
+        end
+        @show J 
+        println("")
+    else
+        finite_difference_jacobian!(J, dy_dt!, y, cache)
+        J .*= -A*dt                                         # J <- I - A.dt.J
+        for i in diagind(J)
+            J[i] += 1.0
+        end
+    end
+
     FE[1] += length(y) + 1
     evaluations[1] += 1
     return nothing 

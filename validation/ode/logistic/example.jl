@@ -1,3 +1,4 @@
+# ln -fs "/Applications/Julia-1.9.app/Contents/Resources/julia/bin/julia" /usr/local/bin/julia
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
@@ -33,10 +34,13 @@ stage_finder = ImplicitStageFinder()
 # stage_finder = ImplicitStageFinder(; root_method = FixedPoint())
 # stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian())
 
-t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
+t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-1)
 
 # do asserts between adaptive, method in parameters outer-constructor
 parameters = Parameters(; adaptive, method, t_range, controller, stage_finder)
+
+# J = [1.028427247674115 -1.770466251885422e-7; -1.77048360449305e-7 1.0284272476757894]
+# J = [1.0284267174038035 -0.0; -0.0 1.0284267174038035]
 
 t0 = t_range.t0
 

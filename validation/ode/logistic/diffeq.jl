@@ -9,8 +9,8 @@ N = 2
 y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
 
 # alg = Trapezoid(autodiff = true)
-# alg = ImplicitEuler(autodiff = true)
-alg = TRBDF2(autodiff = true)
+alg = ImplicitEuler(autodiff = true)
+# alg = TRBDF2(autodiff = true)
 
 prob = ODEProblem(f_ord, y0, (t0, 10.0))
 @time sol = solve(prob, alg, dt = 1e-4, reltol = 1e-6, #abstol = 0.0,
@@ -21,7 +21,7 @@ prob = ODEProblem(f_ord, y0, (t0, 10.0))
                   )
 
 # plot(sol, legend = :outertopright) |> display
-plot!(sol.t,  mapreduce(permutedims, vcat, sol.u)) |> display
+# plot!(sol.t,  mapreduce(permutedims, vcat, sol.u)) |> display
 
 @show sol.destats
 GC.gc()
