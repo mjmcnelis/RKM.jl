@@ -55,6 +55,12 @@ end
 
         if !explicit_stage[i]
             for n = 1:max_iterations
+                @.. y_tmp = y                            # reset y_tmp
+                for j = 1:i-1
+                    dy_stage = view(dy,:,j)
+                    @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
+                end
+                
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
                 ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)     # evaluate current slope
@@ -83,8 +89,6 @@ end
                     for i in diagind(J)
                         J[i] += 1.0
                     end
-                    # undo addition to y_tmp
-                    @.. y_tmp = y_tmp - A_T[i,i]*dy_stage
 
                     # pass Jacobian and residual error to linear cache
                     linear_cache = set_A(linear_cache, J)
