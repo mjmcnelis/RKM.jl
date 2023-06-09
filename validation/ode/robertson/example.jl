@@ -1,7 +1,7 @@
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/rober/equations.jl") : nothing
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/robertson/equations.jl") : nothing
 
 # adaptive = Fixed()   
 adaptive = Doubling(; epsilon = 1e-6)  

@@ -2,7 +2,7 @@ using Revise, OrdinaryDiffEq, StaticArrays, BenchmarkTools
 using DoubleFloats: Double64
 import RKM: RKM_root
 using Plots; plotly()
-!(@isdefined f_ord) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing 
+!(@isdefined f_ord) ? include("$RKM_root/validation/ode/robertson/equations.jl") : nothing 
 
 y0 = [1.0, 0.0, 0.0]
 alg = TRBDF2(autodiff = true)   # fails for fixed dt = 0.01
