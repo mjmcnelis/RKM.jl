@@ -75,6 +75,7 @@ end
 
                 tol = epsilon * dy_norm                 # compute tolerance
             
+                # TODO: test doing at least one iteration on helping stiff problems
                 if e_norm < tol                         # check for root convergence
                     break
                 end

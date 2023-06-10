@@ -12,7 +12,7 @@ import SparseArrays: SparseMatrixCSC, sparse
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
-import Base: @kwdef, format_bytes
+import Base: @kwdef, rationalize, format_bytes
 import ProgressMeter: Progress, next!
 import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS

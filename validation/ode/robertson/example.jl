@@ -3,6 +3,10 @@ import DoubleFloats: Double64
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/robertson/equations.jl") : nothing
 
+precision = Float64
+# precision = Double64
+# precision = BigFloat    # note: PID controller can't use BigFloat yet 
+
 # adaptive = Fixed()   
 adaptive = Doubling(; epsilon = 1e-6)  
 
@@ -20,7 +24,7 @@ parameters = Parameters(; adaptive, method, t_range, controller, stage_finder)
 
 y0 = [1.0, 0.0, 0.0]
 
-@time sol = evolve_ode(y0, dy_dt!; parameters)
+@time sol = evolve_ode(y0, dy_dt!; parameters, precision)
 
 get_stats(sol)
 # plot_ode(sol, method, Plots.plot; logx = true)
