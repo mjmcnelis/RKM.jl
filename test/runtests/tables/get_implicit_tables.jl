@@ -6,6 +6,7 @@ function get_runge_kutta_diagonal_implicit_tables(; precision::Type{<:AbstractFl
         # fixed
         BackwardEuler1(; precision),
         ImplicitMidpoint2(; precision),
+        TrapezoidRuleBDF2(; precision),
         QinZhang2(; precision),
         KraaijevangerSpijker2(; precision),
         PareschiRusso2(; precision),
@@ -25,6 +26,12 @@ end
 
 # TODO: make docstring
 function get_runge_kutta_full_implicit_tables(; precision::Type{<:AbstractFloat})
+    # FIRK FSAL methods
+    # method = RadauIIA3()      # not ES
+    # method = LobattoIIIC21()  # not ES
+    # method = LobattoIIIC42()  # not ES
+    # method = RadauIIA52()     # not ES
+    # method = LobattoIIIA42()  # is ES
     [
         # fixed
         RadauIA3(; precision),

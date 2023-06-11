@@ -1,4 +1,8 @@
+"""
+    CrankNicolson21(; precision::Type{T} = Float64) where T <: AbstractFloat
 
+Crank and Nicolson's second-order method (A-stable) with embedded Euler pair.
+"""
 function CrankNicolson21(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0
                1 1//2 1//2

@@ -35,48 +35,65 @@ end
                      J::MatrixMMatrix, linear_cache, 
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack c, A_T, b, stages, explicit_stage = method
+    @unpack c, A_T, b, stages, explicit_stage, fsal = method
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
 
-    for i = 1:stages        
-        t_tmp = t + c[i]*dt
-        ode_wrap.t[1] = t_tmp                            # set intermediate time in wrapper
+    for i = 1:stages   
+        # first explicit stage should already be pre-evaluated elsewhere
+        if i == 1 && explicit_stage[i]
+            continue 
+        end 
 
-        @.. y_tmp = y                                    # sum over known stages
+        # set intermediate time in wrapper
+        t_tmp = t + c[i]*dt
+        ode_wrap.t[1] = t_tmp   
+
+        # sum over known stages
+        @.. y_tmp = y                                    
         for j = 1:i-1
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
         
+        # guess stage before iterating
         # TODO: look into predictors
-        ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)             # guess stage before iterating
+        ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)             
         FE[1] += 1
         @.. dy[:,i] = dt * f_tmp
 
         if !explicit_stage[i]
             for n = 1:max_iterations
-                @.. y_tmp = y                            # reset y_tmp
+                # reset y_tmp
+                @.. y_tmp = y                            
                 for j = 1:i-1
                     dy_stage = view(dy,:,j)
                     @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
                 end
-                
+
+                # evaluate current state and ODE
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
-                ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)     # evaluate current slope
+                ode_wrap.dy_dt!(f_tmp, t_tmp, y_tmp)     
                 FE[1] += 1
 
                 # compute residual error of root equation
                 # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
                 @.. error = dy_stage - dt*f_tmp
 
+                # compute norms and tolerance
                 e_norm  = norm(error, p_norm)           # compute norms
                 dy_norm = norm(view(dy,:,i), p_norm)
-
-                tol = epsilon * dy_norm                 # compute tolerance
+                tol = epsilon * dy_norm               
             
+                # check for root convergence
                 # TODO: test doing at least one iteration on helping stiff problems
-                if e_norm < tol                         # check for root convergence
+                if e_norm < tol                        
+                    break
+                elseif n == max_iterations - 1 
+                    # println("failed to converge")
+                    # note: allow f_tmp to store dy_dt!
+                    # of last iteration for FSAL methods
+                    # TODO: count convergence failures in stats
                     break
                 end
 
@@ -100,13 +117,11 @@ end
                     sol = solve(linear_cache)
                     @.. dy[:,i] -= sol.u
                 end
-                if n == max_iterations
-                    # TODO: mark convergence failure 0 instead of warn statement
-                end
             end
         end
     end
-    @.. y_tmp = y                                        # evaluate iteration
+    # evaluate update
+    @.. y_tmp = y                                       
     for j = 1:stages
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage

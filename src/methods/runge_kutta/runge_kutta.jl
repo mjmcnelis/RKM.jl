@@ -70,5 +70,13 @@ function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
 end
 
 function Base.show(io::IO, RK::RungeKutta)
-    print(io, "$(RK.name)")
+    for field in RK |> typeof |> fieldnames
+        # display A rather than A_T
+        if field == :A_T
+            print("A = ")
+            display(RK.A_T')
+        else
+            println("$field = $(getproperty(RK, field))")
+        end
+    end
 end

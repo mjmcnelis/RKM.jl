@@ -9,6 +9,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
+    @unpack explicit_stage, fsal = method
 
     order = method.order[1]                             # order of scheme
 
@@ -16,8 +17,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     high ^= order / (1.0 + order)                       # rescale high based on order
     epsilon ^= order / (1.0 + order)
 
-    if iteration isa Explicit
-        ode_wrap.dy_dt!(f, t[1], y)                     # evaluate first stage at (t,y)
+    # if do Richardson extrapolation, then always have
+    # to evaluate (explicit) first stage at (t,y)
+    if explicit_stage[1]
+        ode_wrap.dy_dt!(f, t[1], y)          
         FE[1] += 1
     end
 
@@ -71,28 +74,31 @@ end
 function double_step!(method, iteration, y, t, dt, ode_wrap, dy, y_tmp, f_tmp, 
                       f, y1, y2, FE, error, J, linear_cache, stage_finder)
 
-    # note: dy = dt * f lines only matter for explicit or ESDIRK methods
-    #       in implicit version, those lines and dy_dt! weren't needed
-    # iterate full time step
-    if iteration isa Explicit
+    @unpack explicit_stage, fsal = method 
+
+    # update full time step
+    if explicit_stage[1]
         @.. dy[:,1] = dt * f
     end
     runge_kutta_step!(method, iteration, y, t, dt, ode_wrap, dy, y_tmp, 
                       f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y1 = y_tmp
 
-    # iterate two half time steps
-    if iteration isa Explicit
+    # update two half time steps
+    #   first half step
+    if explicit_stage[1]
         @.. dy[:,1] = (dt/2.0) * f
     end
     runge_kutta_step!(method, iteration, y, t, dt/2., ode_wrap, dy, y_tmp, 
                       f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y2 = y_tmp
-    # note: for some reason, dy_dt! step reduces allocations in implicit
-    # TODO: always evaluate stage at t + c[1]*dt (if explicit)
-    if iteration isa Explicit  # try method.explicit_stage[1] instead
-        ode_wrap.dy_dt!(f_tmp, t + dt/2.0, y2)
-        FE[1] += 1
+    #   second half step
+    if explicit_stage[1]
+        # skip function evaluation if method is FSAL
+        if !(fsal isa FSAL)
+            ode_wrap.dy_dt!(f_tmp, t + dt/2.0, y2)
+            FE[1] += 1
+        end
         @.. dy[:,1] = (dt/2.0) * f_tmp
     end
     runge_kutta_step!(method, iteration, y2, t+dt/2.0, dt/2.0, ode_wrap, dy, y_tmp, 

@@ -7,11 +7,19 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              J::MatrixMMatrix, linear_cache, 
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
              
-    # note: for explicit, can comment this and loop i = 1:stages w/o allocating
-    if iteration isa Explicit
-        ode_wrap.dy_dt!(f_tmp, t[1], y)                 # evaluate first stage at (t,y)
-        FE[1] += 1
-        @.. dy[:,1] = dt[1] * f_tmp
+    @unpack explicit_stage, fsal = method
+
+    # TODO: wrap into a function
+    # evaluate first stage at (t,y)
+    if explicit_stage[1]
+        # skip function evaluation if method is FSAL
+        if FE[1] > 0 && fsal isa FSAL
+            f .= f_tmp
+        else
+            ode_wrap.dy_dt!(f, t[1], y)         
+            FE[1] += 1
+        end
+        @.. dy[:,1] = dt[1] * f
     end
 
     runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, y_tmp, 

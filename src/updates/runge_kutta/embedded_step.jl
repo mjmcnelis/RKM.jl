@@ -8,6 +8,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
            
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
+    @unpack explicit_stage, fsal = method 
 
     y_norm = norm(y, p_norm)                            # compute norm of current state
 
@@ -18,10 +19,15 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     high    ^= (order_min / order_max)                  # rescale high, epsilon parameters
     epsilon ^= (order_min / order_max)
 
-    # TODO: dispatch fsal
-    if iteration isa Explicit && !(method.fsal isa FSAL && FE[1] > 0)
-        ode_wrap.dy_dt!(f, t[1], y)                     # evaluate first stage at (t,y)
-        FE[1] += 1
+    # evaluate first stage at (t,y)
+    if explicit_stage[1]
+        # skip function evaluation if method is FSAL
+        if FE[1] > 0 && fsal isa FSAL
+            f .= f_tmp
+        else
+            ode_wrap.dy_dt!(f, t[1], y)          
+            FE[1] += 1
+        end
     end
 
     dt[1] = dt[2]                                       # initialize time step
@@ -76,13 +82,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         attempts += 1
     end
     controller.initialized[1] = true
-    
-    # TODO: dispatch fsal
-    if iteration isa Explicit && method.fsal isa FSAL
-        @.. f = f_tmp 
-    end
 
-    @.. y = y1                                          # get iteration
+    @.. y = y1                                          # get update
     return nothing
 end
 

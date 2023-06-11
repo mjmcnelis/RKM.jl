@@ -12,21 +12,9 @@ function BackwardEuler1(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
-    CrankNicolson2(; precision::Type{T} = Float64) where T <: AbstractFloat
-
-Crank and Nicolson's second-order method (A-stable).
-"""
-function CrankNicolson2(; precision::Type{T} = Float64) where T <: AbstractFloat
-    butcher = [0 0 0 
-               1 1//2 1//2 
-               1 1//2 1//2]
-    butcher = butcher .|> precision
-
-    return RungeKutta(; name = :Crank_Nicolson_2, butcher)
-end
-
-"""
     TrapezoidRuleBDF2(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+Second-order trapezoid rule BDF method (ABLS-stable)
 
 R.E. Bank, W.M. Coughran, W. Fichtner, E.H. Grosse, D.J.
 Rose, and R.K. Smith. Transient simulation of silicon devices
@@ -178,6 +166,9 @@ Third-order L-stable diagonal implicit method.
 https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 """
 function DIRKL3(; precision::Type{T} = Float64) where T <: AbstractFloat
+
+    # note: method is FSAL but not first-stage explicit, but it's possible
+    #       I could use FSAL to initialize guess (not  very high priority)
     # TODO: find more specific name
     butcher = [1//2 1//2 0 0 0
                2//3 1//6 1//2 0 0
