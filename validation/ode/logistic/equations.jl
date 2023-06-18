@@ -10,6 +10,16 @@ function dy_dt!(f, y; kwargs...)
     nothing
 end
 
+# pass model_parameters = [0.5, 0.25]
+# function dy_dt!(f, y; p, kwargs...)
+#     N = length(y)
+#     for i in eachindex(y)
+#         a = p[i]
+#         f[i] = (y[i] + a) * (1.0 - a - y[i])
+#     end
+#     nothing
+# end
+
 function y_exact(t; N = 1)
     y_ex = BigFloat[]
     t = BigFloat(t)

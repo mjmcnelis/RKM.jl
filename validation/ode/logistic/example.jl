@@ -53,7 +53,10 @@ show_progress = false
 static_array = false
 # static_array = true
 
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array)
+# model_parameters = [0.5, 0.25]
+@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array,
+                    #    model_parameters
+)
 # sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
 
 get_stats(sol)
