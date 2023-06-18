@@ -11,6 +11,7 @@ The ODE solver loop.
 Required parameters: `y0`, `dy_dt!`, `parameters`, `dy_dt_wrap!`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; 
+                    model_parameters = nothing,
                     static_array::Bool = false, show_progress::Bool = true, 
                     precision::Type{T2} = Float64, 
                     parameters::Parameters) where {T <: AbstractFloat, T2 <: AbstractFloat}
@@ -44,7 +45,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
 
     # create ODE wrapper function
     # note: used copy(t) to prevent bug in time accumulation
-    ode_wrap = ODEWrapper(copy(t), dy_dt!)
+    ode_wrap! = ODEWrapper(copy(t), model_parameters, dy_dt!)
 
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
@@ -66,13 +67,11 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     fact = lu(J) 
 
     # configure linear cache (see src/common.jl in LinearSolve.jl)
-    linear_cache = init(LinearProblem(J, f), #=LUFactorization()=#)
+    # note: assumes LU factorization for now
+    linear_cache = init(LinearProblem(J, f), LUFactorization())
     linear_cache = set_cacheval(linear_cache, fact)
 
-    # TODO: figure out to make dy_dt! wrapper that can update t
-    # https://github.com/JuliaDiff/ForwardDiff.jl/issues/402
-
-    stage_finder = set_jacobian_cache(stage_finder, ode_wrap, f_tmp, y)
+    stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
     
     # initalize solution
     sol = Solution(; precision, dimensions)
@@ -94,7 +93,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
 
         # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, controller,
-                              FE, y, t, dt, ode_wrap, dy, y_tmp, f_tmp, f, y1, y2, 
+                              FE, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, f, y1, y2, 
                               error, J, linear_cache, stage_finder
                             )
         t[1] += dt[1]

@@ -4,7 +4,7 @@ using RKM
 using LinearAlgebra
 using Plots
 using UnPack
-# plotly()
+plotly()
 
 function gauss(x)
     exp(-(x - 3)^2)
@@ -42,6 +42,7 @@ y0 = gauss.(x)
 @show C
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)
+y, t = get_solution(sol) 
 
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),
@@ -50,8 +51,7 @@ plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            legend = :outertopright, legendfontsize = 12, dpi = 200)
 for i = 1:3
     t = t0 + N*i*dt0
-    y = sol.y[1 + N*i]
-    plot!(x, y, color = "indianred", linewidth = 2, label = "t = $t")
+    plot!(x, y[1+N*i, :], color = "indianred", linewidth = 2, label = "t = $t")
 end
 
 plot!(x, y0, label = "t = 0 (exact)", color = "black", linewidth = 1, line = :dash)
@@ -60,7 +60,6 @@ for i = 1:3
     y_exact = gauss.(x .- a*t)
     plot!(x, y_exact, color = "black", linewidth = 1, line = :dash, label = "t = $t (exact)")
 end
-# display(plt)
-savefig(plt, joinpath(RKM_root, "demo/linear_advection/plot_lax_friedrichs.png"))
+display(plt)
 
 println("\ndone")

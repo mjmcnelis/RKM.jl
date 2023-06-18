@@ -2,7 +2,7 @@
 function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              adaptive::Embedded, controller::Controller, FE::MVector{1,Int64},
              y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T}, 
-             ode_wrap::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector, 
+             ode_wrap!::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector, 
              f_tmp::VectorMVector, f::VectorMVector, y1::VectorMVector, y2::VectorMVector, 
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
@@ -25,7 +25,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         if FE[1] > 0 && fsal isa FSAL
             f .= f_tmp
         else
-            ode_wrap.dy_dt!(f, t[1], y)          
+            ode_wrap!(f, t[1], y)          
             FE[1] += 1
         end
     end
@@ -41,7 +41,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
-        runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap, dy, y_tmp, 
+        runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap!, dy, y_tmp, 
                           f_tmp, FE, error, J, linear_cache, stage_finder)
         @.. y1 = y_tmp
 

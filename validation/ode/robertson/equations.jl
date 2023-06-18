@@ -1,5 +1,6 @@
 
-function dy_dt!(f, t, y)
+# for RKM
+function dy_dt!(f, y; kwargs...)
     k1 = 0.04
     k2 = 3.0e7
     k3 = 1.0e4
@@ -10,7 +11,7 @@ function dy_dt!(f, t, y)
 end
 
 # for OrdinaryDiffEq 
-function f_ord(f, y, p, t)
+function dy_dt!(f, y, p, t)
     k1 = 0.04
     k2 = 3.0e7
     k3 = 1.0e4

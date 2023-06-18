@@ -7,10 +7,11 @@ y0 = [δ]
 t0 = 0.0 
 tf = 2.0/δ
 dt0 = δ
+
 epsilon = 1e-7
 
+# RKM
 method = TrapezoidRuleBDF2()
-
 parameters = Parameters(; method, 
                           adaptive = Doubling(; epsilon), 
                           stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian()),
@@ -20,17 +21,12 @@ parameters = Parameters(; method,
 get_stats(sol)
 plot_ode(sol, method, Plots.plot);
 
+# OrdinaryDiffEq
 prob = ODEProblem(dy_dt!, y0, (t0, tf))
 @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = epsilon, abstol = epsilon)
-
-if sol.retcode == ReturnCode.Success
-    display(plot!(sol.t,  mapreduce(permutedims, vcat, sol.u), 
-                  color = :black, linewidth = 2, line = :dash)
-            )
-    @show sol.destats
-else 
-    @show sol.retcode
-end
+@show sol.destats
+plot!(sol.t,  mapreduce(permutedims, vcat, sol.u), 
+      color = :black, linewidth = 2, line = :dash) |> display
 
 GC.gc()
 println("\ndone")

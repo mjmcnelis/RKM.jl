@@ -9,7 +9,7 @@ using Plots; plotly()
 
 # differential equation
 const C = 0.5
-function dy_dt!(f, t, y)
+function dy_dt!(f, y; kwargs...)
     f[1] = (y[1] + C) * (1.0 - C - y[1])
     nothing
 end
