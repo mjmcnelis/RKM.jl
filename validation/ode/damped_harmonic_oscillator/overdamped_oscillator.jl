@@ -2,16 +2,14 @@ using Revise, RKM, OrdinaryDiffEq, LinearSolve
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/damped_harmonic_oscillator/equations.jl") : nothing
 
-y0 = [1.0, -1.0]
+y0 = [1.0, -1.0]        # eigenvector of ODE system (exact solution is y(t) = exp(-t)*y0)
 t0 = 0.0
 tf = 10.0
 
 # setup stiff ODE
 γ = 1.0e9               # my solver doesn't work well for this large value
-
-# example from paper
 # γ = 1000.0
-ω = sqrt(1.001*γ)
+ω = sqrt(γ + 1.0)       # eigenvalues of ODE are λ = (-γ, -1)
 p = [γ, ω]
 
 dt0 = 1e-2
@@ -39,7 +37,7 @@ prob = ODEProblem(dy_dt!, y0, (t0, tf), p)
 @time sol = solve(prob, TRBDF2(linsolve = LUFactorization()), dt = dt0, adaptive = false)
 @show sol.destats
 plot!(sol.t,  mapreduce(permutedims, vcat, sol.u),
-      color = :black, linewidth = 2, line = :dash)# |> display
+      color = :black, linewidth = 2, line = :dash) |> display
 
 GC.gc()
 println("\ndone")
