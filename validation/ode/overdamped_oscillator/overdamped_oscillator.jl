@@ -7,9 +7,10 @@ t0 = 0.0
 tf = 10.0
 
 # setup stiff ODE
-γ = 1.0e9               # my solver doesn't work well for this large value
-# γ = 1000.0
-ω = sqrt(γ + 1.0)       # eigenvalues of ODE are λ = (-γ, -1)
+# ω = 10.0^(9/2)          # my solver is slow w/ this large value when epsilon = 1e-8
+ω = 10.0^(3/2)
+γ = ω^2 + 1.0           # eigenvalues of ODE are λ = (-ω², -1)
+
 p = [γ, ω]
 
 dt0 = 1e-2
@@ -18,7 +19,7 @@ dt0 = 1e-2
 method = TrapezoidRuleBDF2()
 # method = BackwardEuler1()
 # method = Heun2()            # unstable
-# method = Ketcheson4()       # barely stable for γ = 1000.0, dt = 1e-2
+method = Ketcheson4()       # barely stable for ω² = 1000, dt = 0.01
 jacobian_method = ForwardJacobian()
 
 parameters = Parameters(; method,
