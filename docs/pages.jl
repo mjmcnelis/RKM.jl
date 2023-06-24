@@ -5,7 +5,7 @@ pages = [
     "Methods" => ["Runge-Kutta" => ["methods/runge_kutta/runge_kutta.md",
                                     "methods/runge_kutta/tableau.md",
                                     "methods/runge_kutta/debug_table.md",
-                                    "Explicit methods" => ["Low-order" => "methods/runge_kutta/explicit/low_order.md", 
+                                    "Explicit methods" => ["Low-order" => "methods/runge_kutta/explicit/low_order.md",
                                                            "Medium-order" => "methods/runge_kutta/explicit/medium_order.md",
                                                            "High-order" => "methods/runge_kutta/explicit/high_order.md",
                                                            "Very high-order" => "methods/runge_kutta/explicit/very_high_order.md"],
@@ -13,8 +13,8 @@ pages = [
                                                           ]
                                    ],
                  ],
-    "Adaptive Time Step" => ["adaptive/constructor.md", 
-                             "Algorithms" => ["adaptive/algorithms/doubling.md", 
+    "Adaptive Time Step" => ["adaptive/constructor.md",
+                             "Algorithms" => ["adaptive/algorithms/doubling.md",
                                               "adaptive/algorithms/embedded.md",
                                               "adaptive/algorithms/finite_diff.md"
                                              ],

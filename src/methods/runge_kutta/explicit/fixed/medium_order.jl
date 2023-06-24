@@ -55,7 +55,7 @@ end
 """
     Ketcheson4(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Ketcheson's fourth-order SSP method. 
+Ketcheson's fourth-order SSP method.
 
 https://epubs.siam.org/doi/10.1137/07070485X
 """

@@ -110,7 +110,7 @@ end
 """
     Verner56(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Verner's fifth(sixth)-order method (1978). 
+Verner's fifth(sixth)-order method (1978).
 
 https://www.jstor.org/stable/2156853
 """

@@ -1,16 +1,16 @@
 
 # Medium-order (4-6) explicit Runge-Kutta methods
 
-## Standard 
+## Standard
 
 The following standard methods are compatible with `Fixed()`, `Doubling()` and `FiniteDiff()` time-stepping:
 
 - `RungeKutta4()`: Runge and Kutta's classic fourth-order method
 - `ThreeEightsRule4()`: fourth-order 3/8 rule
-- `Ralston4()`: Ralston's fourth-order method 
+- `Ralston4()`: Ralston's fourth-order method
 - `Ketcheson4()`: Ketcheson's fourth-order SSP method
-- `Butcher5()`: Butcher's fifth-order method 
-- `Butcher6()`: Butcher's sixth-order method 
+- `Butcher5()`: Butcher's fifth-order method
+- `Butcher6()`: Butcher's sixth-order method
 
 ## Embedded
 
@@ -26,10 +26,10 @@ The following embedded methods are compatible with all adaptive time step option
 
 *Note: SSP stands for strong stability preserving*
 
-## API Reference 
+## API Reference
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/explicit/fixed/medium_order.jl", 
+Pages   = ["methods/runge_kutta/explicit/fixed/medium_order.jl",
            "methods/runge_kutta/explicit/embedded/medium_order.jl"]
 ```

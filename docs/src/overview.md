@@ -1,9 +1,9 @@
 # Overview
 
 ```julia
-using RKM 
+using RKM
 import DoubleFloat
-using Plots; plotly() 
+using Plots; plotly()
 
 # differential equation
 const C = 0.5

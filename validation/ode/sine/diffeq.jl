@@ -1,7 +1,7 @@
 using Revise, OrdinaryDiffEq, StaticArrays, BenchmarkTools
 import RKM: RKM_root
 # using Plots; plotly()
-!(@isdefined fp) ? include("$RKM_root/validation/ode/sine/equations.jl") : nothing 
+!(@isdefined fp) ? include("$RKM_root/validation/ode/sine/equations.jl") : nothing
 
 t0 = 0.0
 u0 = [sin(t0), ω*cos(ω*t0)]

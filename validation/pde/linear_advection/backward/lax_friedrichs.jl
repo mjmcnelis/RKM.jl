@@ -43,7 +43,7 @@ y0 = gauss.(x)
 @show C
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)
-y, t = get_solution(sol) 
+y, t = get_solution(sol)
 
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),

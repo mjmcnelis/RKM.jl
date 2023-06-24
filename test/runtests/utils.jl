@@ -2,10 +2,10 @@ import LinearAlgebra: norm
 import UnPack: @unpack
 
 function reconstruct_butcher(method::RungeKutta)
-    @unpack stages, precision, c, A_T, b, b_hat = method 
+    @unpack stages, precision, c, A_T, b, b_hat = method
 
     ncol = stages + 1
-    nrow = b_hat == b ? ncol : ncol + 1 
+    nrow = b_hat == b ? ncol : ncol + 1
     butcher = zeros(precision, nrow, ncol)
 
     butcher[1:ncol-1, 2:ncol] .= A_T'
@@ -15,7 +15,7 @@ function reconstruct_butcher(method::RungeKutta)
     butcher[ncol, 1] = 1.0
     butcher[nrow, 1] = 1.0
 
-    return butcher 
+    return butcher
 end
 
 """

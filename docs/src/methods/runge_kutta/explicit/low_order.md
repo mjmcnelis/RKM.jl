@@ -1,7 +1,7 @@
 
 # Low-order (1-3) explicit Runge-Kutta methods
 
-## Standard 
+## Standard
 
 The following standard methods are compatible with `Fixed()`, `Doubling()` and `FiniteDiff()` time-stepping:
 
@@ -10,14 +10,14 @@ The following standard methods are compatible with `Fixed()`, `Doubling()` and `
 - `Midpoint2()`: second-order mid-point rule
 - `Ralston2()`: Ralston's second-order method
 - `Generic2(; alpha)`: generic second-order method whose coefficients depend on the parameter `alpha`
-- `Heun3()`: Heun's third-order method 
+- `Heun3()`: Heun's third-order method
 - `Ralston3()`: Ralston's third-order
 - `RungeKutta3()`: Kutta's third-order method
 - `ShuOsher3()`: Shu and Osher's third-order SSP method
 - `SpiteriRuuth3()`: Spiteri and Ruuth's third-order SSP method
 - `Generic3(; alpha)`: generic third-order method whose coefficients depend on the parameter `alpha`
 
-## Embedded 
+## Embedded
 
 The following embedded methods are compatible with all adaptive time step options:
 
@@ -27,10 +27,10 @@ The following embedded methods are compatible with all adaptive time step option
 
 *Note: SSP stands for strong stability preserving*
 
-## API Reference 
+## API Reference
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/explicit/fixed/low_order.jl", 
+Pages   = ["methods/runge_kutta/explicit/fixed/low_order.jl",
            "methods/runge_kutta/explicit/embedded/low_order.jl"]
 ```

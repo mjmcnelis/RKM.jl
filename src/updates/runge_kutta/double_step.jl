@@ -1,11 +1,11 @@
 
 function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
-             adaptive::Doubling, controller::Controller, FE::MVector{1,Int64},  
-             y::Vector{T}, t::Union{Vector{T}, MVector{1,T}}, 
-             dt::Union{Vector{T}, MVector{2,T}}, ode_wrap!::ODEWrapper, dy::Matrix{T}, 
-             y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, y1::Vector{T}, 
-             y2::Vector{T}, error::Vector{T}, 
-             J::MatrixMMatrix, linear_cache, 
+             adaptive::Doubling, controller::Controller, FE::MVector{1,Int64},
+             y::Vector{T}, t::Union{Vector{T}, MVector{1,T}},
+             dt::Union{Vector{T}, MVector{2,T}}, ode_wrap!::ODEWrapper, dy::Matrix{T},
+             y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, y1::Vector{T},
+             y2::Vector{T}, error::Vector{T},
+             J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack epsilon, low, high, safety, p_norm, dt_min, dt_max, max_attempts = adaptive
@@ -20,7 +20,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     # if do Richardson extrapolation, then always have
     # to evaluate (explicit) first stage at (t,y)
     if explicit_stage[1]
-        ode_wrap!(f, t[1], y)          
+        ode_wrap!(f, t[1], y)
         FE[1] += 1
     end
 
@@ -31,7 +31,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, iteration, y, t[1], dt[1], ode_wrap!, dy, y_tmp, f_tmp, 
+        double_step!(method, iteration, y, t[1], dt[1], ode_wrap!, dy, y_tmp, f_tmp,
                      f, y1, y2, FE, error, J, linear_cache, stage_finder)
 
         @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
@@ -60,7 +60,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
 
         if e_norm <= tol                                # compare error to tolerance
             set_previous_control_vars!(controller, e_norm, dt[1])
-            break 
+            break
         end
         attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
         attempts += 1
@@ -71,16 +71,16 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     return nothing
 end
 
-function double_step!(method, iteration, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, 
+function double_step!(method, iteration, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp,
                       f, y1, y2, FE, error, J, linear_cache, stage_finder)
 
-    @unpack explicit_stage, fsal = method 
+    @unpack explicit_stage, fsal = method
 
     # update full time step
     if explicit_stage[1]
         @.. dy[:,1] = dt * f
     end
-    runge_kutta_step!(method, iteration, y, t, dt, ode_wrap!, dy, y_tmp, 
+    runge_kutta_step!(method, iteration, y, t, dt, ode_wrap!, dy, y_tmp,
                       f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y1 = y_tmp
 
@@ -89,7 +89,7 @@ function double_step!(method, iteration, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp,
     if explicit_stage[1]
         @.. dy[:,1] = (dt/2.0) * f
     end
-    runge_kutta_step!(method, iteration, y, t, dt/2., ode_wrap!, dy, y_tmp, 
+    runge_kutta_step!(method, iteration, y, t, dt/2., ode_wrap!, dy, y_tmp,
                       f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y2 = y_tmp
     #   second half step

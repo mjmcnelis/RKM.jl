@@ -1,15 +1,15 @@
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/gaussian/equations.jl") : nothing 
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/gaussian/equations.jl") : nothing
 
 # precision = Double64
-precision = Float64 
+precision = Float64
 
 t0 = -5.0
 y0 = exp(-t0^2/2.0) + 1.0     # note: shift by +1 to ignore abstol
 
-adaptive = Embedded(; epsilon = 1e-15, low = 0.1, high = 5.0, safety = 0.9)         
+adaptive = Embedded(; epsilon = 1e-15, low = 0.1, high = 5.0, safety = 0.9)
 method = DormandPrince54()
 t_range = TimeRange(; t0, tf = 5, dt0 = 1e-4)
 timer = TimeLimit()

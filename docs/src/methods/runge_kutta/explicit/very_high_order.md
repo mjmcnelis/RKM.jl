@@ -9,7 +9,7 @@ The following embedded methods are compatible with all adaptive time step option
 - `Feagin1210()`: Feagin's twelfth(tenth)-order method
 - `Feagin1412()`: Feagin's fourteenth(twelfth)-order method
 
-## API Reference 
+## API Reference
 
 ```@autodocs
 Modules = [RKM]

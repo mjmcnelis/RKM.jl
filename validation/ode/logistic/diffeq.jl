@@ -2,7 +2,7 @@ using Revise, OrdinaryDiffEq, StaticArrays, BenchmarkTools
 using DoubleFloats: Double64
 import RKM: RKM_root
 using Plots; plotly()
-!(@isdefined f_ord) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing 
+!(@isdefined f_ord) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
 t0 = -10.0
 N = 2
@@ -33,4 +33,3 @@ println("\ndone")
 #      legend = :outertopright, legendfontsize = 12,
 #      ylabel = "Δt", yguidefontsize = 14, ytickfontsize = 12,
 #      xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
-     

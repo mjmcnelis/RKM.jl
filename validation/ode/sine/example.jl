@@ -1,13 +1,13 @@
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/sine/equations.jl") : nothing 
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/sine/equations.jl") : nothing
 
 const ω = 100.0       # frequency
 const R = 20          # cycles
 
 precision = Float64
-adaptive = Fixed()         
+adaptive = Fixed()
 method = RungeKutta4()
 t_range = TimeRange(; t0 = 0, tf = pi/2, dt0 = 1e-5)
 parameters = Parameters(; adaptive, method, t_range)

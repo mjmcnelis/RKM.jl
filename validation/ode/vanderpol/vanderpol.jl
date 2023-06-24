@@ -3,15 +3,15 @@ using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/vanderpol/equations.jl") : nothing
 
 y0 = [2.0, 0.0]
-t0 = 0.0 
-tf = 3.0e3 
+t0 = 0.0
+tf = 3.0e3
 dt0 = 1e-4
 
 # RKM
 method = TrapezoidRuleBDF2()
 epsilon = 1e-6
-parameters = Parameters(; method, 
-                          adaptive = Doubling(; epsilon), 
+parameters = Parameters(; method,
+                          adaptive = Doubling(; epsilon),
                           stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian()),
                           t_range = TimeRange(; t0, tf, dt0)
                         )
@@ -25,7 +25,7 @@ epsilon = 1e-7
 prob = ODEProblem(dy_dt!, y0, (t0, tf))
 @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = epsilon, abstol = epsilon)
 @show sol.destats
-plot!(sol.t,  mapreduce(permutedims, vcat, sol.u), 
+plot!(sol.t,  mapreduce(permutedims, vcat, sol.u),
       color = :black, linewidth = 2, line = :dash) |> display
 
 GC.gc()

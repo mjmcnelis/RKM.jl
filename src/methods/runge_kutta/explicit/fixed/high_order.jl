@@ -1,13 +1,13 @@
 """
     Curtis8(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Curtis' eighth-order method. 
+Curtis' eighth-order method.
 
 https://link.springer.com/article/10.1007/BF02219778
 http://www.peterstone.name/Maplepgs/Maple/nmthds/RKcoeff/Runge_Kutta_schemes/RK8/RKcoeff8b_4.pdf
 """
 function Curtis8(; precision::Type{T} = Float64) where T <: AbstractFloat
-    s21 = sqrt(BigFloat(21.0)) 
+    s21 = sqrt(BigFloat(21.0))
 
     butcher = [0 0 0 0 0 0 0 0 0 0 0 0
                1//192 1//192 0 0 0 0 0 0 0 0 0 0
@@ -29,7 +29,7 @@ end
 """
     Shanks8(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Shanks' eighth-order method. 
+Shanks' eighth-order method.
 
 https://ntrs.nasa.gov/citations/19650022581
 """
@@ -55,7 +55,7 @@ end
 """
     ShanksPseudo8(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Shanks' pseudo eighth-order method. 
+Shanks' pseudo eighth-order method.
 
 https://ntrs.nasa.gov/citations/19650022581
 """

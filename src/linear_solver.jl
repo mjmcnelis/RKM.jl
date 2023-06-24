@@ -15,7 +15,7 @@ function do_factorization_tmp(cache, alg::AbstractFactorization)
     do_factorization(alg, cache.A, cache.b, cache.u)
 end
 
-# note: much simpler than https://github.com/SciML/LinearSolve.jl/blob/main/src/factorization.jl 
+# note: much simpler than https://github.com/SciML/LinearSolve.jl/blob/main/src/factorization.jl
 # ln.353-372 so be wary
 _do_factorization(cache, A::SparseMatrixCSC) = lu!(cache.cacheval, A)
 function do_factorization_tmp(cache, ::KLUFactorization)

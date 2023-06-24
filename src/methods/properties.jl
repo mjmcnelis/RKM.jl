@@ -36,7 +36,7 @@ function fsal_prop(butcher::Matrix{<:AbstractFloat})
     ncol = size(butcher, 2)
 
     # TODO: if using implicit routine TRBDF2, then also need to check
-    #       whether first stage is explicit in order to use f = f_tmp 
+    #       whether first stage is explicit in order to use f = f_tmp
     #       should probably test it out on TRBDF2 (fixed time step and embedded case)
 
     # remove any embedded rows
@@ -62,7 +62,7 @@ function explicit_stage_prop(butcher::Matrix{T}) where T <: AbstractFloat
     A = butcher[1:(ncol-1), 2:end]
     stages = ncol-1
     explicit_stage = Vector{Bool}(undef, stages)
-    for i in 1:stages 
+    for i in 1:stages
         explicit_stage[i] = all(x -> x == 0.0, A[i,i:end])
     end
     return explicit_stage |> SVector{stages}

@@ -2,15 +2,15 @@
 using Revise
 using RKM
 using LinearAlgebra
-using Plots 
+using Plots
 using UnPack
 plotly()
 
-# initial condition 
+# initial condition
 x = LinRange(-5, 5, 101) |> collect
 const a = 0.25            # diffusion constant
 const dx = x[2] - x[1]
-const dt = 0.01           # just adjust this for courant number 
+const dt = 0.01           # just adjust this for courant number
 const C = 2*a*dt/dx^2
 const t0 = 1.0
 N = 300
@@ -39,24 +39,24 @@ parameters = Parameters(; adaptive, method, t_range)
 
 @unpack t0, dt0 = t_range
 y0 = gauss.(x, t0)
-@show C 
+@show C
 
 @time sol = evolve_ode(y0, dy_dt!; parameters)
 
 plt = plot(x, y0, label = "t = $t0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),
-           ylabel = "u", yguidefontsize = 14, ytickfontsize = 12, 
-           xlabel = "t", xguidefontsize = 14, xtickfontsize = 12, 
+           ylabel = "u", yguidefontsize = 14, ytickfontsize = 12,
+           xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,
            legend = :outertopright, legendfontsize = 12)
 for i = 1:3
-    t = t0 + N*i*dt0 
+    t = t0 + N*i*dt0
     y = sol.y[1 + N*i]
     plot!(x, y, color = "indianred", linewidth = 2, label = "t = $t")
 end
 
-plot!(x, y0, label = "t = $t0 (exact)", color = "black", linewidth = 1, line = :dash)   
+plot!(x, y0, label = "t = $t0 (exact)", color = "black", linewidth = 1, line = :dash)
 for i = 1:3
-    t = t0 + N*i*dt0 
+    t = t0 + N*i*dt0
     y_exact = gauss.(x, t)
     plot!(x, y_exact, color = "black", linewidth = 1, line = :dash, label = "t = $t (exact)")
 end

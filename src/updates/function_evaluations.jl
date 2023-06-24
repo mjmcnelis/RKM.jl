@@ -1,19 +1,19 @@
 """
-    add_function_evaluations(FE::MVector{1,Int64}, iteration::Iteration, 
-                             adaptive::AdaptiveStepSize, ode_method::ODEMethod, 
+    add_function_evaluations(FE::MVector{1,Int64}, iteration::Iteration,
+                             adaptive::AdaptiveStepSize, ode_method::ODEMethod,
                              args...)
 
 Add number of function evaluations per time step to `FE`.
 
 Required parameters: `FE`, `iteration`, `adaptive`, `method`
 """
-function add_function_evaluations!(FE::MVector{1,Int64}, iteration::Iteration, 
-                                   adaptive::AdaptiveStepSize, method::ODEMethod, 
+function add_function_evaluations!(FE::MVector{1,Int64}, iteration::Iteration,
+                                   adaptive::AdaptiveStepSize, method::ODEMethod,
                                    args...)
     throw("No function for $iteration, $adaptive method $(method.name)")
 end
 
-function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::AdaptiveStepSize, 
+function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::AdaptiveStepSize,
                                    method::RungeKutta, args...)
     FE[1] += method.stages
     return nothing
@@ -30,7 +30,7 @@ function add_function_evaluations!(FE::MVector{1,Int64}, ::Explicit, ::Embedded,
                                    method::RungeKutta, attempts::Int64)
     @unpack stages, fsal = method
     fsal_stage = fsal isa FSAL ? 1 : 0
-   
+
     # note: fsal advantage does not count for rejected attempts
     evals = 1 - fsal_stage + attempts*(stages - 1)
     FE[1] += evals

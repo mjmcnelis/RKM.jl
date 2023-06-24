@@ -4,8 +4,8 @@ import Statistics: mean
 import Plots: plot, plot!
 import Setfield: @set
 
-function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Function; 
-             precision::Type{T2}, methods::OrderedDict{<:AdaptiveStepSize, <:Vector}, 
+function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Function;
+             precision::Type{T2}, methods::OrderedDict{<:AdaptiveStepSize, <:Vector},
              epsilon_vect::Vector{Float64}, t_range::TimeRange, xlims = (1e2, 1e5),
              ylims = (1e-20, 1e0)) where {T <: AbstractFloat, T2 <: AbstractFloat}
     plt = plot()
@@ -19,7 +19,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
 
             # TODO: sort out how to do efficiency for fixed time step
             for epsilon in epsilon_vect
-                adaptive = @set adaptive.epsilon = epsilon 
+                adaptive = @set adaptive.epsilon = epsilon
                 parameters = Parameters(; adaptive, method, t_range)
 
                 sol = evolve_ode(y0, dy_dt!; parameters, precision)
@@ -35,7 +35,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
                     y_ex[i,:] = y_exact(t[i], sol.dimensions)
                     err[i] = norm(y[i,:] .- y_ex[i,:], p_norm)
                 end
-                
+
                 append!(FE, sol.FE)
                 append!(mean_err, mean(err))
 
@@ -49,7 +49,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
             norm_label = isinf(p_norm) ? "∞" : "$(Int(p_norm))"
 
             # TODO: separate legends for SDRK, ERK
-            plot!(FE, mean_err; 
+            plot!(FE, mean_err;
                   size = (900, 600), linewidth = 2, linestyle, label = code_name,
                   legend = :outertopright, legendtitlefontsize = 12, legendfontsize = 12,
                   xlabel = "Function evaluations", ylabel = "Mean L$norm_label error",

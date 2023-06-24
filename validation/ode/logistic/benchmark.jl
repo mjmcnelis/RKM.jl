@@ -16,12 +16,12 @@ memory_rkm = Float64[]
 static = false
 # static = true
 
-N = 1 
+N = 1
 y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
 dt0_vect = 10.0.^(-(1:1:5))
 
 # vary time step (fix number of state variables)
-for dt0 in dt0_vect  
+for dt0 in dt0_vect
     @show dt0
 
     # OrdinaryDiffEq
@@ -33,7 +33,7 @@ for dt0 in dt0_vect
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    ps = Parameters(; adaptive = Fixed(), method = RungeKutta4(), 
+    ps = Parameters(; adaptive = Fixed(), method = RungeKutta4(),
                       t_range = TimeRange(; t0, tf, dt0))
     rkm = @benchmark evolve_ode($y0, dy_dt!; parameters = $ps, show_progress = false,
                                 static_array = $static)
@@ -44,18 +44,18 @@ end
 # plot options
 plot_kwargs = (title = "Logistic equation", titlefontsize = 16, size = (1000, 600),
                  linewidth = 2, legend = :outertopright, legendfontsize = 12,
-                 yguidefontsize = 14, ytickfontsize = 12,xguidefontsize = 14, 
+                 yguidefontsize = 14, ytickfontsize = 12,xguidefontsize = 14,
                  xtickfontsize = 12, xaxis = :log, yaxis = :log)
 
 # Plot runtimes vs time step
-plt = plot(dt0_vect, time_ord; label = "OrdinaryDiffEq", 
+plt = plot(dt0_vect, time_ord; label = "OrdinaryDiffEq",
            xlabel = "Time step [s]", ylabel = "Runtime [s]",
            xlims = (1e-5, 1e-1), ylims = (1e-5, 1e1), plot_kwargs...);
 plot!(dt0_vect, time_rkm; label = "RKM", plot_kwargs...);
 display(plt)
 
 # Plot memory usage vs time step
-plt = plot(dt0_vect, memory_ord; label = "OrdinaryDiffEq", 
+plt = plot(dt0_vect, memory_ord; label = "OrdinaryDiffEq",
            xlabel = "Time step [s]", ylabel = "Memory usage [MiB]",
            xlims = (1e-5, 1e-1), ylims = (1e-2, 1e3),
             plot_kwargs...);
@@ -73,8 +73,8 @@ dt0 = 1e-1
 N_vect = (10).^(0:1:6)
 
 # vary state variables (fix time step)
-for N in N_vect 
-    @show N 
+for N in N_vect
+    @show N
     # don't use static arrays
     y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
 
@@ -85,7 +85,7 @@ for N in N_vect
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    ps = Parameters(; adaptive = Fixed(), method = RungeKutta4(), 
+    ps = Parameters(; adaptive = Fixed(), method = RungeKutta4(),
                       t_range = TimeRange(; t0, tf, dt0))
     rkm = @benchmark evolve_ode($y0, dy_dt!; parameters = $ps, show_progress = false)
     push!(time_rkm, mean(rkm).time/1e9)
@@ -94,14 +94,14 @@ for N in N_vect
 end
 
 # Plot runtimes vs number of state variables
-plt = plot(N_vect, time_ord; label = "OrdinaryDiffEq", 
+plt = plot(N_vect, time_ord; label = "OrdinaryDiffEq",
            xlabel = "Number of state variables", ylabel = "Runtime [s]",
            xlims = (1e0, 1e6), ylims = (1e-5, 1e2), plot_kwargs...);
 plot!(N_vect, time_rkm; label = "RKM", plot_kwargs...);
 display(plt)
 
 # Plot memory usage vs number of state variables
-plt = plot(N_vect, memory_ord; label = "OrdinaryDiffEq", 
+plt = plot(N_vect, memory_ord; label = "OrdinaryDiffEq",
            xlabel = "Number of state variables", ylabel = "Memory usage [MiB]",
            xlims = (1e0, 1e6), ylims = (1e-2, 1e4), plot_kwargs...);
 plot!(N_vect, memory_rkm; label = "RKM", plot_kwargs...);

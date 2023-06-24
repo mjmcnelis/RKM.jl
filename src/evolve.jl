@@ -1,19 +1,19 @@
 # TODO update docstring
 """
-    evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; 
-               static_array::Bool = false, show_progress::Bool = true, 
-               precision::Type{T2} = Float64, parameters::Parameters, 
+    evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
+               static_array::Bool = false, show_progress::Bool = true,
+               precision::Type{T2} = Float64, parameters::Parameters,
                jacobian! = jacobian_error) where {T <: AbstractFloat,
                                                   T2 <: AbstractFloat}
 
-The ODE solver loop. 
+The ODE solver loop.
 
 Required parameters: `y0`, `dy_dt!`, `parameters`, `dy_dt_wrap!`
 """
-function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function; 
+function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
                     model_parameters = nothing,
-                    static_array::Bool = false, show_progress::Bool = true, 
-                    precision::Type{T2} = Float64, 
+                    static_array::Bool = false, show_progress::Bool = true,
+                    precision::Type{T2} = Float64,
                     parameters::Parameters) where {T <: AbstractFloat, T2 <: AbstractFloat}
 
     @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
@@ -34,7 +34,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     # initial conditions
     y  = y0 .|> precision
     y isa Vector ? nothing : y = [y]
-    static_array ? y = MVector{dimensions}(y...) : nothing 
+    static_array ? y = MVector{dimensions}(y...) : nothing
 
     t0 = rationalize(t0) |> precision
     tf = rationalize(tf) |> precision
@@ -61,10 +61,10 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     y2 = calloc_vector(static_array, precision, dimensions)
     error = calloc_vector(static_array, precision, dimensions)
 
-    J[diagind(J)] .= 1.0 
+    J[diagind(J)] .= 1.0
     # TODO: have option to use sparse jacobian
     # J = sparse(J)
-    fact = lu(J) 
+    fact = lu(J)
 
     # configure linear cache (see src/common.jl in LinearSolve.jl)
     # note: assumes LU factorization for now
@@ -72,12 +72,12 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     linear_cache = set_cacheval(linear_cache, fact)
 
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
-    
+
     # initalize solution
     sol = Solution(; precision, dimensions)
     @unpack FE = sol
-   
-    # TODO: is resize and indexing faster than append? 
+
+    # TODO: is resize and indexing faster than append?
     adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
     # for progress meter
@@ -85,7 +85,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     progress = Progress(100)
 
     stats = @timed allocs = @allocated while true
-        append!(sol.y, y) 
+        append!(sol.y, y)
         append!(sol.t, t[1])
 
         show_progress && monitor_progess(t, progress, checkpoints)
@@ -93,14 +93,14 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
 
         # TODO: see if can pass kwargs
         evolve_one_time_step!(method, iteration, adaptive, controller,
-                              FE, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, f, y1, y2, 
+                              FE, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, f, y1, y2,
                               error, J, linear_cache, stage_finder
                             )
         t[1] += dt[1]
     end
 
-    # TODO: look into @code_warntype 
-    # TODO: wrap into compute_stats function 
+    # TODO: look into @code_warntype
+    # TODO: wrap into compute_stats function
     compute_step_rejection_rate!(sol, method, adaptive, timer)
     sol.JE .= stage_finder.jacobian_method.evaluations
     sol.memory_storage .= format_bytes(sizeof(sol.y) + sizeof(sol.t))

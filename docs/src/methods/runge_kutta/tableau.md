@@ -4,7 +4,7 @@
 In this section, we discuss how a Runge-Kutta method's Butcher tableau and properties
 are constructed and stored in the `RungeKutta` struct.
 
-## Example 
+## Example
 
 Here we set the ODE solver method to the classic fourth-order Runge-Kutta method:
 ```julia
@@ -13,7 +13,7 @@ method = RungeKutta4()
 
 The code for this method's constructor is
 
-```julia 
+```julia
 function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0
                1//2 1//2 0 0 0
@@ -26,17 +26,17 @@ function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 ```
 First we write out the Butcher tableau in `Matrix` form. If the coefficients are simple,
-we express them as integers and fractions (otherwise we use `big` strings). The matrix 
-`butcher` is converted to the float type `precision`, which is set by the user. 
+we express them as integers and fractions (otherwise we use `big` strings). The matrix
+`butcher` is converted to the float type `precision`, which is set by the user.
 
-Next, we pass `butcher` and a symbolic label `name` to `RungeKutta`'s outer constructor. 
-The outer constructor partitions `butcher` into the arrays `c`, `A_T` and `b` (`b_hat`) 
-and stores them as static types. It also infers several properties, such as the number of 
-stages and whether the method is explicit or implicit. The order of the primary (embedded) 
-update is extracted by parsing `name`. The code below shows the fields of the `RungeKutta` 
+Next, we pass `butcher` and a symbolic label `name` to `RungeKutta`'s outer constructor.
+The outer constructor partitions `butcher` into the arrays `c`, `A_T` and `b` (`b_hat`)
+and stores them as static types. It also infers several properties, such as the number of
+stages and whether the method is explicit or implicit. The order of the primary (embedded)
+update is extracted by parsing `name`. The code below shows the fields of the `RungeKutta`
 struct `method` after it is set to `RungeKutta4()`:
 
-```julia 
+```julia
 julia> for field in method |> typeof |> fieldnames
            println("$field = $(getproperty(method, field))")
        end
@@ -54,11 +54,11 @@ code_name = RK4
 
 *Note: the `1` entry in the lower-left corner of `butcher` is only used as a placeholder to verify that the coefficients in `b` (`b_hat`) sum up to unity within floating precision.*
 
-## API Reference 
+## API Reference
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/runge_kutta.jl", 
-           "methods/properties.jl", 
+Pages   = ["methods/runge_kutta/runge_kutta.jl",
+           "methods/properties.jl",
            "methods/code_names.jl"]
 ```

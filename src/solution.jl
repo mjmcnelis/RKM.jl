@@ -73,7 +73,7 @@ Returns the solution tuple `(y,t)` from `sol`. The solution vector `y`, which ha
 `D*N`, is reshaped into an `N x D` matrix (`N` = time steps, `D` = dimensions).
 
 For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
-is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`. The solution 
+is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`. The solution
 vector is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 """
 function get_solution(sol::Solution)

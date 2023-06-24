@@ -3,7 +3,7 @@ abstract type AdaptiveStepSize end
 
 struct Fixed <: AdaptiveStepSize end
 
-struct CentralDiff <: AdaptiveStepSize 
+struct CentralDiff <: AdaptiveStepSize
     """Relative and incremental error tolerance"""
     epsilon::Float64
     """Lower bound on the time step's rate of change"""

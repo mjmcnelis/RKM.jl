@@ -1,7 +1,7 @@
 
 # Low-order (1-3) implicit Runge-Kutta methods
 
-## Standard 
+## Standard
 
 Currently, only the standard diagonal implicit methods are compatible with `Fixed()`
 time-stepping.
@@ -12,13 +12,13 @@ time-stepping.
 - `QinZhang2()`: Qin and Zhang's second-order method
 - `KraaijevangerSpijker2()`: Kraaijevanger and Spijker's second-order method
 - `PareschiRusso2()`: Pareschi and Russo's second-order method
-- `PareschiRusso3()`: Pareschi and Russo's third-order method 
+- `PareschiRusso3()`: Pareschi and Russo's third-order method
 - `Crouzeix3()`: Crouzeix's third-order method
 - `RadauIA3()`: Radau IA3 third-order method
 - `RadauIIA3()`: Radau IA3 third-order method
 - `DIRKL3()`: a third-order L-stable diagonal implicit method (name unknown)
 
-## Embedded 
+## Embedded
 
 The following embedded methods are compatible with all adaptive time step options:
 
@@ -28,10 +28,10 @@ The following embedded methods are compatible with all adaptive time step option
 
 *Note: SSP stands for strong stability preserving*
 
-## API Reference 
+## API Reference
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/implicit/fixed/low_order.jl", 
+Pages   = ["methods/runge_kutta/implicit/fixed/low_order.jl",
            "methods/runge_kutta/implicit/embedded/low_order.jl"]
 ```

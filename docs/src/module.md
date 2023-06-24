@@ -1,6 +1,6 @@
 # Module
 
-## Exports 
+## Exports
 - `evolve_ode` for solving the ODE system and outputting the solution
 - `get_solution` for post-processing the ODE solution
 - `Parameters` for storing the ODE solver options

@@ -5,13 +5,13 @@ Plots the ODE solution `y(t)` from `sol` with the function `plot` (usually `Plot
 
 Note: pass `plot` as a function to reduce RKM's precompilation time.
 """
-function plot_ode(sol::Solution, method::ODEMethod, plot::Function; 
+function plot_ode(sol::Solution, method::ODEMethod, plot::Function;
                   logx = false, logy = false)
-                  
+
     # TODO: put some more functionality (panel?)
     y, t = get_solution(sol)
-    
-    @unpack code_name = method 
+
+    @unpack code_name = method
 
     x_args = logx ? (; xaxis = :log) : (;)
     y_args = logy ? (; xaxis = :log) : (;)
@@ -27,10 +27,10 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function;
     #      label = code_name, legend = :outertopright, legendfontsize = 12,
     #      ylabel = "Δt", yguidefontsize = 14, ytickfontsize = 12,
     #      xlabel = "t", xguidefontsize = 14, xtickfontsize = 12,) |> display
-    
+
     return plt
 end
 
-get_linestyle(::AdaptiveStepSize) = :solid 
+get_linestyle(::AdaptiveStepSize) = :solid
 get_linestyle(::Doubling) = :dot
 get_linestyle(::Embedded) = :dash

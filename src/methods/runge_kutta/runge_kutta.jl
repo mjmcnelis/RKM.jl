@@ -44,7 +44,7 @@ end
 """
     RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
 
-Outer constructor for `RungeKutta`. 
+Outer constructor for `RungeKutta`.
 
 Required parameters: `name`, `butcher`
 """
@@ -65,7 +65,7 @@ function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
 
-    return RungeKutta(name, c, A_T, b, b_hat, stages, order, 
+    return RungeKutta(name, c, A_T, b, b_hat, stages, order,
                       iteration, fsal, explicit_stage, code_name)
 end
 
