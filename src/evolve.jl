@@ -1,20 +1,19 @@
 # TODO update docstring
 """
-    evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
-               static_array::Bool = false, show_progress::Bool = true,
-               precision::Type{T2} = Float64, parameters::Parameters,
-               jacobian! = jacobian_error) where {T <: AbstractFloat,
-                                                  T2 <: AbstractFloat}
+    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
+                model_parameters = nothing,
+                static_array::Bool = false, show_progress::Bool = true,
+                parameters::Parameters) where {T <: AbstractFloat}
 
-The ODE solver loop.
-
-Required parameters: `y0`, `dy_dt!`, `parameters`, `dy_dt_wrap!`
+Required parameters: `sol`, `y0`, `dy_dt!`, `parameters`
 """
-function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
+function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
                     model_parameters = nothing,
                     static_array::Bool = false, show_progress::Bool = true,
-                    precision::Type{T2} = Float64,
-                    parameters::Parameters) where {T <: AbstractFloat, T2 <: AbstractFloat}
+                    parameters::Parameters) where {T <: AbstractFloat}
+
+    clear_solution!(sol)
+    @unpack precision, FE#=, JE=# = sol
 
     @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
     @unpack t0, tf, dt0 = t_range
@@ -30,6 +29,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
     @unpack stages, iteration = method
 
     dimensions = size(y0, 1)
+    sol.dimensions .= dimensions
 
     # initial conditions
     y  = y0 .|> precision
@@ -73,16 +73,14 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
 
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
 
-    # initalize solution
-    sol = Solution(; precision, dimensions)
-    @unpack FE = sol
-
     # TODO: is resize and indexing faster than append?
     adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
     # for progress meter
     checkpoints = collect(LinRange(t0, tf, 101))[2:end]
     progress = Progress(100)
+
+    # @unpack evaluations = stage_finder.jacobian_method
 
     stats = @timed allocs = @allocated while true
         append!(sol.y, y)
@@ -97,15 +95,39 @@ function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
                               error, J, linear_cache, stage_finder
                             )
         t[1] += dt[1]
+
+        # note: still get excess allocations (could pass it in above)
+        # JE[1] = evaluations[1]
+        # q()
     end
 
     # TODO: look into @code_warntype
     # TODO: wrap into compute_stats function
     compute_step_rejection_rate!(sol, method, adaptive, timer)
     sol.JE .= stage_finder.jacobian_method.evaluations
-    sol.memory_storage .= format_bytes(sizeof(sol.y) + sizeof(sol.t))
     sol.excess_memory .= format_bytes(stats.bytes)
     sol.excess_allocations .= allocs
     sol.runtime .= stats.time
+    return nothing
+end
+
+"""
+    evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
+               static_array::Bool = false, show_progress::Bool = true,
+               precision::Type{T2} = Float64, parameters::Parameters,
+               jacobian! = jacobian_error) where {T <: AbstractFloat,
+                                                  T2 <: AbstractFloat}
+
+Required parameters: `y0`, `dy_dt!`, `parameters`
+"""
+function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
+                    model_parameters = nothing,
+                    static_array::Bool = false, show_progress::Bool = true,
+                    precision::Type{T2} = Float64,
+                    parameters::Parameters) where {T <: AbstractFloat, T2 <: AbstractFloat}
+
+    sol = Solution(; precision)
+    evolve_ode!(sol, y0, dy_dt!; model_parameters, static_array,
+                                 show_progress, parameters)
     return sol
 end

@@ -107,13 +107,13 @@ export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoII
 # Code names
 export make_code_name
 # ODE solution
-export get_solution, get_stats
+export Solution, get_solution, clear_solution!, get_stats
 # Parameters
 export Parameters
 # Time
 export TimeRange, TimeLimit
 # ODE solver
-export evolve_ode
+export evolve_ode, evolve_ode!
 # Plots
 export plot_ode
 # Utilities

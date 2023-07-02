@@ -53,11 +53,11 @@ show_progress = false
 static_array = false
 # static_array = true
 
-# model_parameters = [0.5, 0.25]
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array,
-                    #    model_parameters
-)
-# sol = @btime evolve_ode(y0, dy_dt!; parameters, precision, show_progress)
+@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array)
+
+# in-place version
+# sol = Solution()
+# @time evolve_ode!(sol, y0, dy_dt!; parameters, show_progress, static_array)
 
 get_stats(sol)
 # plot_ode(sol, method, Plots.plot)

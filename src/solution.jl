@@ -23,8 +23,10 @@ struct Solution{T <: AbstractFloat}
     excess_memory::Vector{String}
     """Excess number of allocations in time evolution loop"""
     excess_allocations::MVector{1,Int64}
-    """Number of dynamical variables"""
-    dimensions::Int64
+    """Number of dynamical variables (assumed to be fixed)"""
+    dimensions::MVector{1,Int64}
+    """Float precision type"""
+    precision::Type{T}
 end
 
 """
@@ -34,7 +36,7 @@ Outer constructor for `Solution`.
 
 Required parameters: `precision`, `dimensions`
 """
-function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
+function Solution(; precision::Type{T} = Float64) where T <: AbstractFloat
     y = Vector{precision}()
     t = Vector{precision}()
     FE = MVector{1,Int64}(0)
@@ -44,9 +46,28 @@ function Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFl
     memory_storage = [""]
     excess_memory = [""]
     excess_allocations = MVector{1,Int64}(0)
+    dimensions = MVector{1,Int64}(0.0)
 
     return Solution(y, t, FE, JE, rejection_rate, runtime, memory_storage,
-                    excess_memory, excess_allocations, dimensions)
+                    excess_memory, excess_allocations, dimensions, precision)
+end
+
+function clear_solution!(sol::Solution)
+    @unpack y, t, FE, JE, rejection_rate, runtime,
+            memory_storage, excess_memory, excess_allocations = sol
+    empty!(y)
+    empty!(t)
+    # doesn't appear to undo sizehint_solution!
+    # sizehint!(y, 0)
+    # sizehint!(t, 0)
+    FE .= 0
+    JE .= 0
+    rejection_rate .= 0.0
+    runtime .= 0.0
+    memory_storage .= ""
+    excess_memory .= ""
+    excess_allocations .= 0
+    return nothing
 end
 
 """
@@ -77,19 +98,21 @@ is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`. The s
 vector is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 """
 function get_solution(sol::Solution)
-    y, t = sol.y, sol.t
+    @unpack y, t, dimensions = sol
     # TODO: replace length(t) if use deleteat for PDEs
-    y = reshape(y, sol.dimensions, length(t))'
+    y = reshape(y, dimensions[1], length(t))'
     return y, t
 end
 
 function get_stats(sol::Solution)
-    println("time steps           = $(length(sol.t))")
+    @unpack y, t, FE, JE, memory_storage = sol
+    memory_storage .= format_bytes(sizeof(sol.y) + sizeof(sol.t))
+    println("time steps           = $(length(t))")
     println("step rejection rate  = $(sol.rejection_rate[1]) %")
-    println("function evaluations = $(sol.FE[1])")
-    println("jacobian evaluations = $(sol.JE[1])")
+    println("function evaluations = $(FE[1])")
+    println("jacobian evaluations = $(JE[1])")
     println("solver runtime       = $(round(sol.runtime[1], sigdigits = 4)) seconds")
-    println("solution storage     = $(sol.memory_storage[1])")
+    println("solution storage     = $(memory_storage[1])")
     println("excess memory        = $(sol.excess_memory[1])")
     println("excess allocations   = $(sol.excess_allocations[1])")
 end
