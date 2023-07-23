@@ -53,7 +53,7 @@ struct Doubling <: AdaptiveStepSize
     max_attempts::Int64
 end
 
-function Doubling(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm = 2,
+function Doubling(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.8, p_norm = 2,
                     dt_min = eps(1.0), dt_max = Inf, max_attempts = 10)
 
     check_adaptive_parameters_1(; epsilon, low, high, p_norm, dt_min, dt_max)
@@ -81,7 +81,7 @@ struct Embedded <: AdaptiveStepSize
     max_attempts::Int64
 end
 
-function Embedded(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.9, p_norm = 2,
+function Embedded(; epsilon = 1e-6, low = 0.2, high = 5.0, safety = 0.8, p_norm = 2,
                     dt_min = eps(1.0), dt_max = Inf, max_attempts = 10)
 
     check_adaptive_parameters_1(; epsilon, low, high, p_norm, dt_min, dt_max)

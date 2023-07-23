@@ -6,7 +6,7 @@ import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LinearCache, set_A, set_b, do_factorization,
                     set_cacheval, _ldiv!, KLUFactorization, LUFactorization,
                     AbstractFactorization
-import LinearAlgebra: norm, tril, diag, diagind, lu, lu!
+import LinearAlgebra: norm, tril, diag, diagind, lu, lu!, eigvals
 import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import SparseArrays: SparseMatrixCSC, sparse
 import MuladdMacro: @muladd
@@ -32,7 +32,8 @@ include("solution.jl")
 include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
-include("controller.jl")
+include("controller/pid_control.jl")
+include("controller/common.jl")
 include("stage_finder.jl")
 include("linear_solver.jl")
 include("plots.jl")
@@ -70,7 +71,9 @@ include("evolve.jl")
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff
 # Time step controller
-export PIDController, PIDControllerK, PIDControllerBeta
+export PIDControl, PIDControlK, PIDControlBeta
+export BasicControl, PI34Control, PI33Control, PI42Control, H312Control,
+       H321PredictiveControl
 # Implicit stage finder
 export ImplicitStageFinder, FixedPoint, Newton, ForwardJacobian, FiniteJacobian
 # Embedded pairs

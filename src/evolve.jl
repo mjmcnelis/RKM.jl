@@ -24,7 +24,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
     start_timer!(timer)
 
     method = reconstruct_method(method, precision)
-    controller = reconstruct_controller(controller, precision)
+    controller = reconstruct_controller(controller, method, adaptive, precision)
 
     @unpack stages, iteration = method
 
@@ -68,7 +68,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
 
     # configure linear cache (see src/common.jl in LinearSolve.jl)
     # note: assumes LU factorization for now
-    linear_cache = init(LinearProblem(J, f), LUFactorization())
+    linear_cache = init(LinearProblem(J, f), LUFactorization())#; alias_A = false, alias_b = false)
     linear_cache = set_cacheval(linear_cache, fact)
 
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)

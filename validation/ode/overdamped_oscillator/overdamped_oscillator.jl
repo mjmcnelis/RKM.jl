@@ -1,6 +1,6 @@
 using Revise, RKM, OrdinaryDiffEq, LinearSolve
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/damped_harmonic_oscillator/equations.jl") : nothing
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/overdamped_oscillator/equations.jl") : nothing
 
 y0 = [1.0, -1.0]        # eigenvector of ODE system (exact solution is y(t) = exp(-t)*y0)
 t0 = 0.0
@@ -19,7 +19,7 @@ dt0 = 1e-2
 method = TrapezoidRuleBDF2()
 # method = BackwardEuler1()
 # method = Heun2()            # unstable
-method = Ketcheson4()       # barely stable for ω² = 1000, dt = 0.01
+# method = Ketcheson4()       # barely stable for ω² = 1000, dt = 0.01
 jacobian_method = ForwardJacobian()
 
 parameters = Parameters(; method,

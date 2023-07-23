@@ -46,23 +46,26 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
         tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
 
         if !controller.initialized[1]                   # initialize controller
-            initialize_controller!(controller, e_norm, dt[1])
+            initialize_controller!(controller, e_norm, tol, dt[1])
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
+            @warn "Error estimate is zero"
             rescale = high
         else
-            rescale = rescale_time_step(controller, tol, e_norm, order)
+            rescale = rescale_time_step(controller, tol, e_norm)
             rescale = min(high, max(low, safety*rescale))
         end
 
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         if e_norm <= tol                                # compare error to tolerance
-            set_previous_control_vars!(controller, e_norm, dt[1])
+            set_previous_control_vars!(controller, e_norm, tol, dt[1])
             break
         end
-        attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts"; break)
+        attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts";
+                                     set_previous_control_vars!(controller, e_norm, tol, dt[1]);
+                                     break)
         attempts += 1
     end
     controller.initialized[1] = true
