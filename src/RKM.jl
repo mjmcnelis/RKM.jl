@@ -32,8 +32,8 @@ include("solution.jl")
 include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
+include("controller/control_classes.jl")
 include("controller/pid_control.jl")
-include("controller/common.jl")
 include("stage_finder.jl")
 include("linear_solver.jl")
 include("plots.jl")
@@ -72,8 +72,8 @@ include("evolve.jl")
 export Fixed, Doubling, Embedded, FiniteDiff
 # Time step controller
 export PIDControl, PIDControlK, PIDControlBeta
-export BasicControl, PI34Control, PI33Control, PI42Control, H312Control,
-       H321PredictiveControl
+export BasicControl, PIControl, H312Control, H321PredictiveControl,
+       H211bPredictiveControl
 # Implicit stage finder
 export ImplicitStageFinder, FixedPoint, Newton, ForwardJacobian, FiniteJacobian
 # Embedded pairs
