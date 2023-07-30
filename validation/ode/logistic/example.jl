@@ -26,8 +26,8 @@ method = HeunEuler21()
 
 # controller = BasicControl()
 # controller = PIControl()
-# controller = H312Control()
-controller = H321PredictiveControl()
+controller = H312Control()
+# controller = H321PredictiveControl()
 # controller = H211bPredictiveControl()
 
 stage_finder = ImplicitStageFinder()

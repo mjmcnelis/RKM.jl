@@ -1,6 +1,14 @@
-#  TODO: make a TimeStepController struct to wrap PID and other control logic parameters
+
 abstract type Controller end
 
+"""
+$(TYPEDEF)
+
+Time step controller based on PID control
+
+# Fields
+$(TYPEDFIELDS)
+"""
 struct PIDControl{T} <: Controller where {T <: AbstractFloat}
     # why not just always use Float64 for betas?
     beta1::T
@@ -8,6 +16,8 @@ struct PIDControl{T} <: Controller where {T <: AbstractFloat}
     beta3::T
     alpha2::T
     alpha3::T
+    """Safety factor to scale down estimate for predicted time step"""
+    safety::T
     e_prev::MVector{2,T}
     tol_prev::MVector{2,T}
     dt_prev::MVector{3,T}
@@ -16,6 +26,8 @@ end
 
 function PIDControlBeta(; beta1 = 0.7, beta2 = -0.4, beta3 = 0.0,
                           alpha2 = 0.0, alpha3 = 0.0,
+                          # TODO: come up with limiter method struct to hold safety, low, high
+                          safety = 0.8,
                           precision::Type{T} = Float64) where {T <: AbstractFloat}
 
     e_prev = MVector{2, precision}(1.0, 1.0)
@@ -23,25 +35,25 @@ function PIDControlBeta(; beta1 = 0.7, beta2 = -0.4, beta3 = 0.0,
     dt_prev = MVector{3, precision}(1.0, 1.0, 1.0)
     initialized = MVector{1, Bool}(false)
 
+    @assert 0.0 < safety < 1.0 "safety = $safety is out of bounds (0, 1)"
+    # TODO: once have limiter struct, use these asserts
+    # @assert safety*high > 1.0 "safety*high = $(safety*high) is not greater than 1"
+
     return PIDControl(beta1, beta2, beta3, alpha2, alpha3,
+                      safety,
                       e_prev, tol_prev, dt_prev, initialized)
 end
 
 function PIDControlK(; kI = 0.3, kP = 0.4, kD = 0.0,
                        alpha2 = 0.0, alpha3 = 0.0,
+                       safety = 0.8,
                        precision::Type{T} = Float64) where {T <: AbstractFloat}
     # relation between beta and k control parameters
     beta1 = kI + kP + kD
     beta2 = -kP - 2kD
     beta3 = kD
 
-    e_prev = MVector{2, precision}(1.0, 1.0)
-    tol_prev = MVector{2, precision}(1.0, 1.0)
-    dt_prev = MVector{3, precision}(1.0, 1.0, 1.0)
-    initialized = MVector{1, Bool}(false)
-
-    return PIDControl(beta1, beta2, beta3, alpha2, alpha3,
-                      e_prev, tol_prev, dt_prev, initialized)
+    return PIDControlBeta(; beta1, beta2, beta3, alpha2, alpha3, safety, precision)
 end
 
 function rescale_time_step(controller::PIDControl, tol::T,
@@ -81,7 +93,7 @@ function reconstruct_controller(controller::PIDControl,
                                 method::ODEMethod, adaptive::AdaptiveStepSize,
                                 precision::Type{T}) where T <: AbstractFloat
 
-    @unpack beta1, beta2, beta3, alpha2, alpha3 = controller
+    @unpack beta1, beta2, beta3, alpha2, alpha3, safety = controller
 
     local_order = adaptive isa Embedded ? minimum(method.order) + 1.0 :
                   adaptive isa CentralDiff ? 2.0 : method.order[1] + 1.0
@@ -91,6 +103,7 @@ function reconstruct_controller(controller::PIDControl,
     beta3 = precision(beta3 / local_order)
     alpha2 = precision(alpha2)
     alpha3 = precision(alpha3)
+    safety = precision(safety)
 
-    return PIDControlBeta(; beta1, beta2, beta3, alpha2, alpha3, precision)
+    return PIDControlBeta(; beta1, beta2, beta3, alpha2, alpha3, safety, precision)
 end
