@@ -7,7 +7,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack epsilon, low, high, p_norm, dt_min, dt_max, max_attempts = adaptive
+    @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
     @unpack explicit_stage, fsal = method
     @unpack safety = controller
 
@@ -17,8 +17,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     order_min = minimum(method.order)
 
     # note: comment if benchmark against OrdinaryDiffEq (add boolean?)
-    high    ^= (order_min / order_max)                  # rescale high, epsilon parameters
-    epsilon ^= (order_min / order_max)
+    epsilon ^= (order_min / order_max)                  # rescale tolerance parameter
 
     # evaluate first stage at (t,y)
     if explicit_stage[1]
@@ -68,10 +67,12 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
 
         if e_norm == 0.0                                # compute scaling factor for dt
             @warn "Error estimate is zero"
-            rescale = high
+            rescale = controller.high
         else
             rescale = rescale_time_step(controller, tol, e_norm)
-            rescale = min(high, max(low, safety*rescale))
+            rescale = limit_time_step(controller, rescale)
+            # TODO: need to track rescale in the controller
+            #       both for accepted and rejected step
         end
 
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
