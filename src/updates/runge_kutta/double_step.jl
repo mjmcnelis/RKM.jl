@@ -10,7 +10,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
 
     @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
     @unpack explicit_stage, fsal = method
-    @unpack safety = controller
+    @unpack limiter = controller
 
     order = method.order[1]                             # order of scheme
 
@@ -51,10 +51,10 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
 
         if e_norm == 0.0                                # compute scaling factor for dt
             @warn "Error estimate is zero"
-            rescale = controller.high
+            rescale = limiter.high
         else
             rescale = rescale_time_step(controller, tol, e_norm)
-            rescale = limit_time_step(controller, rescale)
+            rescale = limit_time_step(limiter, rescale)
             # TODO: need to track rescale in the controller
             #       both for accepted and rejected step
         end
