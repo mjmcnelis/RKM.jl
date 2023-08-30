@@ -1,96 +1,54 @@
 
-abstract type Controller end
-
-"""
-$(TYPEDEF)
-
-Time step controller based on PID control
-
-# Fields
-$(TYPEDFIELDS)
-"""
-struct TimeStepController{P, L, T} <: Controller where {P <: PIDControlBeta,
-                                                        L <: LimiterMethod,
-                                                        T <: AbstractFloat}
-    pid::P
-    limiter::L
-    e_prev::MVector{2,T}
-    tol_prev::MVector{2,T}
-    dt_prev::MVector{3,T}
-    initialized::MVector{1,Bool}
+@kwdef struct PIDControlBeta{T <: AbstractFloat}
+    # why not just always use Float64 for betas?
+    beta1::T
+    beta2::T
+    beta3::T
+    alpha2::T = 0.0
+    alpha3::T = 0.0
 end
 
-function TimeStepController(; pid = PIControl(), limiter = PiecewiseLimiter(),
-                              precision::Type{T} = Float64) where {T <: AbstractFloat}
-    # initialize vectors
-    e_prev = MVector{2, precision}(1.0, 1.0)
-    tol_prev = MVector{2, precision}(1.0, 1.0)
-    dt_prev = MVector{3, precision}(1.0, 1.0, 1.0)
-    initialized = MVector{1, Bool}(false)
-
-    return TimeStepController(pid, limiter, e_prev, tol_prev, dt_prev, initialized)
+function PIDControlK(; kI, kP, kD, alpha2 = 0.0, alpha3 = 0.0)
+    # relation between beta and k control parameters
+    beta1 = kI + kP + kD
+    beta2 = -kP - 2kD
+    beta3 = kD
+    return PIDControlBeta(; beta1, beta2, beta3, alpha2, alpha3)
 end
 
-function rescale_time_step(controller::TimeStepController, tol::T,
-                           e_norm::T) where T <: AbstractFloat
-
-    @unpack pid, e_prev, tol_prev, dt_prev = controller
-    @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
-
-    # TODO: 2nd factor allocates with Double64
-    rescale = (tol/e_norm)^beta1 * (tol_prev[1]/e_prev[1])^beta2 *
-              (tol_prev[2]/e_prev[2])^beta3 * (dt_prev[2]/dt_prev[1])^alpha2 *
-              (dt_prev[3]/dt_prev[2])^alpha3
-
-    return rescale
+function BasicControl()
+    return PIDControlK(; kI = 1.0, kP = 0.0, kD = 0.0, alpha2 = 0.0, alpha3 = 0.0)
 end
 
-function initialize_controller!(controller::TimeStepController, e_norm::T,
-                                tol::T, dt::T) where T <: AbstractFloat
-    controller.e_prev   .= e_norm
-    controller.tol_prev .= tol
-    controller.dt_prev  .= dt
-    return nothing
+function PIControl(; kI = 0.3, kP = 0.4)
+    return PIDControlK(; kI, kP, kD = 0.0, alpha2 = 0.0, alpha3 = 0.0)
 end
 
-function set_previous_control_vars!(controller::TimeStepController, e_norm::T,
-                                    tol::T, dt::T) where T <: AbstractFloat
-    controller.e_prev[2]   = controller.e_prev[1]
-    controller.e_prev[1]   = e_norm
-    controller.tol_prev[2] = controller.tol_prev[1]
-    controller.tol_prev[1] = tol
-    controller.dt_prev[3]  = controller.dt_prev[2]
-    controller.dt_prev[2]  = controller.dt_prev[1]
-    controller.dt_prev[1]  = dt
-    return nothing
+function H312Control(; kI = 2/9)
+    beta1 = kI/4
+    beta2 = kI/2
+    beta3 = kI/4
+    return PIDControlBeta(; beta1, beta2, beta3, alpha2 = 0.0, alpha3 = 0.0)
 end
 
-function reconstruct_controller(controller::TimeStepController,
-                                method::ODEMethod, adaptive::AdaptiveStepSize,
-                                precision::Type{T}) where T <: AbstractFloat
+function H321PredictiveControl(; kI = 0.1, kP = 0.45)
+    beta1 = 3kI/4 + kP/2
+    beta2 = kI/2
+    beta3 = -kI/4 - kP/2
+    return PIDControlBeta(; beta1, beta2, beta3, alpha2 = -1.0, alpha3 = 0.0)
+end
 
-    @unpack pid, limiter = controller
-    @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
-    @unpack safety, low, high = limiter
-    @unpack order = method
+function H211Control(; kI = 1/6)
+    beta1 = kI/2
+    beta2 = kI/2
+    return PIDControlBeta(; beta1, beta2, beta3 = 0.0, alpha2 = 0.0, alpha3 = 0.0)
+end
 
-    local_order = adaptive isa Embedded ? minimum(order) + 1.0 :
-                  adaptive isa CentralDiff ? 2.0 :
-                  adaptive isa Doubling ? order[1] + 1.0 : error()
-
-    repower_high = adaptive isa Embedded ? minimum(order)/maximum(order) :
-                   adaptive isa CentralDiff ? 1.0/order[1] :
-                   adaptive isa Doubling ? order[1]/(1.0 + order[1]) : error()
-
-    @set! pid.beta1 = precision(beta1 / local_order)
-    @set! pid.beta2 = precision(beta2 / local_order)
-    @set! pid.beta3 = precision(beta3 / local_order)
-    @set! pid.alpha2 = precision(alpha2)
-    @set! pid.alpha3 = precision(alpha3)
-
-    @set! limiter.safety = precision(safety)
-    @set! limiter.low = precision(low)
-    @set! limiter.high = precision(high^repower_high)
-
-    return TimeStepController(; pid, limiter, precision)
+function H211bPredictiveControl(; b = 4.0)
+    2 <= b <= 8 ? nothing : @warn "Recommend using b ∈ [2,8]"
+    beta1 = 1/b
+    beta2 = 1/b
+    alpha2 = 1/b
+    # TODO: use alpha1 and alpha2 instead of predictive = true
+    return PIDControlBeta(; beta1, beta2, beta3 = 0.0, alpha2, alpha3 = 0.0)
 end
