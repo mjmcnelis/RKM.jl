@@ -24,11 +24,13 @@ method = HeunEuler21()
 # adaptive = FiniteDiff()
 # method = Heun2()
 
-# controller = BasicControl()
-# controller = PIControl()
-controller = H312Control()
-# controller = H321PredictiveControl()
-# controller = H211bPredictiveControl()
+# pid = BasicControl()
+# pid = PIControl()
+pid = H312Control()
+# pid = H321PredictiveControl()
+# pid = H211bPredictiveControl()
+
+controller = TimeStepController(; pid)
 
 stage_finder = ImplicitStageFinder()
 # stage_finder = ImplicitStageFinder(; root_method = FixedPoint())
