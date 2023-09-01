@@ -1,11 +1,10 @@
 
-@kwdef struct PIDControlBeta{T <: AbstractFloat}
-    # why not just always use Float64 for betas?
-    beta1::T
-    beta2::T
-    beta3::T
-    alpha2::T = 0.0
-    alpha3::T = 0.0
+@kwdef struct PIDControlBeta
+    beta1::Float64
+    beta2::Float64
+    beta3::Float64
+    alpha2::Float64 = 0.0
+    alpha3::Float64 = 0.0
 end
 
 function PIDControlK(; kI, kP, kD, alpha2 = 0.0, alpha3 = 0.0)

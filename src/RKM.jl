@@ -11,6 +11,7 @@ import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
 import SparseArrays: SparseMatrixCSC, sparse
 import MuladdMacro: @muladd
 import FastBroadcast: @..
+import DoubleFloats: DoubleFloat, IEEEFloat
 import UnPack: @unpack
 import Base: @kwdef, rationalize, format_bytes
 import ProgressMeter: Progress, next!
@@ -35,6 +36,7 @@ include("adaptive.jl")
 include("controller/pid_control.jl")
 include("controller/limiter.jl")
 include("controller/time_step_controller.jl")
+include("controller/explog_tmp.jl")
 include("stage_finder.jl")
 include("linear_solver.jl")
 include("plots.jl")

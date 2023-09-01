@@ -6,14 +6,13 @@ abstract type LimiterMethod end
 # if I re-evaluate rescale based on dt_min <= dt <= dt_max,
 # would floating precision errors be a problem?
 
-struct PiecewiseLimiter{T} <: LimiterMethod where {T <: AbstractFloat}
-    # TOOD: try T
+struct PiecewiseLimiter <: LimiterMethod
     """Safety factor to scale down estimate for predicted time step"""
-    safety::T
+    safety::Float64
     """Lower bound on the time step's rate of change"""
-    low::T
+    low::Float64
     """Upper bound on the time step's rate of change"""
-    high::T
+    high::Float64
 end
 
 function PiecewiseLimiter(; safety = 0.8, low = 0.2, high = 5.0)

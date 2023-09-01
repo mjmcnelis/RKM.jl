@@ -33,6 +33,7 @@ end
 function TimeStepController(; pid = PIControl(), limiter = PiecewiseLimiter(),
                               precision::Type{T} = Float64) where {T <: AbstractFloat}
     # initialize vectors
+    # TODO: for BigFloat need to use regular vectors
     e_prev = MVector{2, precision}(1.0, 1.0)
     tol_prev = MVector{2, precision}(1.0, 1.0)
     dt_prev = MVector{3, precision}(1.0, 1.0, 1.0)
@@ -47,7 +48,7 @@ function rescale_time_step(controller::TimeStepController, tol::T,
     @unpack pid, e_prev, tol_prev, dt_prev = controller
     @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
 
-    # TODO: 2nd factor allocates with Double64
+    # note: use a slightly modified ^ operator for DoubleFloats (see explog.jl)
     rescale = (tol/e_norm)^beta1 * (tol_prev[1]/e_prev[1])^beta2 *
               (tol_prev[2]/e_prev[2])^beta3 * (dt_prev[2]/dt_prev[1])^alpha2 *
               (dt_prev[3]/dt_prev[2])^alpha3
@@ -92,15 +93,10 @@ function reconstruct_controller(controller::TimeStepController,
                    adaptive isa CentralDiff ? 1.0/order[1] :
                    adaptive isa Doubling ? order[1]/(1.0 + order[1]) : error()
 
-    @set! pid.beta1 = precision(beta1 / local_order)
-    @set! pid.beta2 = precision(beta2 / local_order)
-    @set! pid.beta3 = precision(beta3 / local_order)
-    @set! pid.alpha2 = precision(alpha2)
-    @set! pid.alpha3 = precision(alpha3)
-
-    @set! limiter.safety = precision(safety)
-    @set! limiter.low = precision(low)
-    @set! limiter.high = precision(high^repower_high)
+    @set! pid.beta1 = beta1 / local_order
+    @set! pid.beta2 = beta2 / local_order
+    @set! pid.beta3 = beta3 / local_order
+    @set! limiter.high = high^repower_high
 
     return TimeStepController(; pid, limiter, precision)
 end
