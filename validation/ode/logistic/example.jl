@@ -30,7 +30,10 @@ pid = H312Control()
 # pid = H321PredictiveControl()
 # pid = H211bPredictiveControl()
 
-controller = TimeStepController(; pid)
+# limiter = PiecewiseLimiter()
+limiter = SmoothLimiter()
+
+controller = TimeStepController(; pid, limiter)
 
 stage_finder = ImplicitStageFinder()
 # stage_finder = ImplicitStageFinder(; root_method = FixedPoint())

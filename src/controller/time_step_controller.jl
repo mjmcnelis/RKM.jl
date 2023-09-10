@@ -82,7 +82,7 @@ function reconstruct_controller(controller::TimeStepController,
 
     @unpack pid, limiter = controller
     @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
-    @unpack safety, low, high = limiter
+    @unpack safety, high = limiter
     @unpack order = method
 
     local_order = adaptive isa Embedded ? minimum(order) + 1.0 :
@@ -97,6 +97,10 @@ function reconstruct_controller(controller::TimeStepController,
     @set! pid.beta2 = beta2 / local_order
     @set! pid.beta3 = beta3 / local_order
     @set! limiter.high = high^repower_high
+
+    # TODO: add message
+    # reminder: reason I need this is b/c I default rescale = high when error = 0
+    @assert safety * limiter.high > 1.0
 
     return TimeStepController(; pid, limiter, precision)
 end

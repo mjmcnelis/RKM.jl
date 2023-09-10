@@ -77,7 +77,7 @@ export Fixed, Doubling, Embedded, FiniteDiff
 export TimeStepController, PIDControlBeta, PIDControlK
 export BasicControl, PIControl, H312Control, H321PredictiveControl,
        H211bPredictiveControl
-export PiecewiseLimiter
+export PiecewiseLimiter, SmoothLimiter
 # Implicit stage finder
 export ImplicitStageFinder, FixedPoint, Newton, ForwardJacobian, FiniteJacobian
 # Embedded pairs
