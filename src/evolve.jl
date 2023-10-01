@@ -24,7 +24,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
     start_timer!(timer)
 
     method = reconstruct_method(method, precision)
-    controller = reconstruct_controller(controller, method, adaptive, precision)
+    if !(adaptive isa Fixed)
+        controller = reconstruct_controller(controller, method, adaptive, precision)
+    end
 
     @unpack stages, iteration = method
 

@@ -54,7 +54,8 @@ end
 function order_prop(name::Symbol, butcher::Matrix{<:AbstractFloat})
     precision = typeof(butcher[1,1])
     order = filter.(isdigit, split(string(name), "_"))
-    return parse.(precision, filter(x -> x != "", order))
+    order = parse.(precision, filter(x -> x != "", order))
+    return SVector{length(order)}(order)
 end
 
 function explicit_stage_prop(butcher::Matrix{T}) where T <: AbstractFloat
