@@ -1,11 +1,16 @@
 
-# stats for logistic ODE w/ controller = TimeStepController(; pid = H312Control())
-# time steps           = 249
-# step rejection rate  = 0.8000000000000007 %
-# function evaluations = 498
+# stats for logistic ODE w/
+# controller = TimeStepController(; pid = H312Control(), limiter = SmoothLimiter())
+# precision = Float64
+# adaptive = Embedded()
+# method = HeunEuler21()
+#
+# time steps           = 252
+# step rejection rate  = 0.7905138339920903 %
+# function evaluations = 504
 # jacobian evaluations = 0
-# solver runtime       = 0.0001137 seconds
-# solution storage     = 5.836 KiB
+# solver runtime       = 0.0001427 seconds
+# solution storage     = 5.906 KiB
 # excess memory        = 14.969 KiB
 # excess allocations   = 15328
 
@@ -24,19 +29,25 @@ struct TimeStepController{P, L, T} <: Controller where {P <: PIDControlBeta,
                                                         T <: AbstractFloat}
     pid::P
     limiter::L
-    e_prev::MVector{2,T}
-    tol_prev::MVector{2,T}
-    dt_prev::MVector{3,T}
+    e_prev::VectorMVector{2,T}
+    tol_prev::VectorMVector{2,T}
+    dt_prev::VectorMVector{3,T}
     initialized::MVector{1,Bool}
 end
 
 function TimeStepController(; pid = PIControl(), limiter = PiecewiseLimiter(),
                               precision::Type{T} = Float64) where {T <: AbstractFloat}
     # initialize vectors
-    # TODO: for BigFloat need to use regular vectors
-    e_prev = MVector{2, precision}(1.0, 1.0)
-    tol_prev = MVector{2, precision}(1.0, 1.0)
-    dt_prev = MVector{3, precision}(1.0, 1.0, 1.0)
+    if precision == BigFloat
+        e_prev   = ones(precision, 2)
+        tol_prev = ones(precision, 2)
+        dt_prev  = ones(precision, 3)
+    else
+        e_prev   = MVector{2, precision}(1.0, 1.0)
+        tol_prev = MVector{2, precision}(1.0, 1.0)
+        dt_prev  = MVector{3, precision}(1.0, 1.0, 1.0)
+    end
+
     initialized = MVector{1, Bool}(false)
 
     return TimeStepController(pid, limiter, e_prev, tol_prev, dt_prev, initialized)

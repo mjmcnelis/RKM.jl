@@ -6,6 +6,8 @@ function solve_linear_tmp(cache::LinearCache)
         fact = do_factorization_tmp(cache, cache.alg)
         # note: cache.isfresh is set to false by set_cacheval
         cache = set_cacheval(cache, fact)
+# ┌ Warning: set_cacheval is deprecated for mutation on the cache. Use `cache.cacheval = cacheval; cache.isfresh = false
+# └ @ LinearSolve ~/.julia/packages/LinearSolve/Rq2MY/src/deprecated.jl:72
     end
     _ldiv!(cache.u, cache.cacheval, cache.b)
     return cache
