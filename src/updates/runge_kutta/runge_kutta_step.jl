@@ -55,13 +55,22 @@ end
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
 
-        # guess stage before iterating
-        # TODO: look into predictors
-        ode_wrap!(f_tmp, t_tmp, y_tmp)
-        FE[1] += 1
-        @.. dy[:,i] = dt * f_tmp
+        if explicit_stage[i]
+            ode_wrap!(f_tmp, t_tmp, y_tmp)
+            FE[1] += 1
+            @.. dy[:,i] = dt * f_tmp
+        else
+            # guess stage before iterating
+            # TODO: look into predictors
+            # ode_wrap!(f_tmp, t_tmp, y_tmp)
+            # FE[1] += 1
 
-        if !explicit_stage[i]
+            # pred = [exp(-t_tmp), -exp(-t_tmp)]
+            # @show t_tmp y_tmp pred
+            # q()
+            # @.. dy[:,i] .= pred .- y_tmp#0.0 # dt * f_tmp
+            dy[:,i] .= 0.0
+
             for n = 1:max_iterations
                 # reset y_tmp
                 @.. y_tmp = y
@@ -73,6 +82,9 @@ end
                 # evaluate current state and ODE
                 dy_stage = view(dy,:,i)
                 @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
+
+                # @show y_tmp pred
+                # q()
                 ode_wrap!(f_tmp, t_tmp, y_tmp)
                 FE[1] += 1
 
@@ -83,14 +95,24 @@ end
                 # compute norms and tolerance
                 e_norm  = norm(error, p_norm)           # compute norms
                 dy_norm = norm(view(dy,:,i), p_norm)
+                # tol = epsilon * max(dy_norm, 0.1*(length(y))^(1.0/p_norm))
                 tol = epsilon * dy_norm
 
+                # @show e_norm norm(f_tmp, p_norm)#dy[:,i]
                 # check for root convergence
                 # TODO: test doing at least one iteration on helping stiff problems
                 if e_norm < tol
+                    # print(n)
                     break
                 elseif n == max_iterations - 1
-                    # println("failed to converge")
+                    @show i t e_norm tol
+                    # println("")
+                    # print(0)
+                    λ = eigvals(J)
+                    @show abs(maximum(λ) / minimum(λ))
+
+                    println("failed to converge")
+                    q()
                     # note: allow f_tmp to store dy_dt!
                     # of last iteration for FSAL methods
                     # TODO: count convergence failures in stats
