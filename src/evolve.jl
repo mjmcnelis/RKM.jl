@@ -7,13 +7,13 @@
 
 Required parameters: `sol`, `y0`, `dy_dt!`, `parameters`
 """
-function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
-                    model_parameters = nothing,
-                    static_array::Bool = false, show_progress::Bool = true,
-                    parameters::Parameters) where {T <: AbstractFloat}
+function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
+                     parameters::Parameters; model_parameters = nothing,
+                     static_array::Bool = false,
+                     show_progress::Bool = true) where {T <: AbstractFloat}
 
     clear_solution!(sol)
-    @unpack precision, FE#=, JE=# = sol
+    @unpack precision, FE#=, JE=#, save_solution = sol
 
     @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
     @unpack t0, tf, dt0 = t_range
@@ -87,8 +87,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
     # @unpack evaluations = stage_finder.jacobian_method
 
     stats = @timed allocs = @allocated while true
-        append!(sol.y, y)
-        append!(sol.t, t[1])
+        if save_solution
+            append!(sol.y, y)
+            append!(sol.t, t[1])
+        end
 
         show_progress && monitor_progess(t, progress, checkpoints)
         continue_solver(t, tf, timer) || break
@@ -124,14 +126,14 @@ end
 
 Required parameters: `y0`, `dy_dt!`, `parameters`
 """
-function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
-                    model_parameters = nothing,
+function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function, parameters::Parameters;
+                    model_parameters = nothing, save_solution::Bool = true,
                     static_array::Bool = false, show_progress::Bool = true,
-                    precision::Type{T2} = Float64,
-                    parameters::Parameters) where {T <: AbstractFloat, T2 <: AbstractFloat}
+                    precision::Type{T2} = Float64) where {T <: AbstractFloat,
+                                                          T2 <: AbstractFloat}
 
-    sol = Solution(; precision)
-    evolve_ode!(sol, y0, dy_dt!; model_parameters, static_array,
-                                 show_progress, parameters)
+    sol = Solution(; precision, save_solution)
+    evolve_ode!(sol, y0, dy_dt!, parameters; model_parameters, static_array,
+                                             show_progress)
     return sol
 end

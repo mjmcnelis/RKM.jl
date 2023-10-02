@@ -27,6 +27,8 @@ struct Solution{T <: AbstractFloat}
     dimensions::MVector{1,Int64}
     """Float precision type"""
     precision::Type{T}
+    """Determines whether or not the solution is stored"""
+    save_solution::Bool
 end
 
 """
@@ -36,7 +38,8 @@ Outer constructor for `Solution`.
 
 Required parameters: `precision`, `dimensions`
 """
-function Solution(; precision::Type{T} = Float64) where T <: AbstractFloat
+function Solution(; precision::Type{T} = Float64,
+                    save_solution::Bool = true) where T <: AbstractFloat
     y = Vector{precision}()
     t = Vector{precision}()
     FE = MVector{1,Int64}(0)
@@ -48,8 +51,8 @@ function Solution(; precision::Type{T} = Float64) where T <: AbstractFloat
     excess_allocations = MVector{1,Int64}(0)
     dimensions = MVector{1,Int64}(0.0)
 
-    return Solution(y, t, FE, JE, rejection_rate, runtime, memory_storage,
-                    excess_memory, excess_allocations, dimensions, precision)
+    return Solution(y, t, FE, JE, rejection_rate, runtime, memory_storage, excess_memory,
+                    excess_allocations, dimensions, precision, save_solution)
 end
 
 function clear_solution!(sol::Solution)

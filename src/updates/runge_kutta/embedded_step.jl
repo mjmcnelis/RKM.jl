@@ -11,7 +11,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
     @unpack explicit_stage, fsal = method
     @unpack limiter = controller
 
-    # why does this allocate for Double64?
+    # note: have modified norm function for DoubleFloat
     y_norm = norm(y, p_norm)                            # compute norm of current state
 
     order_max = maximum(method.order)                   # max/min orders in embedded scheme

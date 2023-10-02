@@ -3,8 +3,8 @@ import DoubleFloats: Double64
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
-precision = Float64
-# precision = Double64
+# precision = Float64
+precision = Double64
 # precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
 
 # adaptive = Fixed()
@@ -59,11 +59,15 @@ show_progress = false
 static_array = false
 # static_array = true
 
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress, static_array)
+save_solution = true
+# save_solution = false
+
+@time sol = evolve_ode(y0, dy_dt!, parameters; precision, save_solution,
+                                               show_progress, static_array)
 
 # in-place version
-# sol = Solution()
-# @time evolve_ode!(sol, y0, dy_dt!; parameters, show_progress, static_array)
+# sol = Solution(; precision, save_solution)
+# @time evolve_ode!(sol, y0, dy_dt!, parameters; show_progress, static_array)
 
 get_stats(sol)
 # plot_ode(sol, method, Plots.plot)
