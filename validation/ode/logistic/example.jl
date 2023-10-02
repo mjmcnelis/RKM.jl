@@ -3,8 +3,8 @@ import DoubleFloats: Double64
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
-# precision = Float64
-precision = Double64
+precision = Float64
+# precision = Double64
 # precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
 
 # adaptive = Fixed()
