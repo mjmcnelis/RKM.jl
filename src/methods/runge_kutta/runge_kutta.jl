@@ -49,7 +49,7 @@ Outer constructor for `RungeKutta`.
 Required parameters: `name`, `butcher`
 """
 function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
-    order          = order_prop(name, butcher)      # determine properties
+    order          = order_prop(name, T)            # determine properties
     iteration      = iteration_prop(butcher)
     fsal           = fsal_prop(butcher)
     explicit_stage = explicit_stage_prop(butcher)

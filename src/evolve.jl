@@ -77,7 +77,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
 
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
 
-    # TODO: is resize and indexing faster than append?
     adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
 
     # for progress meter

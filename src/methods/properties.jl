@@ -14,7 +14,7 @@ struct NotFSAL <: FirstSameAsLast end
 
 # TODO: determine if butcher table fixed (square matrix) or embedded (not square matrix)
 
-function iteration_prop(butcher::Matrix{<:AbstractFloat})
+function iteration_prop(butcher::Matrix{T}) where T <: AbstractFloat
     ncol = size(butcher, 2)
     A = butcher[1:(ncol-1), 2:end]
 
@@ -32,7 +32,7 @@ function iteration_prop(butcher::Matrix{<:AbstractFloat})
     return iteration
 end
 
-function fsal_prop(butcher::Matrix{<:AbstractFloat})
+function fsal_prop(butcher::Matrix{T}) where T <: AbstractFloat
     ncol = size(butcher, 2)
 
     # TODO: if using implicit routine TRBDF2, then also need to check
@@ -51,8 +51,7 @@ function fsal_prop(butcher::Matrix{<:AbstractFloat})
     return fsal
 end
 
-function order_prop(name::Symbol, butcher::Matrix{<:AbstractFloat})
-    precision = typeof(butcher[1,1])
+function order_prop(name::Symbol, precision::Type{T}) where T <: AbstractFloat
     order = filter.(isdigit, split(string(name), "_"))
     order = parse.(precision, filter(x -> x != "", order))
     return SVector{length(order)}(order)

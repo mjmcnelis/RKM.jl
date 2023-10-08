@@ -60,6 +60,9 @@ include("methods/runge_kutta/implicit/fixed/low_order.jl")
 include("methods/runge_kutta/implicit/fixed/medium_order.jl")
 include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
+# Multistep tables
+include("methods/multistep/linear_multistep.jl")
+include("methods/multistep/adams_bashforth.jl")
 # Runge-Kutta updates
 include("updates/function_evaluations.jl")
 include("updates/step_rejection_rate.jl")
@@ -87,12 +90,11 @@ export DefaultPair, EulerPair, SecondPair
 # TODO: probably don't need to export these
 #---------------------------------------
 # Numerical ODE methods
-export RungeKutta
+export RungeKutta, LinearMultistep
     # Properties
 export Iteration, Explicit, DiagonalImplicit, FullImplicit,
        FirstSameAsLast, FSAL, NotFSAL
 #---------------------------------------
-
     # Fixed explicit Runge-Kutta
 export Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3, Ralston3, RungeKutta3,
        ShuOsher3, SpiteriRuuth3, Generic3, RungeKutta4, ThreeEightsRule4, Ralston4,
@@ -105,13 +107,15 @@ export Fehlberg12, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, Dorma
 export BackwardEuler1, CrankNicolson2, ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2,
        PareschiRusso2, PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3, Norsett4,
        RaduaIA5
-
 # not sure which category it belongs to yet
 export TrapezoidRuleBDF2
-
     # Embedded implicit Runge-Kutta
 export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42,
        LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52, GaussLegendre64
+    # Linear multistep
+export AdamsBashforth1, AdamsBashforth2, AdamsBashforth3, AdamsBashforth4, AdamsBashforth5,
+       AdamsBashforth6, AdamsBashforth8
+
 # Code names
 export make_code_name
 # ODE solution
