@@ -71,9 +71,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
     # configure linear cache (see src/common.jl in LinearSolve.jl)
     # note: assumes LU factorization for now
     linear_cache = init(LinearProblem(J, f), LUFactorization())#; alias_A = false, alias_b = false)
-    linear_cache = set_cacheval(linear_cache, fact)
-#     ┌ Warning: set_cacheval is deprecated for mutation on the cache. Use `cache.cacheval = cacheval; cache.isfresh = false
-# └ @ LinearSolve ~/.julia/packages/LinearSolve/Rq2MY/src/deprecated.jl:72
+    linear_cache.cacheval = fact
+    linear_cache.isfresh = false
 
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
 
