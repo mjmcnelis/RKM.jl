@@ -28,7 +28,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
         controller = reconstruct_controller(controller, method, adaptive, precision)
     end
 
-    @unpack stages, iteration = method
+    @unpack stages = method
 
     dimensions = size(y0, 1)
     sol.dimensions .= dimensions
@@ -76,7 +76,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
 
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
 
-    adaptive isa Fixed ? sizehint_solution!(sol, t_range, dimensions) : nothing
+    if save_solution && adaptive isa Fixed
+        sizehint_solution!(sol, t_range, dimensions)
+    end
 
     # for progress meter
     checkpoints = collect(LinRange(t0, tf, 101))[2:end]
@@ -94,7 +96,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
         continue_solver(t, tf, timer) || break
 
         # TODO: see if can pass kwargs
-        evolve_one_time_step!(method, iteration, adaptive, controller,
+        evolve_one_time_step!(method, adaptive, controller,
                               FE, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, f, y1, y2,
                               error, J, linear_cache, stage_finder
                             )
@@ -107,7 +109,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
 
     # TODO: look into @code_warntype
     # TODO: wrap into compute_stats function
-    compute_step_rejection_rate!(sol, method, adaptive, timer)
+    # compute_step_rejection_rate!(sol, method, adaptive, timer)
     sol.JE .= stage_finder.jacobian_method.evaluations
     sol.excess_memory .= format_bytes(stats.bytes)
     sol.excess_allocations .= allocs

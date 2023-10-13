@@ -1,6 +1,6 @@
 
 # TODO: not really working that well right now, debug later (also out of date)
-function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
+function evolve_one_time_step!(method::RungeKutta,
              adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64},
              y::Vector{T}, t::Union{Vector{T}, MVector{1,T}},
              dt::Union{Vector{T}, MVector{2,T}}, dy_dt!::F, dy::Matrix{T},
@@ -8,6 +8,8 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Explicit,
              # TODO: may want to do kwargs for different caches used in adaptive methods
              # note: next argument was f but renamed it to y_prev here
              y_prev::Vector{T}, args...) where {T <: AbstractFloat, F}
+
+    @unpack iteration = method
 
     dy_dt!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
 

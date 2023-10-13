@@ -1,5 +1,5 @@
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
+function evolve_one_time_step!(method::RungeKutta,
              adaptive::Doubling, controller::Controller, FE::MVector{1,Int64},
              y::Vector{T}, t::Union{Vector{T}, MVector{1,T}},
              dt::Union{Vector{T}, MVector{2,T}}, ode_wrap!::ODEWrapper, dy::Matrix{T},
@@ -9,7 +9,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
-    @unpack explicit_stage, fsal = method
+    @unpack iteration, explicit_stage, fsal = method
     @unpack limiter = controller
 
     order = method.order[1]                             # order of scheme

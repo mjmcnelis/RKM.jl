@@ -1,5 +1,5 @@
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
+function evolve_one_time_step!(method::RungeKutta,
              adaptive::Embedded, controller::Controller, FE::MVector{1,Int64},
              y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
              ode_wrap!::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector,
@@ -8,7 +8,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
-    @unpack explicit_stage, fsal = method
+    @unpack iteration, explicit_stage, fsal = method
     @unpack limiter = controller
 
     # note: have modified norm function for DoubleFloat

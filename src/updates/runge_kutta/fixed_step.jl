@@ -1,5 +1,5 @@
 
-function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
+function evolve_one_time_step!(method::RungeKutta,
              adaptive::Fixed, controller::Controller, FE::MVector{1,Int64},
              y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
              ode_wrap!::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector,
@@ -7,7 +7,7 @@ function evolve_one_time_step!(method::RungeKutta, iteration::Iteration,
              J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack explicit_stage, fsal = method
+    @unpack iteration, explicit_stage, fsal = method
 
     # TODO: wrap into a function
     # evaluate first stage at (t,y)
