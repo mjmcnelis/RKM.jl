@@ -43,7 +43,7 @@ struct Doubling <: AdaptiveStepSize
     max_attempts::Int64
 end
 
-function Doubling(; epsilon = 1e-6, low = 0.2,
+function Doubling(; epsilon = 1e-6, p_norm = 2,
                     dt_min = eps(1.0), dt_max = Inf, max_attempts = 10)
 
     check_adaptive_parameters_1(; epsilon, p_norm, dt_min, dt_max)

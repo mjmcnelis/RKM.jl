@@ -9,7 +9,7 @@ function evolve_one_time_step!(method::RungeKutta,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
-    @unpack iteration, explicit_stage, fsal = method
+    @unpack explicit_stage = method
     @unpack limiter = controller
 
     order = method.order[1]                             # order of scheme
@@ -31,7 +31,7 @@ function evolve_one_time_step!(method::RungeKutta,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, iteration, y, t[1], dt[1], ode_wrap!, dy, y_tmp, f_tmp,
+        double_step!(method, y, t[1], dt[1], ode_wrap!, dy, y_tmp, f_tmp,
                      f, y1, y2, FE, error, J, linear_cache, stage_finder)
 
         @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
@@ -77,10 +77,10 @@ function evolve_one_time_step!(method::RungeKutta,
     return nothing
 end
 
-function double_step!(method, iteration, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp,
+function double_step!(method, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp,
                       f, y1, y2, FE, error, J, linear_cache, stage_finder)
 
-    @unpack explicit_stage, fsal = method
+    @unpack explicit_stage, fsal, iteration = method
 
     # update full time step
     if explicit_stage[1]

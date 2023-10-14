@@ -15,13 +15,14 @@ alg = TRBDF2(autodiff = true)
 prob = ODEProblem(f_ord, y0, (t0, 10.0))
 @time sol = solve(prob, alg, dt = 1e-4, reltol = 1e-6, #abstol = 0.0,
                   # if adaptive is false will compute Jacobian at each timestep
-                  adaptive = false
+                  adaptive = false,
+                #   save_everystep = false, save_start = false, save_end = false
                   # qmin = 0.2, qmax = 10.0, gamma = 0.9,
                   # controller = IController(), dtmin = 0.0,
                   )
 
 # plot(sol, legend = :outertopright) |> display
-plot!(sol.t,  mapreduce(permutedims, vcat, sol.u)) |> display
+# plot!(sol.t,  mapreduce(permutedims, vcat, sol.u)) |> display
 
 @show sol.destats
 GC.gc()

@@ -2,49 +2,18 @@ using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
+include("$RKM_root/validation/ode/logistic/parameters.jl")
 
 precision = Float64
 # precision = Double64
-# precision = BigFloat        # 31.60 M allocations (fixed time step, no progress meter)
+# precision = BigFloat
 
-# adaptive = Fixed()
-# method = RungeKutta4()
-# method = BackwardEuler1()     # 200.31 k allocations: 19.856 MiB
+# TODO: do asserts between adaptive, method in parameters outer-constructor
+parameters = Parameters(options)
 
-# TODO: if stage 2 and 3 have "same jacobian", then can reuse it?
-#       not entirely sure what it implies
-# method = TrapezoidRuleBDF2()  # 400.41 k allocations: 35.122 MiB (fixed time step)
-# method = CrankNicolson21()    # 200.34 k allocations: 19.858 MiB (fixed time step)
-# method = Heun2()
+# should put t0, tf, precision here
 
-# adaptive = Doubling()
-adaptive = Embedded()#; epsilon = 1e-7)
-method = HeunEuler21()
-# method = Fehlberg45()
-# adaptive = FiniteDiff()
-# method = Heun2()
-
-# pid = BasicControl()
-# pid = PIControl()
-pid = H312Control()
-# pid = H321PredictiveControl()
-# pid = H211bPredictiveControl()
-
-# limiter = PiecewiseLimiter()
-limiter = SmoothLimiter()
-
-controller = TimeStepController(; pid, limiter)
-
-stage_finder = ImplicitStageFinder()
-# stage_finder = ImplicitStageFinder(; root_method = FixedPoint())
-# stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian())
-
-t_range = TimeRange(; t0 = -10, tf = 10, dt0 = 1e-4)
-
-# do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(; adaptive, method, t_range, controller, stage_finder)
-
-t0 = t_range.t0
+t0 = parameters.t_range.t0
 
 N = 2
 y0 = Float64[]
@@ -70,7 +39,7 @@ save_solution = true
 # @time evolve_ode!(sol, y0, dy_dt!, parameters; show_progress, static_array)
 
 get_stats(sol)
-# plot_ode(sol, method, Plots.plot)
+# plot_ode(sol, parameters.method, Plots.plot)
 
 GC.gc()
 println("\ndone")
