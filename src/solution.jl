@@ -74,15 +74,17 @@ function clear_solution!(sol::Solution)
 end
 
 """
-    sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
+    sizehint_solution!(sol::Solution, t_range::TimeRange,
+                       dt0::T, dimensions::Int64) where T <: AbstractFloat
 
 Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
 
-Required parameters: `sol`, `t_range`, `dimensions`
+Required parameters: `sol`, `t_range`, `dt0`, `dimensions`
 """
-function sizehint_solution!(sol::Solution, t_range::TimeRange, dimensions::Int64)
+function sizehint_solution!(sol::Solution, t_range::TimeRange,
+                            dt0::T, dimensions::Int64) where T <: AbstractFloat
     # TODO: whether or not I call this depends if save at regular intervals
-    @unpack t0, tf, dt0 = t_range
+    @unpack t0, tf = t_range
     steps = round((tf - t0)/dt0) |> Int64
     # TODO: why is steps+1 not sufficient?
     sizehint!(sol.y, dimensions*(steps + 2))

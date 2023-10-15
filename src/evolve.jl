@@ -1,13 +1,13 @@
 # TODO update docstring
 """
-    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function;
-                model_parameters = nothing,
-                static_array::Bool = false, show_progress::Bool = true,
-                parameters::Parameters) where {T <: AbstractFloat}
+    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64, dy_dt!::Function,
+                parameters::Parameters; model_parameters = nothing,
+                static_array::Bool = false,
+                show_progress::Bool = true) where {T <: AbstractFloat}
 
-Required parameters: `sol`, `y0`, `dy_dt!`, `parameters`
+Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `parameters`
 """
-function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
+function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64, dy_dt!::Function,
                      parameters::Parameters; model_parameters = nothing,
                      static_array::Bool = false,
                      show_progress::Bool = true) where {T <: AbstractFloat}
@@ -16,7 +16,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
     @unpack precision, FE#=, JE=#, save_solution = sol
 
     @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
-    @unpack t0, tf, dt0 = t_range
+    @unpack t0, tf = t_range
 
     # note: if code errors out from bug and doesn't not update
     #       solver_finished variable, then can print time's up warning
@@ -77,7 +77,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
     stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
 
     if save_solution && adaptive isa Fixed
-        sizehint_solution!(sol, t_range, dimensions)
+        sizehint_solution!(sol, t_range, dt0, dimensions)
     end
 
     # for progress meter
@@ -118,22 +118,24 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dy_dt!::Function,
 end
 
 """
-    evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function;
+    evolve_ode(y0::Union{T, Vector{T}}, dt0::Float64,
+               dy_dt!::Function, parameters::Parameters;
+               model_parameters = nothing, save_solution::Bool = true,
                static_array::Bool = false, show_progress::Bool = true,
-               precision::Type{T2} = Float64, parameters::Parameters,
-               jacobian! = jacobian_error) where {T <: AbstractFloat,
-                                                  T2 <: AbstractFloat}
+               precision::Type{T2} = Float64) where {T <: AbstractFloat,
+                                                    T2 <: AbstractFloat}
 
-Required parameters: `y0`, `dy_dt!`, `parameters`
+Required parameters: `y0`, `dt0`, `dy_dt!`, `parameters`
 """
-function evolve_ode(y0::Union{T, Vector{T}}, dy_dt!::Function, parameters::Parameters;
+function evolve_ode(y0::Union{T, Vector{T}}, dt0::Float64,
+                    dy_dt!::Function, parameters::Parameters;
                     model_parameters = nothing, save_solution::Bool = true,
                     static_array::Bool = false, show_progress::Bool = true,
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T2 <: AbstractFloat}
 
     sol = Solution(; precision, save_solution)
-    evolve_ode!(sol, y0, dy_dt!, parameters; model_parameters, static_array,
-                                             show_progress)
+    evolve_ode!(sol, y0, dt0, dy_dt!, parameters; model_parameters, static_array,
+                                                  show_progress)
     return sol
 end

@@ -6,8 +6,6 @@ Specifies the time evolution interval and initial time step.
     t0::Float64
     """Final time"""
     tf::Float64
-    """Initial time step"""
-    dt0::Float64
 end
 
 """

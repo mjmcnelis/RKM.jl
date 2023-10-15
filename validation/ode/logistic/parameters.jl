@@ -11,7 +11,7 @@ options = Dict(
     # :adaptive => Embedded(; epsilon = 1e-6, p_norm = 2.0),
     # :adaptive => Doubling(; epsilon = 1e-6, p_norm = 2.0),
 
-    :t_range      => TimeRange(; t0 = -10.0, tf = 10.0, dt0 = 1e-4),
+    :t_range      => TimeRange(; t0 = -10.0, tf = 10.0),
     :controller   => TimeStepController(;
                          pid = H312Control(),
                         #  pid = PIControl(),

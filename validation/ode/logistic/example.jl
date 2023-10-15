@@ -14,6 +14,7 @@ parameters = Parameters(options)
 # should put t0, tf, precision here
 
 t0 = parameters.t_range.t0
+dt0 = 1e-4
 
 N = 2
 y0 = Float64[]
@@ -31,7 +32,7 @@ static_array = false
 save_solution = true
 # save_solution = false
 
-@time sol = evolve_ode(y0, dy_dt!, parameters; precision, save_solution,
+@time sol = evolve_ode(y0, dt0, dy_dt!, parameters; precision, save_solution,
                                                show_progress, static_array)
 
 # in-place version
