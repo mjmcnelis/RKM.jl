@@ -23,21 +23,10 @@ for i = 1:N
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 
-# show_progress = true
-show_progress = false
-
-static_array = false
-# static_array = true
-
-save_solution = true
-# save_solution = false
-
-@time sol = evolve_ode(y0, dt0, dy_dt!, parameters; precision, save_solution,
-                                               show_progress, static_array)
-
+@time sol = evolve_ode(y0, dt0, dy_dt!, parameters; precision)
 # in-place version
-# sol = Solution(; precision, save_solution)
-# @time evolve_ode!(sol, y0, dy_dt!, parameters; show_progress, static_array)
+# sol = Solution(; precision)
+# @time evolve_ode!(sol, y0, dy_dt!, parameters)
 
 get_stats(sol)
 # plot_ode(sol, parameters.method, Plots.plot)

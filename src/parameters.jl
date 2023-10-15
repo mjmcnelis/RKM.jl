@@ -14,6 +14,12 @@ Parameters for the ODE solver.
     controller::Controller = PIDControlK()
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
+    """Determines whether or not the solution is stored"""
+    save_solution::Bool = true
+    """Determines whether or not the progress meter is displayed"""
+    show_progress::Bool = false
+    """Determines whether or not static array types are used"""
+    static_array::Bool = false
 end
 # note: need to use abstract types (e.g. ::StageFinder)
 #       to avoid excess allocations in evolve loop

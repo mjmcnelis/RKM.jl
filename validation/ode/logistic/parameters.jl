@@ -25,4 +25,7 @@ options = Dict(
                         #  root_method = FixedPoint(),
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
+    :save_solution => true,
+    :show_progress => false,
+    :static_array => false,
 );

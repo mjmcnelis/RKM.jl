@@ -1,21 +1,20 @@
 # TODO update docstring
 """
-    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64, dy_dt!::Function,
-                parameters::Parameters; model_parameters = nothing,
-                static_array::Bool = false,
-                show_progress::Bool = true) where {T <: AbstractFloat}
+    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64,
+                dy_dt!::Function, parameters::Parameters;
+                model_parameters = nothing) where {T <: AbstractFloat}
 
 Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `parameters`
 """
-function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64, dy_dt!::Function,
-                     parameters::Parameters; model_parameters = nothing,
-                     static_array::Bool = false,
-                     show_progress::Bool = true) where {T <: AbstractFloat}
+function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64,
+                     dy_dt!::Function, parameters::Parameters;
+                     model_parameters = nothing) where {T <: AbstractFloat}
 
     clear_solution!(sol)
-    @unpack precision, FE#=, JE=#, save_solution = sol
+    @unpack precision, FE#=, JE=# = sol
 
-    @unpack adaptive, controller, method, t_range, timer, stage_finder = parameters
+    @unpack adaptive, controller, method, t_range, timer,
+            stage_finder, static_array, show_progress, save_solution = parameters
     @unpack t0, tf = t_range
 
     # note: if code errors out from bug and doesn't not update
@@ -47,7 +46,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64, dy_dt
 
     # create ODE wrapper function
     # note: used copy(t) to prevent bug in time accumulation
-    ode_wrap! = ODEWrapper(copy(t), model_parameters, dy_dt!)
+    ode_wrap! = ODEWrapper(deepcopy(t), model_parameters, dy_dt!)
 
     # note: should not be SA in general but still may want option if size small
     # note: keep in mind of ForwardDiff issues we had with PaT
@@ -120,8 +119,7 @@ end
 """
     evolve_ode(y0::Union{T, Vector{T}}, dt0::Float64,
                dy_dt!::Function, parameters::Parameters;
-               model_parameters = nothing, save_solution::Bool = true,
-               static_array::Bool = false, show_progress::Bool = true,
+               model_parameters = nothing,
                precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                     T2 <: AbstractFloat}
 
@@ -129,13 +127,11 @@ Required parameters: `y0`, `dt0`, `dy_dt!`, `parameters`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, dt0::Float64,
                     dy_dt!::Function, parameters::Parameters;
-                    model_parameters = nothing, save_solution::Bool = true,
-                    static_array::Bool = false, show_progress::Bool = true,
+                    model_parameters = nothing,
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T2 <: AbstractFloat}
 
-    sol = Solution(; precision, save_solution)
-    evolve_ode!(sol, y0, dt0, dy_dt!, parameters; model_parameters, static_array,
-                                                  show_progress)
+    sol = Solution(; precision)
+    evolve_ode!(sol, y0, dt0, dy_dt!, parameters; model_parameters)
     return sol
 end
