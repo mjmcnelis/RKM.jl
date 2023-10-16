@@ -1,13 +1,13 @@
 # TODO update docstring
 """
-    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64,
-                dy_dt!::Function, parameters::Parameters;
+    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Float64,
+                dt0::Float64, dy_dt!::Function, parameters::Parameters;
                 model_parameters = nothing) where {T <: AbstractFloat}
 
 Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `parameters`
 """
-function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64,
-                     dy_dt!::Function, parameters::Parameters;
+function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Float64,
+                     dt0::Float64, dy_dt!::Function, parameters::Parameters;
                      model_parameters = nothing) where {T <: AbstractFloat}
 
     clear_solution!(sol)
@@ -15,6 +15,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64,
 
     @unpack adaptive, controller, method, t_range, timer,
             stage_finder, static_array, show_progress, save_solution = parameters
+
+    @set! t_range.t0 = t0
+    @set! t_range.tf = tf
     @unpack t0, tf = t_range
 
     # note: if code errors out from bug and doesn't not update
@@ -117,7 +120,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, dt0::Float64,
 end
 
 """
-    evolve_ode(y0::Union{T, Vector{T}}, dt0::Float64,
+    evolve_ode(y0::Union{T, Vector{T}}, t0::Float64, tf::Float64, dt0::Float64,
                dy_dt!::Function, parameters::Parameters;
                model_parameters = nothing,
                precision::Type{T2} = Float64) where {T <: AbstractFloat,
@@ -125,13 +128,13 @@ end
 
 Required parameters: `y0`, `dt0`, `dy_dt!`, `parameters`
 """
-function evolve_ode(y0::Union{T, Vector{T}}, dt0::Float64,
+function evolve_ode(y0::Union{T, Vector{T}}, t0::Float64, tf::Float64, dt0::Float64,
                     dy_dt!::Function, parameters::Parameters;
                     model_parameters = nothing,
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T2 <: AbstractFloat}
 
     sol = Solution(; precision)
-    evolve_ode!(sol, y0, dt0, dy_dt!, parameters; model_parameters)
+    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters; model_parameters)
     return sol
 end

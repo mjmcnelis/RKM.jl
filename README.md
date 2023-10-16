@@ -18,12 +18,15 @@ end
 t0 = -10.0
 y0 = exp(t0)/(1.0 + exp(t0)) - C
 
-# time range, solver options
-t_range = TimeRange(; t0, tf = 10.0, dt0 = 1e-4)
-parameters = Parameters(; t_range, method = RungeKutta4(), adaptive = Fixed())
+# final time, initial time step
+tf = 10.0
+dt0 = 1e-4
+
+# solver options
+parameters = Parameters(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve system
-sol = evolve_ode(y0, dy_dt!; parameters, precision = Float64)
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision = Float64)
 
 # plot solution
 y, t = get_solution(sol)

@@ -7,11 +7,11 @@ Parameters for the ODE solver.
     """ODE solver method"""
     method::ODEMethod
     """Time range of ODE evolution"""
-    t_range::TimeRange
+    t_range::TimeRange = TimeRange(; t0 = 0.0, tf = 1.0)
     """Timer for ODE solver"""
     timer::TimeLimit = TimeLimit(; wtime_min = 60)
     """Adaptive time step controller"""
-    controller::Controller = PIDControlK()
+    controller::Controller = TimeStepController()
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
     """Determines whether or not the solution is stored"""
