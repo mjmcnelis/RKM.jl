@@ -1,6 +1,4 @@
 # TODO: try adding precision to list
-# note: may consider taking out t0, tf out of t_range (repurpose TimeRange as interpolator)
-#       could move dt0 to adaptive methods
 
 options = Dict(
     :method => RungeKutta4(),

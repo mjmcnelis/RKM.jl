@@ -20,8 +20,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Fl
     @set! t_range.tf = tf
     @unpack t0, tf = t_range
 
-    # note: if code errors out from bug and doesn't not update
-    #       solver_finished variable, then can print time's up warning
     reset_timer!(timer)
     start_timer!(timer)
 
