@@ -8,7 +8,8 @@ Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `parameters`
 """
 function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Float64,
                      dt0::Float64, dy_dt!::Function, parameters::Parameters;
-                     model_parameters = nothing) where {T <: AbstractFloat}
+                     model_parameters = nothing,
+                     tsk = nothing) where {T <: AbstractFloat}
 
     clear_solution!(sol)
     @unpack precision, FE#=, JE=# = sol
@@ -92,6 +93,13 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Fl
             append!(sol.t, t[1])
         end
 
+        if istaskdone(tsk)
+            @info "Timer task is done"
+            break
+        else
+            @show "hi"
+        end
+
         show_progress && monitor_progess(t, progress, checkpoints)
         continue_solver(t, tf, timer) || break
 
@@ -133,6 +141,11 @@ function evolve_ode(y0::Union{T, Vector{T}}, t0::Float64, tf::Float64, dt0::Floa
                                                           T2 <: AbstractFloat}
 
     sol = Solution(; precision)
-    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters; model_parameters)
+
+    timer() = sleep(1)
+    tsk = Task(timer)
+    schedule(tsk)
+
+    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters; model_parameters, tsk)
     return sol
 end
