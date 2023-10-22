@@ -81,7 +81,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Fl
 
     # for progress meter
     checkpoints = collect(LinRange(t0, tf, 101))[2:end]
-    progress = Progress(100)
+    progress = Progress(100; showspeed = true, color = :gray)
 
     # @unpack evaluations = stage_finder.jacobian_method
 
