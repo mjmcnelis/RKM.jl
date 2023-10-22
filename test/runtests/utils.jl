@@ -2,7 +2,8 @@ import LinearAlgebra: norm
 import UnPack: @unpack
 
 function reconstruct_butcher(method::RungeKutta)
-    @unpack stages, precision, c, A_T, b, b_hat = method
+    @unpack stages, c, A_T, b, b_hat = method
+    precision = typeof(c[1])
 
     ncol = stages + 1
     nrow = b_hat == b ? ncol : ncol + 1

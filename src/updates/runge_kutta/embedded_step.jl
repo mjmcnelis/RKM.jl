@@ -19,6 +19,8 @@ function evolve_one_time_step!(method::RungeKutta,
 
     # note: comment if benchmark against OrdinaryDiffEq (add boolean?)
     epsilon ^= (order_min / order_max)                  # rescale tolerance parameter
+    # TODO: try reconstruct_adaptive (i.e. repower epsilon, make it correct type)
+    epsilon = T(epsilon) # tmp for T = Float32 (otherwise tol = Float64 != Float32)
 
     # evaluate first stage at (t,y)
     if explicit_stage[1]

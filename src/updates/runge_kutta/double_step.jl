@@ -16,6 +16,8 @@ function evolve_one_time_step!(method::RungeKutta,
 
     # note: comment if want to compare to OrdinaryDiffEq
     epsilon ^= order / (1.0 + order)                    # rescale tolerance parameter
+    # TODO: try reconstruct_adaptive (i.e. repower epsilon, make it correct type)
+    epsilon = T(epsilon) # tmp for T = Float32 (otherwise tol = Float64 != Float32)
 
     # if do Richardson extrapolation, then always have
     # to evaluate (explicit) first stage at (t,y)
@@ -95,7 +97,7 @@ function double_step!(method, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp,
     if explicit_stage[1]
         @.. dy[:,1] = (dt/2.0) * f
     end
-    runge_kutta_step!(method, iteration, y, t, dt/2., ode_wrap!, dy, y_tmp,
+    runge_kutta_step!(method, iteration, y, t, dt/2, ode_wrap!, dy, y_tmp,
                       f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y2 = y_tmp
     #   second half step
@@ -107,7 +109,7 @@ function double_step!(method, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp,
         end
         @.. dy[:,1] = (dt/2.0) * f_tmp
     end
-    runge_kutta_step!(method, iteration, y2, t+dt/2.0, dt/2.0, ode_wrap!, dy, y_tmp,
+    runge_kutta_step!(method, iteration, y2, t+dt/2, dt/2, ode_wrap!, dy, y_tmp,
                       f_tmp, FE, error, J, linear_cache, stage_finder)
     @.. y2 = y_tmp
     return nothing
