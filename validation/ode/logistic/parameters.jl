@@ -9,6 +9,8 @@ options = Dict(
     # :adaptive => Embedded(; epsilon = 1e-6, p_norm = 2.0),
     # :adaptive => Doubling(; epsilon = 1e-6, p_norm = 2.0),
 
+    # :timer => TimeLimit(; wtime_min = 0),
+
     :controller   => TimeStepController(;
                          pid = H312Control(),
                         #  pid = PIControl(),

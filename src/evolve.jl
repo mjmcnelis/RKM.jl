@@ -21,7 +21,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::Float64, tf::Fl
     @unpack t0, tf = t_range
 
     reset_timer!(timer)
-    start_timer!(timer)
 
     method = reconstruct_method(method, precision)
     if !(adaptive isa Fixed)

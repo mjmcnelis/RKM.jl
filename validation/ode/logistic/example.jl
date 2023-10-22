@@ -27,6 +27,8 @@ end
 # sol = Solution(; precision)
 # @time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters)
 
+# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
+
 get_stats(sol)
 # plot_ode(sol, parameters.method, Plots.plot)
 
