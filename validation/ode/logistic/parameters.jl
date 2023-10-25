@@ -31,4 +31,5 @@ options = Dict(
     # :show_progress => true,
 
     :static_array => false
+    # :static_array => true
 );

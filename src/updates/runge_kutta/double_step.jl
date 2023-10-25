@@ -1,11 +1,10 @@
 
 function evolve_one_time_step!(method::RungeKutta,
              adaptive::Doubling, controller::Controller, FE::MVector{1,Int64},
-             y::Vector{T}, t::Union{Vector{T}, MVector{1,T}},
-             dt::Union{Vector{T}, MVector{2,T}}, ode_wrap!::ODEWrapper, dy::Matrix{T},
-             y_tmp::Vector{T}, f_tmp::Vector{T}, f::Vector{T}, y1::Vector{T},
-             y2::Vector{T}, error::Vector{T},
-             J::MatrixMMatrix, linear_cache,
+             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
+             ode_wrap!::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector,
+             f_tmp::VectorMVector, f::VectorMVector, y1::VectorMVector, y2::VectorMVector,
+             error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
@@ -53,7 +52,6 @@ function evolve_one_time_step!(method::RungeKutta,
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
-            @warn "Error estimate is zero"
             rescale = limiter.high
         else
             rescale = rescale_time_step(controller, tol, e_norm)

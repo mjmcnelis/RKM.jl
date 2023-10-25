@@ -69,7 +69,6 @@ function evolve_one_time_step!(method::RungeKutta,
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
-            @warn "Error estimate is zero"
             rescale = limiter.high
         else
             rescale = rescale_time_step(controller, tol, e_norm)
