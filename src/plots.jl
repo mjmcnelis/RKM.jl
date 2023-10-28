@@ -14,7 +14,7 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function;
     @unpack code_name = method
 
     x_args = logx ? (; xaxis = :log) : (;)
-    y_args = logy ? (; xaxis = :log) : (;)
+    y_args = logy ? (; yaxis = :log) : (;)
 
     plt = plot(t, y; size = (900, 600), linewidth = 2, legendtitle = code_name,
                legend = :outertopright, legendtitlefontsize = 12, legendfontsize = 12,
