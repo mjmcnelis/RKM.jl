@@ -4,6 +4,8 @@ using Plots; plotly()
 import DoubleFloats: Double64
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
+@info "Starting allocation test..."
+
 precision_vect = [Float64, Double64]
 method_vect = [HeunEuler21()]
 adaptive_vect = [Fixed(), Doubling(), Embedded()]
@@ -51,4 +53,5 @@ for precision in precision_vect, method in method_vect,
     # println("")
 end
 
-println("\ndone")
+@info "...done"
+println("")
