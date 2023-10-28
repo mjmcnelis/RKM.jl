@@ -1,9 +1,9 @@
 using Revise, RKM, JLD2, StatsBase, Test
 using Plots; plotly()
-!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/robertson/equations.jl") : nothing
-loadpath = joinpath(RKM_root, "test/runtests/ode/answers/roberston_answers.jld2")
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/vanderpol/equations.jl") : nothing
+loadpath = joinpath(RKM_root, "test/runtests/ode/answers/vanderpol_answers.jld2")
 
-@info "Starting Robertson test..."
+@info "Starting Vanderpol test..."
 
 # option to reset answer keys
 reset_answer_keys = false
@@ -13,10 +13,10 @@ plot_compare = "ans"
 # plot_compare = "diffeq"
 show_plot = false
 
-y0 = [1.0, 0.0, 0.0]
-t0 = 0.01
-tf = 1.0e4
-dt0 = 0.01
+y0 = [2.0, 0.0]
+t0 = 0.0
+tf = 3.0e3
+dt0 = 1e-4
 
 # TODO: need to interpolate solution
 parameters = Parameters(; method = TrapezoidRuleBDF2(),
@@ -34,7 +34,8 @@ end
 @load loadpath y_ans t_ans
 
 # plot comparison
-plt = plot_ode(sol, parameters.method, Plots.plot; logx = true);
+# note: hide y2, y4 and autoscale to see y1 (RKM) vs y3 (ans/diffeq)
+plt = plot_ode(sol, parameters.method, Plots.plot);
 if plot_compare == "ans"
     plot!(t_ans, y_ans, color = :black, linewidth = 2, line = :dot)
 elseif plot_compare == "diffeq"

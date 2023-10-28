@@ -1,7 +1,7 @@
 using Revise, RKM, JLD2, StatsBase, Test
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/flame/equations.jl") : nothing
-loadpath = joinpath(RKM_root, "test/runtests/ode/flame_answers.jld2")
+loadpath = joinpath(RKM_root, "test/runtests/ode/answers/flame_answers.jld2")
 
 @info "Starting Flame test..."
 
