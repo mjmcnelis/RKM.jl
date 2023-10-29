@@ -114,8 +114,8 @@ end
                     # note: may not need this if use regular newton method
                     # linear_cache = solve_linear_tmp(linear_cache)
                     # @.. dy[:,i] -= linear_cache.u
-                    sol = solve(linear_cache)
-                    @.. dy[:,i] -= sol.u
+                    solve!(linear_cache)
+                    @.. dy[:,i] -= linear_cache.u
                 end
             end
         end

@@ -1,6 +1,6 @@
 using Revise
 using RKM, Test
-using Plots; plotly()
+# using Plots; plotly()
 import DoubleFloats: Double64
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
