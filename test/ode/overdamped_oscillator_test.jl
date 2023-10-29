@@ -1,17 +1,15 @@
 using Revise, RKM, JLD2, StatsBase, Test
-using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/overdamped_oscillator/equations.jl") : nothing
-loadpath = joinpath(RKM_root, "test/runtests/ode/answers/overdamped_oscillator_answers.jld2")
-
+loadpath = joinpath(RKM_root, "test/ode/answers/overdamped_oscillator_answers.jld2")
 @info "Starting overdamped oscillator test..."
 
 # option to reset answer keys
 reset_answer_keys = false
 
-# options to plot compare answer key / OrdinaryDiffEq
+# options to plot, compare answer key / OrdinaryDiffEq
+show_plot = false
 plot_compare = "ans"
 # plot_compare = "diffeq"
-show_plot = false
 
 y0 = [1.0, -1.0]    # eigenvector of ODE system (exact solution is y(t) = ±exp(-t)*y0)
 t0 = 0.0
@@ -45,18 +43,21 @@ end
 @load loadpath y_ans t_ans
 
 # plot comparison
-plt = plot_ode(sol, parameters.method, Plots.plot);
-if plot_compare == "ans"
-    plot!(t_ans, y_ans, color = :black, linewidth = 2, line = :dot)
-elseif plot_compare == "diffeq"
-    using OrdinaryDiffEq, LinearSolve
-    prob = ODEProblem(dy_dt!, y0, (t0, tf), p)
-    @time sol = solve(prob, TRBDF2(linsolve = LUFactorization()),
-                      dt = dt0, adaptive = false)
-    plot!(sol.t, mapreduce(permutedims, vcat, sol.u),
-          color = :black, linewidth = 2, line = :dash)
+if show_plot
+    using Plots; plotly()
+    plt = plot_ode(sol, parameters.method, Plots.plot);
+    if plot_compare == "ans"
+        plot!(t_ans, y_ans, color = :black, linewidth = 2, line = :dot)
+    elseif plot_compare == "diffeq"
+        using OrdinaryDiffEq, LinearSolve
+        prob = ODEProblem(dy_dt!, y0, (t0, tf), p)
+        @time sol = solve(prob, TRBDF2(linsolve = LUFactorization()),
+                        dt = dt0, adaptive = false)
+        plot!(sol.t, mapreduce(permutedims, vcat, sol.u),
+            color = :black, linewidth = 2, line = :dash)
+    end
+    display(plt)
 end
-show_plot ? display(plt) : nothing
 
 # test
 for j in size(y,2)
