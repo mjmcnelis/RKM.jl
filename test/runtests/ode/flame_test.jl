@@ -3,7 +3,7 @@ using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/flame/equations.jl") : nothing
 loadpath = joinpath(RKM_root, "test/runtests/ode/answers/flame_answers.jld2")
 
-@info "Starting Flame test..."
+@info "Starting flame test..."
 
 # option to reset answer keys
 reset_answer_keys = false
@@ -41,7 +41,7 @@ if plot_compare == "ans"
 elseif plot_compare == "diffeq"
     using OrdinaryDiffEq
     prob = ODEProblem(dy_dt!, y0, (t0, tf))
-    @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = 1e-7, abstol = 1e-7);
+    @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = 1e-7, abstol = 1e-7)
     plot!(sol.t, mapreduce(permutedims, vcat, sol.u),
           color = :black, linewidth = 2, line = :dash)
 end

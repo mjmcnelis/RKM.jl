@@ -40,7 +40,7 @@ if plot_compare == "ans"
 elseif plot_compare == "diffeq"
     using OrdinaryDiffEq
     prob = ODEProblem(dy_dt!, y0, (t0, tf))
-    @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = 1e-6, abstol = 1e-6);
+    @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = 1e-6, abstol = 1e-6)
     plot!(sol.t, mapreduce(permutedims, vcat, sol.u),
           color = :black, linewidth = 2, line = :dash)
 end
