@@ -1,13 +1,15 @@
 
 # for RKM
-function dy_dt!(f, t, y)
+function dy_dt!(f, y; p, kwargs...)
+    ω = p[1]
     f[1] = y[2]
     f[2] = -ω^2*y[1]
     return nothing
 end
 
 # for OrdinaryDiffEq
-function fp(f, y, p, t)
+function dy_dt!(f, y, p, t)
+    ω = p[1]
     f[1] = y[2]
     f[2] = -ω^2*y[1]
     return nothing
