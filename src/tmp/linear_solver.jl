@@ -1,16 +1,15 @@
 
-function solve_linear_tmp(cache::LinearCache)
+function solve_linear_tmp!(cache::LinearCache)
     # TODO: extend to methods that don't involve factorization
     if cache.isfresh
         # note: allocates on do_factorization (any way to avoid this?)
         fact = do_factorization_tmp(cache, cache.alg)
         # note: cache.isfresh is set to false by set_cacheval
-        cache = set_cacheval(cache, fact)
-# ┌ Warning: set_cacheval is deprecated for mutation on the cache. Use `cache.cacheval = cacheval; cache.isfresh = false
-# └ @ LinearSolve ~/.julia/packages/LinearSolve/Rq2MY/src/deprecated.jl:72
+        cache.cacheval = fact
+        cache.isfresh = false
     end
     _ldiv!(cache.u, cache.cacheval, cache.b)
-    return cache
+    return nothing
 end
 
 function do_factorization_tmp(cache, alg::AbstractFactorization)
