@@ -80,3 +80,46 @@ function Base.show(io::IO, RK::RungeKutta)
         end
     end
 end
+
+function list_explicit_runge_kutta_methods()
+    println("Standard (compatible with adaptive = Fixed(), Doubling()):\n")
+    """
+    \tLow order (1-3)    | Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3,
+    \t                   | Ralston3, RungeKutta3, ShuOsher3, SpiteriRuuth3, Generic3
+    \t-------------------------------------------------------------------------------
+    \tMedium order (4-6) | RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4,
+    \t                   | Butcher5, Butcher6
+    \t-------------------------------------------------------------------------------
+    \tHigh order (7-9)   | Curtis8, Shanks8, ShanksPseudo8
+    """ |> println
+
+    println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
+    """
+    \tLow order (1-3)       | Fehlberg12, HeunEuler21, BogackiShampine32
+    \t-------------------------------------------------------------------------------
+    \tMedium order (4-6)    | Fehlberg45, CashKarp54, DormandPrince54,
+    \t                      | BogackiShampine54, Tsitouras54, Verner56, Verner65
+    \t-------------------------------------------------------------------------------
+    \tHigh order (7-9)      | Fehlberg78, DormandPrince87
+    \t-------------------------------------------------------------------------------
+    \tVery high order (10+) | Feagin108, Feagin1210, Feagin1412
+    """ |> println
+end
+
+function list_implicit_runge_kutta_methods()
+    println("Standard (compatible with adaptive = Fixed(), Doubling()):\n")
+    """
+    \tLow order (1-3)    | BackwardEuler1, ImplicitMidpoint2, TrapezoidRuleBDF2,
+    \t                   | QinZhang2, KraaijevangerSpijker2, PareschiRusso2,
+    \t                   | PareschiRusso3, Crouzeix3, DIRKL3
+    \t-------------------------------------------------------------------------------
+    \tMedium order (4-6) | Norsett4
+    """ |> println
+
+    println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
+    """
+    \tLow order (1-3)    | CrankNicolson21, LobattoIIIB21
+    \t-------------------------------------------------------------------------------
+    \tMedium order (4-6) | LobattoIIICS42
+    """ |> println
+end
