@@ -32,7 +32,7 @@ It is also recommended to install these external packages:
 ```
 
 ## Example
-This code example shows how to use the ODE solver:
+The following is a basic code example of the ODE solver's usage:
 ```julia
 using RKM
 using Plots; plotly()
@@ -48,7 +48,7 @@ end
 C = 0.5
 t0 = -10.0
 y0 = exp(t0)/(1.0 + exp(t0)) - C
-model_parameters = [C]
+p = [C]
 
 # final time, initial time step
 tf = 10.0
@@ -59,9 +59,24 @@ parameters = Parameters(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve system
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
-                 model_parameters, precision = Float64)
+                 model_parameters = p, precision = Float64)
 
 # plot solution
 y, t = get_solution(sol)
 plot(t, y)
 ```
+### External inputs
+The package requires you to define a function `dy_dt!` that numerically evaluates the ODE system at a given state/time
+```math
+\frac{dy_i}{dt} = f_i(\vec{y}; t, p)
+```
+We support the following in-place methods to store the result in a vector variable `f`:
+```julia
+dy_dt!(f, y; kwargs...)
+dy_dt!(f, y; t, kwargs...)
+dy_dt!(f, y; p, kwargs...)
+dy_dt!(f, y; t, p)
+```
+The first method is for ODEs that depend only on the state variable(s) `y`. You can pass in keyword arguments if your ODE system also depends on time `t` and/or model parameters `p`.
+
+In addition, you will need to specify the initial conditions `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0` and model parameters `p` (if any).
