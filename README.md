@@ -4,71 +4,72 @@
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://mjmcnelis.github.io/RKM.jl/dev)
 
 ## Overview
-RKM.jl is an ordinary differential equation (ODE) solver written in the Julia language. It is based off an earlier version [RKM](https://github.com/mjmcnelis/RKM) written in Python.
+`RKM.jl` is an ordinary differential equation (ODE) solver written in Julia. It is based from an original version [RKM](https://github.com/mjmcnelis/RKM) written in Python.
 
-This repository is currently under development, with one alpha-version released. The package contains the following main features:
+This repository is currently in the development/testing phase, with one alpha-version released. The main features of this package include
 
 - Explicit and diagonal-implicit Runge-Kutta methods
 - Evaluate Jacobian with finite difference or forward auto-differentiation
 - Adaptive time stepping (embedded or step doubling) with a PID controller
-- Options for timer, progress bar, float precision and static arrays
-- Solver statistics: runtime, solution size and excess memory/allocations
+- Options for float precision, static arrays, progress bar and timer
+- Solver statistics (e.g. runtime, solution size, excess memory/allocations)
 
 ## Setup
-This package is currently not registered. To install, clone the repository
+This package is not registered. To install, clone the repository
 
     cd <your_path_dir>
     git clone https://github.com/mjmcnelis/RKM.jl.git
 
-and do the following in a Julia REPL (assumes v1.9.0 or higher):
+and develop the package in a Julia REPL (assumes v1.9.0 or higher):
 ```julia
 using Pkg
 Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
 ```
 
-It is also recommended to install these external packages:
+It is also recommended to install these packages in your base environment:
 ```julia
 ] add Plots DoubleFloats
 ```
 
 ## Example
-The following is a basic code example of the ODE solver's usage:
+This code example shows how to use the ODE solver.
 ```julia
 using RKM
 using Plots; plotly()
 
-# differential equation
+# logistic equation
 function dy_dt!(f, y; p, kwargs...)
-    C = p[1]
-    f[1] = (y[1] + C) * (1.0 - C - y[1])
+    B = p[1]
+    f[1] = (y[1] + B) * (1.0 - B - y[1])
     nothing
 end
 
-# initial conditions, model parameters
-C = 0.5
+# initial conditions
+B = 0.5
 t0 = -10.0
-y0 = exp(t0)/(1.0 + exp(t0)) - C
-p = [C]
+y0 = exp(t0)/(1.0 + exp(t0)) - B
 
-# final time, initial time step
+# final time, initial time step, model parameters
 tf = 10.0
 dt0 = 1e-4
+p = [B]
 
 # solver options
 parameters = Parameters(; method = RungeKutta4(), adaptive = Fixed())
 
-# evolve system
+# evolve system, print stats
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
                  model_parameters = p, precision = Float64)
+get_stats(sol)
 
 # plot solution
 y, t = get_solution(sol)
 plot(t, y)
 ```
 ### External inputs
-The package requires you to define a function `dy_dt!` that numerically evaluates the ODE system at a given state/time
+The package requires a user-defined function `dy_dt!` that numerically evaluates the ODE system at a given state and time
 ```math
-\frac{dy_i}{dt} = f_i(\vec{y}; t, p)
+\frac{d\vec{y}}{dt} = \vec{f}(\vec{y}, t; p)
 ```
 We support the following in-place methods to store the result in a vector variable `f`:
 ```julia
@@ -77,6 +78,17 @@ dy_dt!(f, y; t, kwargs...)
 dy_dt!(f, y; p, kwargs...)
 dy_dt!(f, y; t, p)
 ```
-The first method is for ODEs that depend only on the state variable(s) `y`. You can pass in keyword arguments if your ODE system also depends on time `t` and/or model parameters `p`.
+The first one is for ODEs that depend only on the state variable(s) `y`. If the ODE system also depends on time `t` and/or model parameters `p`, you can list them as keyword arguments.
 
-In addition, you will need to specify the initial conditions `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0` and model parameters `p` (if any).
+In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and model parameters `p` (if any).
+
+### Solver options
+Next, we have to set some of the solver options. We are required to set the ODE method `method` and adaptive time step `adaptive`. In this example, we use the classic RK4 method and a fixed time step.
+
+There is a number of explicit and diagonal-implicit Runge-Kutta methods to choose from. You can list all of the available methods by calling
+```julia
+list_explicit_runge_kutta_methods()
+list_implicit_runge_kutta_methods()
+```
+
+We can select the time step to be fixed or adaptive. The latter is based on step doubling and embedded techinques. All Runge-Kutta methods are compatible with `adaptive = Fixed()` or `Doubling()`, whereas `adaptive = Embedded()` is only compatible with embedded Runge-Kutta methods.
