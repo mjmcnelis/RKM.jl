@@ -36,17 +36,20 @@ This code example shows how to use the ODE solver.
 ```julia
 using RKM
 using Plots; plotly()
+using DoubleFloats: Double64
 
 # logistic equation
-function dy_dt!(f, y; p, kwargs...)
-    B = p[1]
-    f[1] = (y[1] + B) * (1.0 - B - y[1])
-    nothing
+if !(@isdefined dy_dt!)
+    function dy_dt!(f, y; p, kwargs...)
+        B = p[1]
+        f[1] = (y[1] + B) * (1.0 - B - y[1])
+        nothing
+    end
 end
 
 # initial conditions
 B = 0.5
-t0 = -10.0
+t0 = -10.0 |> BigFloat
 y0 = exp(t0)/(1.0 + exp(t0)) - B
 
 # final time, initial time step, model parameters
@@ -58,16 +61,16 @@ p = [B]
 parameters = Parameters(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve system, print stats
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
-                 model_parameters = p, precision = Float64)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
+                       model_parameters = p, precision = Float64)
 get_stats(sol)
 
 # plot solution
-y, t = get_solution(sol)
+@time y, t = get_solution(sol)
 plot(t, y)
 ```
 ### External inputs
-The package requires a user-defined function `dy_dt!` that numerically evaluates the ODE system at a given state and time
+The solver requires a user-defined function `dy_dt!` that numerically evaluates the ODE system at a given state and time
 ```math
 \frac{d\vec{y}}{dt} = \vec{f}(\vec{y}, t; p)
 ```
@@ -78,17 +81,47 @@ dy_dt!(f, y; t, kwargs...)
 dy_dt!(f, y; p, kwargs...)
 dy_dt!(f, y; t, p)
 ```
-The first one is for ODEs that depend only on the state variable(s) `y`. If the ODE system also depends on time `t` and/or model parameters `p`, you can list them as keyword arguments.
+The first one is for ODEs that depend only on the state variable(s) `y`. If the ODE system also depends on time `t` and/or model parameters `p`, they can be passed as keyword arguments.
 
 In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and model parameters `p` (if any).
 
 ### Solver options
-Next, we have to set some of the solver options. We are required to set the ODE method `method` and adaptive time step `adaptive`. In this example, we use the classic RK4 method and a fixed time step.
+Next, we have to set two of the solver options: the ODE method `method` and the adaptive time step `adaptive`. In this example, we use the classic RK4 method and a fixed time step.
 
-There is a number of explicit and diagonal-implicit Runge-Kutta methods to choose from. You can list all of the available methods by calling
+The solver supports a number of explicit and diagonal-implicit Runge-Kutta methods. You can list all of the available methods by calling
 ```julia
 list_explicit_runge_kutta_methods()
 list_implicit_runge_kutta_methods()
 ```
 
-We can select the time step to be fixed or adaptive. The latter is based on step doubling and embedded techinques. All Runge-Kutta methods are compatible with `adaptive = Fixed()` or `Doubling()`, whereas `adaptive = Embedded()` is only compatible with embedded Runge-Kutta methods.
+We can set the time step to be either fixed or adaptive. The latter is based on step doubling or embedded techinques. All Runge-Kutta methods are compatible with `adaptive = Fixed()` or `Doubling()`, whereas `adaptive = Embedded()` is only compatible with embedded methods.
+
+### ODE evolution
+Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution ```y(t)```. An in-place version `evolve_ode!` is also available.
+```julia
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
+                 model_parameters = p, precision = Float64)
+
+sol = Solution(; precision = Float64)
+evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters; model_parameters = p)
+```
+We can adjust the numerical precision of the solver with the keyword argument `precision` (e.g. `Float64`, `Double64`, `BigFloat`).
+
+*Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
+
+### Runtime statistics
+```
+# after recompiling
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
+                              model_parameters = p, precision = Float64);
+0.017567 seconds (306 allocations: 3.076 MiB)
+julia> get_stats(sol)
+time steps           = 200002
+step rejection rate  = 0.0 %
+function evaluations = 800004
+jacobian evaluations = 0
+solver runtime       = 0.01725 seconds
+solution storage     = 3.052 MiB
+excess memory        = 0 bytes
+excess allocations   = 0
+```
