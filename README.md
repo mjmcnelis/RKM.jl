@@ -58,10 +58,10 @@ dt0 = 1e-4
 p = [B]
 
 # solver options
-parameters = Parameters(; method = RungeKutta4(), adaptive = Fixed())
+options = Parameters(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve system, print stats
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                        model_parameters = p, precision = Float64)
 get_stats(sol)
 
@@ -86,24 +86,31 @@ The first one is for ODEs that depend only on the state variable(s) `y`. If the 
 In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and model parameters `p` (if any).
 
 ### Solver options
-Next, we have to set two of the solver options: the ODE method `method` and the adaptive time step `adaptive`. In this example, we use the classic RK4 method and a fixed time step.
+Next, we have to set two of the solver options: the ODE method `method` and the adaptive time step algorithm `adaptive`. In this example, we use the classic RK4 method and a fixed time step.
 
 The solver supports a number of explicit and diagonal-implicit Runge-Kutta methods. You can list all of the available methods by calling
 ```julia
 list_explicit_runge_kutta_methods()
 list_implicit_runge_kutta_methods()
 ```
+We can set the time step to be either fixed or adaptive. The latter is based on step doubling or embedded techinques.
+```julia
+Fixed()                     # fixed time step
+Doubling(; epsilon = 1e-6)  # step doubling
+Embedded(; epsilon = 1e-6)  # embedded Runge-Kutta
+```
+All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embedded` is only compatible with embedded methods. In the adaptive time step routines, the parameter `epsilon` controls both the relative and incremental error tolerances.
 
-We can set the time step to be either fixed or adaptive. The latter is based on step doubling or embedded techinques. All Runge-Kutta methods are compatible with `adaptive = Fixed()` or `Doubling()`, whereas `adaptive = Embedded()` is only compatible with embedded methods.
+*Note: the absolute tolerance parameter is currently omitted.*
 
 ### ODE evolution
 Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution ```y(t)```. An in-place version `evolve_ode!` is also available.
 ```julia
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                  model_parameters = p, precision = Float64)
 
 sol = Solution(; precision = Float64)
-evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters; model_parameters = p)
+evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 ```
 We can adjust the numerical precision of the solver with the keyword argument `precision` (e.g. `Float64`, `Double64`, `BigFloat`).
 
@@ -124,4 +131,23 @@ solver runtime       = 0.01725 seconds
 solution storage     = 3.052 MiB
 excess memory        = 0 bytes
 excess allocations   = 0
+```
+
+## Timer and progress display features
+
+We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
+```julia
+timer = TimeLimit(; wtime_min = 1)   # set timer to 1 minute
+show_progress = true                 # display progress
+options = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
+                       timer, show_progress)
+```
+The solver stops if it exceeds the time limit, but it still saves part of the solution:
+```
+julia> dt0 = 5e-8;                   # slow solver
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
+                              model_parameters = p, precision = Float64);
+Progress:  66%|███████████████████▏         |  ETA: 0:00:30 ( 0.88  s/it)
+┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
+└ @ RKM ~/Desktop/RKM.jl/src/time.jl:67
 ```
