@@ -9,10 +9,11 @@
 This repository is currently in the development/testing phase, with one alpha-version released. The main features of this package include
 
 - Explicit and diagonal-implicit Runge-Kutta methods
-- Evaluate Jacobian with finite difference or forward auto-differentiation
+- Jacobian evaluation with finite difference or forward auto-differentiation
 - Adaptive time stepping (embedded or step doubling) with a PID controller
-- Options for float precision, static arrays, progress bar and timer
 - Solver statistics (e.g. runtime, solution size, excess memory/allocations)
+- Options for float precision, timer, progress bar and static arrays
+
 
 ## Setup
 This package is not registered. To install, clone the repository
@@ -28,15 +29,16 @@ Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
 
 It is also recommended to install these packages in your base environment:
 ```julia
-] add Plots DoubleFloats
+] add DoubleFloats Plots BenchmarkTools
 ```
 
 ## Example
 This code example shows how to use the ODE solver.
 ```julia
 using RKM
-using Plots; plotly()
 using DoubleFloats: Double64
+using Plots; plotly()
+using BenchmarkTools: @btime
 
 # logistic equation
 if !(@isdefined dy_dt!)
@@ -60,13 +62,10 @@ p = [B]
 # solver options
 options = Parameters(; method = RungeKutta4(), adaptive = Fixed())
 
-# evolve system, print stats
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                       model_parameters = p, precision = Float64)
-get_stats(sol)
-
-# plot solution
-@time y, t = get_solution(sol)
+# evolve ode, plot solution
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
+                 model_parameters = p, precision = Float64)
+y, t = get_solution(sol)
 plot(t, y)
 ```
 ### External inputs
@@ -81,7 +80,7 @@ dy_dt!(f, y; t, kwargs...)
 dy_dt!(f, y; p, kwargs...)
 dy_dt!(f, y; t, p)
 ```
-The first one is for ODEs that depend only on the state variable(s) `y`. If the ODE system also depends on time `t` and/or model parameters `p`, they can be passed as keyword arguments.
+The first one is for ODEs that depend only on the state variable(s) `y`. The others are for ODEs that also depend on time `t` and/or model parameters `p`.
 
 In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and model parameters `p` (if any).
 
@@ -103,8 +102,8 @@ All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embe
 
 *Note: the absolute tolerance parameter is currently omitted.*
 
-### ODE evolution
-Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution ```y(t)```. An in-place version `evolve_ode!` is also available.
+### ODE evolution and post-processing
+Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution. An in-place version `evolve_ode!` is also available.
 ```julia
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                  model_parameters = p, precision = Float64)
@@ -112,9 +111,31 @@ sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
 sol = Solution(; precision = Float64)
 evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 ```
-We can adjust the numerical precision of the solver with the keyword argument `precision` (e.g. `Float64`, `Double64`, `BigFloat`).
+We can adjust the numerical precision of the solver with the keyword argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
+
+The numerical solution ````{\vec{y}_0, ... \vec{y}_n}```` is stored in linear column format. If the state vector ````vec{y}```` is multi-dimensional, we need to reshape the solution as an (adjoint) matrix
+```
+julia> y, t = get_solution(sol);
+julia> y
+200002×1 adjoint(::Matrix{Float64}) with eltype Float64:
+ -0.49995460213129755
+ -0.49995459759148986
+  ⋮
+  0.49995460213129483
+  0.49995460667064867
+```
+before plotting the results
+```julia
+plot(t, y)
+```
+There is also the custom plot function
+```julia
+plot_ode(sol, options.method, Plots.plot)
+```
+
+## Additional features
 
 ### Runtime statistics
 ```
@@ -133,7 +154,7 @@ excess memory        = 0 bytes
 excess allocations   = 0
 ```
 
-## Timer and progress display features
+### Timer and progress display
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
@@ -142,12 +163,33 @@ show_progress = true                 # display progress
 options = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
                        timer, show_progress)
 ```
-The solver stops if it exceeds the time limit, but it still saves part of the solution:
+The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```
-julia> dt0 = 5e-8;                   # slow solver
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                              model_parameters = p, precision = Float64);
+julia> dt0 = 5e-8;                   # trigger timer
+julia> sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
+                        model_parameters = p, precision = Float64);
 Progress:  66%|███████████████████▏         |  ETA: 0:00:30 ( 0.88  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/time.jl:67
 ```
+
+### Static arrays
+
+If the ODE system size is small, we can use static arrays to speed up the runtime:
+```julia
+options_static = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
+                              static_array = true)
+```
+No modifications to the ODE function `dy_dt!` or initial conditions `y0` are required. The following benchmark compares the runtime between static and dynamic arrays:
+```
+# static array
+julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
+                               model_parameters = p, precision = Float64);
+  20.399 ms (407 allocations: 3.08 MiB)
+
+# dynamic array
+julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
+                               model_parameters = p, precision = Float64);
+  30.666 ms (286 allocations: 3.07 MiB)
+```
+### Advanced solver options
