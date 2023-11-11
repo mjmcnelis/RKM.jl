@@ -140,9 +140,10 @@ plot_ode(sol, options.method, Plots.plot)
 ### Runtime statistics
 ```
 # after recompiling
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters;
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                               model_parameters = p, precision = Float64);
 0.017567 seconds (306 allocations: 3.076 MiB)
+
 julia> get_stats(sol)
 time steps           = 200002
 step rejection rate  = 0.0 %
@@ -160,13 +161,13 @@ We can set a time limit and display a progress bar by passing `timer` and `show_
 ```julia
 timer = TimeLimit(; wtime_min = 1)   # set timer to 1 minute
 show_progress = true                 # display progress
-options = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
-                       timer, show_progress)
+options_time = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
+                            timer, show_progress)
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```
-julia> dt0 = 5e-8;                   # trigger timer
-julia> sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
+julia> dt0_small = 5e-8;             # trigger timer
+julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_time;
                         model_parameters = p, precision = Float64);
 Progress:  66%|███████████████████▏         |  ETA: 0:00:30 ( 0.88  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
@@ -183,11 +184,13 @@ options_static = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
 No modifications to the ODE function `dy_dt!` or initial conditions `y0` are required. The following benchmark compares the runtime between static and dynamic arrays:
 ```
 # static array
+
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
                                model_parameters = p, precision = Float64);
   20.399 ms (407 allocations: 3.08 MiB)
 
 # dynamic array
+
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                                model_parameters = p, precision = Float64);
   30.666 ms (286 allocations: 3.07 MiB)
