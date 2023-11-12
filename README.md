@@ -116,7 +116,7 @@ We can adjust the numerical precision of the solver with the keyword argument `p
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
 The numerical solution ````{\vec{y}_0, ... \vec{y}_n}```` is stored in linear column format. If the state vector ````vec{y}```` is multi-dimensional, we need to reshape the solution as an (adjoint) matrix
-```
+```julia
 julia> y, t = get_solution(sol);
 julia> y
 200002×1 adjoint(::Matrix{Float64}) with eltype Float64:
@@ -139,7 +139,6 @@ plot_ode(sol, options.method, Plots.plot)
 
 ### Runtime statistics
 ```
-# after recompiling
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                               model_parameters = p, precision = Float64);
 0.017567 seconds (306 allocations: 3.076 MiB)
@@ -183,16 +182,12 @@ options_static = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
 ```
 No modifications to the ODE function `dy_dt!` or initial conditions `y0` are required. The following benchmark compares the runtime between static and dynamic arrays:
 ```
-# static array
-
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
                                model_parameters = p, precision = Float64);
   20.399 ms (407 allocations: 3.08 MiB)
-
-# dynamic array
 
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                                model_parameters = p, precision = Float64);
   30.666 ms (286 allocations: 3.07 MiB)
 ```
-### Advanced solver options
+### Advanced solver option
