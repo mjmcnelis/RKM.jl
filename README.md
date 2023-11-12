@@ -80,7 +80,7 @@ dy_dt!(f, y; t, kwargs...)
 dy_dt!(f, y; p, kwargs...)
 dy_dt!(f, y; t, p)
 ```
-The first one is for ODEs that depend only on the state variable(s) `y`. The others are for ODEs that also depend on time `t` and/or model parameters `p`.
+The first one is for ODEs that depend only on the state variable(s) `y`. The other three are for ODEs that also depend on time `t` and/or model parameters `p`.
 
 In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and model parameters `p` (if any).
 
@@ -111,11 +111,11 @@ sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
 sol = Solution(; precision = Float64)
 evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 ```
-We can adjust the numerical precision of the solver with the keyword argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
+You can adjust the numerical precision of the solver with the keyword argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
-The numerical solution ````{\vec{y}_0, ... \vec{y}_n}```` is stored in linear column format. If the state vector ````vec{y}```` is multi-dimensional, we need to reshape the solution as an (adjoint) matrix
+The numerical solution $\{\vec{y}_0, ..., \vec{y}_n\}$ is stored in linear column format. If the state vector $\vec{y}$ is multi-dimensional, then we have to reshape the solution vector `sol.y` as an (adjoint) matrix
 ```julia
 julia> y, t = get_solution(sol);
 julia> y
@@ -130,7 +130,7 @@ before plotting the results
 ```julia
 plot(t, y)
 ```
-There is also the custom plot function
+Alternatively, you can use the custom plot function
 ```julia
 plot_ode(sol, options.method, Plots.plot)
 ```
@@ -138,7 +138,7 @@ plot_ode(sol, options.method, Plots.plot)
 ## Additional features
 
 ### Runtime statistics
-```
+```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                               model_parameters = p, precision = Float64);
 0.017567 seconds (306 allocations: 3.076 MiB)
@@ -164,7 +164,7 @@ options_time = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
                             timer, show_progress)
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
-```
+```julia
 julia> dt0_small = 5e-8;             # trigger timer
 julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_time;
                         model_parameters = p, precision = Float64);
@@ -181,7 +181,7 @@ options_static = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
                               static_array = true)
 ```
 No modifications to the ODE function `dy_dt!` or initial conditions `y0` are required. The following benchmark compares the runtime between static and dynamic arrays:
-```
+```julia
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
                                model_parameters = p, precision = Float64);
   20.399 ms (407 allocations: 3.08 MiB)
