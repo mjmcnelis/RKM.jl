@@ -102,7 +102,7 @@ vector is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 function get_solution(sol::Solution)
     @unpack y, t, dimensions = sol
     # TODO: replace length(t) if use deleteat for PDEs
-    y = reshape(y, dimensions[1], length(t))'
+    y = reshape(y, dimensions[1], length(t)) |> transpose
     return y, t
 end
 

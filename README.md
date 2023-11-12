@@ -115,11 +115,11 @@ You can adjust the numerical precision of the solver with the keyword argument `
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
-The numerical solution $\{\vec{y}_0, ..., \vec{y}_n\}$ is stored in linear column format. If the state vector $\vec{y}$ is multi-dimensional, then we have to reshape the solution vector `sol.y` as an (adjoint) matrix
+The numerical solution ($\vec{y}_0, ..., \vec{y}_n$) is stored in linear column format. If the state vector $\vec{y}$ is multi-dimensional, then we have to reshape the solution vector `sol.y` as a (transposed) matrix
 ```julia
 julia> y, t = get_solution(sol);
 julia> y
-200002×1 adjoint(::Matrix{Float64}) with eltype Float64:
+200002×1 transpose(::Matrix{Float64}) with eltype Float64:
  -0.49995460213129755
  -0.49995459759148986
   ⋮
@@ -190,4 +190,4 @@ julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                                model_parameters = p, precision = Float64);
   30.666 ms (286 allocations: 3.07 MiB)
 ```
-### Advanced solver option
+### Advanced solver options
