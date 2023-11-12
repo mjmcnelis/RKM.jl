@@ -115,7 +115,11 @@ You can adjust the numerical precision of the solver with the keyword argument `
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
-The numerical solution ($\vec{y}_0, ..., \vec{y}_n$) is stored in linear column format. If the state vector $\vec{y}$ is multi-dimensional, then we have to reshape the solution vector `sol.y` as a (transposed) matrix
+The field `sol.t` stores the time series ($t_0, ..., t_n$), and `sol.y` stores the solution set ($\vec{y}_0, ..., \vec{y}_n$) in linear column format. If the state vector $\vec{y}$ is one-dimensional, we can plot the solution with
+```julia
+plot(sol.t, sol.y)
+```
+If $\vec{y}$ is multi-dimensional, we have to reshape `sol.y` as a (transposed) matrix
 ```julia
 julia> y, t = get_solution(sol);
 julia> y
@@ -138,6 +142,8 @@ plot_ode(sol, options.method, Plots.plot)
 ## Additional features
 
 ### Runtime statistics
+
+After the solver finishes, we can print runtime statistics with the function `get_stats`. After recompiling, we get
 ```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                               model_parameters = p, precision = Float64);
@@ -153,6 +159,10 @@ solution storage     = 3.052 MiB
 excess memory        = 0 bytes
 excess allocations   = 0
 ```
+Here, we show the number of time steps taken and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size and the excess memory allocated during the time evolution loop. In this example, observe that the memory given by the `@time` macro nearly matches the solution size.
+
+*Note: we have not included the memory used for the solver configuration (prior to the evolution loop).*
+
 
 ### Timer and progress display
 
@@ -180,7 +190,7 @@ If the ODE system size is small, we can use static arrays to speed up the runtim
 options_static = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
                               static_array = true)
 ```
-No modifications to the ODE function `dy_dt!` or initial conditions `y0` are required. The following benchmark compares the runtime between static and dynamic arrays:
+The following code benchmarks the runtime between static and dynamic arrays:
 ```julia
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
                                model_parameters = p, precision = Float64);
