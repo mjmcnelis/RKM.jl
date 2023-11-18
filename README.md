@@ -102,7 +102,7 @@ All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embe
 
 *Note: the absolute tolerance parameter is currently omitted.*
 
-### ODE evolution and post-processing
+### ODE evolution
 Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution. An in-place version `evolve_ode!` is also available.
 ```julia
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
@@ -115,6 +115,7 @@ You can adjust the numerical precision of the solver with the keyword argument `
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
+### Post-processing
 The field `sol.t` stores the time series ($t_0, ..., t_n$), and `sol.y` stores the solution set ($\vec{y}_0, ..., \vec{y}_n$) in linear column format. If the state vector $\vec{y}$ is one-dimensional, we can plot the solution with
 ```julia
 plot(sol.t, sol.y)
@@ -134,10 +135,6 @@ before plotting the results
 ```julia
 plot(t, y)
 ```
-Alternatively, you can use the custom plot function
-```julia
-plot_ode(sol, options.method, Plots.plot)
-```
 
 ## Additional features
 
@@ -147,31 +144,28 @@ After the solver finishes, we can print runtime statistics with the function `ge
 ```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                               model_parameters = p, precision = Float64);
-0.017567 seconds (306 allocations: 3.076 MiB)
+0.017567 seconds (306 allocations: 3.075 MiB)
 
 julia> get_stats(sol)
 time steps           = 200002
 step rejection rate  = 0.0 %
 function evaluations = 800004
 jacobian evaluations = 0
-solver runtime       = 0.01725 seconds
-solution storage     = 3.052 MiB
+evolution runtime    = 0.01725 seconds
+solution size        = 3.052 MiB
+config memory        = 22.109 KiB
 excess memory        = 0 bytes
-excess allocations   = 0
 ```
-Here, we show the number of time steps taken and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size and the excess memory allocated during the time evolution loop. In this example, observe that the memory given by the `@time` macro nearly matches the solution size.
-
-*Note: we have not included the memory used for the solver configuration (prior to the evolution loop).*
-
+Here, we show the number of time steps taken and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size, the configuration memory, and the excess memory allocated during the time evolution loop. In this example, almost all of the allocated memory went towards storing the solution.
 
 ### Timer and progress display
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
-timer = TimeLimit(; wtime_min = 1)   # set timer to 1 minute
-show_progress = true                 # display progress
 options_time = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
-                            timer, show_progress)
+                            timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
+                            show_progress = true                # display progress
+                         )
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
