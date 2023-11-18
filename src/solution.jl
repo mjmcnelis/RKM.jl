@@ -57,9 +57,8 @@ function clear_solution!(sol::Solution)
             solution_size, config_memory, excess_memory = sol
     empty!(y)
     empty!(t)
-    # doesn't appear to undo sizehint_solution!
-    # sizehint!(y, 0)
-    # sizehint!(t, 0)
+    sizehint!(y, 0)
+    sizehint!(t, 0)
     FE .= 0
     JE .= 0
     rejection_rate .= 0.0

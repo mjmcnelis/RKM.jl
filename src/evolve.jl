@@ -114,11 +114,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     runtime .= loop_stats.time
     solution_size .= sizeof(sol.y) + sizeof(sol.t)
     config_memory .= config_bytes
-
-    if (save_solution && adaptive isa Fixed) || loop_stats.bytes == 0
-        excess_memory .= loop_stats.bytes
-    else
-        excess_memory .= loop_stats.bytes .- solution_size
+    excess_memory .= loop_stats.bytes
+    if !(save_solution && adaptive isa Fixed)
+        excess_memory .-= solution_size
     end
     return nothing
 end
