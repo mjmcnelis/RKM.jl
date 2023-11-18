@@ -15,14 +15,14 @@ struct Solution{T <: AbstractFloat}
     JE::MVector{1,Int64}
     """Step rejection rate (percentage)"""
     rejection_rate::MVector{1,Float64}
-    """Runtime of ODE solver (excludes configuration)"""
+    """Runtime of ODE solver (excludes configuration) [seconds]"""
     runtime::MVector{1,Float64}
-    """Memory used to store solution set (t,y)"""
-    solution_size::Vector{String}
-    """Memory used to configure the solver"""
-    config_memory::Vector{String}
-    """Excess memory used in time evolution loop"""
-    excess_memory::Vector{String}
+    """Memory used to store solution set (t,y) [bytes]"""
+    solution_size::MVector{1,Int64}
+    """Memory used to configure the solver [bytes]"""
+    config_memory::MVector{1,Int64}
+    """Excess memory used in time evolution loop [bytes]"""
+    excess_memory::MVector{1,Int64}
     """Number of dynamical variables (assumed to be fixed)"""
     dimensions::MVector{1,Int64}
     """Float precision type"""
@@ -43,9 +43,9 @@ function Solution(; precision::Type{T} = Float64) where T <: AbstractFloat
     JE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
     runtime = MVector{1,Float64}(0.0)
-    solution_size = [""]
-    config_memory = [""]
-    excess_memory = [""]
+    solution_size = MVector{1,Int64}(0)
+    config_memory = MVector{1,Int64}(0)
+    excess_memory = MVector{1,Int64}(0)
     dimensions = MVector{1,Int64}(0.0)
 
     return Solution(y, t, FE, JE, rejection_rate, runtime, solution_size,
@@ -64,9 +64,9 @@ function clear_solution!(sol::Solution)
     JE .= 0
     rejection_rate .= 0.0
     runtime .= 0.0
-    solution_size .= ""
-    config_memory .= ""
-    excess_memory .= ""
+    solution_size .= 0
+    config_memory .= 0
+    excess_memory .= 0
     return nothing
 end
 
@@ -114,7 +114,7 @@ function get_stats(sol::Solution)
     println("function evaluations = $(FE[1])")
     println("jacobian evaluations = $(JE[1])")
     println("evolution runtime    = $(round(runtime[1], sigdigits = 4)) seconds")
-    println("solution size        = $(solution_size[1])")
-    println("config memory        = $(config_memory[1])")
-    println("excess memory        = $(excess_memory[1])")
+    println("solution size        = $(format_bytes(solution_size[1]))")
+    println("config memory        = $(format_bytes(config_memory[1]))")
+    println("excess memory        = $(format_bytes(excess_memory[1]))")
 end

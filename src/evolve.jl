@@ -88,6 +88,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         sizehint_solution!(sol, t_range, dt0, dimensions)
     end
 
+    # TODO: look into @code_warntype
     loop_stats = @timed while true
         if save_solution
             append!(sol.y, y)
@@ -103,28 +104,22 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                               error, J, linear_cache, stage_finder
                             )
         t[1] += dt[1]
-
-        # note: still get excess allocations (could pass it in above)
-        # JE[1] = evaluations[1]
-        # q()
     end
 
-    # TODO: look into @code_warntype
-    # TODO: wrap into compute_stats function
-    # compute_step_rejection_rate!(sol, method, adaptive, timer)
-    sol.JE .= stage_finder.jacobian_method.evaluations
-    sol.runtime .= loop_stats.time
+    @unpack JE, runtime, solution_size, config_memory, excess_memory = sol
 
-    solution_bytes = sizeof(sol.y) + sizeof(sol.t)
-    sol.solution_size .= format_bytes(solution_bytes)
+    # TODO: wrap into compute_stats function, fix rejection rate
+    # compute_step_rejection_rate!(sol, method, adaptive, timer)
+    JE .= stage_finder.jacobian_method.evaluations
+    runtime .= loop_stats.time
+    solution_size .= sizeof(sol.y) + sizeof(sol.t)
+    config_memory .= config_bytes
 
     if (save_solution && adaptive isa Fixed) || loop_stats.bytes == 0
-        sol.excess_memory .= format_bytes(loop_stats.bytes)
+        excess_memory .= loop_stats.bytes
     else
-        sol.excess_memory .= format_bytes(loop_stats.bytes - solution_bytes)
+        excess_memory .= loop_stats.bytes .- solution_size
     end
-
-    sol.config_memory .= format_bytes(config_bytes)
     return nothing
 end
 

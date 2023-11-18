@@ -36,16 +36,16 @@ for precision in precision_vect, method in method_vect,
 
     # sol = Solution(; precision)
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters)
-    # @show sol.excess_allocations[1]
+    # @show sol.excess_memory[1]
     # note: second solve does not allocate on adaptive even if save_solution = true
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters)
 
     sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
-    # @show sol.excess_allocations[1]
+    # @show sol.excess_memory[1]
     sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
 
-    @test sol.excess_allocations[1] == 0
-    # @show sol.excess_allocations[1]
+    @test sol.excess_memory[1] == 0
+    # @show sol.excess_memory[1]
 
     # note: plotting here gives me this error unless deepcopy
     # ERROR: LoadError: cannot resize array with shared data
