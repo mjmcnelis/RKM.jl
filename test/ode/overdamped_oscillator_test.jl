@@ -54,7 +54,7 @@ if show_plot
         @time sol = solve(prob, TRBDF2(linsolve = LUFactorization()),
                         dt = dt0, adaptive = false)
         plot!(sol.t, mapreduce(permutedims, vcat, sol.u),
-            color = :black, linewidth = 2, line = :dash)
+              color = :black, linewidth = 2, line = :dash)
     end
     display(plt)
 end

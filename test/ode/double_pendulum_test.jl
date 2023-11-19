@@ -1,27 +1,25 @@
 using Revise, RKM, JLD2, StatsBase, Test
-!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/vanderpol/equations.jl") : nothing
-loadpath = joinpath(RKM_root, "test/ode/answers/vanderpol_answers.jld2")
-@info "Starting Vanderpol test..."
+!(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/double_pendulum/equations.jl") : nothing
+loadpath = joinpath(RKM_root, "test/ode/answers/double_pendulum_answers.jld2")
+@info "Starting double pendulum test..."
 
 # option to reset answer keys
 reset_answer_keys = false
 
-# options to plot compare answer key / OrdinaryDiffEq
+# options to plot, compare answer key / OrdinaryDiffEq
 show_plot = false
 plot_compare = "ans"
 # plot_compare = "diffeq"
 
-y0 = [2.0, 0.0]
+y0 = [pi/2.0, pi/2.0, 0.0, 0.0]
 t0 = 0.0
-tf = 3.0e3
+tf = 10.0
+
+p = [0.5]
 dt0 = 1e-4
 
-# TODO: need to interpolate solution
-options = SolverOptions(; method = TrapezoidRuleBDF2(),
-                          adaptive = Doubling(; epsilon = 1e-6),
-                          stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian()),
-                        )
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed())
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 y, t = get_solution(sol)
 
 # save new answer keys
@@ -34,14 +32,13 @@ end
 # plot comparison
 if show_plot
     using Plots; plotly()
-    # note: hide y2, y4 and autoscale to see y1 (RKM) vs y3 (ans/diffeq)
     plt = plot_ode(sol, options.method, Plots.plot);
     if plot_compare == "ans"
         plot!(t_ans, y_ans, color = :black, linewidth = 2, line = :dot)
     elseif plot_compare == "diffeq"
         using OrdinaryDiffEq
-        prob = ODEProblem(dy_dt!, y0, (t0, tf))
-        @time sol = solve(prob, TRBDF2(), dt = dt0, reltol = 1e-6, abstol = 1e-6)
+        prob = ODEProblem(dy_dt!, y0, (t0, tf), p)
+        @time sol = solve(prob, RK4(), dt = dt0, adaptive = false)
         plot!(sol.t, mapreduce(permutedims, vcat, sol.u),
               color = :black, linewidth = 2, line = :dash)
     end
