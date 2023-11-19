@@ -51,13 +51,13 @@ end
 adaptive   = Fixed()
 method     = BackwardEuler1()
 t_range    = TimeRange(; t0, tf = 10.0, dt0 = dt)
-parameters = Parameters(; adaptive, method, t_range)
+options = SolverOptions(; adaptive, method, t_range)
 
 @unpack t0, dt0 = t_range
 y0 = gauss.(x, t0)
 @show C
 
-@time sol = evolve_ode(y0, dy_dt!; jacobian!, parameters)
+@time sol = evolve_ode(y0, dy_dt!; jacobian!, options)
 
 plt = plot(x, y0, label = "t = $t0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.5, 1.3),

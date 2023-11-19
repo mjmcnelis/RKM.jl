@@ -18,11 +18,11 @@ tf = 2.0/δ
 dt0 = δ
 
 # TODO: need to interpolate solution
-parameters = Parameters(; method = TrapezoidRuleBDF2(),
+options = SolverOptions(; method = TrapezoidRuleBDF2(),
                           adaptive = Doubling(; epsilon = 1e-7),
                           stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian()),
                         )
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
 y, t = get_solution(sol)
 
 # save new answer keys
@@ -35,7 +35,7 @@ end
 # plot comparison
 if show_plot
     using Plots; plotly()
-    plt = plot_ode(sol, parameters.method, Plots.plot);
+    plt = plot_ode(sol, options.method, Plots.plot);
     if plot_compare == "ans"
         plot!(t_ans, y_ans, color = :black, linewidth = 2, line = :dot)
     elseif plot_compare == "diffeq"

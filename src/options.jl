@@ -1,7 +1,7 @@
 """
-Parameters for the ODE solver.
+SolverOptions for the ODE solver.
 """
-@kwdef struct Parameters
+@kwdef struct SolverOptions
     """Adaptive time step method"""
     adaptive::AdaptiveStepSize
     """ODE solver method"""
@@ -24,6 +24,6 @@ end
 # note: need to use abstract types (e.g. ::StageFinder)
 #       to avoid excess allocations in evolve loop
 
-function Parameters(dict::Dict)
-    return Parameters(; (Symbol(k) => v for (k,v) in dict)...)
+function SolverOptions(dict::Dict)
+    return SolverOptions(; (Symbol(k) => v for (k,v) in dict)...)
 end

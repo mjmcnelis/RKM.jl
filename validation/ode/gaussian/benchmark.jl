@@ -41,10 +41,10 @@ for epsilon in epsilon_vect
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    ps = Parameters(; adaptive = Embedded(; epsilon, low, high, safety),
+    ps = SolverOptions(; adaptive = Embedded(; epsilon, low, high, safety),
                       method = DormandPrince54(), t_range = TimeRange(; t0, tf, dt0))
 
-    rkm = @benchmark evolve_ode($y0, dy_dt!; parameters = $ps, show_progress = false,
+    rkm = @benchmark evolve_ode($y0, dy_dt!; options = $ps, show_progress = false,
                                 static_array = $static)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)

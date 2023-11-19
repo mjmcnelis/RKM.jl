@@ -9,7 +9,7 @@ precision = Float64
 # precision = BigFloat
 
 # TODO: do asserts between adaptive, method in parameters outer-constructor
-parameters = Parameters(options)
+options = SolverOptions(options)
 
 t0 = -10.0
 tf = 10.0
@@ -22,17 +22,17 @@ for i = 1:N
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
 # in-place version
 #=
 sol = Solution(; precision)
-@time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters)
+@time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
 =#
 
-# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
+# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
 
 get_stats(sol)
-# plot_ode(sol, parameters.method, Plots.plot)
+# plot_ode(sol, options.method, Plots.plot)
 
 GC.gc()
 println("\ndone")

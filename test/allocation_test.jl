@@ -32,24 +32,24 @@ for precision in precision_vect, method in method_vect,
 
     # @show precision adaptive limiter pid static_array
 
-    parameters = Parameters(; method, adaptive, controller, save_solution, static_array)
+    options = SolverOptions(; method, adaptive, controller, save_solution, static_array)
 
     # sol = Solution(; precision)
-    # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters)
+    # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
     # @show sol.excess_memory[1]
     # note: second solve does not allocate on adaptive even if save_solution = true
-    # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters)
+    # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
 
-    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
+    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
     # @show sol.excess_memory[1]
-    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, parameters; precision)
+    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
 
     @test sol.excess_memory[1] == 0
     # @show sol.excess_memory[1]
 
     # note: plotting here gives me this error unless deepcopy
     # ERROR: LoadError: cannot resize array with shared data
-    # plot_ode(deepcopy(sol), parameters.method, Plots.plot) |> display
+    # plot_ode(deepcopy(sol), options.method, Plots.plot) |> display
     # println("")
 end
 

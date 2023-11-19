@@ -74,7 +74,7 @@ include("updates/runge_kutta/central_step.jl")
 # Multistep updates
 include("updates/multistep/fixed_step.jl")
 
-include("parameters.jl")
+include("options.jl")
 include("evolve.jl")
 
 # Adaptive methods
@@ -122,8 +122,8 @@ export AdamsBashforth1, AdamsBashforth2, AdamsBashforth3, AdamsBashforth4, Adams
 export make_code_name
 # ODE solution
 export Solution, get_solution, clear_solution!, get_stats
-# Parameters
-export Parameters
+# Solver options
+export SolverOptions
 # Time
 export TimeRange, TimeLimit
 # ODE solver

@@ -60,7 +60,7 @@ dt0 = 1e-4
 p = [B]
 
 # solver options
-options = Parameters(; method = RungeKutta4(), adaptive = Fixed())
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve ode, plot solution
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
@@ -162,7 +162,7 @@ Here, we show the number of time steps taken and the number of times `dy_dt!` wa
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
-options_time = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
+options_time = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                             timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
                             show_progress = true                # display progress
                          )
@@ -181,7 +181,7 @@ Progress:  66%|███████████████████▏     
 
 If the ODE system size is small, we can use static arrays to speed up the runtime:
 ```julia
-options_static = Parameters(; method = RungeKutta4(), adaptive = Fixed(),
+options_static = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                               static_array = true)
 ```
 The following code benchmarks the runtime between static and dynamic arrays:

@@ -12,7 +12,7 @@ epsilon = 1e-8
 
 # RKM
 method = DormandPrince54()
-parameters = Parameters(; method,
+options = SolverOptions(; method,
                           adaptive = Embedded(; epsilon),
                           t_range = TimeRange(; t0, tf, dt0)
                         )

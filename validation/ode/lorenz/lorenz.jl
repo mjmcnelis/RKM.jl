@@ -12,7 +12,7 @@ dt0 = 1e-3
 
 # RKM
 method = RungeKutta4()
-parameters = Parameters(; method,
+options = SolverOptions(; method,
                           adaptive = Fixed(),
                           t_range = TimeRange(; t0, tf, dt0)
                         )

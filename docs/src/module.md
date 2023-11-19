@@ -3,7 +3,7 @@
 ## Exports
 - `evolve_ode` for solving the ODE system and outputting the solution
 - `get_solution` for post-processing the ODE solution
-- `Parameters` for storing the ODE solver options
+- `SolverOptions` for storing the ODE solver options
 - `TimeRange` for specifying the time evolution interval
 - `TimeLimit` for setting a timer for the solver routine
 - Runge--Kutta methods (see [Runge--Kutta](methods/runge_kutta/runge_kutta.html))

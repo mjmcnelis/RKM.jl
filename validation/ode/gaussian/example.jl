@@ -13,9 +13,9 @@ adaptive = Embedded(; epsilon = 1e-15, low = 0.1, high = 5.0, safety = 0.9)
 method = DormandPrince54()
 t_range = TimeRange(; t0, tf = 5, dt0 = 1e-4)
 timer = TimeLimit()
-parameters = Parameters(; adaptive, method, t_range, timer)
+options = SolverOptions(; adaptive, method, t_range, timer)
 
-@time sol = evolve_ode(y0, dy_dt!; parameters, precision, show_progress = false)
+@time sol = evolve_ode(y0, dy_dt!; options, precision, show_progress = false)
 # plot_ode(sol, method, Plots.plot)
 
 @show timer.counter sol.FE sol.rejection_rate

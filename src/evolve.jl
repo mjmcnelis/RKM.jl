@@ -1,14 +1,14 @@
 # TODO update docstring
 """
     evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
-                dt0::Float64, dy_dt!::Function, parameters::Parameters;
+                dt0::Float64, dy_dt!::Function, options::SolverOptions;
                 model_parameters = nothing) where {T <: AbstractFloat,
                                                    T1 <: AbstractFloat}
 
-Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `parameters`
+Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `options`
 """
 function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
-                     dt0::Float64, dy_dt!::Function, parameters::Parameters;
+                     dt0::Float64, dy_dt!::Function, options::SolverOptions;
                      model_parameters = nothing) where {T <: AbstractFloat,
                                                         T1 <: AbstractFloat}
     config_bytes = @allocated begin
@@ -16,7 +16,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         @unpack precision, FE#=, JE=# = sol
 
         @unpack adaptive, controller, method, t_range, timer,
-                stage_finder, static_array, show_progress, save_solution = parameters
+                stage_finder, static_array, show_progress, save_solution = options
 
         @set! t_range.t0 = t0
         @set! t_range.tf = tf
@@ -123,21 +123,21 @@ end
 
 """
     evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-               dy_dt!::Function, parameters::Parameters;
+               dy_dt!::Function, options::SolverOptions;
                model_parameters = nothing,
                precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                      T1 <: AbstractFloat,
                                                      T2 <: AbstractFloat}
 
-Required parameters: `y0`, `dt0`, `dy_dt!`, `parameters`
+Required parameters: `y0`, `dt0`, `dy_dt!`, `options`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-                    dy_dt!::Function, parameters::Parameters;
+                    dy_dt!::Function, options::SolverOptions;
                     model_parameters = nothing,
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T1 <: AbstractFloat,
                                                           T2 <: AbstractFloat}
     sol = Solution(; precision)
-    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, parameters; model_parameters)
+    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters)
     return sol
 end

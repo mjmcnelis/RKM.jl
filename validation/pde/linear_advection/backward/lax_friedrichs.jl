@@ -36,7 +36,7 @@ method       = BackwardEuler1()
 stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian())
 t_range      = TimeRange(; t0 = 0.0, tf = 6.0, dt0 = dt)
 
-parameters = Parameters(; adaptive, method, stage_finder, t_range)
+options = SolverOptions(; adaptive, method, stage_finder, t_range)
 
 @unpack t0, dt0 = t_range
 y0 = gauss.(x)

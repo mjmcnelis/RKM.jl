@@ -45,9 +45,9 @@ for epsilon in epsilon_vect
     append!(err_ord, mean(err))
 
     # RKM
-    ps = Parameters(; adaptive = Embedded(; epsilon, low, high, safety),
+    ps = SolverOptions(; adaptive = Embedded(; epsilon, low, high, safety),
                       method = DormandPrince54(), t_range = TimeRange(; t0, tf, dt0))
-    sol = evolve_ode(y0, dy_dt!; parameters = ps, show_progress = false, precision)
+    sol = evolve_ode(y0, dy_dt!; options = ps, show_progress = false, precision)
 
     append!(fe_rkm, sol.FE)
 

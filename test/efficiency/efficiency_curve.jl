@@ -20,7 +20,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
             # TODO: sort out how to do efficiency for fixed time step
             for epsilon in epsilon_vect
                 adaptive = @set adaptive.epsilon = epsilon
-                parameters = Parameters(; adaptive, method, t_range)
+                options = SolverOptions(; adaptive, method, t_range)
 
                 sol = evolve_ode(y0, dy_dt!; parameters, precision)
                 y, t = get_solution(sol)
