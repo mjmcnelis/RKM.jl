@@ -1,6 +1,6 @@
 using Revise, RKM, OrdinaryDiffEq
 import StaticArrays: SA
-import BenchmarkTools: @benchmark, @btime, mean
+import BenchmarkTools: @benchmark, mean
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 GC.gc()
@@ -28,15 +28,15 @@ for dt0 in dt0_vect
     f = static ? f_ord_static : f_ord
     y = static ? SA[y0...] : y0
     prob = ODEProblem(f, y, (t0, tf))
-    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false)
+    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false,
+                           maxiters = $(10^7), saveat = $dt0)
     push!(time_ord, mean(ord).time/1e9)     # convert from ns to s
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    ps = SolverOptions(; adaptive = Fixed(), method = RungeKutta4(),
-                      t_range = TimeRange(; t0, tf, dt0))
-    rkm = @benchmark evolve_ode($y0, dy_dt!; options = $ps, show_progress = false,
-                                static_array = $static)
+    options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                              static_array = static)
+    rkm = @benchmark evolve_ode($y0, $t0, $tf, $dt0, dy_dt!, $options)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
     GC.gc()
@@ -80,14 +80,14 @@ for N in N_vect
 
     # OrdinaryDiffEq
     prob = ODEProblem(f_ord, y0, (t0, tf))
-    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false)
+    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false, saveat = $dt0)
     push!(time_ord, mean(ord).time/1e9)     # convert from ns to s
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    ps = SolverOptions(; adaptive = Fixed(), method = RungeKutta4(),
-                      t_range = TimeRange(; t0, tf, dt0))
-    rkm = @benchmark evolve_ode($y0, dy_dt!; options = $ps, show_progress = false)
+    options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                              static_array = static)
+    rkm = @benchmark evolve_ode($y0, $t0, $tf, $dt0, dy_dt!, $options)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
     GC.gc()
