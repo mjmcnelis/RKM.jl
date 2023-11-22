@@ -126,9 +126,7 @@ julia> y, t = get_solution(sol);
 julia> y
 200002×1 transpose(::Matrix{Float64}) with eltype Float64:
  -0.49995460213129755
- -0.49995459759148986
   ⋮
-  0.49995460213129483
   0.49995460667064867
 ```
 before plotting the results
@@ -144,16 +142,16 @@ After the solver finishes, we can print runtime statistics with the function `ge
 ```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                               model_parameters = p, precision = Float64);
-0.017567 seconds (306 allocations: 3.075 MiB)
+  0.017137 seconds (279 allocations: 3.074 MiB)
 
 julia> get_stats(sol)
 time steps           = 200002
 step rejection rate  = 0.0 %
 function evaluations = 800004
 jacobian evaluations = 0
-evolution runtime    = 0.01725 seconds
+evolution runtime    = 0.01693 seconds
 solution size        = 3.052 MiB
-config memory        = 22.109 KiB
+config memory        = 21.938 KiB
 excess memory        = 0 bytes
 ```
 Here, we show the number of time steps taken and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size, the configuration memory, and the excess memory allocated during the time evolution loop. In this example, almost all of the allocated memory went towards storing the solution.
@@ -169,10 +167,10 @@ options_time = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
-julia> dt0_small = 5e-8;             # trigger timer
+julia> dt0_small = 2e-8;             # trigger timer
 julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_time;
                         model_parameters = p, precision = Float64);
-Progress:  66%|███████████████████▏         |  ETA: 0:00:30 ( 0.88  s/it)
+Progress:  55%|███████████████████████                  |  ETA: 0:00:48 ( 1.07  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/time.jl:67
 ```
@@ -188,10 +186,10 @@ The following code benchmarks the runtime between static and dynamic arrays:
 ```julia
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
                                model_parameters = p, precision = Float64);
-  20.399 ms (407 allocations: 3.08 MiB)
+  14.082 ms (400 allocations: 3.08 MiB)
 
 julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                                model_parameters = p, precision = Float64);
-  30.666 ms (286 allocations: 3.07 MiB)
+  17.659 ms (279 allocations: 3.07 MiB)
 ```
 ### Advanced solver options
