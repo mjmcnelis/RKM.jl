@@ -39,8 +39,10 @@ struct Doubling <: AdaptiveStepSize
     dt_min::Float64
     """Maximum time step"""
     dt_max::Float64
-    """Maximum number of attempts to search for new time step"""
+    """Maximum number of attempts to compute time step per update"""
     max_attempts::Int64
+    """Total number of attempts in evolution loop"""
+    total_attempts::MVector{1,Int64}
 end
 
 function Doubling(; epsilon = 1e-6, p_norm = 2,
@@ -48,8 +50,9 @@ function Doubling(; epsilon = 1e-6, p_norm = 2,
 
     check_adaptive_parameters_1(; epsilon, p_norm, dt_min, dt_max)
     check_adaptive_parameters_2(; max_attempts)
+    total_attempts = MVector{1,Int64}(0)
 
-    return Doubling(epsilon, p_norm, dt_min, dt_max, max_attempts)
+    return Doubling(epsilon, p_norm, dt_min, dt_max, max_attempts, total_attempts)
 end
 
 struct Embedded <: AdaptiveStepSize
@@ -61,8 +64,10 @@ struct Embedded <: AdaptiveStepSize
     dt_min::Float64
     """Maximum time step"""
     dt_max::Float64
-    """Maximum number of attempts to search for new time step"""
+    """Maximum number of attempts to compute time step per update"""
     max_attempts::Int64
+    """Total number of attempts in evolution loop"""
+    total_attempts::MVector{1,Int64}
 end
 
 function Embedded(; epsilon = 1e-6, p_norm = 2,
@@ -70,8 +75,9 @@ function Embedded(; epsilon = 1e-6, p_norm = 2,
 
     check_adaptive_parameters_1(; epsilon, p_norm, dt_min, dt_max)
     check_adaptive_parameters_2(; max_attempts)
+    total_attempts = MVector{1,Int64}(0)
 
-    return Embedded(epsilon, p_norm, dt_min, dt_max, max_attempts)
+    return Embedded(epsilon, p_norm, dt_min, dt_max, max_attempts, total_attempts)
 end
 
 function check_adaptive_parameters_1(; epsilon, p_norm, dt_min, dt_max)
@@ -85,4 +91,20 @@ end
 function check_adaptive_parameters_2(; max_attempts)
     @assert max_attempts > 0 "max_attempts = $max_attempts is not greater than 0"
     return nothing
+end
+
+function reset_attempts!(adaptive::AdaptiveStepSize)
+    if hasproperty(adaptive, :total_attempts)
+        adaptive.total_attempts[1] = 0
+    end
+    return nothing
+end
+
+function compute_step_rejection_rate(adaptive::AdaptiveStepSize, timer::TimeLimit)
+    if hasproperty(adaptive, :total_attempts)
+        @unpack total_steps = timer
+        @unpack total_attempts = adaptive
+        return 100.0 * (1.0 - total_steps[1]/total_attempts[1])
+    end
+    return 0.0
 end

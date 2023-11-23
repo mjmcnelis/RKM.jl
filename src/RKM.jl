@@ -30,7 +30,6 @@ RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
 include("time.jl")
-include("solution.jl")
 include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
@@ -39,6 +38,7 @@ include("controller/pid_control.jl")
 include("controller/limiter.jl")
 include("controller/time_step_controller.jl")
 include("stage_finder.jl")
+include("solution.jl")
 include("tmp/linear_solver.jl")
 include("plots.jl")
 include("utils.jl")
@@ -64,7 +64,6 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 include("methods/multistep/linear_multistep.jl")
 include("methods/multistep/adams_bashforth.jl")
 # Runge-Kutta updates
-include("updates/step_rejection_rate.jl")
 include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")
 include("updates/runge_kutta/double_step.jl")
@@ -75,7 +74,6 @@ include("updates/multistep/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")
-include("stats.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff

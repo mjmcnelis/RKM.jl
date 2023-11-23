@@ -7,7 +7,7 @@ function evolve_one_time_step!(method::RungeKutta,
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack epsilon, p_norm, dt_min, dt_max, max_attempts = adaptive
+    @unpack epsilon, p_norm, dt_min, dt_max, max_attempts, total_attempts = adaptive
     @unpack explicit_stage = method
     @unpack limiter = controller
 
@@ -71,6 +71,7 @@ function evolve_one_time_step!(method::RungeKutta,
                                      break)
         attempts += 1
     end
+    total_attempts[1] += attempts
     controller.initialized[1] = true
 
     @.. y = y2                                          # get iteration

@@ -16,8 +16,8 @@ struct TimeLimit
     wtime_min::Float64
     """System time since epoch (seconds)"""
     time_sys::MVector{1,Float64}
-    """Counter for the number of time steps done so far by the solver"""
-    counter::MVector{1,Int64}
+    """Total number of time steps taken by the solver"""
+    total_steps::MVector{1,Int64}
 end
 
 """
@@ -28,9 +28,9 @@ Outer constructor for `TimeLimit`.
 function TimeLimit(; wtime_min::Real = 60)
     @assert wtime_min >= 0 "wtime_min = $wtime_min is not greater than or equal to 0"
     time_sys = MVector{1,Float64}(time())
-    counter = MVector{1,Int64}(0)
+    total_steps = MVector{1,Int64}(0)
 
-    return TimeLimit(wtime_min, time_sys, counter)
+    return TimeLimit(wtime_min, time_sys, total_steps)
 end
 
 """
@@ -42,7 +42,7 @@ Required parameters: `timer`
 """
 function reset_timer!(timer::TimeLimit)
     timer.time_sys[1] = time()
-    timer.counter[1] = 0
+    timer.total_steps[1] = 0
     return nothing
 end
 
@@ -57,11 +57,10 @@ Required parameters: `t`, `tf`, `timer`
 """
 function continue_solver(t::VectorMVector{1,T}, tf::T,
                          timer::TimeLimit) where T <: AbstractFloat
-    @unpack counter, wtime_min, time_sys = timer
+    @unpack wtime_min, time_sys, total_steps = timer
 
-    counter[1] += 1
     # note: check timer every 10 time steps
-    if !isinf(wtime_min) && counter[1] % 10 == 0
+    if !isinf(wtime_min) && total_steps[1] % 10 == 0
         if time() > time_sys[1] + 60*wtime_min
             println("")
             @warn "Exceeded time limit of $wtime_min minutes (stopping evolve_ode!...)\n"

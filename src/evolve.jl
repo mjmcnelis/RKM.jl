@@ -23,6 +23,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         @unpack t0, tf = t_range
 
         reset_timer!(timer)
+        reset_attempts!(adaptive)
 
         method = reconstruct_method(method, precision)
         if !(adaptive isa Fixed)
@@ -104,8 +105,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                               error, J, linear_cache, stage_finder
                              )
         t[1] += dt[1]
+        timer.total_steps[1] += 1
     end
-    compute_stats!(sol, options, stage_finder, loop_stats, config_bytes)
+    compute_stats!(sol, save_solution, adaptive, timer,
+                   stage_finder, loop_stats, config_bytes)
     return nothing
 end
 
