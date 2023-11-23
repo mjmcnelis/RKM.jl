@@ -162,15 +162,15 @@ Here, we show the number of time steps taken and the number of times `dy_dt!` wa
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
-options_time = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                            timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
-                            show_progress = true                # display progress
-                         )
+options_timer = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                                timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
+                                show_progress = true                # display progress
+                             )
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
 julia> dt0_small = 5e-8;             # trigger timer
-julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_time;
+julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_timer;
                         model_parameters = p, precision = Float64);
 Progress:  66%|███████████████████▏         |  ETA: 0:00:30 ( 0.88  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
@@ -182,7 +182,7 @@ Progress:  66%|███████████████████▏     
 If the ODE system size is small, we can use static arrays to speed up the runtime:
 ```julia
 options_static = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                              static_array = true)
+                                 static_array = true)
 ```
 The following code benchmarks the runtime between static and dynamic arrays:
 ```julia

@@ -64,7 +64,6 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 include("methods/multistep/linear_multistep.jl")
 include("methods/multistep/adams_bashforth.jl")
 # Runge-Kutta updates
-include("updates/function_evaluations.jl")
 include("updates/step_rejection_rate.jl")
 include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")

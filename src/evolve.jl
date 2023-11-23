@@ -57,7 +57,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         f_tmp = calloc_vector(static_array, precision, dimensions)
         f     = calloc_vector(static_array, precision, dimensions)
         # TODO: should have option to make it sparse
+
+        # TMP for benchmark (really need to skip allocation here when dimensions >> 1)
         J     = calloc_matrix(static_array, precision, dimensions, dimensions)
+        # J = calloc_matrix(static_array, precision, 1, 1)
 
         # TEMP for step doubling (embedded too probably)
         y1 = calloc_vector(static_array, precision, dimensions)
@@ -80,8 +83,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
         progress = Progress(100; showspeed = true, color = :gray)
-
-        # @unpack evaluations = stage_finder.jacobian_method
     end
 
     if save_solution && adaptive isa Fixed
@@ -98,26 +99,13 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         show_progress && monitor_progess(t, progress, checkpoints)
         continue_solver(t, tf, timer) || break
 
-        # TODO: see if can pass kwargs
         evolve_one_time_step!(method, adaptive, controller,
                               FE, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, f, y1, y2,
                               error, J, linear_cache, stage_finder
-                            )
+                             )
         t[1] += dt[1]
     end
-
-    @unpack JE, runtime, solution_size, config_memory, excess_memory = sol
-
-    # TODO: wrap into compute_stats function, fix rejection rate
-    # compute_step_rejection_rate!(sol, method, adaptive, timer)
-    JE .= stage_finder.jacobian_method.evaluations
-    runtime .= loop_stats.time
-    solution_size .= sizeof(sol.y) + sizeof(sol.t)
-    config_memory .= config_bytes
-    excess_memory .= loop_stats.bytes
-    if !(save_solution && adaptive isa Fixed)
-        excess_memory .-= solution_size
-    end
+    compute_stats!(sol, options, stage_finder, loop_stats, config_bytes)
     return nothing
 end
 

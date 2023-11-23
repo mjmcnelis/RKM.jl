@@ -105,6 +105,27 @@ function get_solution(sol::Solution)
     return y, t
 end
 
+function compute_stats!(sol::Solution, options::SolverOptions, stage_finder::StageFinder,
+                        loop_stats::NamedTuple, config_bytes::Int64)
+
+    @unpack save_solution, adaptive = options
+    @unpack jacobian_method = stage_finder
+    @unpack JE, runtime, solution_size, config_memory, excess_memory = sol
+
+    # TODO: fix step rejection rate
+    # compute_step_rejection_rate!(sol, method, adaptive, timer)
+
+    JE .= jacobian_method.evaluations
+    runtime .= loop_stats.time
+    solution_size .= sizeof(sol.y) + sizeof(sol.t)
+    config_memory .= config_bytes
+    excess_memory .= loop_stats.bytes
+    if !(save_solution && adaptive isa Fixed)
+        excess_memory .-= solution_size
+    end
+    return  nothing
+end
+
 function get_stats(sol::Solution)
     @unpack y, t, FE, JE, rejection_rate, runtime,
     solution_size, config_memory, excess_memory = sol
