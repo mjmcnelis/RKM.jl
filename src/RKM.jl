@@ -75,6 +75,7 @@ include("updates/multistep/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")
+include("stats.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, FiniteDiff
