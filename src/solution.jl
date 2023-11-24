@@ -121,7 +121,7 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveSt
     if !(save_solution && adaptive isa Fixed)
         excess_memory .-= solution_size
     end
-    return  nothing
+    return nothing
 end
 
 function get_stats(sol::Solution)

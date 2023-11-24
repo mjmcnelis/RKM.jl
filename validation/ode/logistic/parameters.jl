@@ -6,14 +6,14 @@ options = Dict(
     # :method => HeunEuler21(),
 
     :adaptive => Fixed(),
-    # :adaptive => Embedded(; epsilon = 1e-6, p_norm = 2.0),
-    # :adaptive => Doubling(; epsilon = 1e-6, p_norm = 2.0),
+    # :adaptive => Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0),
+    # :adaptive => Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0),
 
     # :timer => TimeLimit(; wtime_min = 0),
 
     :controller   => TimeStepController(;
-                         pid = H312Control(),
-                        #  pid = PIControl(),
+                         pid = PIControl(),
+                        #  pid = H312Control(),
                          limiter = SmoothLimiter(),
                         #  limiter = PiecewiseLimiter(),
                      ),

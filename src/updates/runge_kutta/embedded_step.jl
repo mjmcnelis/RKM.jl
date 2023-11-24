@@ -7,21 +7,22 @@ function evolve_one_time_step!(method::RungeKutta,
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack epsilon, p_norm, max_attempts, total_attempts = adaptive
+    @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts = adaptive
     @unpack iteration, explicit_stage, fsal = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
-
-    # note: have modified norm function for DoubleFloat
-    y_norm = norm(y, p_norm)                            # compute norm of current state
 
     order_max = maximum(method.order)                   # max/min orders in embedded scheme
     order_min = minimum(method.order)
 
     # note: comment if benchmark against OrdinaryDiffEq (add boolean?)
-    epsilon ^= (order_min / order_max)                  # rescale tolerance parameter
+    epsilon ^= (order_min / order_max)                  # rescale tolerance parameters
+    alpha ^= (order_min / order_max)
+    delta ^= (order_min / order_max)
     # TODO: try reconstruct_adaptive (i.e. repower epsilon, make it correct type)
     epsilon = T(epsilon) # tmp for T = Float32 (otherwise tol = Float64 != Float32)
+    alpha = T(alpha)
+    delta = T(delta)
 
     # evaluate first stage at (t,y)
     if explicit_stage[1]
@@ -55,7 +56,7 @@ function evolve_one_time_step!(method::RungeKutta,
         @.. error = y2 - y1                             # local error of embedded pair
 
         e_norm = norm(error, p_norm)                    # compute norms
-        y1_norm = norm(y1, p_norm)
+        y_norm = norm(y1, p_norm)
         # TODO: need to use Δy = y2 since it's secondary method
         #       but should make labeling consistent w/ doubling
         Δy = y2
@@ -63,7 +64,7 @@ function evolve_one_time_step!(method::RungeKutta,
         Δy_norm = norm(Δy, p_norm)
 
         # compute tolerance
-        tol = epsilon * max(y_norm, y1_norm, Δy_norm)
+        tol = max(epsilon*y_norm, alpha, delta*Δy_norm) # compute tolerance
 
         if !controller.initialized[1]                   # initialize controller
             initialize_controller!(controller, e_norm, tol, dt[1])

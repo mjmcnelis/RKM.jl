@@ -7,7 +7,7 @@ function evolve_one_time_step!(method::RungeKutta,
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack epsilon, p_norm, max_attempts, total_attempts = adaptive
+    @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts = adaptive
     @unpack explicit_stage = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
@@ -15,9 +15,13 @@ function evolve_one_time_step!(method::RungeKutta,
     order = method.order[1]                             # order of scheme
 
     # note: comment if want to compare to OrdinaryDiffEq
-    epsilon ^= order / (1.0 + order)                    # rescale tolerance parameter
+    epsilon ^= order / (1.0 + order)                    # rescale tolerance parameters
+    alpha ^= order / (1.0 + order)
+    delta ^= order / (1.0 + order)
     # TODO: try reconstruct_adaptive (i.e. repower epsilon, make it correct type)
     epsilon = T(epsilon) # tmp for T = Float32 (otherwise tol = Float64 != Float32)
+    alpha = T(alpha)
+    delta = T(delta)
 
     # if do Richardson extrapolation, then always have
     # to evaluate (explicit) first stage at (t,y)
@@ -46,7 +50,7 @@ function evolve_one_time_step!(method::RungeKutta,
         @.. Δy = y2 - y
         Δy_norm = norm(Δy, p_norm)
 
-        tol = epsilon * max(y_norm, Δy_norm)            # compute tolerance
+        tol = max(epsilon*y_norm, alpha, delta*Δy_norm) # compute tolerance
 
         if !controller.initialized[1]                   # initialize controller
             initialize_controller!(controller, e_norm, tol, dt[1])

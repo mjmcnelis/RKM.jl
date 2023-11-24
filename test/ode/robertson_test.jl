@@ -18,7 +18,7 @@ dt0 = 0.01
 
 # TODO: need to interpolate solution
 options = SolverOptions(; method = TrapezoidRuleBDF2(),
-                          adaptive = Doubling(; epsilon = 1e-6),
+                          adaptive = Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6),
                           stage_finder = ImplicitStageFinder(; jacobian_method = ForwardJacobian()),
                         )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)

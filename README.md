@@ -94,13 +94,11 @@ list_implicit_runge_kutta_methods()
 ```
 We can set the time step to be either fixed or adaptive. The latter is based on step doubling or embedded techinques.
 ```julia
-Fixed()                     # fixed time step
-Doubling(; epsilon = 1e-6)  # step doubling
-Embedded(; epsilon = 1e-6)  # embedded Runge-Kutta
+Fixed()                                                 # fixed time step
+Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6)  # step doubling
+Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6)  # embedded Runge-Kutta
 ```
-All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embedded` is only compatible with embedded methods. In the adaptive time step routines, the parameter `epsilon` controls both the relative and incremental error tolerances.
-
-*Note: the absolute tolerance parameter is currently omitted.*
+All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embedded` is only compatible with embedded methods. The parameters `epsilon`, `alpha` and `delta` control the relative, absolute and incremental error tolerances, respectively.
 
 ### ODE evolution
 Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution. An in-place version `evolve_ode!` is also available.

@@ -26,8 +26,12 @@ Step doubling adaptive time step algorithm
 $(TYPEDFIELDS)
 """
 struct Doubling <: AdaptiveStepSize
-    """Relative and incremental error tolerance"""
+    """Relative error tolerance"""
     epsilon::Float64
+    """Absolute error tolerance"""
+    alpha::Float64
+    """Incremental error tolerance"""
+    delta::Float64
     """Integer used to compute L--norms"""
     p_norm::Float64
     """Maximum number of attempts to compute time step per update"""
@@ -36,18 +40,23 @@ struct Doubling <: AdaptiveStepSize
     total_attempts::MVector{1,Int64}
 end
 
-function Doubling(; epsilon = 1e-6, p_norm = 2, max_attempts = 10)
+function Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,
+                    p_norm = 2, max_attempts = 10)
 
-    check_adaptive_parameters_1(; epsilon, p_norm)
+    check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
     check_adaptive_parameters_2(; max_attempts)
     total_attempts = MVector{1,Int64}(0)
 
-    return Doubling(epsilon, p_norm, max_attempts, total_attempts)
+    return Doubling(epsilon, alpha, delta, p_norm, max_attempts, total_attempts)
 end
 
 struct Embedded <: AdaptiveStepSize
-    """Relative and incremental error tolerance"""
+    """Relative error tolerance"""
     epsilon::Float64
+    """Absolute error tolerance"""
+    alpha::Float64
+    """Incremental error tolerance"""
+    delta::Float64
     """Integer used to compute L--norms"""
     p_norm::Float64
     """Maximum number of attempts to compute time step per update"""
@@ -56,16 +65,22 @@ struct Embedded <: AdaptiveStepSize
     total_attempts::MVector{1,Int64}
 end
 
-function Embedded(; epsilon = 1e-6, p_norm = 2, max_attempts = 10)
-    check_adaptive_parameters_1(; epsilon, p_norm)
+function Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,
+                    p_norm = 2, max_attempts = 10)
+
+    check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
     check_adaptive_parameters_2(; max_attempts)
     total_attempts = MVector{1,Int64}(0)
 
-    return Embedded(epsilon, p_norm, max_attempts, total_attempts)
+    return Embedded(epsilon, alpha, delta, p_norm, max_attempts, total_attempts)
 end
 
-function check_adaptive_parameters_1(; epsilon, p_norm)
-    @assert epsilon > 0.0 "epsilon = $epsilon is not positive"
+function check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
+    @assert epsilon >= 0.0 "epsilon = $epsilon cannot be negative"
+    @assert alpha >= 0.0 "alpha = $alpha cannot be negative"
+    @assert delta >= 0.0 "delta = $delta cannot be negative"
+    msg = "one of the tolerance parameters (epsilon, alpha, delta) must be positive"
+    @assert !all(x -> x == 0.0, [epsilon, alpha, delta]) msg
     @assert p_norm >= 1 "p_norm = $p_norm is not valid"
     return nothing
 end
