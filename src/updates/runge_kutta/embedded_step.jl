@@ -7,9 +7,10 @@ function evolve_one_time_step!(method::RungeKutta,
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack epsilon, p_norm, dt_min, dt_max, max_attempts, total_attempts = adaptive
+    @unpack epsilon, p_norm, max_attempts, total_attempts = adaptive
     @unpack iteration, explicit_stage, fsal = method
     @unpack limiter = controller
+    @unpack dt_min, dt_max = limiter
 
     # note: have modified norm function for DoubleFloat
     y_norm = norm(y, p_norm)                            # compute norm of current state

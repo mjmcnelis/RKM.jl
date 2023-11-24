@@ -7,9 +7,10 @@ function evolve_one_time_step!(method::RungeKutta,
              error::VectorMVector, J::MatrixMMatrix, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
-    @unpack epsilon, p_norm, dt_min, dt_max, max_attempts, total_attempts = adaptive
+    @unpack epsilon, p_norm, max_attempts, total_attempts = adaptive
     @unpack explicit_stage = method
     @unpack limiter = controller
+    @unpack dt_min, dt_max = limiter
 
     order = method.order[1]                             # order of scheme
 
