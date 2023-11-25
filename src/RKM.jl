@@ -42,6 +42,7 @@ include("solution.jl")
 include("tmp/linear_solver.jl")
 include("plots.jl")
 include("utils.jl")
+include("cache.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")

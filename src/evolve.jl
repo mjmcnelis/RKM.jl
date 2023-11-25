@@ -36,7 +36,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         sol.dimensions .= dimensions
 
         # initial conditions
-        y  = y0 .|> precision
+        y = y0 .|> precision
         y isa Vector ? nothing : y = [y]
         static_array ? y = MVector{dimensions}(y...) : nothing
 
@@ -48,25 +48,15 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         dt = precision == BigFloat ? [dt0, dt0] : MVector{2}(dt0, dt0)
 
         # create ODE wrapper function
-        # note: used copy(t) to prevent bug in time accumulation
         ode_wrap! = ODEWrapper(deepcopy(t), model_parameters, dy_dt!)
 
-        # note: should not be SA in general but still may want option if size small
-        # note: keep in mind of ForwardDiff issues we had with PaT
-        dy    = calloc_matrix(static_array, precision, dimensions, stages)
-        y_tmp = calloc_vector(static_array, precision, dimensions)
-        f_tmp = calloc_vector(static_array, precision, dimensions)
-        f     = calloc_vector(static_array, precision, dimensions)
-        # TODO: should have option to make it sparse
+        update_cache = if static_array
+            StaticUpdateCache(; method, adaptive, precision, dimensions, stages)
+        else
+            UpdateCache(; method, adaptive, precision, dimensions, stages)
+        end
 
-        # TMP for benchmark (really need to skip allocation here when dimensions >> 1)
-        J     = calloc_matrix(static_array, precision, dimensions, dimensions)
-        # J = calloc_matrix(static_array, precision, 1, 1)
-
-        # TEMP for step doubling (embedded too probably)
-        y1 = calloc_vector(static_array, precision, dimensions)
-        y2 = calloc_vector(static_array, precision, dimensions)
-        error = calloc_vector(static_array, precision, dimensions)
+        @unpack J, f, f_tmp = update_cache
 
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
@@ -101,9 +91,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         continue_solver(t, tf, timer) || break
 
         evolve_one_time_step!(method, adaptive, controller,
-                              FE, y, t, dt, ode_wrap!, dy, y_tmp, f_tmp, f, y1, y2,
-                              error, J, linear_cache, stage_finder
-                             )
+                              FE, y, t, dt, ode_wrap!, update_cache,
+                              linear_cache, stage_finder)
         t[1] += dt[1]
         timer.total_steps[1] += 1
     end
