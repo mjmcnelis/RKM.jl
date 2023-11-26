@@ -1,19 +1,4 @@
 
-# stats for logistic ODE w/
-# controller = TimeStepController(; pid = H312Control(), limiter = SmoothLimiter())
-# precision = Float64
-# adaptive = Embedded()
-# method = HeunEuler21()
-#
-# time steps           = 252
-# step rejection rate  = 0.7905138339920903 %
-# function evaluations = 504
-# jacobian evaluations = 0
-# solver runtime       = 0.0001427 seconds
-# solution storage     = 5.906 KiB
-# excess memory        = 14.969 KiB
-# excess allocations   = 15328
-
 abstract type Controller end
 
 """

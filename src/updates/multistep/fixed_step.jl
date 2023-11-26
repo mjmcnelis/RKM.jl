@@ -2,9 +2,7 @@
 function evolve_one_time_step!(method::LinearMultistep,
              adaptive::Fixed, controller::Controller, FE::MVector{1,Int64},
              y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
-             ode_wrap!::ODEWrapper, dy::MatrixMMatrix, y_tmp::VectorMVector,
-             f_tmp::VectorMVector, f::VectorMVector, y1, y2, error,
-             J::MatrixMMatrix, linear_cache,
+             ode_wrap!::ODEWrapper, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack b, stages = method

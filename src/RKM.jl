@@ -23,13 +23,12 @@ import Setfield: @set!
 abstract type ODEMethod end
 
 const VectorMVector = Union{Vector{T}, MVector{D,T}} where {D, T <: AbstractFloat}
-const MatrixMMatrix = Union{Matrix{T}, MMatrix{D,S,T,DS},
-                            SparseMatrixCSC{T}} where {D, S, DS, T <: AbstractFloat}
 
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
-include("time.jl")
+include("timer.jl")
+include("progress.jl")
 include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
@@ -41,7 +40,6 @@ include("stage_finder.jl")
 include("solution.jl")
 include("tmp/linear_solver.jl")
 include("plots.jl")
-include("utils.jl")
 include("cache.jl")
 
 include("methods/code_names.jl")

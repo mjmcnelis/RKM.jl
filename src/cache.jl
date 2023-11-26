@@ -61,6 +61,7 @@ function StaticUpdateCache(; method::ODEMethod, adaptive::AdaptiveStepSize, prec
     y_tmp = @MVector zeros(precision, dimensions)
     f_tmp = @MVector zeros(precision, dimensions)
     f     = @MVector zeros(precision, dimensions)
+    # note: static arrays not working in LinearSolve
     J     = @MMatrix zeros(precision, n, n)
     y1    = @MVector zeros(precision, m)
     y2    = @MVector zeros(precision, m)
