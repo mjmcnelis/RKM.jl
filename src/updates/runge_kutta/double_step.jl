@@ -1,7 +1,7 @@
 
-function evolve_one_time_step!(method::RungeKutta,
-             adaptive::Doubling, controller::Controller, FE::MVector{1,Int64},
-             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
+function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
+             controller::Controller, FE::MVector{1,Int64},
+             t::VectorMVector{1,T}, dt::VectorMVector{2,T},
              ode_wrap!::ODEWrapper, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
@@ -9,7 +9,7 @@ function evolve_one_time_step!(method::RungeKutta,
     @unpack explicit_stage = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
-    @unpack f, y1, y2, error = update_cache
+    @unpack y, f, y1, y2, error = update_cache
 
     order = method.order[1]                             # order of scheme
 
@@ -36,7 +36,7 @@ function evolve_one_time_step!(method::RungeKutta,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, y, t[1], dt[1], ode_wrap!, FE, update_cache,
+        double_step!(method, t[1], dt[1], ode_wrap!, FE, update_cache,
                      linear_cache, stage_finder)
 
         @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
@@ -82,17 +82,17 @@ function evolve_one_time_step!(method::RungeKutta,
     return nothing
 end
 
-function double_step!(method, y, t, dt, ode_wrap!, FE, update_cache,
+function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
                       linear_cache, stage_finder)
 
     @unpack explicit_stage, fsal, iteration = method
-    @unpack dy, y_tmp, f, f_tmp, y1, y2 = update_cache
+    @unpack dy, y, y_tmp, f, f_tmp, y1, y2 = update_cache
 
     # update full time step
     if explicit_stage[1]
         @.. dy[:,1] = dt * f
     end
-    runge_kutta_step!(method, iteration, y, t, dt, ode_wrap!, FE,
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap!, FE,
                       update_cache, linear_cache, stage_finder)
     @.. y1 = y_tmp
 
@@ -101,7 +101,7 @@ function double_step!(method, y, t, dt, ode_wrap!, FE, update_cache,
     if explicit_stage[1]
         @.. dy[:,1] = (dt/2.0) * f
     end
-    runge_kutta_step!(method, iteration, y, t, dt/2, ode_wrap!, FE,
+    runge_kutta_step!(method, iteration, t, dt/2, ode_wrap!, FE,
                       update_cache, linear_cache, stage_finder)
     @.. y2 = y_tmp
     #   second half step
@@ -113,8 +113,13 @@ function double_step!(method, y, t, dt, ode_wrap!, FE, update_cache,
         end
         @.. dy[:,1] = (dt/2.0) * f_tmp
     end
-    runge_kutta_step!(method, iteration, y2, t+dt/2, dt/2, ode_wrap!, FE,
+    # note: swap y, y2 values before/after second runge_kutta_step!
+    @.. y_tmp = y2
+    @.. y2 = y
+    @.. y = y_tmp
+    runge_kutta_step!(method, iteration, t+dt/2, dt/2, ode_wrap!, FE,
                       update_cache, linear_cache, stage_finder)
+    @.. y = y2
     @.. y2 = y_tmp
     return nothing
 end

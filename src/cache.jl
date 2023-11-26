@@ -3,6 +3,7 @@ abstract type RKMCache end
 
 struct UpdateCache{T <: AbstractFloat} <: RKMCache
     dy::Matrix{T}
+    y::Vector{T}
     y_tmp::Vector{T}
     f_tmp::Vector{T}
     f::Vector{T}
@@ -12,8 +13,9 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     error::Vector{T}
 end
 
-function UpdateCache(; method::ODEMethod, adaptive::AdaptiveStepSize, precision::Type{T},
-                       dimensions::Int64, stages::Int64) where T <: AbstractFloat
+function UpdateCache(; y::Vector{T}, method::ODEMethod, adaptive::AdaptiveStepSize,
+                       precision::Type{T}, dimensions::Int64,
+                       stages::Int64) where T <: AbstractFloat
 
     # note: LinearMultistep does not have this field atm
     @unpack iteration = method
@@ -32,13 +34,14 @@ function UpdateCache(; method::ODEMethod, adaptive::AdaptiveStepSize, precision:
     y2    = zeros(precision, m)
     error = zeros(precision, p)
 
-    return UpdateCache(dy, y_tmp, f_tmp, f, J, y1, y2, error)
+    return UpdateCache(dy, y, y_tmp, f_tmp, f, J, y1, y2, error)
 end
 
 struct StaticUpdateCache{T, D, S, DS, N, N2, M, P} <: RKMCache where {T <: AbstractFloat,
                                                                       D, S, DS, N,
                                                                       N2, M, P}
     dy::MMatrix{D, S, T, DS}
+    y::MVector{D, T}
     y_tmp::MVector{D, T}
     f_tmp::MVector{D, T}
     f::MVector{D, T}
@@ -48,8 +51,10 @@ struct StaticUpdateCache{T, D, S, DS, N, N2, M, P} <: RKMCache where {T <: Abstr
     error::MVector{P, T}
 end
 
-function StaticUpdateCache(; method::ODEMethod, adaptive::AdaptiveStepSize, precision::Type{T},
-                             dimensions::Int64, stages::Int64) where T <: AbstractFloat
+function StaticUpdateCache(; y::MVector{D,T}, method::ODEMethod,
+                             adaptive::AdaptiveStepSize, precision::Type{T},
+                             dimensions::Int64,
+                             stages::Int64) where {D, T <: AbstractFloat}
 
     @unpack iteration = method
     n = iteration isa Explicit ? 0 : dimensions
@@ -67,5 +72,5 @@ function StaticUpdateCache(; method::ODEMethod, adaptive::AdaptiveStepSize, prec
     y2    = @MVector zeros(precision, m)
     error = @MVector zeros(precision, p)
 
-    return StaticUpdateCache(dy, y_tmp, f_tmp, f, J, y1, y2, error)
+    return StaticUpdateCache(dy, y, y_tmp, f_tmp, f, J, y1, y2, error)
 end

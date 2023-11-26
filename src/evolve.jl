@@ -51,12 +51,12 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         ode_wrap! = ODEWrapper(deepcopy(t), model_parameters, dy_dt!)
 
         update_cache = if static_array
-            StaticUpdateCache(; method, adaptive, precision, dimensions, stages)
+            StaticUpdateCache(; y, method, adaptive, precision, dimensions, stages)
         else
-            UpdateCache(; method, adaptive, precision, dimensions, stages)
+            UpdateCache(; y, method, adaptive, precision, dimensions, stages)
         end
 
-        @unpack J, f, f_tmp = update_cache
+        @unpack y, f, f_tmp, J = update_cache
 
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
@@ -91,7 +91,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         continue_solver(t, tf, timer) || break
 
         evolve_one_time_step!(method, adaptive, controller,
-                              FE, y, t, dt, ode_wrap!, update_cache,
+                              FE, t, dt, ode_wrap!, update_cache,
                               linear_cache, stage_finder)
         t[1] += dt[1]
         timer.total_steps[1] += 1

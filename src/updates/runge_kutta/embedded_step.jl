@@ -1,7 +1,7 @@
 
-function evolve_one_time_step!(method::RungeKutta,
-             adaptive::Embedded, controller::Controller, FE::MVector{1,Int64},
-             y::VectorMVector, t::VectorMVector{1,T}, dt::VectorMVector{2,T},
+function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
+             controller::Controller, FE::MVector{1,Int64},
+             t::VectorMVector{1,T}, dt::VectorMVector{2,T},
              ode_wrap!::ODEWrapper, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
@@ -9,7 +9,7 @@ function evolve_one_time_step!(method::RungeKutta,
     @unpack iteration, explicit_stage, fsal = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
-    @unpack dy, y_tmp, f, f_tmp, y1, y2, error = update_cache
+    @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
 
     order_max = maximum(method.order)                   # max/min orders in embedded scheme
     order_min = minimum(method.order)
@@ -45,7 +45,7 @@ function evolve_one_time_step!(method::RungeKutta,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
-        runge_kutta_step!(method, iteration, y, t[1], dt[1], ode_wrap!, FE,
+        runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!, FE,
                           update_cache, linear_cache, stage_finder)
         @.. y1 = y_tmp
 

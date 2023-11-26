@@ -1,10 +1,10 @@
 # benchmark.jl note: don't see as much benefit to @muladd as @..
 # benchmark.jl note: @.. doesn't help much when switch to MVector
-@muladd function runge_kutta_step!(method::RungeKutta, ::Explicit, y::VectorMVector, t::T,
-                     dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
+@muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
+                     t::T, dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
                      update_cache::RKMCache, args...) where T <: AbstractFloat
     @unpack c, A_T, b, stages = method
-    @unpack dy, y_tmp, f_tmp = update_cache
+    @unpack dy, y, y_tmp, f_tmp = update_cache
 
     for i = 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
@@ -29,13 +29,13 @@
 end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
-                     y::VectorMVector, t::T, dt::T, ode_wrap!::ODEWrapper,
-                     FE::MVector{1,Int64}, update_cache::RKMCache, linear_cache,
+                     t::T, dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
+                     update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fsal = method
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
-    @unpack dy, y_tmp, f_tmp, J, error = update_cache
+    @unpack dy, y, y_tmp, f_tmp, J, error = update_cache
 
     for i = 1:stages
         # first explicit stage should already be pre-evaluated elsewhere
