@@ -13,7 +13,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     if explicit_stage[1]
         # skip function evaluation if method is FSAL
         if FE[1] > 0 && fsal isa FSAL
-            f .= f_tmp
+            @.. f = f_tmp
         else
             ode_wrap!(f, t[1], y)
             FE[1] += 1

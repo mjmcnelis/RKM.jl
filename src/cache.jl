@@ -14,11 +14,10 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
 end
 
 function UpdateCache(; y::Vector{T}, method::ODEMethod, adaptive::AdaptiveStepSize,
-                       precision::Type{T}, dimensions::Int64,
-                       stages::Int64) where T <: AbstractFloat
+                       precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
 
-    # note: LinearMultistep does not have this field atm
-    @unpack iteration = method
+    # note: LinearMultistep assumes iteration = Explicit() only
+    @unpack iteration, stages = method
 
     n = iteration isa Explicit ? 0 : dimensions
     m = adaptive isa Fixed ? 0 : dimensions
@@ -53,10 +52,10 @@ end
 
 function StaticUpdateCache(; y::MVector{D,T}, method::ODEMethod,
                              adaptive::AdaptiveStepSize, precision::Type{T},
-                             dimensions::Int64,
-                             stages::Int64) where {D, T <: AbstractFloat}
+                             dimensions::Int64) where {D, T <: AbstractFloat}
 
-    @unpack iteration = method
+    @unpack iteration, stages = method
+
     n = iteration isa Explicit ? 0 : dimensions
     m = adaptive isa Fixed ? 0 : dimensions
     p = iteration isa Explicit && adaptive isa Fixed ? 0 : dimensions

@@ -11,7 +11,7 @@
         @.. y_tmp = y
         # TODO: need a better dy cache for performance
         for j = 1:i-1
-            # TODO: continue if A,b = 0?
+            A_T[j,i] == 0.0 ? continue : nothing
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
@@ -22,6 +22,7 @@
     end
     @.. y_tmp = y                                        # evaluate iteration
     for j = 1:stages
+        b[j] == 0.0 ? continue : nothing
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
     end

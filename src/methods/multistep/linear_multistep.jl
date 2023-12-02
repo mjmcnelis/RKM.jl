@@ -4,6 +4,7 @@ struct LinearMultistep{T, S, P} <: ODEMethod where {T <: AbstractFloat, S, P}
     b::SVector{S,T}
     stages::Int64
     order::SVector{P,T}
+    iteration::Iteration
     code_name::String
 end
 
@@ -16,7 +17,10 @@ function LinearMultistep(; name::Symbol, table::Vector{T}) where T <: AbstractFl
 
     b = table[2:ncol] |> SVector{stages}
 
-    return LinearMultistep(name, b, stages, order, code_name)
+    # TMP
+    iteration = Explicit()
+
+    return LinearMultistep(name, b, stages, order, iteration, code_name)
 end
 
 function Base.show(io::IO, LM::LinearMultistep)
