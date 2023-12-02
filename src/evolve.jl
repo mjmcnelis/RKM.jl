@@ -30,8 +30,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             controller = reconstruct_controller(controller, method, adaptive, precision)
         end
 
-        @unpack stages = method
-
         dimensions = size(y0, 1)
         sol.dimensions .= dimensions
 
@@ -51,12 +49,12 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         ode_wrap! = ODEWrapper(deepcopy(t), model_parameters, dy_dt!)
 
         update_cache = if static_array
-            StaticUpdateCache(; y, method, adaptive, precision, dimensions, stages)
+            StaticUpdateCache(; y, method, adaptive, precision, dimensions)
         else
-            UpdateCache(; y, method, adaptive, precision, dimensions, stages)
+            UpdateCache(; y, method, adaptive, precision, dimensions)
         end
 
-        @unpack y, f, f_tmp, J = update_cache
+        @unpack y, f, f_tmp, J, error = update_cache
 
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
@@ -65,11 +63,13 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         # configure linear cache (see src/common.jl in LinearSolve.jl)
         # note: assumes LU factorization for now
-        linear_cache = init(LinearProblem(J, f), LUFactorization())#; alias_A = false, alias_b = false)
+        linear_cache = init(LinearProblem(J, error), LUFactorization())#; alias_A = false, alias_b = false)
         linear_cache.cacheval = fact
         linear_cache.isfresh = false
 
-        stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
+        if method.iteration isa Implicit
+            stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
+        end
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
