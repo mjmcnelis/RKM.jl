@@ -99,7 +99,7 @@ end
 @muladd function embedded_step!(method, y, dy, y_tmp)
     @unpack stages, b_hat = method
     @.. y_tmp = y                                       # evaluate iteration
-    for j = 1:stages
+    for j in 1:stages
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b_hat[j]*dy_stage
     end

@@ -13,7 +13,7 @@ function monitor_progess(t::VectorMVector{1,T}, progress::Progress,
         dt = checkpoints[2] - checkpoints[1]
         idx = Int(floor(Float64((t[1] - checkpoints[1])/dt))) + 1
         idx = min(length(checkpoints), idx)
-        for i = 1:idx
+        for i in 1:idx
             next!(progress)
             popfirst!(checkpoints)
         end

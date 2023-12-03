@@ -6,11 +6,11 @@
     @unpack c, A_T, b, stages = method
     @unpack dy, y, y_tmp, f_tmp = update_cache
 
-    for i = 2:stages                                    # evaluate remaining stages
+    for i in 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         @.. y_tmp = y
         # TODO: need a better dy cache for performance
-        for j = 1:i-1
+        for j in 1:i-1
             A_T[j,i] == 0.0 ? continue : nothing
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
@@ -21,7 +21,7 @@
         @.. dy[:,i] = dt * f_tmp
     end
     @.. y_tmp = y                                        # evaluate iteration
-    for j = 1:stages
+    for j in 1:stages
         b[j] == 0.0 ? continue : nothing
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
@@ -38,7 +38,7 @@ end
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
     @unpack dy, y, y_tmp, f_tmp, J, error = update_cache
 
-    for i = 1:stages
+    for i in 1:stages
         # first explicit stage should already be pre-evaluated elsewhere
         if i == 1 && explicit_stage[i]
             continue
@@ -50,7 +50,7 @@ end
 
         # sum over known stages
         @.. y_tmp = y
-        for j = 1:i-1
+        for j in 1:i-1
             dy_stage = view(dy,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
         end
@@ -62,35 +62,32 @@ end
         @.. dy[:,i] = dt * f_tmp
 
         if !explicit_stage[i]
-            for n = 1:max_iterations
-                # reset y_tmp
+            for n in 1:max_iterations+1
+                # evaluate current correction and ODE
                 @.. y_tmp = y
-                for j = 1:i-1
+                for j in 1:i
                     dy_stage = view(dy,:,j)
                     @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
                 end
-
-                # evaluate current state and ODE
-                dy_stage = view(dy,:,i)
-                @.. y_tmp = y_tmp + A_T[i,i]*dy_stage
                 ode_wrap!(f_tmp, t_tmp, y_tmp)
                 FE[1] += 1
 
                 # compute residual error of root equation
                 # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
+                dy_stage = view(dy,:,i)
                 @.. error = dy_stage - dt*f_tmp
 
                 # compute norms and tolerance
                 e_norm  = norm(error, p_norm)           # compute norms
-                dy_norm = norm(view(dy,:,i), p_norm)
+                dy_norm = norm(dy_stage, p_norm)
                 tol = epsilon * dy_norm
 
                 # check for root convergence
                 # TODO: test doing at least one iteration on helping stiff problems
                 if e_norm < tol
                     break
-                elseif n == max_iterations - 1
-                    # println("failed to converge")
+                elseif n == max_iterations + 1
+                    # println("failed to converge after $(n-1) iterations")
                     # note: allow f_tmp to store dy_dt!
                     # of last iteration for FSAL methods
                     # TODO: count convergence failures in stats
@@ -103,6 +100,8 @@ end
                     # evaluate current Jacobian
                     evaluate_system_jacobian!(jacobian_method, FE, J,
                                               ode_wrap!, y_tmp, f_tmp)
+
+                    # TODO: try fast broadcast, muladd?
                     J .*= (-A_T[i,i]*dt)                 # J <- I - A.dt.J
                     for i in diagind(J)
                         J[i] += 1.0
@@ -121,7 +120,7 @@ end
     end
     # evaluate update
     @.. y_tmp = y
-    for j = 1:stages
+    for j in 1:stages
         dy_stage = view(dy,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
     end

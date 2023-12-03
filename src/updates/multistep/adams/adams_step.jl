@@ -63,7 +63,7 @@ end
         if e_norm < tol
             break
         elseif n == max_iterations + 1
-            println("failed to converge after $(n-1) iteration(s)")
+            # println("failed to converge after $(n-1) iteration(s)")
             break
         end
 
