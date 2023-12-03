@@ -5,8 +5,13 @@ abstract type Iteration end
 abstract type Implicit <: Iteration end
 
 struct Explicit <: Iteration end
+
+# implicit Runge-Kutta methods
 struct DiagonalImplicit <: Implicit end
 struct FullImplicit <: Implicit end
+
+# implicit multistep methods
+struct SingleImplicit <: Implicit end
 
 abstract type FirstSameAsLast end
 struct FSAL <: FirstSameAsLast end

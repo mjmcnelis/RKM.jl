@@ -21,8 +21,7 @@ function LinearMultistep(; name::Symbol, table::Matrix{T}) where T <: AbstractFl
     b = table[1, 2:ncol] |> SVector{stages}
     b_pred = table[max(1,nrow), 2:ncol] |> SVector{stages}
 
-    # TMP
-    iteration = Explicit()
+    iteration = nrow == 1 ? Explicit() : SingleImplicit()
 
     return LinearMultistep(name, b, b_pred, stages, order, iteration, code_name)
 end
