@@ -70,6 +70,7 @@ include("updates/runge_kutta/double_step.jl")
 include("updates/runge_kutta/embedded_step.jl")
 include("updates/runge_kutta/central_step.jl")
 # Multistep updates
+include("updates/multistep/adams/adams_step.jl")
 include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")

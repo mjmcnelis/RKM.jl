@@ -16,7 +16,6 @@ end
 function UpdateCache(; y::Vector{T}, method::ODEMethod, adaptive::AdaptiveStepSize,
                        precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
 
-    # note: LinearMultistep assumes iteration = Explicit() only
     @unpack iteration, stages = method
 
     n = iteration isa Explicit ? 0 : dimensions
