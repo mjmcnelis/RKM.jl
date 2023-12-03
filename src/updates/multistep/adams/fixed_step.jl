@@ -1,5 +1,5 @@
 
-function evolve_one_time_step!(method::LinearMultistep,
+function evolve_one_time_step!(method::Adams,
              adaptive::Fixed, controller::Controller, FE::MVector{1,Int64},
              t::VectorMVector{1,T}, dt::VectorMVector{2,T},
              ode_wrap!::ODEWrapper, update_cache::RKMCache, linear_cache,

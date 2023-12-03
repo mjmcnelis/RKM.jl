@@ -61,8 +61,8 @@ include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 # Multistep tables
 include("methods/multistep/linear_multistep.jl")
-include("methods/multistep/adams_bashforth.jl")
-include("methods/multistep/adams_moulton.jl")
+include("methods/multistep/adams/adams_bashforth.jl")
+include("methods/multistep/adams/adams_moulton.jl")
 # Runge-Kutta updates
 include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")
@@ -70,7 +70,7 @@ include("updates/runge_kutta/double_step.jl")
 include("updates/runge_kutta/embedded_step.jl")
 include("updates/runge_kutta/central_step.jl")
 # Multistep updates
-include("updates/multistep/fixed_step.jl")
+include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")

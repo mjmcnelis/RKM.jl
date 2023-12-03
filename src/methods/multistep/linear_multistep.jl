@@ -1,5 +1,7 @@
 
-struct LinearMultistep{T, S, P} <: ODEMethod where {T <: AbstractFloat, S, P}
+abstract type LinearMultistep <: ODEMethod end
+
+struct Adams{T, S, P} <: LinearMultistep where {T <: AbstractFloat, S, P}
     name::Symbol
     b::SVector{S,T}
     b_pred::SVector{S,T}
@@ -9,7 +11,7 @@ struct LinearMultistep{T, S, P} <: ODEMethod where {T <: AbstractFloat, S, P}
     code_name::String
 end
 
-function LinearMultistep(; name::Symbol, table::Matrix{T}) where T <: AbstractFloat
+function Adams(; name::Symbol, table::Matrix{T}) where T <: AbstractFloat
     order     = order_prop(name, T)
     code_name = make_code_name(name)
 
@@ -23,7 +25,7 @@ function LinearMultistep(; name::Symbol, table::Matrix{T}) where T <: AbstractFl
 
     iteration = nrow == 1 ? Explicit() : SingleImplicit()
 
-    return LinearMultistep(name, b, b_pred, stages, order, iteration, code_name)
+    return Adams(name, b, b_pred, stages, order, iteration, code_name)
 end
 
 function Base.show(io::IO, LM::LinearMultistep)
