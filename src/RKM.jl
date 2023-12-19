@@ -44,7 +44,6 @@ include("cache.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")
-include("methods/utils.jl")
 # Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
 include("methods/runge_kutta/debug_table.jl")
@@ -63,6 +62,8 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 include("methods/multistep/linear_multistep.jl")
 include("methods/multistep/adams/adams_bashforth.jl")
 include("methods/multistep/adams/adams_moulton.jl")
+# Reconstruct ODE method
+include("methods/utils.jl")
 # Runge-Kutta updates
 include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")
@@ -114,10 +115,7 @@ export TrapezoidRuleBDF2
 export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42,
        LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52, GaussLegendre64
     # Linear multistep
-export AdamsBashforth1, AdamsBashforth2, AdamsBashforth3, AdamsBashforth4, AdamsBashforth5,
-       AdamsBashforth6, AdamsBashforth8,
-       AdamsMoulton1, AdamsMoulton2, AdamsMoulton3, AdamsMoulton4, AdamsMoulton5,
-       AdamsMoulton6, AdamsMoulton8
+export AdamsBashforth, AdamsMoulton
 
 # Code names
 export make_code_name

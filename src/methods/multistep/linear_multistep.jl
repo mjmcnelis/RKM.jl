@@ -1,30 +1,34 @@
 
 abstract type LinearMultistep <: ODEMethod end
 
-struct Adams{T, S, P} <: LinearMultistep where {T <: AbstractFloat, S, P}
+struct Adams{T, S} <: LinearMultistep where {T <: AbstractFloat, S}
     name::Symbol
     b::SVector{S,T}
     b_pred::SVector{S,T}
     stages::Int64
-    order::SVector{P,T}
+    order::Int64
     iteration::Iteration
     code_name::String
 end
 
-function Adams(; name::Symbol, table::Matrix{T}) where T <: AbstractFloat
-    order     = order_prop(name, T)
+function Adams(; name::Symbol, order::Int64, table::Matrix{T},
+                 table_pred::Matrix{T} = Array{Float64}(undef, 0, 0)
+              ) where T <: AbstractFloat
+
     code_name = make_code_name(name)
+    stages = order
 
-    nrow, ncol = size(table)
-    @assert 1 <= nrow <= 2 && ncol >= 2
+    b = table[order, 2:order+1] |> SVector{order}
 
-    stages = ncol - 1
+    if isempty(table_pred)
+        b_pred = b  # dummy filler
+        iteration = Explicit()
+    else
+        b_pred = table_pred[order, 2:order+1] |> SVector{order}
+        iteration = SingleImplicit()
+    end
 
-    b = table[1, 2:ncol] |> SVector{stages}
-    b_pred = table[max(1,nrow), 2:ncol] |> SVector{stages}
-
-    iteration = nrow == 1 ? Explicit() : SingleImplicit()
-
+    # TODO: replace stages with steps
     return Adams(name, b, b_pred, stages, order, iteration, code_name)
 end
 
