@@ -1,5 +1,5 @@
 """
-    BackwardDifferentiationFormula(;
+    BackwardDifferentiationFormula(; order::Int64,
         precision::Type{T} = Float64) where T <: AbstractFloat
 
 Backward differentiation formula (BDF) implicit multistep method.
