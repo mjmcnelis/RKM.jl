@@ -32,6 +32,29 @@ function Adams(; name::Symbol, order::Int64, table::Matrix{T},
     return Adams(name, b, b_pred, stages, order, iteration, code_name)
 end
 
+struct DifferentiationFormula{T, S} <: LinearMultistep where {T <: AbstractFloat, S}
+    name::Symbol
+    b::SVector{S,T}
+    b_pred::SVector{S,T}
+    stages::Int64
+    order::Int64
+    iteration::Iteration
+    code_name::String
+end
+
+function DifferentiationFormula(; name::Symbol, order::Int64, table::Matrix{T},
+                                  table_pred::Matrix{T}) where T <: AbstractFloat
+    code_name = make_code_name(name)
+    stages = order + 1
+
+    b = table[order, 1:order+1] |> SVector{order+1}
+    b_pred = table_pred[order, 1:order+1] |> SVector{order+1}
+
+    iteration = SingleImplicit()
+
+    return DifferentiationFormula(name, b, b_pred, stages, order, iteration, code_name)
+end
+
 function Base.show(io::IO, LM::LinearMultistep)
     for field in LM |> typeof |> fieldnames
         println("$field = $(getproperty(LM, field))")

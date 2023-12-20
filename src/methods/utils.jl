@@ -1,10 +1,12 @@
 
-function reconstruct_method(method::RungeKutta, precision::Type{T}) where T <: AbstractFloat
+function reconstruct_method(method::RungeKutta,
+                            precision::Type{T}) where T <: AbstractFloat
     name = replace(String(method.name), "_" => "") |> Symbol
     return getfield(RKM, name)(; precision)
 end
 
-function reconstruct_method(method::Adams, precision::Type{T}) where T <: AbstractFloat
+function reconstruct_method(method::LinearMultistep,
+                            precision::Type{T}) where T <: AbstractFloat
     @unpack order = method
     name = replace(String(method.name), "_" => "")
     name = filter(!isdigit, collect(name)) |> String |> Symbol

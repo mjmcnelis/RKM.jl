@@ -15,9 +15,11 @@ memory_rkm = Float64[]
 
 static = false
 # static = true
+save_solution = true
+# save_solution = false
 
 N = 1
-y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
+y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i in 1:N]
 dt0_vect = 10.0.^(-(1:1:5))
 
 # vary time step (fix number of state variables)
@@ -28,14 +30,19 @@ for dt0 in dt0_vect
     f = static ? f_ord_static : f_ord
     y = static ? SA[y0...] : y0
     prob = ODEProblem(f, y, (t0, tf))
+    saveat = save_solution ? dt0 : ()
     ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false,
-                           maxiters = $(10^7), saveat = $dt0)
+                           maxiters = $(10^7), saveat = $saveat,
+                        #    save_everystep = $save_solution,
+                        #    save_start = $save_solution,
+                        #    save_end = $save_solution
+                          )
     push!(time_ord, mean(ord).time/1e9)     # convert from ns to s
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
     options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                              static_array = static)
+                              static_array = static, save_solution)
     rkm = @benchmark evolve_ode($y0, $t0, $tf, $dt0, dy_dt!, $options)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
@@ -57,7 +64,7 @@ display(plt)
 # Plot memory usage vs time step
 plt = plot(dt0_vect, memory_ord; label = "OrdinaryDiffEq",
            xlabel = "Time step [s]", ylabel = "Memory usage [MiB]",
-           xlims = (1e-5, 1e-1), ylims = (1e-2, 1e3),
+           xlims = (1e-5, 1e-1), ylims = (1e-3, 1e3),
             plot_kwargs...);
 plot!(dt0_vect, memory_rkm; label = "RKM", plot_kwargs...);
 display(plt)
@@ -76,17 +83,22 @@ N_vect = (10).^(0:1:6)
 for N in N_vect
     @show N
     # don't use static arrays
-    y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
+    y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i in 1:N]
 
     # OrdinaryDiffEq
     prob = ODEProblem(f_ord, y0, (t0, tf))
-    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false, saveat = $dt0)
+    saveat = save_solution ? dt0 : ()
+    ord = @benchmark solve($prob, RK4(), dt = $dt0, adaptive = false, saveat = $saveat,
+                        #    save_everystep = $save_solution,
+                        #    save_start = $save_solution,
+                        #    save_end = $save_solution
+                        )
     push!(time_ord, mean(ord).time/1e9)     # convert from ns to s
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
     options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                              static_array = static)
+                              static_array = static, save_solution)
     rkm = @benchmark evolve_ode($y0, $t0, $tf, $dt0, dy_dt!, $options)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
@@ -103,6 +115,6 @@ display(plt)
 # Plot memory usage vs number of state variables
 plt = plot(N_vect, memory_ord; label = "OrdinaryDiffEq",
            xlabel = "Number of state variables", ylabel = "Memory usage [MiB]",
-           xlims = (1e0, 1e6), ylims = (1e-2, 1e4), plot_kwargs...);
+           xlims = (1e0, 1e6), ylims = (1e-3, 1e4), plot_kwargs...);
 plot!(N_vect, memory_rkm; label = "RKM", plot_kwargs...);
 display(plt)

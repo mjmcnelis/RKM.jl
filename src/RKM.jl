@@ -62,6 +62,7 @@ include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 include("methods/multistep/linear_multistep.jl")
 include("methods/multistep/adams/adams_bashforth.jl")
 include("methods/multistep/adams/adams_moulton.jl")
+include("methods/multistep/differentiation_formula/backward_differentiation_formula.jl")
 # Reconstruct ODE method
 include("methods/utils.jl")
 # Runge-Kutta updates
@@ -115,7 +116,7 @@ export TrapezoidRuleBDF2
 export CrankNicolson21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42,
        LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52, GaussLegendre64
     # Linear multistep
-export AdamsBashforth, AdamsMoulton
+export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula
 
 # Code names
 export make_code_name

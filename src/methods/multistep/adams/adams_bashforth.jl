@@ -1,7 +1,7 @@
 """
     AdamsBashforth(; order::Int64, precision::Type{T} = Float64) where T <: AbstractFloat
 
-Adams-Bashforth explicit multistep method.
+Adams-Bashforth (AB) explicit multistep method.
 
 Note: `order` ranges from 1-6
 """

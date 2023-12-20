@@ -1,7 +1,7 @@
 """
     AdamsMoulton(; order::Int64, precision::Type{T} = Float64) where T <: AbstractFloat
 
-Adams-Moulton implicit multistep method.
+Adams-Moulton (AM) implicit multistep method.
 
 Note: `order` ranges from 1-6, `table_pred` contains the
        predictor coefficients (i.e. Adams-Bashforth)
