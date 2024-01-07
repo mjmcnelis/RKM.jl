@@ -4,12 +4,12 @@
                      update_cache::RKMCache, args...) where T <: AbstractFloat
 
     @unpack b, stages = method
-    @unpack dy, y, y_tmp = update_cache
+    @unpack dy_LM, y, y_tmp = update_cache
 
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
-        dy_stage = view(dy,:,j)
+        dy_stage = view(dy_LM,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
     end
     return nothing
@@ -22,7 +22,7 @@ end
 
     @unpack b, b_pred, stages = method
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
-    @unpack dy, y, y_tmp, f_tmp, J, error = update_cache
+    @unpack dy_LM, y, y_tmp, f_tmp, J, error = update_cache
 
     # set implicit time in wrapper
     t_tmp = t + dt
@@ -32,18 +32,18 @@ end
     @.. y_tmp = y
     # note: comment for loop if want to compare to BackwardEuler1, CrankNicolson
     for j in 1:stages
-        dy_stage = view(dy,:,j)
+        dy_stage = view(dy_LM,:,j)
         @.. y_tmp = y_tmp + b_pred[j]*dy_stage
     end
     ode_wrap!(f_tmp, t_tmp, y_tmp)
     FE[1] += 1
-    @.. dy[:,1] = dt * f_tmp
+    @.. dy_LM[:,1] = dt * f_tmp
 
     for n in 1:max_iterations+1
         # compute current correction and evaluate ODE (i.e CE)
         @.. y_tmp = y
         for j in 1:stages
-            dy_stage = view(dy,:,j)
+            dy_stage = view(dy_LM,:,j)
             @.. y_tmp = y_tmp + b[j]*dy_stage
         end
         ode_wrap!(f_tmp, t_tmp, y_tmp)
@@ -51,7 +51,7 @@ end
 
         # compute residual error of root equation
         # dy - dt.f(t_tmp, y_tmp + b.dy) = 0
-        dy_stage = view(dy,:,1)
+        dy_stage = view(dy_LM,:,1)
         @.. error = dy_stage - dt*f_tmp
 
         # compute norms and tolerance
@@ -68,7 +68,7 @@ end
         end
 
         if root_method isa FixedPoint
-            @.. dy[:,i] -= error
+            @.. dy_LM[:,1] -= error
         elseif root_method isa Newton
             # evaluate current Jacobian
             evaluate_system_jacobian!(jacobian_method, FE, J,
@@ -84,13 +84,13 @@ end
             linear_cache.b = error
             # solve and apply Newton iteration
             solve!(linear_cache)
-            @.. dy[:,1] -= linear_cache.u
+            @.. dy_LM[:,1] -= linear_cache.u
         end
     end
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
-        dy_stage = view(dy,:,j)
+        dy_stage = view(dy_LM,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
     end
     return nothing

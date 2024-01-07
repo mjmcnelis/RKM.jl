@@ -1,13 +1,14 @@
 """
-    AdamsMoulton(; order::Int64, precision::Type{T} = Float64) where T <: AbstractFloat
+    AdamsMoulton(; order::Int64, precision::Type{T} = Float64,
+                   start_method::RungeKutta = Ketcheson4()) where T <: AbstractFloat
 
 Adams-Moulton (AM) implicit multistep method.
 
 Note: `order` ranges from 1-6, `table_pred` contains the
        predictor coefficients (i.e. Adams-Bashforth)
 """
-function AdamsMoulton(; order::Int64,
-                        precision::Type{T} = Float64) where T <: AbstractFloat
+function AdamsMoulton(; order::Int64, precision::Type{T} = Float64,
+                        start_method::RungeKutta = Ketcheson4()) where T <: AbstractFloat
     # TODO: tried to find 7th order coefficients online
     @assert 1 <= order <= 6 "order = $order is not valid"
 
@@ -29,7 +30,8 @@ function AdamsMoulton(; order::Int64,
                 ]
     table_pred = table_pred .|> precision
 
-    return Adams(; name = Symbol("Adams_Moulton_$(order)"), order, table, table_pred)
+    return Adams(; name = Symbol("Adams_Moulton_$(order)"),
+                   order, table, table_pred, start_method)
 end
 
 #=

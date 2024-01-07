@@ -1,12 +1,13 @@
 """
-    AdamsBashforth(; order::Int64, precision::Type{T} = Float64) where T <: AbstractFloat
+    AdamsBashforth(; order::Int64, precision::Type{T} = Float64,
+                     start_method::RungeKutta = Ketcheson4()) where T <: AbstractFloat
 
 Adams-Bashforth (AB) explicit multistep method.
 
 Note: `order` ranges from 1-6
 """
-function AdamsBashforth(; order::Int64,
-                          precision::Type{T} = Float64) where T <: AbstractFloat
+function AdamsBashforth(; order::Int64, precision::Type{T} = Float64,
+                          start_method::RungeKutta = Ketcheson4()) where T <: AbstractFloat
     # TODO: tried to find 7th order coefficients online
     @assert 1 <= order <= 6 "order = $order is not valid"
 
@@ -18,7 +19,11 @@ function AdamsBashforth(; order::Int64,
              1 4277//1440 -7923//1440 9982//1440 -7298//1440 2877//1440 -475//1440
             ]
     table = table .|> precision
-    return Adams(; name = Symbol("Adams_Bashforth_$(order)"), order, table)
+
+    table_pred = Array{precision}(undef, 0, 0) # empty predictor coefficients
+
+    return Adams(; name = Symbol("Adams_Bashforth_$(order)"),
+                   order, table, table_pred, start_method)
 end
 
 #=
