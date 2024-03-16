@@ -42,7 +42,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         tf = rationalize(tf) |> precision
         dt0 = rationalize(dt0) |> precision
 
-        t  = precision == BigFloat ? [t0] : MVector{1}(t0)
+        t  = precision == BigFloat ? [t0, t0] : MVector{2}(t0, t0)
         dt = precision == BigFloat ? [dt0, dt0] : MVector{2}(dt0, dt0)
 
         # create ODE wrapper function
@@ -95,6 +95,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             evolve_one_time_step!(method, adaptive, controller,
                                 FE, t, dt, ode_wrap!, update_cache,
                                 linear_cache, stage_finder)
+            t[2] = t[1]
             t[1] += dt[1]
             timer.total_steps[1] += 1
 

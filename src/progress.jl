@@ -1,5 +1,5 @@
 """
-    monitor_progess(t::VectorMVector{1,T}, progress::Progress,
+    monitor_progess(t::VectorMVector{2,T}, progress::Progress,
                     checkpoints::Vector{T}) where T <: AbstractFloat
 
 Updates the `progress` meter percentage points depending on how many
@@ -7,7 +7,7 @@ Updates the `progress` meter percentage points depending on how many
 
 Required parameters: `t`, `progress`, `checkpoints`
 """
-function monitor_progess(t::VectorMVector{1,T}, progress::Progress,
+function monitor_progess(t::VectorMVector{2,T}, progress::Progress,
                          checkpoints::Vector{T}) where T <: AbstractFloat
     if length(checkpoints) > 1
         dt = checkpoints[2] - checkpoints[1]
