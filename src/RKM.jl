@@ -41,6 +41,7 @@ include("solution.jl")
 include("tmp/linear_solver.jl")
 include("plots.jl")
 include("cache.jl")
+include("interpolation.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")
@@ -90,6 +91,8 @@ export PiecewiseLimiter, SmoothLimiter
 export ImplicitStageFinder, FixedPoint, Newton, ForwardJacobian, FiniteJacobian
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
+# Interpolation methods
+export NoInterpolator, HermiteInterpolator
 
 # TODO: probably don't need to export these
 #---------------------------------------

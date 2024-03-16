@@ -14,6 +14,8 @@ SolverOptions for the ODE solver.
     controller::Controller = TimeStepController()
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
+    """Interpolation method for dense output"""
+    interpolator::Interpolator = NoInterpolator()
     """Determines whether or not the solution is stored"""
     save_solution::Bool = true
     """Determines whether or not the progress meter is displayed"""

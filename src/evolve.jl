@@ -15,8 +15,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         clear_solution!(sol)
         @unpack precision, FE#=, JE=# = sol
 
-        @unpack adaptive, controller, method, t_range, timer,
-                stage_finder, static_array, show_progress, save_solution = options
+        @unpack adaptive, controller, method, t_range, timer, stage_finder,
+                interpolator, static_array, show_progress, save_solution = options
 
         @set! t_range.t0 = t0
         @set! t_range.tf = tf
@@ -81,20 +81,27 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     end
 
     # TODO: look into @code_warntype
-    loop_stats = @timed while true
+    loop_stats = @timed begin
+        # save initial condition
         if save_solution
             append!(sol.y, y)
             append!(sol.t, t[1])
         end
+        # time evolution loop
+        while true
+            show_progress && monitor_progess(t, progress, checkpoints)
+            continue_solver(t, tf, timer) || break
 
-        show_progress && monitor_progess(t, progress, checkpoints)
-        continue_solver(t, tf, timer) || break
+            evolve_one_time_step!(method, adaptive, controller,
+                                FE, t, dt, ode_wrap!, update_cache,
+                                linear_cache, stage_finder)
+            t[1] += dt[1]
+            timer.total_steps[1] += 1
 
-        evolve_one_time_step!(method, adaptive, controller,
-                              FE, t, dt, ode_wrap!, update_cache,
-                              linear_cache, stage_finder)
-        t[1] += dt[1]
-        timer.total_steps[1] += 1
+            if save_solution
+                interpolate_solution!(interpolator, sol, update_cache, t, t0, tf)
+            end
+        end
     end
     compute_stats!(sol, save_solution, adaptive, timer,
                    stage_finder, loop_stats, config_bytes)
