@@ -78,8 +78,8 @@ end
                 @.. error = dy_stage - dt*f_tmp
 
                 # compute norms and tolerance
-                e_norm  = norm(error, p_norm)           # compute norms
-                dy_norm = norm(dy_stage, p_norm)
+                e_norm  = norm_tmp(error, p_norm)           # compute norms
+                dy_norm = norm_tmp(dy_stage, p_norm)
                 tol = epsilon * dy_norm
 
                 # check for root convergence

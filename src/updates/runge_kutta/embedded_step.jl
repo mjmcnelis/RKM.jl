@@ -54,13 +54,13 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
 
         @.. error = y2 - y1                             # local error of embedded pair
 
-        e_norm = norm(error, p_norm)                    # compute norms
-        y_norm = norm(y1, p_norm)
+        e_norm = norm_tmp(error, p_norm)                    # compute norms
+        y_norm = norm_tmp(y1, p_norm)
         # TODO: need to use Δy = y2 since it's secondary method
         #       but should make labeling consistent w/ doubling
         Δy = y2
         @.. Δy = y1 - y
-        Δy_norm = norm(Δy, p_norm)
+        Δy_norm = norm_tmp(Δy, p_norm)
 
         # compute tolerance
         tol = max(epsilon*y_norm, alpha, delta*Δy_norm) # compute tolerance

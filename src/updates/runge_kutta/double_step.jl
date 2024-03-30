@@ -43,11 +43,11 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         @.. y2 = y2 + error                             # Richardson extrapolation
 
         # note: have modified norm function for DoubleFloat
-        e_norm = norm(error, p_norm)                    # compute norms
-        y_norm = norm(y2, p_norm)
+        e_norm = norm_tmp(error, p_norm)                    # compute norms
+        y_norm = norm_tmp(y2, p_norm)
         Δy = y1
         @.. Δy = y2 - y
-        Δy_norm = norm(Δy, p_norm)
+        Δy_norm = norm_tmp(Δy, p_norm)
 
         tol = max(epsilon*y_norm, alpha, delta*Δy_norm) # compute tolerance
 
