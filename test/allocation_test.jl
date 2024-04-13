@@ -34,7 +34,7 @@ for precision in precision_vect, method in method_vect,
 
     options = SolverOptions(; method, adaptive, controller, save_solution, static_array)
 
-    # sol = Solution(; precision)
+    # sol = Solution(precision)
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
     # @show sol.excess_memory[1]
     # note: second solve does not allocate on adaptive even if save_solution = true

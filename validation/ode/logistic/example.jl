@@ -25,7 +25,7 @@ end
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
 # in-place version
 #=
-sol = Solution(; precision)
+sol = Solution(precision)
 @time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
 =#
 

@@ -106,7 +106,7 @@ Finally, we call the function `evolve_ode` to evolve the ODE system and store th
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
                  model_parameters = p, precision = Float64)
 
-sol = Solution(; precision = Float64)
+sol = Solution(precision)
 evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 ```
 You can adjust the numerical precision of the solver with the keyword argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.

@@ -1,3 +1,11 @@
+
+# note: thread on DataType kwarg type-instability
+# https://discourse.julialang.org/t/type-stability-when-datatype-is-passed-as-a-keyword-argument/52770
+
+# TODO: not sure if something like this is needed (try again later)
+# abstract type RKMSolution end
+# struct Solution{T} <: RKMSolution where T <: AbstractFloat
+
 """
 Stores the solution vector `y(t)` of the ODE system in linear column format.
 
@@ -30,13 +38,13 @@ struct Solution{T <: AbstractFloat}
 end
 
 """
-    Solution(; precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
+    Solution(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Outer constructor for `Solution`.
 
-Required parameters: `precision`, `dimensions`
+Required parameters: `precision`
 """
-function Solution(; precision::Type{T} = Float64) where T <: AbstractFloat
+function Solution(precision::Type{T} = Float64) where T <: AbstractFloat
     y = Vector{precision}()
     t = Vector{precision}()
     FE = MVector{1,Int64}(0)

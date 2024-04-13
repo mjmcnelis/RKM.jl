@@ -125,7 +125,7 @@ function evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
                     precision::Type{T2} = Float64) where {T <: AbstractFloat,
                                                           T1 <: AbstractFloat,
                                                           T2 <: AbstractFloat}
-    sol = Solution(; precision)
+    sol = Solution(precision)
     evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters)
     return sol
 end
