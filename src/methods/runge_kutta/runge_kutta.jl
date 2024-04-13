@@ -6,7 +6,9 @@ Stores the Butcher tableau and properties of a given Runge-Kutta method.
 # Fields
 $(TYPEDFIELDS)
 """
-struct RungeKutta{T, S, S2, P} <: ODEMethod where {T <: AbstractFloat, S, S2, P}
+struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, S2, P,
+                                                         I <: Iteration,
+                                                         F <: FirstSameAsLast}
     """Name of the Runge-Kutta method"""
     name::Symbol
     """Intermediate time update coefficient of each stage in the Butcher tableau"""
@@ -23,9 +25,9 @@ struct RungeKutta{T, S, S2, P} <: ODEMethod where {T <: AbstractFloat, S, S2, P}
     order::SVector{P, T}
     # TODO: should I just wrap this in a Properties struct?
     """Determines whether the method is explicit or implicit"""
-    iteration::Iteration
+    iteration::I
     """Determines whether the method has the FSAL property"""
-    fsal::FirstSameAsLast
+    fsal::F
     """Determines which stages are explicit"""
     explicit_stage::SVector{S, Bool}
     """Abbreviated name for the Runge-Kutta method"""
