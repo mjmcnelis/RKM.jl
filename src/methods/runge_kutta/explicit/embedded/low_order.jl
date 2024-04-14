@@ -17,18 +17,19 @@ function Fehlberg12(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
-    HeunEuler21(; precision::Type{T} = Float64) where T <: AbstractFloat
+    HeunEuler21(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Heun-Euler second(first)-order method.
 """
-function HeunEuler21(; precision::Type{T} = Float64) where T <: AbstractFloat
-    butcher = [0 0 0
-               1 1 0
-               1 1//2 1//2
-               1 1 0]
-    butcher = butcher .|> precision
-
-    return RungeKutta(; name = :Heun_Euler_2_1, butcher)
+function HeunEuler21(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Heun_Euler_2_1
+    butcher = SMatrix{3, 4, precision, 12}(
+        0, 0, 0,
+        1, 1, 0,
+        1, 1//2, 1//2,
+        1, 1, 0
+    ) |> transpose
+    return RungeKutta(name, butcher)
 end
 
 """

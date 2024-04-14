@@ -6,9 +6,7 @@ Stores the Butcher tableau and properties of a given Runge-Kutta method.
 # Fields
 $(TYPEDFIELDS)
 """
-struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, S2, P,
-                                                         I <: Iteration,
-                                                         F <: FirstSameAsLast}
+struct RungeKutta{T, S, S2, P} <: ODEMethod where {T <: AbstractFloat, S, S2, P}
     """Name of the Runge-Kutta method"""
     name::Symbol
     """Intermediate time update coefficient of each stage in the Butcher tableau"""
@@ -23,11 +21,10 @@ struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, 
     stages::Int64
     """Order of the primary (and embedded) update(s) of the Runge-Kutta method"""
     order::SVector{P, T}
-    # TODO: should I just wrap this in a Properties struct?
     """Determines whether the method is explicit or implicit"""
-    iteration::I
+    iteration::Iteration
     """Determines whether the method has the FSAL property"""
-    fsal::F
+    fsal::Bool
     """Determines which stages are explicit"""
     explicit_stage::SVector{S, Bool}
     """Abbreviated name for the Runge-Kutta method"""
@@ -35,37 +32,38 @@ struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, 
 end
 
 # TODO: implement option to use Euler or generic 2nd order
-    #       should I just replace the embedded row and rename label?
-    # TODO: add field for FSAL
-
-# Properties = Dict(:iteration => Explicit(),
-#                   :fsal => FSAL(),
-#                   :symp
-#                   :)
+#       should I just replace the embedded row and rename label?
 
 """
-    RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
+    RungeKutta(name::Symbol,
+               butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
 
 Outer constructor for `RungeKutta`.
 
 Required parameters: `name`, `butcher`
 """
-function RungeKutta(; name::Symbol, butcher::Matrix{T}) where T <: AbstractFloat
-    order          = order_prop(name, T)            # determine properties
-    iteration      = iteration_prop(butcher)
-    fsal           = fsal_prop(butcher)
-    explicit_stage = explicit_stage_prop(butcher)
-    code_name      = make_code_name(name)           # get code name label
+function RungeKutta(name::Symbol,
+                    butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
 
     nrow, ncol = size(butcher)
-    stages = ncol - 1
+    stages = ncol - 1                               # number of stages
+    p = nrow - ncol + 1                             # number of primary/embedded updates
 
-    # convert butcher tableau into static arrays
-    c   = butcher[1:ncol-1, 1] |> SVector{stages}
-    A_T = butcher[1:ncol-1, 2:ncol] |> transpose |> SMatrix{stages, stages}
-    b   = butcher[ncol, 2:ncol] |> SVector{stages}
+    # split butcher tableau
+    c   = butcher[1:ncol-1, 1] |> SVector{stages, T}
+    A_T = butcher[1:ncol-1, 2:ncol] |> transpose |> SMatrix{stages, stages, T, stages^2}
+    b   = butcher[ncol, 2:ncol] |> SVector{stages, T}
     # TODO: generalize b_hat to multiple embedded pairs
-    b_hat = butcher[nrow, 2:ncol] |> SVector{stages}
+    b_hat = butcher[nrow, 2:ncol] |> SVector{stages, T}
+
+    # properties
+    order          = order_prop(name, T, p)         # order of each RK update
+    iteration      = iteration_prop(butcher)        # whether method is explicit/implicit
+    fsal           = method_is_fsal(butcher)        # whether method has FSAL property
+    explicit_stage = explicit_stage_prop(butcher)   # mark which stages are explicit
+
+    # code name label
+    code_name = make_code_name(name)
 
     return RungeKutta(name, c, A_T, b, b_hat, stages, order,
                       iteration, fsal, explicit_stage, code_name)

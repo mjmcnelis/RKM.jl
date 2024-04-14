@@ -12,7 +12,7 @@ function BackwardEuler1(; precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
-    TrapezoidRuleBDF2(; precision::Type{T} = Float64) where T <: AbstractFloat
+    TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Second-order trapezoid rule BDF method (ABLS-stable)
 
@@ -21,18 +21,18 @@ Rose, and R.K. Smith. Transient simulation of silicon devices
 and circuits. IEEE Transactions on Electron Devices, 32:1992–
 2007, 1985.
 """
-function TrapezoidRuleBDF2(; precision::Type{T} = Float64) where T <: AbstractFloat
+function TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloat
     s2 = sqrt(BigFloat(2))   # sqrt(2)
     g = 2 - s2               # gamma
-
-    # note: is it FSAL? 
-    butcher = [0 0 0 0
-               g g/2 g/2 0
-               1 1/(2(2-g)) 1/(2(2-g)) g/2   
-               1 1/(2(2-g)) 1/(2(2-g)) g/2]
-    butcher = butcher .|> precision
-
-    return RungeKutta(; name = :Trapezoid_Rule_B_D_F_2, butcher)
+    # note: is it FSAL?
+    name = :Trapezoid_Rule_B_D_F_2
+    butcher = SMatrix{4, 4, precision, 16}(
+        0, 0, 0, 0,
+        g, g/2, g/2, 0,
+        1, 1/(2(2-g)), 1/(2(2-g)), g/2,
+        1, 1/(2(2-g)), 1/(2(2-g)), g/2
+    ) |> transpose
+    return RungeKutta(name, butcher)
 end
 
 """
@@ -51,7 +51,7 @@ end
 """
     QinZhang2(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Qin and Zhang's econd-order method. 
+Qin and Zhang's econd-order method.
 """
 function QinZhang2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//4 1//4 0
@@ -65,7 +65,7 @@ end
 """
     KraaijevangerSpijker2(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Kraaijevanger and Spijker's second-order method. 
+Kraaijevanger and Spijker's second-order method.
 """
 function KraaijevangerSpijker2(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//2 1//2 0
@@ -79,7 +79,7 @@ end
 """
     PareschiRusso2(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Pareschi and Russo's second-order method. 
+Pareschi and Russo's second-order method.
 """
 function PareschiRusso2(; precision::Type{T} = Float64) where T <: AbstractFloat
     s2 = sqrt(BigFloat(2))   # sqrt(2)
@@ -96,7 +96,7 @@ end
 """
     PareschiRusso3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Pareschi and Russo's third-order method. 
+Pareschi and Russo's third-order method.
 """
 function PareschiRusso3(; precision::Type{T} = Float64) where T <: AbstractFloat
     # TODO: maybe use generic formula from
@@ -116,7 +116,7 @@ end
 """
     Crouzeix3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Crouzeix's third-order method. 
+Crouzeix's third-order method.
 """
 function Crouzeix3(; precision::Type{T} = Float64) where T <: AbstractFloat
     s3 = sqrt(BigFloat(3))   # sqrt(3)
@@ -132,7 +132,7 @@ end
 """
     RadauIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Radau IA3 third-order method. 
+Radau IA3 third-order method.
 """
 function RadauIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 1//4 -1//4
@@ -146,7 +146,7 @@ end
 """
     RadauIIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Radau IIA3 third-order method. 
+Radau IIA3 third-order method.
 """
 function RadauIIA3(; precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [1//3 5//12 -1//12
@@ -161,7 +161,7 @@ end
 """
     DIRKL3(; precision::Type{T} = Float64) where T <: AbstractFloat
 
-Third-order L-stable diagonal implicit method. 
+Third-order L-stable diagonal implicit method.
 
 https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 """

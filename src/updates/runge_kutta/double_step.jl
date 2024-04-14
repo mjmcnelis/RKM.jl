@@ -107,7 +107,7 @@ function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
     #   second half step
     if explicit_stage[1]
         # skip function evaluation if method is FSAL
-        if !(fsal isa FSAL)
+        if !fsal
             ode_wrap!(f_tmp, t + dt/2.0, y2)
             FE[1] += 1
         end

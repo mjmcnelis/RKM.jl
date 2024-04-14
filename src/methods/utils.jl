@@ -5,6 +5,8 @@ function reconstruct_method(method::RungeKutta,
     @unpack name, c, A_T, b, b_hat, stages, order,
     iteration, fsal, explicit_stage, code_name = method
 
+    # ugh this won't fix precision (unless default is BigFloat)
+
     # convert to type precision (maybe need to do this w/ other reconstruct functions)
     c2 = precision.(c)
     A_T2 = precision.(A_T)

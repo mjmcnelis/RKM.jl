@@ -1,35 +1,37 @@
 # TODO: for Fehlberg4, etc, take Fehlberg45 except 2nd-last (last) row
 
 """
-    RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
+    RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Classic fourth-order Runge-Kutta method.
 """
-function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
-    butcher = [0 0 0 0 0
-               1//2 1//2 0 0 0
-               1//2 0 1//2 0 0
-               1 0 0 1 0
-               1 1//6 1//3 1//3 1//6]
-    butcher = butcher .|> precision
-
-    return RungeKutta(; name = :Runge_Kutta_4, butcher)
+function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Runge_Kutta_4
+    butcher = SMatrix{5, 5, precision, 25}(
+        0, 0, 0, 0, 0,
+        1//2, 1//2, 0, 0, 0,
+        1//2, 0, 1//2, 0, 0,
+        1, 0, 0, 1, 0,
+        1, 1//6, 1//3, 1//3, 1//6
+    ) |> transpose
+    return RungeKutta(name, butcher)
 end
 
 """
-    ThreeEightsRule4(; precision::Type{T} = Float64) where T <: AbstractFloat
+    ThreeEightsRule4(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Fourth-order 3/8 rule.
 """
-function ThreeEightsRule4(; precision::Type{T} = Float64) where T <: AbstractFloat
-    butcher = [0 0 0 0 0
-               1//3 1//3 0 0 0
-               2//3 -1//3 1 0 0
-               1 1 -1 1 0
-               1 1//8 3//8 3//8 1//8]
-    butcher = butcher .|> precision
-
-    return RungeKutta(; name = :Three_Eights_Rule_4, butcher)
+function ThreeEightsRule4(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Three_Eights_Rule_4
+    butcher = SMatrix{5, 5, precision, 25}(
+        0, 0, 0, 0, 0,
+        1//3, 1//3, 0, 0, 0,
+        2//3, -1//3, 1, 0, 0,
+        1, 1, -1, 1, 0,
+        1, 1//8, 3//8, 3//8, 1//8
+    ) |> transpose
+    return RungeKutta(name, butcher)
 end
 
 """

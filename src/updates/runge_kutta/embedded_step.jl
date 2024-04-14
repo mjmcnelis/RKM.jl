@@ -26,7 +26,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     # evaluate first stage at (t,y)
     if explicit_stage[1]
         # skip function evaluation if method is FSAL
-        if FE[1] > 0 && fsal isa FSAL
+        if FE[1] > 0 && fsal
             f .= f_tmp
         else
             ode_wrap!(f, t[1], y)

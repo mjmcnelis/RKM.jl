@@ -13,13 +13,9 @@ struct FullImplicit <: Implicit end
 # implicit multistep methods
 struct SingleImplicit <: Implicit end
 
-abstract type FirstSameAsLast end
-struct FSAL <: FirstSameAsLast end
-struct NotFSAL <: FirstSameAsLast end
-
 # TODO: determine if butcher table fixed (square matrix) or embedded (not square matrix)
 
-function iteration_prop(butcher::Matrix{T}) where T <: AbstractFloat
+function iteration_prop(butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
     ncol = size(butcher, 2)
     A = butcher[1:(ncol-1), 2:end]
 
@@ -37,7 +33,7 @@ function iteration_prop(butcher::Matrix{T}) where T <: AbstractFloat
     return iteration
 end
 
-function fsal_prop(butcher::Matrix{T}) where T <: AbstractFloat
+function method_is_fsal(butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
     ncol = size(butcher, 2)
 
     # TODO: if using implicit routine TRBDF2, then also need to check
@@ -49,20 +45,24 @@ function fsal_prop(butcher::Matrix{T}) where T <: AbstractFloat
 
     # check if last, second-last rows are identical
     if B_square[end, :] == B_square[end-1, :]
-        fsal = FSAL()
+        fsal = true
     else
-        fsal = NotFSAL()
+        fsal = false
     end
     return fsal
 end
 
-function order_prop(name::Symbol, precision::Type{T}) where T <: AbstractFloat
+# note: needed @inline macro to make SVector return type-stable
+@inline function order_prop(name::Symbol, precision::Type{T},
+                            p::Int) where T <: AbstractFloat
     order = filter.(isdigit, split(string(name), "_"))
     order = parse.(precision, filter(x -> x != "", order))
-    return SVector{length(order)}(order)
+    return SVector{p, T}(order)
 end
 
-function explicit_stage_prop(butcher::Matrix{T}) where T <: AbstractFloat
+function explicit_stage_prop(butcher::SMatrix{N, M, T, NM}) where {N, M,
+                                                                   T <: AbstractFloat,
+                                                                   NM}
     ncol = size(butcher, 2)
     A = butcher[1:(ncol-1), 2:end]
     stages = ncol-1

@@ -14,7 +14,7 @@ method = RungeKutta4()
 The code for this method's constructor is
 
 ```julia
-function RungeKutta4(; precision::Type{T} = Float64) where T <: AbstractFloat
+function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
     butcher = [0 0 0 0 0
                1//2 1//2 0 0 0
                1//2 0 1//2 0 0
@@ -48,7 +48,7 @@ b_hat = [0.16666666666666666, 0.3333333333333333, 0.3333333333333333, 0.16666666
 stages = 4
 order = [4.0]
 iteration = Explicit()
-fsal = NotFSAL()
+fsal = false
 code_name = RK4
 ```
 
