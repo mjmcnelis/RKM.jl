@@ -32,7 +32,10 @@ function TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloa
         1, 1/(2(2-g)), 1/(2(2-g)), g/2,
         1, 1/(2(2-g)), 1/(2(2-g)), g/2
     ) |> transpose
-    return RungeKutta(name, butcher)
+    iteration = DiagonalImplicit()
+    reconstructor = TrapezoidRuleBDF2
+
+    return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """

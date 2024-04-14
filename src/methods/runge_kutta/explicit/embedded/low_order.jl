@@ -29,7 +29,10 @@ function HeunEuler21(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1//2, 1//2,
         1, 1, 0
     ) |> transpose
-    return RungeKutta(name, butcher)
+    iteration = Explicit()
+    reconstructor = HeunEuler21
+
+    return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """

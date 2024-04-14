@@ -14,7 +14,10 @@ function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 0, 0, 1, 0,
         1, 1//6, 1//3, 1//3, 1//6
     ) |> transpose
-    return RungeKutta(name, butcher)
+    iteration = Explicit()
+    reconstructor = RungeKutta4
+
+    return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """

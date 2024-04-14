@@ -6,7 +6,8 @@ Stores the Butcher tableau and properties of a given Runge-Kutta method.
 # Fields
 $(TYPEDFIELDS)
 """
-struct RungeKutta{T, S, S2, P} <: ODEMethod where {T <: AbstractFloat, S, S2, P}
+struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, S2, P,
+                                                         I <: Iteration, F <: Function}
     """Name of the Runge-Kutta method"""
     name::Symbol
     """Intermediate time update coefficient of each stage in the Butcher tableau"""
@@ -21,29 +22,31 @@ struct RungeKutta{T, S, S2, P} <: ODEMethod where {T <: AbstractFloat, S, S2, P}
     stages::Int64
     """Order of the primary (and embedded) update(s) of the Runge-Kutta method"""
     order::SVector{P, T}
-    """Determines whether the method is explicit or implicit"""
-    iteration::Iteration
+    """Determines whether the method is explicit or full/diagonal implicit"""
+    iteration::I
     """Determines whether the method has the FSAL property"""
     fsal::Bool
     """Determines which stages are explicit"""
     explicit_stage::SVector{S, Bool}
     """Abbreviated name for the Runge-Kutta method"""
     code_name::String
+    """Function used to reconstruct Runge-Kutta method"""
+    reconstructor::F
 end
 
 # TODO: implement option to use Euler or generic 2nd order
 #       should I just replace the embedded row and rename label?
 
 """
-    RungeKutta(name::Symbol,
-               butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
+    RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iteration,
+               reconstructor::Function) where {N, M, T <: AbstractFloat, NM}
 
 Outer constructor for `RungeKutta`.
 
-Required parameters: `name`, `butcher`
+Required parameters: `name`, `butcher`, `iteration`, `reconstructor`
 """
-function RungeKutta(name::Symbol,
-                    butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
+function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iteration,
+                    reconstructor::Function) where {N, M, T <: AbstractFloat, NM}
 
     nrow, ncol = size(butcher)
     stages = ncol - 1                               # number of stages
@@ -58,15 +61,14 @@ function RungeKutta(name::Symbol,
 
     # properties
     order          = order_prop(name, T, p)         # order of each RK update
-    iteration      = iteration_prop(butcher)        # whether method is explicit/implicit
     fsal           = method_is_fsal(butcher)        # whether method has FSAL property
     explicit_stage = explicit_stage_prop(butcher)   # mark which stages are explicit
 
     # code name label
     code_name = make_code_name(name)
 
-    return RungeKutta(name, c, A_T, b, b_hat, stages, order,
-                      iteration, fsal, explicit_stage, code_name)
+    return RungeKutta(name, c, A_T, b, b_hat, stages, order, iteration,
+                      fsal, explicit_stage, code_name, reconstructor)
 end
 
 function Base.show(io::IO, RK::RungeKutta)

@@ -15,24 +15,6 @@ struct SingleImplicit <: Implicit end
 
 # TODO: determine if butcher table fixed (square matrix) or embedded (not square matrix)
 
-function iteration_prop(butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
-    ncol = size(butcher, 2)
-    A = butcher[1:(ncol-1), 2:end]
-
-    # check if submatrix A_{ij} is lower triangular
-    if tril(A) == A
-        # check if diagonal elements of A are all zero
-        if all(x -> x == 0, diag(A))
-            iteration = Explicit()
-        else
-            iteration = DiagonalImplicit()
-        end
-    else
-        iteration = FullImplicit()
-    end
-    return iteration
-end
-
 function method_is_fsal(butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
     ncol = size(butcher, 2)
 
