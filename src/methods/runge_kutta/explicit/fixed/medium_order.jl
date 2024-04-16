@@ -16,6 +16,7 @@ function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = RungeKutta4
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -35,6 +36,7 @@ function ThreeEightsRule4(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = ThreeEightsRule4
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -58,6 +60,7 @@ function Ralston4(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Ralston4
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -85,6 +88,7 @@ function Ketcheson4(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Ketcheson4
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -106,6 +110,7 @@ function Butcher5(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Butcher5
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -128,5 +133,6 @@ function Butcher6(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Butcher6
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end

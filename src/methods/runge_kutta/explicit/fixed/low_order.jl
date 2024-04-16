@@ -12,6 +12,7 @@ function Euler1(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Euler1
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -31,6 +32,7 @@ function Heun2(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Heun2
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -48,6 +50,7 @@ function Midpoint2(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Midpoint2
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -67,6 +70,7 @@ function Ralston2(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Ralston2
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -93,6 +97,7 @@ function Generic2(precision::Type{T} = Float64;
     ) |> transpose
     iteration = Explicit()
     reconstructor = Generic2
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -111,6 +116,7 @@ function Heun3(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Heun3
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -131,6 +137,7 @@ function Ralston3(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Ralston3
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -149,6 +156,7 @@ function RungeKutta3(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = RungeKutta3
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -169,6 +177,7 @@ function ShuOsher3(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = ShuOsher3
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -190,6 +199,7 @@ function SpiteriRuuth3(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = SpiteriRuuth3
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -214,5 +224,6 @@ function Generic3(precision::Type{T} = Float64;
     ) |> transpose
     iteration = Explicit()
     reconstructor = Generic3
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end

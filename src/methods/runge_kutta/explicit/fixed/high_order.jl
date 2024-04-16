@@ -7,7 +7,7 @@ https://link.springer.com/article/10.1007/BF02219778
 http://www.peterstone.name/Maplepgs/Maple/nmthds/RKcoeff/Runge_Kutta_schemes/RK8/RKcoeff8b_4.pdf
 """
 function Curtis8(precision::Type{T} = Float64) where T <: AbstractFloat
-    s21, = sqrt(BigFloat(21.0))
+    s21 = sqrt(BigFloat(21.0))
 
     name = :Curtis_8
     butcher = SMatrix{12, 12, precision, 144}(
@@ -26,6 +26,7 @@ function Curtis8(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Curtis8
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -55,6 +56,7 @@ function Shanks8(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = Shanks8
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
@@ -82,5 +84,6 @@ function ShanksPseudo8(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = ShanksPseudo8
+
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
