@@ -63,8 +63,9 @@ p = [B]
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve ode, plot solution
+precision = Float64
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                 model_parameters = p, precision = Float64)
+                 model_parameters = p, precision)
 y, t = get_solution(sol)
 plot(t, y)
 ```
@@ -103,13 +104,15 @@ All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embe
 ### ODE evolution
 Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution. An in-place version `evolve_ode!` is also available.
 ```julia
+precision = Float64
+
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                 model_parameters = p, precision = Float64)
+                 model_parameters = p, precision)
 
 sol = Solution(precision)
 evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 ```
-You can adjust the numerical precision of the solver with the keyword argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
+You can adjust the numerical precision of the solver with the argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
