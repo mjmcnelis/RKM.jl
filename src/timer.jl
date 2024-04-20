@@ -1,14 +1,3 @@
-# TODO: can't seem to get rid of this atm
-"""
-Specifies the time evolution interval and initial time step.
-"""
-@kwdef struct TimeRange
-    """Initial time"""
-    t0::Float64
-    """Final time"""
-    tf::Float64
-end
-
 """
 Sets a timer for the ODE solver.
 """

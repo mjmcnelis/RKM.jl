@@ -15,12 +15,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         clear_solution!(sol)
         @unpack precision, FE#=, JE=# = sol
 
-        @unpack adaptive, controller, method, t_range, timer, stage_finder,
+        @unpack adaptive, controller, method, timer, stage_finder,
                 interpolator, static_array, show_progress, save_solution = options
-
-        @set! t_range.t0 = t0
-        @set! t_range.tf = tf
-        @unpack t0, tf = t_range
 
         reset_timer!(timer)
         reset_attempts!(adaptive)
@@ -77,7 +73,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     end
 
     if save_solution && adaptive isa Fixed
-        sizehint_solution!(sol, t_range, dt0, dimensions)
+        sizehint_solution!(sol, t0, tf, dt0, dimensions)
     end
 
     # TODO: look into @code_warntype
