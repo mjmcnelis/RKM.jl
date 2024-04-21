@@ -19,7 +19,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # q()
 
         @unpack adaptive, controller, method, timer, stage_finder,
-                interpolator, static_array, show_progress, save_solution = options
+                interpolator, show_progress, save_solution = options
 
         reset_timer!(timer)
         reset_attempts!(adaptive)
@@ -35,7 +35,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # initial conditions
         y = y0 .|> precision
         y isa Vector ? nothing : y = [y]
-        static_array ? y = MVector{dimensions}(y...) : nothing
 
         t0 = rationalize(t0) |> precision
         tf = rationalize(tf) |> precision
@@ -47,11 +46,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # create ODE wrapper function
         ode_wrap! = ODEWrapper([t0], model_parameters, dy_dt!)
 
-        update_cache = if static_array
-            StaticUpdateCache(precision, y, method, adaptive, dimensions)
-        else
-            UpdateCache(precision, y, method, adaptive, dimensions)
-        end
+        # configure cache
+        update_cache = UpdateCache(precision, y, method, adaptive, dimensions)
 
         @unpack y, f, f_tmp, J, error = update_cache
 
@@ -92,8 +88,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             continue_solver(t, tf, timer) || break
 
             evolve_one_time_step!(method, adaptive, controller,
-                                FE, t, dt, ode_wrap!, update_cache,
-                                linear_cache, stage_finder)
+                                  FE, t, dt, ode_wrap!, update_cache,
+                                  linear_cache, stage_finder)
             t[2] = t[1]
             t[1] += dt[1]
             timer.total_steps[1] += 1

@@ -41,8 +41,7 @@ for dt0 in dt0_vect
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                              static_array = static, save_solution)
+    options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(), save_solution)
     rkm = @benchmark evolve_ode($y0, $t0, $tf, $dt0, dy_dt!, $options)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
@@ -97,8 +96,7 @@ for N in N_vect
     push!(memory_ord, ord.memory/1024^2)    # convert from bytes to MiB
     GC.gc()
     # RKM
-    options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                              static_array = static, save_solution)
+    options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(), save_solution)
     rkm = @benchmark evolve_ode($y0, $t0, $tf, $dt0, dy_dt!, $options)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)

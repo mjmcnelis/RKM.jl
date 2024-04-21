@@ -176,21 +176,4 @@ Progress:  55%|█████████████████████�
 └ @ RKM ~/Desktop/RKM.jl/src/time.jl:67
 ```
 
-### Static arrays
-
-If the ODE system size is small, we can use static arrays to speed up the runtime:
-```julia
-options_static = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                                 static_array = true)
-```
-The following code benchmarks the runtime between static and dynamic arrays:
-```julia
-julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options_static;
-                               model_parameters = p, precision = Float64);
-  14.082 ms (400 allocations: 3.08 MiB)
-
-julia> @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                               model_parameters = p, precision = Float64);
-  17.659 ms (279 allocations: 3.07 MiB)
-```
 ### Advanced solver options

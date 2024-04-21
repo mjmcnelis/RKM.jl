@@ -20,7 +20,6 @@ time_rkm = Float64[]
 memory_rkm = Float64[]
 
 static = false
-# static = true
 
 epsilon_vect = 10.0.^(-(10:5:15))
 
@@ -29,8 +28,8 @@ for epsilon in epsilon_vect
     @show epsilon
 
     # OrdinaryDiffEq
-    f = static ? f_ord_static : f_ord
-    y = static ? SA[y0...] : y0
+    f = f_ord
+    y = y0
     prob = ODEProblem(f, y, (t0, tf))
 
     ord = @benchmark solve($prob, DP5(), dt = $dt0, reltol = $epsilon, abstol = 0.0,
@@ -44,8 +43,7 @@ for epsilon in epsilon_vect
     ps = SolverOptions(; adaptive = Embedded(; epsilon, low, high, safety),
                       method = DormandPrince54(), t_range = TimeRange(; t0, tf, dt0))
 
-    rkm = @benchmark evolve_ode($y0, dy_dt!; options = $ps, show_progress = false,
-                                static_array = $static)
+    rkm = @benchmark evolve_ode($y0, dy_dt!; options = $ps, show_progress = false)
     push!(time_rkm, mean(rkm).time/1e9)
     push!(memory_rkm, rkm.memory/1024^2)
     GC.gc()

@@ -18,8 +18,6 @@ SolverOptions for the ODE solver.
     save_solution::Bool = true
     """Determines whether or not the progress meter is displayed"""
     show_progress::Bool = false
-    """Determines whether or not static array types are used"""
-    static_array::Bool = false
 end
 # note: need to use abstract types (e.g. ::StageFinder)
 #       to avoid excess allocations in evolve loop
@@ -30,6 +28,6 @@ end
 
 function lookup_options(options::SolverOptions)
     @unpack adaptive, method, timer, controller, stage_finder,
-            interpolator, save_solution, show_progress, static_array = options
+            interpolator, save_solution, show_progress = options
     return nothing
 end

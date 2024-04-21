@@ -51,6 +51,10 @@ function continue_solver(t::Vector{T}, tf::T, timer::TimeLimit) where T <: Abstr
     if !isinf(wtime_min) && total_steps[1] % 10 == 0
         if time() > time_sys[1] + 60*wtime_min
             println("")
+            # note: @code_warntype shows logger and err are type-unstable (from @warn)
+            #       logger::Union{Nothing, Base.CoreLogging.AbstractLogger} (red)
+            #       err::Any (red)
+            # doesn't seem to hurt performance, would rather warn than print
             @warn "Exceeded time limit of $wtime_min minutes (stopping evolve_ode!...)\n"
             return false
         end

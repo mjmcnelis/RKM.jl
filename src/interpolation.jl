@@ -26,10 +26,9 @@ function HermiteInterpolator(; dt_save::Float64)
 end
 =#
 
-# note: needed @inline to prevent allocations...
-@inline function interpolate_solution!(interp::NoInterpolator, sol::Solution,
-                                       update_cache::RKMCache, t::Vector{T},
-                                       t0::T, tf::T) where T <: AbstractFloat
+function interpolate_solution!(::NoInterpolator, sol::Solution,
+                               update_cache::RKMCache, t::Vector{T},
+                               t0::T, tf::T) where T <: AbstractFloat
     @unpack y = update_cache
 
     append!(sol.y, y)
@@ -37,9 +36,9 @@ end
     return nothing
 end
 
-@inline function interpolate_solution!(interp::HermiteInterpolator, sol::Solution,
-                                       update_cache::RKMCache, t::Vector{T},
-                                       t0::T, tf::T) where T <: AbstractFloat
+function interpolate_solution!(interp::HermiteInterpolator, sol::Solution,
+                               update_cache::RKMCache, t::Vector{T},
+                               t0::T, tf::T) where T <: AbstractFloat
     @unpack dt_save = interp
     @unpack y, y1, y2, y_tmp, f, f_tmp = update_cache
 

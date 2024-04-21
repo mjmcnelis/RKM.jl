@@ -12,7 +12,6 @@ adaptive_vect = [Fixed(), Doubling(), Embedded()]
 limiter_vect = [PiecewiseLimiter(), SmoothLimiter()]
 pid_vect = [BasicControl(), PIControl(), H312Control(),
             H321PredictiveControl(), H211bPredictiveControl()]
-static_array_vect = [false, true]
 
 t0 = -8.0
 tf = 8.0
@@ -23,16 +22,15 @@ y0 = exp(t0)/(1.0 + exp(t0)) - 0.5
 for precision in precision_vect, method in method_vect,
                                  adaptive in adaptive_vect,
                                  limiter in limiter_vect,
-                                 pid in pid_vect,
-                                 static_array in static_array_vect
+                                 pid in pid_vect
 
     controller = TimeStepController(precision; pid, limiter)
     save_solution = adaptive isa Fixed
     # save_solution = true
 
-    # @show precision adaptive limiter pid static_array
+    # @show precision adaptive limiter pid
 
-    options = SolverOptions(; method, adaptive, controller, save_solution, static_array)
+    options = SolverOptions(; method, adaptive, controller, save_solution)
 
     # sol = Solution(precision)
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)

@@ -29,9 +29,6 @@ options = Dict(
     :save_solution => true,
     # :save_solution => false,
 
-    :show_progress => false,
-    # :show_progress => true,
-
-    :static_array => false
-    # :static_array => true
+    :show_progress => false
+    # :show_progress => true
 );
