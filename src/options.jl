@@ -27,3 +27,9 @@ end
 function SolverOptions(dict::Dict)
     return SolverOptions(; (Symbol(k) => v for (k,v) in dict)...)
 end
+
+function lookup_options(options::SolverOptions)
+    @unpack adaptive, method, timer, controller, stage_finder,
+            interpolator, save_solution, show_progress, static_array = options
+    return nothing
+end

@@ -2,7 +2,7 @@
 abstract type Wrapper end
 
 struct ODEWrapper{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
-    t::VectorMVector{2,T}   # note: for now, 2nd index is not being used/updated
+    t::Vector{T}
     p::P
     dy_dt!::F
 end

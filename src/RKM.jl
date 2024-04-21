@@ -23,8 +23,6 @@ import InteractiveUtils: @code_warntype
 
 abstract type ODEMethod end
 
-const VectorMVector = Union{Vector{T}, MVector{D,T}} where {D, T <: AbstractFloat}
-
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 

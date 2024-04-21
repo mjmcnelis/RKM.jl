@@ -15,6 +15,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         clear_solution!(sol)
         @unpack precision, FE#=, JE=# = sol
 
+        # @code_warntype lookup_options(options)
+        # q()
+
         @unpack adaptive, controller, method, timer, stage_finder,
                 interpolator, static_array, show_progress, save_solution = options
 
@@ -38,16 +41,16 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         tf = rationalize(tf) |> precision
         dt0 = rationalize(dt0) |> precision
 
-        t  = precision == BigFloat ? [t0, t0] : MVector{2}(t0, t0)
-        dt = precision == BigFloat ? [dt0, dt0] : MVector{2}(dt0, dt0)
+        t  = [t0, t0]
+        dt = [dt0, dt0]
 
         # create ODE wrapper function
-        ode_wrap! = ODEWrapper(deepcopy(t), model_parameters, dy_dt!)
+        ode_wrap! = ODEWrapper([t0], model_parameters, dy_dt!)
 
         update_cache = if static_array
-            StaticUpdateCache(; y, method, adaptive, precision, dimensions)
+            StaticUpdateCache(precision, y, method, adaptive, dimensions)
         else
-            UpdateCache(; y, method, adaptive, precision, dimensions)
+            UpdateCache(precision, y, method, adaptive, dimensions)
         end
 
         @unpack y, f, f_tmp, J, error = update_cache

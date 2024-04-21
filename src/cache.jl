@@ -14,8 +14,9 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     error::Vector{T}
 end
 
-function UpdateCache(; y::Vector{T}, method::ODEMethod, adaptive::AdaptiveStepSize,
-                       precision::Type{T}, dimensions::Int64) where T <: AbstractFloat
+function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
+                     adaptive::AdaptiveStepSize,
+                     dimensions::Int64) where T <: AbstractFloat
 
     @unpack iteration, stages = method
 
@@ -58,9 +59,9 @@ struct StaticUpdateCache{T, D, S, DS, N, N2, M, P} <: RKMCache where {T <: Abstr
     error::MVector{P, T}
 end
 
-function StaticUpdateCache(; y::MVector{D,T}, method::ODEMethod,
-                             adaptive::AdaptiveStepSize, precision::Type{T},
-                             dimensions::Int64) where {D, T <: AbstractFloat}
+function StaticUpdateCache(precision::Type{T}, y::MVector{D,T}, method::ODEMethod,
+                           adaptive::AdaptiveStepSize,
+                           dimensions::Int64) where {D, T <: AbstractFloat}
 
     @unpack iteration, stages = method
 

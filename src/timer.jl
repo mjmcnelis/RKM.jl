@@ -37,16 +37,14 @@ function reset_timer!(timer::TimeLimit)
 end
 
 """
-    continue_solver(t::VectorMVector{2,T}, tf::T,
-                    timer::TimeLimit) where T <: AbstractFloat
+    continue_solver(t::Vector{T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
 
 Checks whether to continue running the ODE solver. The solver stops (`false`) if either
 the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `timer`.
 
 Required parameters: `t`, `tf`, `timer`
 """
-function continue_solver(t::VectorMVector{2,T}, tf::T,
-                         timer::TimeLimit) where T <: AbstractFloat
+function continue_solver(t::Vector{T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
     @unpack wtime_min, time_sys, total_steps = timer
 
     # note: check timer every 10 time steps
