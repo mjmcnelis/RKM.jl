@@ -14,25 +14,19 @@ struct TimeStepController{P, L, T} <: Controller where {P <: PIDControlBeta,
                                                         T <: AbstractFloat}
     pid::P
     limiter::L
-    e_prev::VectorMVector{2,T}
-    tol_prev::VectorMVector{2,T}
-    dt_prev::VectorMVector{3,T}
+    e_prev::Vector{T}
+    tol_prev::Vector{T}
+    dt_prev::Vector{T}
     initialized::MVector{1,Bool}
 end
 
-function TimeStepController(; pid = PIControl(), limiter = PiecewiseLimiter(),
-                              precision::Type{T} = Float64) where {T <: AbstractFloat}
-    # initialize vectors
-    if precision == BigFloat
-        e_prev   = ones(precision, 2)
-        tol_prev = ones(precision, 2)
-        dt_prev  = ones(precision, 3)
-    else
-        e_prev   = MVector{2, precision}(1.0, 1.0)
-        tol_prev = MVector{2, precision}(1.0, 1.0)
-        dt_prev  = MVector{3, precision}(1.0, 1.0, 1.0)
-    end
-
+function TimeStepController(precision::Type{T} = Float64; pid::P = PIControl(),
+                            limiter::L = PiecewiseLimiter()) where {P <: PIDControlBeta,
+                                                                    L <: LimiterMethod,
+                                                                    T <: AbstractFloat}
+    e_prev   = ones(precision, 2)
+    tol_prev = ones(precision, 2)
+    dt_prev  = ones(precision, 3)
     initialized = MVector{1, Bool}(false)
 
     return TimeStepController(pid, limiter, e_prev, tol_prev, dt_prev, initialized)
@@ -98,5 +92,5 @@ function reconstruct_controller(controller::TimeStepController,
     # reminder: reason I need this is b/c I default rescale = high when error = 0
     @assert safety * limiter.high > 1.0
 
-    return TimeStepController(; pid, limiter, precision)
+    return TimeStepController(precision; pid, limiter)
 end

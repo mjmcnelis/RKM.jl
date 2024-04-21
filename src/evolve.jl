@@ -5,7 +5,7 @@
                 model_parameters = nothing) where {T <: AbstractFloat,
                                                    T1 <: AbstractFloat}
 
-Required parameters: `sol`, `y0`, `dt0`, `dy_dt!`, `options`
+Required parameters: `sol`, `y0`, `t0`, tf`, `dt0`, `dy_dt!`, `options`
 """
 function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
                      dt0::Float64, dy_dt!::Function, options::SolverOptions;
@@ -107,20 +107,20 @@ end
 
 """
     evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-               dy_dt!::Function, options::SolverOptions;
-               model_parameters = nothing,
-               precision::Type{T2} = Float64) where {T <: AbstractFloat,
-                                                     T1 <: AbstractFloat,
-                                                     T2 <: AbstractFloat}
+               dy_dt!::Function, options::SolverOptions,
+               precision::Type{T2} = Float64;
+               model_parameters = nothing) where {T <: AbstractFloat,
+                                                  T1 <: AbstractFloat,
+                                                  T2 <: AbstractFloat}
 
-Required parameters: `y0`, `dt0`, `dy_dt!`, `options`
+Required parameters: `y0`, `t0`, `tf`, `dt0`, `dy_dt!`, `options`, `precision`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-                    dy_dt!::Function, options::SolverOptions;
-                    model_parameters = nothing,
-                    precision::Type{T2} = Float64) where {T <: AbstractFloat,
-                                                          T1 <: AbstractFloat,
-                                                          T2 <: AbstractFloat}
+                    dy_dt!::Function, options::SolverOptions,
+                    precision::Type{T2} = Float64;
+                    model_parameters = nothing) where {T <: AbstractFloat,
+                                                       T1 <: AbstractFloat,
+                                                       T2 <: AbstractFloat}
     sol = Solution(precision)
     evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters)
     return sol

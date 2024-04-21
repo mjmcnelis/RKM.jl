@@ -26,7 +26,7 @@ for precision in precision_vect, method in method_vect,
                                  pid in pid_vect,
                                  static_array in static_array_vect
 
-    controller = TimeStepController(; pid, limiter)
+    controller = TimeStepController(precision; pid, limiter)
     save_solution = adaptive isa Fixed
     # save_solution = true
 
@@ -40,9 +40,9 @@ for precision in precision_vect, method in method_vect,
     # note: second solve does not allocate on adaptive even if save_solution = true
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
 
-    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
+    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, precision)
     # @show sol.excess_memory[1]
-    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; precision)
+    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, precision)
 
     @test sol.excess_memory[1] == 0
     # @show sol.excess_memory[1]

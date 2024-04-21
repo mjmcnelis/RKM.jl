@@ -25,7 +25,7 @@ p = [10.0, 28.0, precision(8//3)]
 dt0 = 1e-3
 
 options = SolverOptions(; method = Feagin108(), adaptive = Fixed())
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p, precision)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, precision; model_parameters = p)
 y, t = get_solution(sol)
 
 # save new answer keys
