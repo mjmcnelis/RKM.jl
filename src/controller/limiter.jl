@@ -70,19 +70,18 @@ function SmoothLimiter(; safety = 0.8, low = 0.2, high = 5.0,
     return SmoothLimiter(a, b, c, d, safety, low, high, dt_min, dt_max)
 end
 
-function limit_time_step(limiter::PiecewiseLimiter, rescale)
+function limit_time_step(limiter::PiecewiseLimiter, rescale::T) where T <: AbstractFloat
     @unpack safety, low, high = limiter
     return min(high, max(low, safety*rescale))
 end
 
-function limit_time_step(limiter::SmoothLimiter, rescale)
+function limit_time_step(limiter::SmoothLimiter, rescale::T) where T <: AbstractFloat
     @unpack a, b, c, d, safety, low, high = limiter
 
-    x = safety*rescale
+    x = T(safety)*rescale
 
     if x < 0.0
-        @warn "rescale = $rescale is negative, limiting rescale = low"
-        return low
+        return T(low)
     elseif 0.0 <= x <= 1.0
         return a + b*x + c*x^2 + d*low*exp(-x/low)
 

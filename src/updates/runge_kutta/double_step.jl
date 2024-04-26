@@ -70,7 +70,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
             set_previous_control_vars!(controller, e_norm, tol, dt[1])
             break
         end
-        attempts <= max_attempts || (@warn "step doubling exceeded $max_attempts attempts";
+        attempts <= max_attempts || (println("step doubling exceeded $max_attempts attempts");
                                      set_previous_control_vars!(controller, e_norm, tol, dt[1]);
                                      break)
         attempts += 1
