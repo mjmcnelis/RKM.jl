@@ -17,6 +17,8 @@ struct Solution{T <: AbstractFloat}
     y::Vector{T}
     """Time vector of solution"""
     t::Vector{T}
+    """Number of time steps taken"""
+    time_steps_taken::MVector{1,Int64}
     """Number of function evaluations"""
     FE::MVector{1,Int64}
     """Number of Jacobian evaluations"""
@@ -47,6 +49,7 @@ Required parameters: `precision`
 function Solution(precision::Type{T} = Float64) where T <: AbstractFloat
     y = Vector{precision}()
     t = Vector{precision}()
+    time_steps_taken = MVector{1,Int64}(0)
     FE = MVector{1,Int64}(0)
     JE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
@@ -56,17 +59,18 @@ function Solution(precision::Type{T} = Float64) where T <: AbstractFloat
     excess_memory = MVector{1,Int64}(0)
     dimensions = MVector{1,Int64}(0.0)
 
-    return Solution(y, t, FE, JE, rejection_rate, runtime, solution_size,
-                    config_memory, excess_memory, dimensions, precision)
+    return Solution(y, t, time_steps_taken, FE, JE, rejection_rate, runtime,
+                    solution_size, config_memory, excess_memory, dimensions, precision)
 end
 
 function clear_solution!(sol::Solution)
-    @unpack y, t, FE, JE, rejection_rate, runtime,
-            solution_size, config_memory, excess_memory = sol
+    @unpack y, t, time_steps_taken, FE, JE, rejection_rate,
+            runtime, solution_size, config_memory, excess_memory = sol
     empty!(y)
     empty!(t)
     sizehint!(y, 0)
     sizehint!(t, 0)
+    time_steps_taken .= 0
     FE .= 0
     JE .= 0
     rejection_rate .= 0.0
@@ -117,10 +121,12 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveSt
                         loop_stats::NamedTuple, config_bytes::Int64)
 
     @unpack jacobian_method = stage_finder
-    @unpack rejection_rate, JE, runtime, solution_size, config_memory, excess_memory = sol
+    @unpack time_steps_taken, JE, rejection_rate, runtime,
+            solution_size, config_memory, excess_memory = sol
 
-    rejection_rate .= compute_step_rejection_rate(adaptive, timer)
+    time_steps_taken .= timer.total_steps
     JE .= jacobian_method.evaluations
+    rejection_rate .= compute_step_rejection_rate(adaptive, timer)
     runtime .= loop_stats.time
     solution_size .= sizeof(sol.y) + sizeof(sol.t)
     config_memory .= config_bytes
@@ -132,9 +138,10 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveSt
 end
 
 function get_stats(sol::Solution)
-    @unpack t, rejection_rate, FE, JE, runtime,
+    @unpack t, time_steps_taken, rejection_rate, FE, JE, runtime,
             solution_size, config_memory, excess_memory = sol
-    println("time steps           = $(length(t))")
+    println("time steps taken     = $(time_steps_taken[1])")
+    println("time points saved    = $(length(t))")
     println("step rejection rate  = $(round(rejection_rate[1], sigdigits = 4)) %")
     println("function evaluations = $(FE[1])")
     println("jacobian evaluations = $(JE[1])")
