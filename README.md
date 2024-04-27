@@ -21,7 +21,7 @@ This package is not registered. To install, clone the repository
     cd <your_path_dir>
     git clone https://github.com/mjmcnelis/RKM.jl.git
 
-and develop the package in a Julia REPL (assumes v1.9.0 or higher):
+and develop the package in a Julia REPL (assumes v1.10.2 or higher):
 ```julia
 using Pkg
 Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
@@ -29,7 +29,7 @@ Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
 
 It is also recommended to install these packages in your base environment:
 ```julia
-] add DoubleFloats Plots BenchmarkTools
+] add DoubleFloats Plots
 ```
 
 ## Example
@@ -38,7 +38,6 @@ This code example shows how to use the ODE solver.
 using RKM
 using DoubleFloats: Double64
 using Plots; plotly()
-using BenchmarkTools: @btime
 
 # logistic equation
 if !(@isdefined dy_dt!)
@@ -64,8 +63,8 @@ options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed())
 
 # evolve ode, plot solution
 precision = Float64
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                 model_parameters = p, precision)
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
+                 precision; model_parameters = p)
 y, t = get_solution(sol)
 plot(t, y)
 ```
@@ -106,8 +105,8 @@ Finally, we call the function `evolve_ode` to evolve the ODE system and store th
 ```julia
 precision = Float64
 
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                 model_parameters = p, precision)
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
+                 precision; model_parameters = p)
 
 sol = Solution(precision)
 evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
@@ -141,18 +140,18 @@ plot(t, y)
 
 After the solver finishes, we can print runtime statistics with the function `get_stats`. After recompiling, we get
 ```julia
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options;
-                              model_parameters = p, precision = Float64);
-  0.017137 seconds (279 allocations: 3.074 MiB)
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
+                              precision; model_parameters = p);
+  0.046932 seconds (152 allocations: 3.063 MiB)
 
 julia> get_stats(sol)
 time steps           = 200002
 step rejection rate  = 0.0 %
 function evaluations = 800004
 jacobian evaluations = 0
-evolution runtime    = 0.01693 seconds
+evolution runtime    = 0.04675 seconds
 solution size        = 3.052 MiB
-config memory        = 21.938 KiB
+config memory        = 10.344 KiB
 excess memory        = 0 bytes
 ```
 Here, we show the number of time steps saved and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size, the configuration memory, and the excess memory allocated during the time evolution loop. In this example, almost all of the allocated memory went towards storing the solution.
@@ -168,12 +167,12 @@ options_timer = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
-julia> dt0_small = 2e-8;             # trigger timer
-julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_timer;
-                        model_parameters = p, precision = Float64);
-Progress:  55%|███████████████████████                  |  ETA: 0:00:48 ( 1.07  s/it)
+julia> dt0_small = 5e-8;             # trigger timer
+julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_timer,
+                        precision; model_parameters = p);
+Progress:  70%|█████████████████████████████▍            |  ETA: 0:00:25 ( 0.85  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
-└ @ RKM ~/Desktop/RKM.jl/src/time.jl:67
+└ @ RKM ~/Desktop/RKM.jl/src/timer.jl:58
 ```
 
 ### Advanced solver options
