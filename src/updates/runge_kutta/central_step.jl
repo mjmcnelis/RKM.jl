@@ -2,20 +2,22 @@
 # TODO: not really working that well right now, debug later (also out of date)
 function evolve_one_time_step!(method::RungeKutta,
              adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64},
-             y::Vector{T}, t::Union{Vector{T}, MVector{1,T}},
-             dt::Union{Vector{T}, MVector{2,T}}, dy_dt!::F, dy::Matrix{T},
-             y_tmp::Vector{T}, f_tmp::Vector{T},
+             t::Vector{T}, dt::Vector{T},
+             ode_wrap!::ODEWrapper, update_cache::RKMCache,
              # TODO: may want to do kwargs for different caches used in adaptive methods
              # note: next argument was f but renamed it to y_prev here
-             y_prev::Vector{T}, args...) where {T <: AbstractFloat, F}
+             args...) where T <: AbstractFloat
 
     @unpack iteration = method
+    @unpack y, y_tmp, f_tmp, dy = update_cache
+    y_prev = update_cache.f
 
-    dy_dt!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
+    ode_wrap!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
 
     # TEMP: fixed time step for first update until estimate first time step w/ doubling
     if FE[1] > 0
-        @unpack epsilon, low, high, p_norm, dt_min, dt_max = adaptive
+        @unpack epsilon, p_norm = adaptive
+        @unpack low, high, dt_min, dt_max = controller.limiter
 
         order = method.order[1]                         # order of scheme
 
@@ -59,12 +61,12 @@ function evolve_one_time_step!(method::RungeKutta,
     end
     # evaluate first stage iteration w/ new time step (i.e. dt[2])
     @.. dy[:,1] = dt[2] * f_tmp
-    runge_kutta_step!(method, iteration, y, t[1], dt[2], dy_dt!, dy, y_tmp, f_tmp)
+    runge_kutta_step!(method, iteration, t[1], dt[2], ode_wrap!, FE, update_cache, args...)
 
     dt[1] = dt[2]                                       # store current time step
     @.. y_prev = y                                      # store current solution
     @.. y = y_tmp                                       # get iteration
 
-    add_function_evaluations!(FE, iteration, adaptive, method)
+    FE[1] += 1                                          # from first evaluation above
     return nothing
 end

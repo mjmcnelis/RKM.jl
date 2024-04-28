@@ -22,10 +22,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                 interpolator, show_progress, save_solution = options
 
         reset_timer!(timer)
-        reset_attempts!(adaptive)
 
         method = reconstruct_method(method, precision)
         if !(adaptive isa Fixed)
+            adaptive = reconstruct_adaptive(adaptive, method, precision)
             controller = reconstruct_controller(controller, method, adaptive, precision)
         end
 

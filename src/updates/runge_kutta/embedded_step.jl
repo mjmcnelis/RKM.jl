@@ -11,18 +11,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @unpack dt_min, dt_max = limiter
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
 
-    order_max = maximum(method.order)                   # max/min orders in embedded scheme
-    order_min = minimum(method.order)
-
-    # note: comment if benchmark against OrdinaryDiffEq (add boolean?)
-    epsilon ^= (order_min / order_max)                  # rescale tolerance parameters
-    alpha ^= (order_min / order_max)
-    delta ^= (order_min / order_max)
-    # TODO: try reconstruct_adaptive (i.e. repower epsilon, make it correct type)
-    epsilon = T(epsilon) # tmp for T = Float32 (otherwise tol = Float64 != Float32)
-    alpha = T(alpha)
-    delta = T(delta)
-
     # evaluate first stage at (t,y)
     if explicit_stage[1]
         # skip function evaluation if method is FSAL
@@ -35,10 +23,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     end
 
     dt[1] = dt[2]                                       # initialize time step
-
-    # TODO: float type can change from Float64 to Double64
-    # note: is that why benchmark vs OrdinaryDiffEq bad for Double64?
-    rescale = 1.0
+    rescale = T(1.0)                                    # default time step rescaling
 
     attempts = 1
     while true                                          # start embedded routine
@@ -54,7 +39,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
 
         @.. error = y2 - y1                             # local error of embedded pair
 
-        e_norm = norm_tmp(error, p_norm)                    # compute norms
+        e_norm = norm_tmp(error, p_norm)                # compute norms
         y_norm = norm_tmp(y1, p_norm)
         # TODO: need to use Δy = y2 since it's secondary method
         #       but should make labeling consistent w/ doubling
@@ -70,7 +55,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
-            rescale = limiter.high
+            rescale = T(limiter.high)
         else
             rescale = rescale_time_step(controller, tol, e_norm)
             rescale = limit_time_step(limiter, rescale)

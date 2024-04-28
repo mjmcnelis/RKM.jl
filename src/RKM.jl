@@ -80,7 +80,7 @@ include("options.jl")
 include("evolve.jl")
 
 # Adaptive methods
-export Fixed, Doubling, Embedded, FiniteDiff
+export Fixed, Doubling, Embedded, CentralDiff
 # Time step controller
 export TimeStepController, PIDControlBeta, PIDControlK
 export BasicControl, PIControl, H312Control, H321PredictiveControl,

@@ -71,26 +71,20 @@ function reconstruct_controller(controller::TimeStepController,
                                 precision::Type{T}) where T <: AbstractFloat
 
     @unpack pid, limiter = controller
-    @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
-    @unpack safety, high = limiter
     @unpack order = method
 
-    local_order = adaptive isa Embedded ? minimum(order) + 1.0 :
-                  adaptive isa CentralDiff ? 2.0 :
-                  adaptive isa Doubling ? order[1] + 1.0 : error()
+    local_order = get_adaptive_local_order(adaptive, order)
+    repower_high = rescale_tolerance(adaptive, order)
 
-    repower_high = adaptive isa Embedded ? minimum(order)/maximum(order) :
-                   adaptive isa CentralDiff ? 1.0/order[1] :
-                   adaptive isa Doubling ? order[1]/(1.0 + order[1]) : error()
-
-    @set! pid.beta1 = beta1 / local_order
-    @set! pid.beta2 = beta2 / local_order
-    @set! pid.beta3 = beta3 / local_order
-    @set! limiter.high = high^repower_high
+    @set! pid.beta1 = pid.beta1 / local_order
+    @set! pid.beta2 = pid.beta2 / local_order
+    @set! pid.beta3 = pid.beta3 / local_order
+    @set! limiter.high = limiter.high^repower_high
 
     # TODO: add message
     # reminder: reason I need this is b/c I default rescale = high when error = 0
-    @assert safety * limiter.high > 1.0
+    # @code_warntype red %88 = Base.AssertionError("limiter.safety * limiter.high > 1.0")::Any
+    @assert limiter.safety * limiter.high > 1.0
 
     return TimeStepController(precision; pid, limiter)
 end

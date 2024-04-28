@@ -13,15 +13,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
 
     order = method.order[1]                             # order of scheme
 
-    # note: comment if want to compare to OrdinaryDiffEq
-    epsilon ^= order / (1.0 + order)                    # rescale tolerance parameters
-    alpha ^= order / (1.0 + order)
-    delta ^= order / (1.0 + order)
-    # TODO: try reconstruct_adaptive (i.e. repower epsilon, make it correct type)
-    epsilon = T(epsilon) # tmp for T = Float32 (otherwise tol = Float64 != Float32)
-    alpha = T(alpha)
-    delta = T(delta)
-
     # if do Richardson extrapolation, then always have
     # to evaluate (explicit) first stage at (t,y)
     if explicit_stage[1]
@@ -30,7 +21,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     end
 
     dt[1] = dt[2]                                       # initialize time step
-    rescale = 1.0
+    rescale = T(1.0)                                    # default time step rescaling
 
     attempts = 1
     while true                                          # start step doubling routine
@@ -43,7 +34,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         @.. y2 = y2 + error                             # Richardson extrapolation
 
         # note: have modified norm function for DoubleFloat
-        e_norm = norm_tmp(error, p_norm)                    # compute norms
+        e_norm = norm_tmp(error, p_norm)                # compute norms
         y_norm = norm_tmp(y2, p_norm)
         Δy = y1
         @.. Δy = y2 - y
@@ -56,7 +47,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
-            rescale = limiter.high
+            rescale = T(limiter.high)
         else
             rescale = rescale_time_step(controller, tol, e_norm)
             rescale = limit_time_step(limiter, rescale)
