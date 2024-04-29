@@ -69,7 +69,15 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     total_attempts[1] += attempts
     controller.initialized[1] = true
 
+    # note: store previous y in y_tmp before interpolation
+    @unpack y_tmp, f_tmp = update_cache
+    @.. y_tmp = y
     @.. y = y2                                          # get iteration
+
+    # TMP for Hermite interpolation
+    ode_wrap!(f_tmp, t[1] + dt[1], y)
+    FE[1] += 1
+
     return nothing
 end
 

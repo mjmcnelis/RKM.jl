@@ -23,6 +23,15 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
 
     runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!, FE,
                       update_cache, linear_cache, stage_finder)
+
+    # note: store previous y in y_tmp before interpolation (use f_tmp as intermediary)
+    @.. f_tmp = y
     @.. y = y_tmp
+    @.. y_tmp = f_tmp
+
+    # TMP for Hermite interpolation
+    ode_wrap!(f_tmp, t[1] + dt[1], y)
+    FE[1] += 1
+
     return nothing
 end

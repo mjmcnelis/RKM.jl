@@ -71,11 +71,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         progress = Progress(100; showspeed = true, color = :gray)
     end
 
-    if save_solution && adaptive isa Fixed
-        sizehint_solution!(sol, t0, tf, dt0, dimensions)
+    if save_solution
+        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, dimensions)
     end
 
-    # TODO: look into @code_warntype
     loop_stats = @timed begin
         # save initial condition
         if save_solution
@@ -99,7 +98,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             end
         end
     end
-    compute_stats!(sol, save_solution, adaptive, timer,
+    compute_stats!(sol, save_solution, adaptive, interpolator, timer,
                    stage_finder, loop_stats, config_bytes)
     return nothing
 end
