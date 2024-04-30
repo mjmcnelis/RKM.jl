@@ -142,7 +142,7 @@ After the solver finishes, we can print runtime statistics with the function `ge
 ```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
                               precision; model_parameters = p);
-  0.046932 seconds (152 allocations: 3.063 MiB)
+  0.017149 seconds (183 allocations: 3.063 MiB)
 
 julia> get_stats(sol)
 time steps taken     = 200001
@@ -150,9 +150,9 @@ time points saved    = 200002
 step rejection rate  = 0.0 %
 function evaluations = 800004
 jacobian evaluations = 0
-evolution runtime    = 0.04675 seconds
+evolution runtime    = 0.01703 seconds
 solution size        = 3.052 MiB
-config memory        = 10.344 KiB
+config memory        = 11.062 KiB
 excess memory        = 0 bytes
 ```
 Here, we show the number of time steps saved and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size, the configuration memory, and the excess memory allocated during the time evolution loop. In this example, almost all of the allocated memory went towards storing the solution.
@@ -168,10 +168,10 @@ options_timer = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
-julia> dt0_small = 5e-8;             # trigger timer
+julia> dt0_small = 2e-8;             # trigger timer
 julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_timer,
                         precision; model_parameters = p);
-Progress:  70%|█████████████████████████████▍            |  ETA: 0:00:25 ( 0.85  s/it)
+Progress:  60%|███████████████████████████████                   |  ETA: 0:00:40 ( 1.00  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/timer.jl:58
 ```
