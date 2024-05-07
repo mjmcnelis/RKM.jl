@@ -26,6 +26,10 @@ options = Dict(
                         #  root_method = FixedPoint(),
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
+
+    :interpolator => NoInterpolator(),
+    # :interpolator => HermiteInterpolator(; dt_save = 1e-5),
+
     :save_solution => true,
     # :save_solution => false,
 

@@ -18,16 +18,11 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # @code_warntype lookup_options(options)
         # q()
 
+        # get solver options
         @unpack adaptive, controller, method, timer, stage_finder,
                 interpolator, show_progress, save_solution = options
 
         reset_timer!(timer)
-
-        method = reconstruct_method(method, precision)
-        if !(adaptive isa Fixed)
-            adaptive = reconstruct_adaptive(adaptive, method, precision)
-            controller = reconstruct_controller(controller, method, adaptive, precision)
-        end
 
         dimensions = size(y0, 1)
         sol.dimensions .= dimensions
@@ -42,6 +37,14 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         t  = [t0, t0]
         dt = [dt0, dt0]
+
+        # reconstruction
+        method = reconstruct_method(method, precision)
+        interpolator = reconstruct_interpolator(interpolator, t0, tf)
+        if !(adaptive isa Fixed)
+            adaptive = reconstruct_adaptive(adaptive, method, precision)
+            controller = reconstruct_controller(controller, method, adaptive, precision)
+        end
 
         # create ODE wrapper function
         ode_wrap! = ODEWrapper([t0], model_parameters, dy_dt!)
@@ -71,6 +74,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         progress = Progress(100; showspeed = true, color = :gray)
     end
 
+    # sizehint solution
     if save_solution
         sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, dimensions)
     end
@@ -94,7 +98,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             timer.total_steps[1] += 1
 
             if save_solution
-                interpolate_solution!(interpolator, sol, update_cache, t, t0, tf)
+                interpolate_solution!(interpolator, sol, update_cache, t, t0)
             end
         end
     end

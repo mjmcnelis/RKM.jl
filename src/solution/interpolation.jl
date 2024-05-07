@@ -4,31 +4,32 @@ abstract type DenseInterpolator <: Interpolator end
 
 struct NoInterpolator <: Interpolator end
 
-@kwdef struct HermiteInterpolator <: DenseInterpolator
+struct HermiteInterpolator{SRL} <: DenseInterpolator where SRL <: StepRangeLen
     dt_save::Float64
+    t_range::SRL
+    nt::Int64
 end
 
-#=
 function HermiteInterpolator(; dt_save::Float64)
-    # t0 = 0.0
-    # tf = 1.0
-
-    # nt = 1 + floor(Int, (tf - t0)/dt_save)
-    # t_range = range(t0, t0 + (nt-1)*dt_save, nt)
-
-    # t_range = range()
-
-    # @show t_range
-    # q()
-    # include save_counter so can index t_range correctly
-
-    return HermiteInterpolator(dt_save, t_range)
+    # note: nt and t_range are dummy values
+    nt = 2
+    t_range = range(0, 1, nt)
+    return HermiteInterpolator(dt_save, t_range, nt)
 end
-=#
 
-function interpolate_solution!(::NoInterpolator, sol::Solution,
-                               update_cache::RKMCache, t::Vector{T},
-                               t0::T, tf::T) where T <: AbstractFloat
+reconstruct_interpolator(interpolator::NoInterpolator, args...) = interpolator
+
+function reconstruct_interpolator(interpolator::HermiteInterpolator,
+                                  t0::T, tf::T) where T <: AbstractFloat
+    @unpack dt_save = interpolator
+    nt = 1 + floor(Int64, Float64((tf - t0)/dt_save))
+    t_range = range(t0, tf, nt)
+
+    return HermiteInterpolator(dt_save, t_range, nt)
+end
+
+function interpolate_solution!(::NoInterpolator, sol::Solution, update_cache::RKMCache,
+                               t::Vector{T}, args...) where T <: AbstractFloat
     @unpack y = update_cache
 
     append!(sol.y, y)
@@ -36,9 +37,9 @@ function interpolate_solution!(::NoInterpolator, sol::Solution,
     return nothing
 end
 
-function interpolate_solution!(interp::HermiteInterpolator, sol::Solution,
+function interpolate_solution!(interpolator::HermiteInterpolator, sol::Solution,
                                update_cache::RKMCache, t::Vector{T},
-                               t0::T, tf::T) where T <: AbstractFloat
+                               t0::T) where T <: AbstractFloat
 
     # should call interpolate after one time step taken
     # the number of times I interpolate depends on how many saved points I pass
@@ -49,7 +50,7 @@ function interpolate_solution!(interp::HermiteInterpolator, sol::Solution,
     # ode_wrap!(f_tmp, t[1], y)
     # in next time step I set f .= f_tmp
 
-    dt_save = T(interp.dt_save)
+    @unpack dt_save, t_range, nt = interpolator
 
     t_curr, t_prev = t
     Δt = t_curr - t_prev
@@ -57,20 +58,13 @@ function interpolate_solution!(interp::HermiteInterpolator, sol::Solution,
     nL = 2 + floor(Int64, Float64((t_prev - t0)/dt_save))
     nR = 1 + floor(Int64, Float64((t_curr - t0)/dt_save))
 
-    # shouldn't need to compute nt, t_range every time
-    nt = 1 + floor(Int64, Float64((tf - t0)/dt_save))
-    # t_range = range(t0, t0 + (nt-1)*dt_save, nt)
-    t_range = range(t0, tf, nt)
-
-    # @show nL, nR, nt t_prev, t_curr
-    # q()
-
     @unpack dy, y, y_tmp, f, f_tmp = update_cache
     y1, y2, f1, f2 = y_tmp, y, f, f_tmp
     y_interp = view(dy,:,1)
 
     for n in nL:min(nR, nt)
-        Θ = (t_range[n] - t_prev) / Δt
+        t_interp = t_range[n]
+        Θ = (t_interp - t_prev) / Δt
         Θ2 = Θ * Θ
         Θ3 = Θ2 * Θ
 
@@ -78,7 +72,7 @@ function interpolate_solution!(interp::HermiteInterpolator, sol::Solution,
                        (3*(y2-y1) - (2*f1+f2)*Δt)*Θ2 + f1*Δt*Θ + y1
 
         append!(sol.y, y_interp)
-        append!(sol.t, t_range[n])
+        append!(sol.t, t_interp)
     end
 
     return nothing

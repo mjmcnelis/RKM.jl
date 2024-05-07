@@ -1,15 +1,17 @@
 
 """
-    _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T,
-                        dimensions::Int64) where T <: AbstractFloat
+    _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T1,
+                        dimensions::Int64) where {T <: AbstractFloat,
+                                                  T1 <: AbstractFloat}
 
 Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
 
 Required parameters: `sol`, `t0`, `tf`, `dt0`, `dimensions`
 """
-function _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T,
-                             dimensions::Int64) where T <: AbstractFloat
-    steps = round((tf - t0)/dt) |> Int64
+function _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T1,
+                             dimensions::Int64) where {T <: AbstractFloat,
+                                                       T1 <: AbstractFloat}
+    steps = round(Int64, Float64((tf - t0)/dt))
     # TODO: can I use steps + 1 if dense output?
     sizehint!(sol.y, dimensions*(steps + 2))
     sizehint!(sol.t, steps + 2)
@@ -26,6 +28,6 @@ end
 function sizehint_solution!(::AdaptiveStepSize, interpolator::DenseInterpolator,
                             sol::Solution, t0::T, tf::T, dt0::T,
                             dimensions::Int64) where T <: AbstractFloat
-    dt_save = T(interpolator.dt_save)
+    @unpack dt_save = interpolator
     return _sizehint_solution!(sol, t0, tf, dt_save, dimensions)
 end

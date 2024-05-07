@@ -3,3 +3,9 @@ Manifest.toml
 # *.png
 docs/build/
 readme.jl
+
+# TMP for testing
+src/evolve_simple.jl
+append_example.jl
+append_large_vectors.jl
+validation/ode/logistic/df_example.jl
