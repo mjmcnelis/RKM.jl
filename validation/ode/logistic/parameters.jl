@@ -4,8 +4,11 @@ options = Dict(
     :method => RungeKutta4(),
     # :method => BogackiShampine32(),
     # :method => BackwardEuler1(),
-    # :method => BackwardDifferentiationFormula2(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()
+    # :method => AdamsBashforth(; order = 2),
+    # :method => AdamsMoulton(; order = 2),
+    # :method => BackwardDifferentiationFormula(; order = 2),   # BDF and NDF currently broken
+    # :method => NumericalDifferentiationFormula(; order = 2),
     # :method => HeunEuler21(),
 
     :adaptive => Fixed(),
