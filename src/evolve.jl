@@ -52,7 +52,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions)
 
-        @unpack y, f, f_tmp, J, error = update_cache
+        @unpack y, y_tmp, f, f_tmp, J, error = update_cache
 
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
@@ -98,8 +98,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             timer.total_steps[1] += 1
 
             if save_solution
-                interpolate_solution!(interpolator, sol, update_cache, t, t0)
+                interpolate_solution!(interpolator, sol, update_cache, t)
             end
+            # note: make sure updated value is stored in y_tmp
+            @.. y = y_tmp
         end
     end
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,

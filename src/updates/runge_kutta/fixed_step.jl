@@ -8,30 +8,28 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     @unpack iteration, explicit_stage, fsal = method
     @unpack dy, y, y_tmp, f, f_tmp = update_cache
 
-    # TODO: wrap into a function
-    # evaluate first stage at (t,y)
-    if explicit_stage[1]
-        # skip function evaluation if method is FSAL
-        if FE[1] > 0 && fsal
-            @.. f = f_tmp
-        else
-            ode_wrap!(f, t[1], y)
-            FE[1] += 1
-        end
-        @.. dy[:,1] = dt[1] * f
+    # don't want to commit just yet (should check TRBDF2 and Backward Euler)
+
+    if FE[1] == 0
+        # always evaluate first stage at initial time (should move outside of function)
+        ode_wrap!(f, t[1], y)
+        FE[1] += 1
+    else
+        # get ODE of current time step (should already be stored in f_tmp)
+        @.. f = f_tmp
     end
+
+    @.. dy[:,1] = dt[1] * f
 
     runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!, FE,
                       update_cache, linear_cache, stage_finder)
 
-    # note: store previous y in y_tmp before interpolation (use f_tmp as intermediary)
-    @.. f_tmp = y
-    @.. y = y_tmp
-    @.. y_tmp = f_tmp
-
-    # TMP for Hermite interpolation
-    ode_wrap!(f_tmp, t[1] + dt[1], y)
-    FE[1] += 1
+    # evaluate ODE at next time step and store in f_tmp (skip if method is FSAL)
+    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fsal
+    if !fsal
+        ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
+        FE[1] += 1
+    end
 
     return nothing
 end

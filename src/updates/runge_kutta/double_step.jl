@@ -9,15 +9,17 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     @unpack explicit_stage = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
-    @unpack y, f, y1, y2, error = update_cache
+    @unpack y, y_tmp, f, f_tmp, y1, y2, error = update_cache
 
     order = method.order[1]                             # order of scheme
 
-    # if do Richardson extrapolation, then always have
-    # to evaluate (explicit) first stage at (t,y)
-    if explicit_stage[1]
+    if FE[1] == 0
+        # always evaluate first stage at initial time (should move outside of function)
         ode_wrap!(f, t[1], y)
         FE[1] += 1
+    else
+        # get ODE of current time step (should already be stored in f_tmp)
+        @.. f = f_tmp
     end
 
     dt[1] = dt[2]                                       # initialize time step
@@ -69,13 +71,12 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     total_attempts[1] += attempts
     controller.initialized[1] = true
 
-    # note: store previous y in y_tmp before interpolation
-    @unpack y_tmp, f_tmp = update_cache
-    @.. y_tmp = y
-    @.. y = y2                                          # get iteration
+    @.. y_tmp = y2                                      # get iteration
 
-    # TMP for Hermite interpolation
-    ode_wrap!(f_tmp, t[1] + dt[1], y)
+    # evaluate ODE at next time step and store in f_tmp
+    # note: if do Richardson extrapolation, then always have
+    # to evaluate (explicit) first stage at (t+dt,y+dy)
+    ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
     FE[1] += 1
 
     return nothing

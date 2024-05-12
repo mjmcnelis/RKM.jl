@@ -2,6 +2,7 @@
 
 options = Dict(
     :method => RungeKutta4(),
+    # :method => BogackiShampine32(),
     # :method => BackwardEuler1(),
     # :method => BackwardDifferentiationFormula2(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()

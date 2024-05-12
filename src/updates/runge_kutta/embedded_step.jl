@@ -11,15 +11,13 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @unpack dt_min, dt_max = limiter
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
 
-    # evaluate first stage at (t,y)
-    if explicit_stage[1]
-        # skip function evaluation if method is FSAL
-        if FE[1] > 0 && fsal
-            f .= f_tmp
-        else
-            ode_wrap!(f, t[1], y)
-            FE[1] += 1
-        end
+    if FE[1] == 0
+        # always evaluate first stage at initial time (should move outside of function)
+        ode_wrap!(f, t[1], y)
+        FE[1] += 1
+    else
+        # get ODE of current time step (should already be stored in f_tmp)
+        @.. f = f_tmp
     end
 
     dt[1] = dt[2]                                       # initialize time step
@@ -77,13 +75,15 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     total_attempts[1] += attempts
     controller.initialized[1] = true
 
-    # note: store previous y in y_tmp before interpolation
-    @.. y_tmp = y
-    @.. y = y1                                          # get update
+    @.. y_tmp = y1                                      # get iteration
 
-    # TMP for Hermite interpolation
-    ode_wrap!(f_tmp, t[1] + dt[1], y)
-    FE[1] += 1
+    # evaluate ODE at next time step and store in f_tmp (skip if method is FSAL)
+    # note: get excess allocations if try to pass interpolator
+    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fsal
+    if !fsal
+        ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
+        FE[1] += 1
+    end
 
     return nothing
 end
