@@ -100,8 +100,7 @@ export NoInterpolator, HermiteInterpolator
 # Numerical ODE methods
 export RungeKutta, LinearMultistep
     # Properties
-export Iteration, Explicit, DiagonalImplicit, FullImplicit,
-       FirstSameAsLast, FSAL, NotFSAL
+export Iteration, Explicit, DiagonalImplicit, FullImplicit
 #---------------------------------------
     # Standard explicit Runge-Kutta
 export list_explicit_runge_kutta_methods, list_implicit_runge_kutta_methods
@@ -131,7 +130,7 @@ export Solution, get_solution, clear_solution!, get_stats
 # Solver options
 export SolverOptions
 # Time
-export TimeRange, TimeLimit
+export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
 # Plots
