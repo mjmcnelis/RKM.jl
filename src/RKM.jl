@@ -26,12 +26,15 @@ abstract type ODEMethod end
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
+function __init__()
+    include("$RKM_root/src/tmp/double_float.jl")
+end
+
 include("timer.jl")
 include("progress.jl")
 include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
-include("tmp/double_float.jl")
 include("controller/pid_control.jl")
 include("controller/limiter.jl")
 include("controller/time_step_controller.jl")

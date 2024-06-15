@@ -1,7 +1,5 @@
 
-norm_tmp(v, p::Real) = norm(v, p)
-
-function norm_tmp(v::Array{DoubleFloat{T}, N}, p::Real = 2.0) where {N, T<:IEEEFloat}
+function norm(v::Array{DoubleFloat{T}, N}, p::Real = 2.0) where {N, T<:IEEEFloat}
     isempty(v) && return zero(DoubleFloat{T})
 
     if isinf(p)
@@ -9,6 +7,7 @@ function norm_tmp(v::Array{DoubleFloat{T}, N}, p::Real = 2.0) where {N, T<:IEEEF
     elseif p == 2
         return sqrt(sum(abs2, v))
     else
+        # note: had more compact version (but deleted file...)
         vp = DoubleFloat{T}(0.0)
         for i in eachindex(v)
             vp += abs(v[i])^p

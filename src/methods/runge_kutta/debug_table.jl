@@ -33,7 +33,7 @@ function debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 
 
     for i in 1:size(B, 1)
         err = abs(B[i, 1] - sum(B[i, 2:end]))
-        tol = norm_tmp(eps.(B[i, 2:end]), 1)        # sum floating precision errors
+        tol = norm(eps.(B[i, 2:end]), 1)        # sum floating precision errors
 
         if err > tol
             err = round(err |> Float64, sigdigits = 3)

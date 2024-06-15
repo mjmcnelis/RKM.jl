@@ -42,9 +42,9 @@ function evolve_one_time_step!(method::RungeKutta,
         # C = 2/dt^2 * (dt*f - y + y_prev)
         # C = 2/dt * (f - (y - y_prev)/dt ) ~ 2/dt * (f_n - f_n-1)
 
-        C_norm = norm_tmp(y_tmp, p_norm)
-        y_norm = norm_tmp(y, p_norm)
-        f_norm = norm_tmp(f_tmp, p_norm)
+        C_norm = norm(y_tmp, p_norm)
+        y_norm = norm(y, p_norm)
+        f_norm = norm(f_tmp, p_norm)
 
         # TODO: solve more complicated algebraic equation from VAH paper
         if C_norm == 0.0                                # compute new time step in dt[2]
