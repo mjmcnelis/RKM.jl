@@ -4,7 +4,6 @@ authors = ["Mike McNelis"]
 version = "0.1.0"
 
 [deps]
-ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
@@ -28,7 +27,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
-ADTypes = "<1.0.0"
 DocStringExtensions = "0.9"
 Documenter = "1"
 DoubleFloats = "1"
