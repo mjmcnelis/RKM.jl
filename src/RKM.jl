@@ -3,13 +3,11 @@ module RKM
 import SciMLBase: init, solve!
 import ForwardDiff: jacobian!, JacobianConfig, DEFAULT_CHUNK_THRESHOLD
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
-import LinearSolve: LinearProblem, LinearCache, set_A, set_b, do_factorization,
-                    set_cacheval, _ldiv!, KLUFactorization, LUFactorization,
-                    AbstractFactorization
+import LinearSolve: LinearProblem, LUFactorization
 import LinearAlgebra
-import LinearAlgebra: norm, tril, diag, diagind, lu, lu!, eigvals, transpose
-import StaticArrays: SVector, SMatrix, MVector, MMatrix, @MVector, @MMatrix
-import SparseArrays: SparseMatrixCSC, sparse
+import LinearAlgebra: norm, diagind, lu, transpose
+import StaticArrays: SVector, SMatrix, MVector
+# import SparseArrays: sparse
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import DoubleFloats: DoubleFloat, IEEEFloat
@@ -19,6 +17,7 @@ import ProgressMeter: Progress, next!
 import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import Setfield: @set!
+# tmp for testing type stablity
 import InteractiveUtils: @code_warntype
 
 abstract type ODEMethod end
@@ -40,7 +39,6 @@ include("controller/limiter.jl")
 include("controller/time_step_controller.jl")
 include("stage_finder.jl")
 include("solution/solution.jl")
-include("tmp/linear_solver.jl")
 include("plots.jl")
 include("cache.jl")
 include("solution/interpolation.jl")

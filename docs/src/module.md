@@ -10,7 +10,7 @@
 - Adaptive time step options (see ...make a page...)
 
 ## Dependencies
-- [`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl): `SVector`, `SMatrix`, `MVector`, `MMatrix`, `@MVector` and `@MMatrix` for the static allocation of Butcher tableaus, state vectors and intermediate caches
+- [`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl): `SVector`, `SMatrix` and `MVector` for the static allocation of Butcher tableaus, state vectors and intermediate caches
 - [`FastBroadcast.jl`](https://github.com/YingboMa/FastBroadcast.jl): `@..` for broadcasting recurring element-wise operations in the state update routines
 - [`ProgressMeter.jl`](https://github.com/timholy/ProgressMeter.jl): `Progress` and `next!` for monitoring the real-time status of the solver routine
 

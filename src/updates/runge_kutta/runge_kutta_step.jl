@@ -110,8 +110,6 @@ end
                     # pass Jacobian and residual error to linear cache
                     linear_cache.A = J
                     linear_cache.b = error
-                    # note: may not need this if use regular newton method
-                    # solve_linear_tmp!(linear_cache)
                     solve!(linear_cache)
                     @.. dy[:,i] -= linear_cache.u
                 end
