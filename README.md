@@ -4,15 +4,15 @@
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://mjmcnelis.github.io/RKM.jl/dev)
 
 ## Overview
-`RKM.jl` is an ordinary differential equation (ODE) solver written in Julia. It is based from an original version [RKM](https://github.com/mjmcnelis/RKM) written in Python.
-
-This repository is currently in the development/testing phase, with one alpha-version released. The main features of this package include
+`RKM.jl` is an ordinary differential equation (ODE) solver written in Julia. It is currently in the development/testing phase, with several alpha versions released. The main features of this package include:
 
 - Explicit and diagonal-implicit Runge-Kutta methods
-- Jacobian evaluation with finite difference or forward auto-differentiation
-- Adaptive time stepping (embedded or step doubling) with a PID controller
-- Solver statistics (e.g. runtime, solution size, excess memory/allocations)
-- Options for float precision, timer, progress bar and static arrays
+- Linear multistep methods (fixed time step only)
+- Jacobian evaluation with finite differences or forward auto-differentiation
+- Adaptive time stepping with a PID controller
+- Arbitrary float precision and dense output
+- Options to set a timer and display a progress bar
+- High runtime performance and efficient memory usage
 
 
 ## Setup
