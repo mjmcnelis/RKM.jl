@@ -59,12 +59,13 @@ dt0 = 1e-4
 p = [B]
 
 # solver options
-options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed())
+options = SolverOptions(; method = RungeKutta4(),
+                          adaptive = Fixed(),
+                          precision = Float64
+                       )
 
 # evolve ode, plot solution
-precision = Float64
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
-                 precision; model_parameters = p)
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 y, t = get_solution(sol)
 plot(t, y)
 ```
@@ -103,15 +104,12 @@ All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embe
 ### ODE evolution
 Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution. An in-place version `evolve_ode!` is also available.
 ```julia
-precision = Float64
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
-                 precision; model_parameters = p)
-
-sol = Solution(precision)
+sol = Solution(options)
 evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 ```
-You can adjust the numerical precision of the solver with the argument `precision` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
+You can adjust the numerical precision of the solver by changing `precision` in `options` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
 
 *Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
 
@@ -140,8 +138,7 @@ plot(t, y)
 
 After the solver finishes, we can print runtime statistics with the function `get_stats`. After recompiling, we get
 ```julia
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options,
-                              precision; model_parameters = p);
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p);
   0.017149 seconds (183 allocations: 3.063 MiB)
 
 julia> get_stats(sol)
@@ -161,16 +158,15 @@ Here, we show the number of time steps saved and the number of times `dy_dt!` wa
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
-options_timer = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                                timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
-                                show_progress = true                # display progress
-                             )
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                          timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
+                          show_progress = true                # display progress
+                       )
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
 julia> dt0_small = 2e-8;             # trigger timer
-julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options_timer,
-                        precision; model_parameters = p);
+julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options; model_parameters = p);
 Progress:  60%|███████████████████████████████                   |  ETA: 0:00:40 ( 1.00  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/timer.jl:58

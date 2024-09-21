@@ -27,18 +27,16 @@ struct Solution{T <: AbstractFloat}
     excess_memory::MVector{1,Int64}
     """Number of dynamical variables (assumed to be fixed)"""
     dimensions::MVector{1,Int64}
-    """Float precision type"""
-    precision::Type{T}
 end
 
 """
-    Solution(precision::Type{T} = Float64) where T <: AbstractFloat
+    Solution(precision::Type{T}) where T <: AbstractFloat
 
 Outer constructor for `Solution`.
 
 Required parameters: `precision`
 """
-function Solution(precision::Type{T} = Float64) where T <: AbstractFloat
+function Solution(precision::Type{T}) where T <: AbstractFloat
     y = Vector{precision}()
     t = Vector{precision}()
     time_steps_taken = MVector{1,Int64}(0)
@@ -51,8 +49,9 @@ function Solution(precision::Type{T} = Float64) where T <: AbstractFloat
     excess_memory = MVector{1,Int64}(0)
     dimensions = MVector{1,Int64}(0.0)
 
-    return Solution(y, t, time_steps_taken, FE, JE, rejection_rate, runtime,
-                    solution_size, config_memory, excess_memory, dimensions, precision)
+    # never understood why do {precision}
+    return Solution{precision}(y, t, time_steps_taken, FE, JE, rejection_rate, runtime,
+                    solution_size, config_memory, excess_memory, dimensions)
 end
 
 function clear_solution!(sol::Solution)

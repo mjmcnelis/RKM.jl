@@ -37,6 +37,10 @@ options = Dict(
     :save_solution => true,
     # :save_solution => false,
 
-    :show_progress => false
+    :show_progress => false,
     # :show_progress => true
+
+    :precision => Float64
+    # :precision => Double64
+    # :precision => BigFloat
 );

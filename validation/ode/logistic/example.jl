@@ -4,10 +4,6 @@ using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 include("$RKM_root/validation/ode/logistic/parameters.jl")
 
-precision = Float64
-# precision = Double64
-# precision = BigFloat
-
 # TODO: do asserts between adaptive, method in parameters outer-constructor
 options = SolverOptions(options)
 
@@ -25,14 +21,14 @@ for i = 1:N
     push!(y0, exp(t0) / (1.0 + exp(t0)) - a)
 end
 
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, precision)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
 # in-place version
 #=
-sol = Solution(precision)
+sol = Solution(options)
 @time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
 =#
 
-# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, precision)
+# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
 
 get_stats(sol)
 # plot_ode(sol, options.method, Plots.plot)

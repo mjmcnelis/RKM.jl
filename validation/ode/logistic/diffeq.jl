@@ -1,7 +1,8 @@
 using Revise, OrdinaryDiffEq, StaticArrays, BenchmarkTools
 using DoubleFloats: Double64
 import RKM: RKM_root
-using Plots; plotly()
+using Plots;
+plotly();
 !(@isdefined f_ord) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 !(@isdefined f_ord_static) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 # benchmarks (alg = RK4())
@@ -13,22 +14,22 @@ using Plots; plotly()
 
 t0 = -10.0
 N = 2
-y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i,N) for i = 1:N]
+y0 = [exp(t0) / (1.0 + exp(t0)) - get_a(i, N) for i = 1:N]
 # y0 = SVector{2,Float64}(y0...)
 
 # alg = Trapezoid(autodiff = true)
 # alg = ImplicitEuler(autodiff = true)
-alg = TRBDF2(autodiff = true)
+alg = TRBDF2(autodiff=true)
 # alg = RK4()
 
-prob = ODEProblem(f_ord #=f_ord_static=#, y0, (t0, 10.0))
-@time sol = solve(prob, alg, dt = 1e-4, reltol = 1e-6, #abstol = 0.0,
-                  # if adaptive is false will compute Jacobian at each timestep
-                  adaptive = false,
-                  # save_everystep = false, save_start = false, save_end = false
-                  # qmin = 0.2, qmax = 10.0, gamma = 0.9,
-                  # controller = IController(), dtmin = 0.0,
-                  )
+prob = ODEProblem(f_ord, y0, (t0, 10.0)) #=f_ord_static=#
+@time sol = solve(prob, alg, dt=1e-4, reltol=1e-6, #abstol = 0.0,
+    # if adaptive is false will compute Jacobian at each timestep
+    adaptive=false,
+    # save_everystep = false, save_start = false, save_end = false
+    # qmin = 0.2, qmax = 10.0, gamma = 0.9,
+    # controller = IController(), dtmin = 0.0,
+)
 
 # plot(sol, legend = :outertopright) |> display
 # plot!(sol.t,  mapreduce(permutedims, vcat, sol.u)) |> display
