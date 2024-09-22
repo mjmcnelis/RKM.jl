@@ -1,10 +1,10 @@
 """
-    CrankNicolson21(precision::Type{T} = Float64) where T <: AbstractFloat
+    ImplicitTrapezoid21(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Crank and Nicolson's second-order method (A-stable) with embedded Euler pair.
+Second-order implicit trapezoid rule (A-stable) with embedded Euler pair.
 """
-function CrankNicolson21(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Crank_Nicolson_2_1
+function ImplicitTrapezoid21(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Implicit_Trapezoid_2_1
     butcher = SMatrix{3, 4, precision, 12}(
         0, 0, 0,
         1, 1//2, 1//2,
@@ -12,7 +12,7 @@ function CrankNicolson21(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1, 0
     ) |> transpose
     iteration = DiagonalImplicit()
-    reconstructor = CrankNicolson21
+    reconstructor = ImplicitTrapezoid21
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end

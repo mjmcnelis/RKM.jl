@@ -30,7 +30,7 @@ end
 
     # compute predictor and evaluate ODE (i.e. PE)
     @.. y_tmp = y
-    # note: comment for loop if want to compare to BackwardEuler1, CrankNicolson
+    # note: comment for loop if want to compare to BackwardEuler1, ImplicitTrapezoid21
     for j in 1:stages
         dy_stage = view(dy_LM,:,j)
         @.. y_tmp = y_tmp + b_pred[j]*dy_stage

@@ -7,7 +7,7 @@ Currently, only the standard diagonal implicit methods are compatible with `Fixe
 time-stepping.
 
 - `BackwardEuler1()`: first-order backward Euler method (L-stable)
-- `CrankNicolson2()`: Crank and Nicolson's second-order method (A-stable)
+- `ImplicitTrapezoid2()`: second-order implicit trapezoid rule (A-stable)
 - `ImplicitMidpoint2()`: second-order implicit mid-point rule (symplectic, A-stable)
 - `QinZhang2()`: Qin and Zhang's second-order method
 - `KraaijevangerSpijker2()`: Kraaijevanger and Spijker's second-order method

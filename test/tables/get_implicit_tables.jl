@@ -17,7 +17,7 @@ function get_runge_kutta_diagonal_implicit_tables(; precision::Type{<:AbstractFl
         Norsett4(; precision),
 
         # embedded
-        CrankNicolson21(; precision),
+        ImplicitTrapezoid21(; precision),
         LobattoIIIB21(; precision),
 
         LobattoIIICS42(; precision),

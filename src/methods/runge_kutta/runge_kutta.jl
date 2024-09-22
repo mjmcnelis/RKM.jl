@@ -120,7 +120,7 @@ function list_implicit_runge_kutta_methods()
 
     println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
     """
-    \tLow order (1-3)    | CrankNicolson21, LobattoIIIB21
+    \tLow order (1-3)    | ImplicitTrapezoid21, LobattoIIIB21
     \t-------------------------------------------------------------------------------
     \tMedium order (4-6) | LobattoIIICS42
     """ |> println
