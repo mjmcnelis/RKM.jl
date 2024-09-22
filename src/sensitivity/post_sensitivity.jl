@@ -16,12 +16,13 @@ end
 (ode_wrap!::ODEWrapperState)(f, y) = ode_wrap!.dy_dt!(f, y; p = ode_wrap!.p, t = ode_wrap!.t)
 (ode_wrap!::ODEWrapperParam)(f, p) = ode_wrap!.dy_dt!(f, ode_wrap!.y; p, t = ode_wrap!.t)
 
-# just make a rudimentary function that outputs something
+# just make a playground function that outputs something
 # worry about organization, efficiency later
-function post_sensitivity_analysis(sol, options, dy_dt!, p;
+function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
+                                   dy_dt!::Function, p::Vector{T};
                                    # TODO: make SensitivityMethod struct
                                    jacobian_method = FiniteJacobian()
-                                  )
+                                  ) where {T <: AbstractFloat}
     y, t = get_solution(sol)
     @unpack precision = options
 
@@ -35,11 +36,10 @@ function post_sensitivity_analysis(sol, options, dy_dt!, p;
     y_tmp = copy(y0)
 
     # add to cache and generalize to matrices
-    S = zeros(precision, ny)        # sensitivity cache
-    S_tmp = zeros(precision, ny)
+    S = zeros(precision, ny, np)        # sensitivity cache
+    S_tmp = zeros(precision, ny, np)
 
-    Jy = zeros(precision, ny, ny)   # reuse/rename J in cache
-    Jp = zeros(precision, ny, np)   # make new
+    Jy = zeros(precision, ny, ny)       # reuse/rename J in cache
 
     # FiniteDiff cache
     cache_y = JacobianCache(y0)
@@ -53,16 +53,9 @@ function post_sensitivity_analysis(sol, options, dy_dt!, p;
 
     # ideally want to store in linear colummn format
     # and reshape it as a rank-3 tensor (Nt x Ny x Np)
-    # TODO: call it sol.S
-    yp = zeros(precision, ny)       # assume 1 parameter for now
+    # TODO: add sol.S (obj and objS)
+    yp = zeros(precision, ny*np)
     sizehint!(yp, nt*ny*np)         # minus -1?
-
-    # looks like I can append a matrix to a vector (inner loop is rows)
-    #=
-    a = Float64[]
-    b = [1.0 2.0; 3.0 4.0]
-    append!(a, b')    # a = [1.0, 2.0, 3.0, 4.0]
-    =#
 
     # Backward Euler
     for n in 1:nt-1
@@ -70,7 +63,7 @@ function post_sensitivity_analysis(sol, options, dy_dt!, p;
         ode_wrap_p!.y .= y_tmp
 
         finite_difference_jacobian!(Jy, ode_wrap_y!, y_tmp, cache_y)
-        finite_difference_jacobian!(Jp, ode_wrap_p!, p, cache_p)
+        finite_difference_jacobian!(S_tmp, ode_wrap_p!, p, cache_p)
 
         dt = t[n+1] - t[n]
 
@@ -81,17 +74,41 @@ function post_sensitivity_analysis(sol, options, dy_dt!, p;
             Jy[i] += 1.0
         end
 
-        S_tmp .= S .+ dt.*Jp        # option 1
+        B = 1.0
+        S_tmp .*= (B*dt)
+        S_tmp .+= S             # looks like stage calc order is reverse
+
+        # any benefit in transposing the sensitivity ODE?
+        # TODO: try using LinearSolve
         S_tmp .= inv(Jy)*S_tmp
 
-        # S .+= dt.*Jp              # option 2
-        # ldiv!(S_tmp, lu(Jy), S)   # need to add ldiv!
-
-        # option 3: use LinearSolve
+        # TMP for debugging reshape
+        # S_tmp[1,2] = 0.01
+        # S_tmp[2,1] = -0.01
 
         append!(yp, S_tmp)
+
+        # comment if done debugging reshape
+        # S_tmp[1,2] = 0.0
+        # S_tmp[2,1] = 0.0
+
         S .= S_tmp
     end
+
+    # want reshape to look like this
+    #=
+    2x2 Matrix{Float64}:    # yp[1, :, :]
+    0.0 0.0
+    0.0 0.0
+
+    2×2 Matrix{Float64}:    # yp[2, :, :]
+    0.109279  0.01
+    -0.01     0.109279
+
+    2×2 Matrix{Float64}:    # yp[3, :, :]
+    0.230278  0.01
+    -0.01     0.230278
+    =#
 
     return yp
 end
