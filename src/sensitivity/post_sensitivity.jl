@@ -7,14 +7,19 @@ struct ODEWrapperState{T, F} <: Wrapper where {T <: AbstractFloat, F <: Function
     dy_dt!::F
 end
 
+function (ode_wrap!::ODEWrapperState)(f, y)
+    return ode_wrap!.dy_dt!(f, y; p = ode_wrap!.p, t = ode_wrap!.t[1])
+end
+
 struct ODEWrapperParam{T, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
     t::Vector{T}
     y::Vector{T}    # make a new vector or reuse one?
     dy_dt!::F
 end
 
-(ode_wrap!::ODEWrapperState)(f, y) = ode_wrap!.dy_dt!(f, y; p = ode_wrap!.p, t = ode_wrap!.t)
-(ode_wrap!::ODEWrapperParam)(f, p) = ode_wrap!.dy_dt!(f, ode_wrap!.y; p, t = ode_wrap!.t)
+function (ode_wrap!::ODEWrapperParam)(f, p)
+    return ode_wrap!.dy_dt!(f, ode_wrap!.y; p, t = ode_wrap!.t[1])
+end
 
 # just make a playground function that outputs something
 # worry about organization, efficiency later
@@ -48,14 +53,14 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
     ode_wrap_y! = ODEWrapperState([t0], p, dy_dt!)
     ode_wrap_p! = ODEWrapperParam([t0], y0, dy_dt!)
 
-    # store as linear column, then reshape as nt x ny x np tensor
+    # store as linear column, then reshape as nt x (ny*np) matrix
     # TODO: add sol.S (obj and objS)
     yp = zeros(precision, ny*np)
     sizehint!(yp, nt*ny*np)
 
     # Backward Euler
     for n in 1:nt-1
-        # n+1 is specific to Backward Euler
+        # note: n+1 is specific to Backward Euler
         y_tmp .= view(y, n+1, :)            # can't do FastBroadcast here
         # set wrappers
         @.. ode_wrap_p!.y = y_tmp
@@ -96,21 +101,6 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
         @.. S = S_tmp
     end
-
-    # want reshape to look like this
-    #=
-    2x2 Matrix{Float64}:    # yp[1, :, :]
-    0.0 0.0
-    0.0 0.0
-
-    2×2 Matrix{Float64}:    # yp[2, :, :]
-    0.109279  0.01
-    -0.01     0.109279
-
-    2×2 Matrix{Float64}:    # yp[3, :, :]
-    0.230278  0.01
-    -0.01     0.230278
-    =#
 
     return yp
 end
