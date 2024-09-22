@@ -44,6 +44,7 @@ include("cache.jl")
 include("solution/interpolation.jl")
 include("solution/sizehint.jl")
 include("solution/stats.jl")
+include("sensitivity/post_sensitivity.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")
@@ -134,6 +135,8 @@ export SolverOptions
 export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
+# Sensitivity
+export post_sensitivity_analysis
 # Plots
 export plot_ode
 # Utilities
