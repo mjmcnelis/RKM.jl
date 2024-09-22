@@ -81,7 +81,7 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
         # any benefit in transposing the sensitivity ODE?
         # TODO: try using LinearSolve
-        @.. S_tmp = inv(J)*S_tmp
+        S_tmp .= inv(J)*S_tmp
 
         # TMP for debugging reshape
         # S_tmp[1,2] = 0.01
