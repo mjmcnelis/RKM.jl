@@ -44,7 +44,6 @@ include("cache.jl")
 include("solution/interpolation.jl")
 include("solution/sizehint.jl")
 include("solution/stats.jl")
-include("sensitivity/post_sensitivity.jl")
 
 include("methods/code_names.jl")
 include("methods/properties.jl")
@@ -82,6 +81,7 @@ include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")
+include("sensitivity/post_sensitivity.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, CentralDiff

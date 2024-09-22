@@ -35,11 +35,10 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
     y_tmp = copy(y0)
 
-    # add to cache and generalize to matrices
-    S = zeros(precision, ny, np)        # sensitivity cache
+    S = zeros(precision, ny, np)        # add sensitivity cache
     S_tmp = zeros(precision, ny, np)
 
-    Jy = zeros(precision, ny, ny)       # reuse/rename J in cache
+    J = zeros(precision, ny, ny)        # reuse J in cache
 
     # FiniteDiff cache
     cache_y = JacobianCache(y0)
@@ -49,38 +48,40 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
     ode_wrap_y! = ODEWrapperState([t0], p, dy_dt!)
     ode_wrap_p! = ODEWrapperParam([t0], y0, dy_dt!)
 
-    # sol.obj, sol.objS
-
-    # ideally want to store in linear colummn format
-    # and reshape it as a rank-3 tensor (Nt x Ny x Np)
+    # store as linear column, then reshape as nt x ny x np tensor
     # TODO: add sol.S (obj and objS)
     yp = zeros(precision, ny*np)
     sizehint!(yp, nt*ny*np)         # minus -1?
 
     # Backward Euler
     for n in 1:nt-1
-        y_tmp .= view(y, n+1, :)
-        ode_wrap_p!.y .= y_tmp
+        # n+1 is specific to Backward Euler
+        y_tmp .= view(y, n+1, :)            # can't do FastBroadcast here
+        # set wrappers
+        @.. ode_wrap_p!.y = y_tmp
+        ode_wrap_y!.t[1] = t[n+1]
+        ode_wrap_p!.t[1] = t[n+1]
 
-        finite_difference_jacobian!(Jy, ode_wrap_y!, y_tmp, cache_y)
+        # compute Jacobian wrt y and p
+        finite_difference_jacobian!(J, ode_wrap_y!, y_tmp, cache_y)
         finite_difference_jacobian!(S_tmp, ode_wrap_p!, p, cache_p)
 
         dt = t[n+1] - t[n]
 
         # TODO: add broadcast
         A = 1.0                 # stage coefficient (BackwardEuler)
-        Jy .*= (-A*dt)          # J <- I - A.dt.J
-        for i in diagind(Jy)
-            Jy[i] += 1.0
+        @.. J *= (-A*dt)        # J <- I - A.dt.J
+        for i in diagind(J)
+            J[i] += 1.0
         end
 
         B = 1.0
-        S_tmp .*= (B*dt)
-        S_tmp .+= S             # looks like stage calc order is reverse
+        @.. S_tmp *= (B*dt)
+        @.. S_tmp += S          # looks like stage calc order is reverse
 
         # any benefit in transposing the sensitivity ODE?
         # TODO: try using LinearSolve
-        S_tmp .= inv(Jy)*S_tmp
+        @.. S_tmp = inv(J)*S_tmp
 
         # TMP for debugging reshape
         # S_tmp[1,2] = 0.01
@@ -92,7 +93,7 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
         # S_tmp[1,2] = 0.0
         # S_tmp[2,1] = 0.0
 
-        S .= S_tmp
+        @.. S = S_tmp
     end
 
     # want reshape to look like this
