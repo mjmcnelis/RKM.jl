@@ -5,7 +5,7 @@ import ForwardDiff: jacobian!, JacobianConfig, DEFAULT_CHUNK_THRESHOLD
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LUFactorization
 import LinearAlgebra
-import LinearAlgebra: norm, diagind, lu, transpose
+import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!
 import StaticArrays: SVector, SMatrix, MVector
 # import SparseArrays: sparse
 import MuladdMacro: @muladd

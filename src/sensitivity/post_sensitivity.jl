@@ -51,7 +51,7 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
     # store as linear column, then reshape as nt x ny x np tensor
     # TODO: add sol.S (obj and objS)
     yp = zeros(precision, ny*np)
-    sizehint!(yp, nt*ny*np)         # minus -1?
+    sizehint!(yp, nt*ny*np)
 
     # Backward Euler
     for n in 1:nt-1
@@ -81,7 +81,8 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
         # any benefit in transposing the sensitivity ODE?
         # TODO: try using LinearSolve
-        S_tmp .= inv(J)*S_tmp
+        F = lu!(J)
+        ldiv!(F, S_tmp)
 
         # TMP for debugging reshape
         # S_tmp[1,2] = 0.01
