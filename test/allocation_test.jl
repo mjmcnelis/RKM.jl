@@ -17,7 +17,8 @@ t0 = -8.0
 tf = 8.0
 dt0 = 1e-4
 
-y0 = exp(t0)/(1.0 + exp(t0)) - 0.5
+p = [0.5]
+y0 = exp(t0)/(1.0 + exp(t0)) - p[1]
 
 for precision in precision_vect, method in method_vect,
                                  adaptive in adaptive_vect,
@@ -38,9 +39,9 @@ for precision in precision_vect, method in method_vect,
     # note: second solve does not allocate on adaptive even if save_solution = true
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
 
-    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
+    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
     # @show sol.excess_memory[1]
-    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
+    sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
 
     @test sol.excess_memory[1] == 0
     # @show sol.excess_memory[1]

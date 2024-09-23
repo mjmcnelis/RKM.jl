@@ -1,9 +1,9 @@
 # TODO: try adding precision to list
 
 options = Dict(
-    :method => RungeKutta4(),
+    # :method => RungeKutta4(),
     # :method => BogackiShampine32(),
-    # :method => BackwardEuler1(),
+    :method => BackwardEuler1(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()
     # :method => AdamsBashforth(; order = 2),
     # :method => AdamsMoulton(; order = 2),
@@ -24,15 +24,15 @@ options = Dict(
                         #  limiter = PiecewiseLimiter(),
                      ),
     :stage_finder => ImplicitStageFinder(;
-                         jacobian_method = ForwardJacobian(),
-                        #  jacobian_method = FiniteJacobian(),
+                        #  jacobian_method = ForwardJacobian(),
+                         jacobian_method = FiniteJacobian(),
                          root_method = Newton(),
                         #  root_method = FixedPoint(),
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 
-    :interpolator => NoInterpolator(),
-    # :interpolator => HermiteInterpolator(; dt_save = 1e-5),
+    # :interpolator => NoInterpolator(),
+    :interpolator => HermiteInterpolator(; dt_save = 0.1),
 
     :save_solution => true,
     # :save_solution => false,
