@@ -72,7 +72,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
-        progress = Progress(100; showspeed = true, color = :gray)
+        progress = create_progress(100; showspeed = true, color = :gray)
     end
 
     # sizehint solution
@@ -88,7 +88,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         end
         # time evolution loop
         while true
-            show_progress && monitor_progess(t, progress, checkpoints)
+            show_progress && monitor_progress(t, progress, checkpoints)
             continue_solver(t, tf, timer) || break
 
             evolve_one_time_step!(method, adaptive, controller,

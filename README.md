@@ -29,7 +29,7 @@ Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
 
 It is also recommended to install these packages in your base environment:
 ```julia
-] add DoubleFloats Plots
+] add DoubleFloats ProgressMeter Plots
 ```
 
 ## Example
@@ -158,6 +158,7 @@ Here, we show the number of time steps saved and the number of times `dy_dt!` wa
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
+using ProgressMeter
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                           timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
                           show_progress = true                # display progress

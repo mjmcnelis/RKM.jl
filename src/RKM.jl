@@ -12,7 +12,6 @@ import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
 import Base: @kwdef, rationalize, format_bytes
-import ProgressMeter: Progress, next!
 import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import Setfield: @set!
@@ -25,7 +24,7 @@ RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
 include("timer.jl")
-include("progress.jl")
+include("progress/default_progress.jl")
 include("wrapper.jl")
 include("embedded.jl")
 include("adaptive.jl")
