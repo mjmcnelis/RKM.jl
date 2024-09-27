@@ -18,9 +18,7 @@ jobs:
           cache-packages: "false"
       - uses: julia-actions/julia-buildpkg@v1
       - name: Setup Test dependencies
-        run: |
-          julia --project=. -e 'using RKM'
-          julia -e 'using Pkg; Pkg.add("JLD2")'
+        run: julia --project=. -e 'using RKM; using Pkg; Pkg.add("JLD2")'
       - uses: julia-actions/julia-runtest@v1
       # - name: Docs Build and deploy
       #   env:
