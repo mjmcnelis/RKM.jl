@@ -13,13 +13,14 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: '1.10'
-      - run: julia -e 'using Pkg; Pkg.add("JLD2")'
       - uses: julia-actions/cache@v1
         with:
           cache-packages: "false"
       - uses: julia-actions/julia-buildpkg@v1
       - name: Setup Test dependencies
-        run: julia --project=. -e 'using RKM'
+        run: |
+          julia --project=. -e 'using RKM'
+          julia -e 'using Pkg; Pkg.add("JLD2")'
       - uses: julia-actions/julia-runtest@v1
       # - name: Docs Build and deploy
       #   env:
