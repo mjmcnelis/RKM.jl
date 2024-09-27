@@ -1,4 +1,3 @@
-using Revise
 using RKM, Test
 # using Plots; plotly()
 import DoubleFloats: Double64

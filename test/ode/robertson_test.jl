@@ -1,4 +1,4 @@
-using Revise, RKM, JLD2, StatsBase, Test
+using RKM, JLD2, StatsBase, Test
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/robertson/equations.jl") : nothing
 loadpath = joinpath(RKM_root, "test/ode/answers/roberston_answers.jld2")
 @info "Starting Robertson test..."

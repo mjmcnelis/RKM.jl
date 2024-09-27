@@ -1,4 +1,4 @@
-using Revise, RKM, JLD2, StatsBase, Test
+using RKM, JLD2, StatsBase, Test
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/sine/equations.jl") : nothing
 loadpath = joinpath(RKM_root, "test/ode/answers/sine_answers.jld2")
 @info "Starting sine test..."

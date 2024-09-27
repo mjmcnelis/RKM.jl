@@ -1,4 +1,4 @@
-using Revise, RKM, OrdinaryDiffEq
+using RKM, OrdinaryDiffEq
 import StaticArrays: SA
 import BenchmarkTools: @benchmark, mean
 using Plots; plotly()

@@ -1,4 +1,3 @@
-using Revise
 using RKM
 import DoubleFloats: Double64
 import DataStructures: OrderedDict

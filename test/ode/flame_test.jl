@@ -1,4 +1,4 @@
-using Revise, RKM, JLD2, StatsBase, Test
+using RKM, JLD2, StatsBase, Test
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/flame/equations.jl") : nothing
 loadpath = joinpath(RKM_root, "test/ode/answers/flame_answers.jld2")
 @info "Starting flame test..."

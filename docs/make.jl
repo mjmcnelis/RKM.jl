@@ -1,5 +1,5 @@
 push!(LOAD_PATH,"../src/")
-using Revise, Documenter, RKM
+using Documenter, RKM
 include("pages.jl")
 DocMeta.setdocmeta!(RKM, :DocTestSetup, :(using RKM); recursive=true)
 

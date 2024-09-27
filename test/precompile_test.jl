@@ -1,4 +1,3 @@
-using Revise
 using Test
 @info "Starting precompile test..."
 
