@@ -14,7 +14,6 @@ JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
-ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
@@ -25,9 +24,11 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [weakdeps]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 
 [extensions]
 RKMDoubleFloatsExt = "DoubleFloats"
+RKMProgressMeterExt = "ProgressMeter"
 
 [compat]
 DocStringExtensions = "0.9"
