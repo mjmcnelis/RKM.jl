@@ -17,12 +17,10 @@ jobs:
         with:
           cache-packages: "false"
       - uses: julia-actions/julia-buildpkg@v1
-      # - name: Setup Rclone
-      #   uses: AnimMouse/setup-rclone@v1
-      #   with:
-      #     rclone_config: ${{ secrets.RCLONE_CONFIG }}
       - name: Setup Test dependencies
-        run: julia --project=. -e 'using RKM'
+        run: |
+          julia --project=. -e 'using RKM'
+          julia=. -e 'using Pkg; Pkg.add("JLD2")'
       - uses: julia-actions/julia-runtest@v1
       # - name: Docs Build and deploy
       #   env:
