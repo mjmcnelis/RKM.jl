@@ -10,7 +10,6 @@ import StaticArrays: SVector, SMatrix, MVector
 # import SparseArrays: sparse
 import MuladdMacro: @muladd
 import FastBroadcast: @..
-import DoubleFloats: DoubleFloat, IEEEFloat
 import UnPack: @unpack
 import Base: @kwdef, rationalize, format_bytes
 import ProgressMeter: Progress, next!
@@ -24,10 +23,6 @@ abstract type ODEMethod end
 
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
-
-function __init__()
-    include("$RKM_root/src/tmp/double_float.jl")
-end
 
 include("timer.jl")
 include("progress.jl")
