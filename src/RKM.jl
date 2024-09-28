@@ -1,7 +1,6 @@
 module RKM
 
 import SciMLBase: init, solve!
-import ForwardDiff: jacobian!, JacobianConfig, DEFAULT_CHUNK_THRESHOLD
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LUFactorization
 import LinearAlgebra
