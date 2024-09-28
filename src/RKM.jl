@@ -12,7 +12,6 @@ import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
 import Base: @kwdef, rationalize, format_bytes
-import Test: @test, @test_broken
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import Setfield: @set!
 # tmp for testing type stablity
@@ -43,7 +42,7 @@ include("methods/code_names.jl")
 include("methods/properties.jl")
 # Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
-include("methods/runge_kutta/debug_table.jl")
+# include("methods/runge_kutta/debug_table.jl") # uses @test, @test_broken
 include("methods/runge_kutta/explicit/fixed/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
