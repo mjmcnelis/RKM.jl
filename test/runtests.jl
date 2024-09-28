@@ -1,5 +1,6 @@
 using SafeTestsets
 using Test
+using DoubleFloats
 
 @testset "RKM.jl tests" begin
     @safetestset "Precompile test" begin include("precompile_test.jl") end
