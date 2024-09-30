@@ -21,7 +21,7 @@ This package is not registered. To install, clone the repository
     cd <your_path_dir>
     git clone https://github.com/mjmcnelis/RKM.jl.git
 
-and develop the package in a Julia REPL (assumes v1.10.2 or higher):
+and develop the package in a Julia REPL (assumes v1.10.5 or higher):
 ```julia
 using Pkg
 Pkg.develop(path = raw"<your_path_dir>/RKM.jl")

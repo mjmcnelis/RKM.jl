@@ -58,13 +58,12 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
         # J = sparse(J)
-        fact = lu(J)
 
         # configure linear cache (see src/common.jl in LinearSolve.jl)
         # note: assumes LU factorization for now
-        linear_cache = init(LinearProblem(J, error), LUFactorization())#; alias_A = false, alias_b = false)
-        linear_cache.cacheval = fact
-        linear_cache.isfresh = false
+        linear_cache = init(LinearProblem(J, error), LUFactorization();
+                            alias_A = true, alias_b = true
+                           )
 
         if method.iteration isa Implicit
             stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
