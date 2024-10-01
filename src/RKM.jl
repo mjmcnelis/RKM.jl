@@ -2,7 +2,8 @@ module RKM
 
 import SciMLBase: init, solve!
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
-import LinearSolve: LinearProblem, LUFactorization
+import LinearSolve: LinearProblem, LUFactorization,
+       AbstractFactorization#, SciMLLinearSolveAlgorithm
 import LinearAlgebra
 import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!
 import StaticArrays: SVector, SMatrix, MVector
