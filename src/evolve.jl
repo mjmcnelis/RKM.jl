@@ -2,15 +2,17 @@
 """
     evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
                 dt0::Float64, dy_dt!::Function, options::SolverOptions;
-                model_parameters = nothing) where {T <: AbstractFloat,
-                                                   T1 <: AbstractFloat}
+                p::Vector{Float64} = Float64[],
+                abstract_params = nothing) where {T <: AbstractFloat,
+                                                  T1 <: AbstractFloat}
 
 Required parameters: `sol`, `y0`, `t0`, tf`, `dt0`, `dy_dt!`, `options`
 """
 function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
-                     dt0::Float64, dy_dt!::Function, options::SolverOptions;
-                     model_parameters = nothing) where {T <: AbstractFloat,
-                                                        T1 <: AbstractFloat}
+                     dt0::Float64, dy_dt!::Function, options::SolverOptions,
+                     p::Vector{Float64} = Float64[];
+                     abstract_params = nothing) where {T <: AbstractFloat,
+                                                       T1 <: AbstractFloat}
     config_bytes = @allocated begin
         clear_solution!(sol)
         @unpack FE#=, JE=# = sol
@@ -26,7 +28,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         reset_timer!(timer)
 
         dimensions = size(y0, 1)
+        coefficients = length(p)
         sol.dimensions .= dimensions
+        sol.coefficients .= coefficients
 
         # initial conditions
         y = y0 .|> precision
@@ -48,12 +52,13 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         end
 
         # create ODE wrapper function
-        ode_wrap! = ODEWrapper([t0], model_parameters, dy_dt!)
+        ode_wrap! = ODEWrapper([t0], p, dy_dt!) # TODO: pass abstract params
 
         # configure cache
-        update_cache = UpdateCache(precision, y, method, adaptive, dimensions)
+        update_cache = UpdateCache(precision, y, method, adaptive,
+                                   dimensions, coefficients)
 
-        @unpack y, y_tmp, f, f_tmp, J, error = update_cache
+        @unpack y, y_tmp, f, f_tmp, J, error, S = update_cache
 
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
@@ -76,13 +81,14 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
     # sizehint solution
     if save_solution
-        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, dimensions)
+        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0)
     end
 
     loop_stats = @timed begin
         # save initial condition
         if save_solution
             append!(sol.y, y)
+            append!(sol.S, S)
             append!(sol.t, t[1])
         end
         # time evolution loop
@@ -112,16 +118,18 @@ end
 """
     evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
                dy_dt!::Function, options::SolverOptions;
+               p::Vector{Float64} = Float64[],
                model_parameters = nothing) where {T <: AbstractFloat,
                                                   T1 <: AbstractFloat}
 
 Required parameters: `y0`, `t0`, `tf`, `dt0`, `dy_dt!`, `options`
 """
 function evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-                    dy_dt!::Function, options::SolverOptions;
-                    model_parameters = nothing) where {T <: AbstractFloat,
-                                                       T1 <: AbstractFloat}
+                    dy_dt!::Function, options::SolverOptions,
+                    p::Vector{Float64} = Float64[];
+                    abstract_params = nothing) where {T <: AbstractFloat,
+                                                      T1 <: AbstractFloat}
     sol = Solution(options)
-    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters)
+    evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options, p; abstract_params)
     return sol
 end

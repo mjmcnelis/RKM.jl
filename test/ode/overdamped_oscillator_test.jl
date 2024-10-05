@@ -32,7 +32,7 @@ options = SolverOptions(;
                                              epsilon = 1e-6,
                                             ),
                        )
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 y, t = get_solution(sol)
 
 # save new answer keys

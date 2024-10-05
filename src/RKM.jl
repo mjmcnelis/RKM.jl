@@ -122,7 +122,8 @@ export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
 # Code names
 export make_code_name
 # ODE solution
-export Solution, get_solution, clear_solution!, get_stats
+export Solution, get_solution, clear_solution!, get_stats,
+       get_sensitivity
 # Solver options
 export SolverOptions
 # Time

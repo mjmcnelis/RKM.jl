@@ -12,35 +12,41 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     y1::Vector{T}
     y2::Vector{T}
     error::Vector{T}
+    S::Matrix{T}
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      adaptive::AdaptiveStepSize,
-                     dimensions::Int64) where T <: AbstractFloat
+                     dimensions::Int64, coefficients::Int64) where T <: AbstractFloat
 
     @unpack iteration, stages = method
 
-    n = iteration isa Explicit ? 0 : dimensions
-    m = adaptive isa Fixed ? 0 : dimensions
-    p = iteration isa Explicit && adaptive isa Fixed ? 0 : dimensions
+    ny = dimensions                         # state/ode
+    np = coefficients                       # parameters
+    nJ = iteration isa Explicit ? 0 : ny    # Jacobian
+    m = adaptive isa Fixed ? 0 : ny         # primary/embedded
+    ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # error
 
     if method isa LinearMultistep
         @unpack start_method = method
-        dy = zeros(precision, dimensions, start_method.stages)
-        dy_LM = zeros(precision, dimensions, stages)
+        dy = zeros(precision, ny, start_method.stages)
+        dy_LM = zeros(precision, ny, stages)
     else
-        dy = zeros(precision, dimensions, stages)
+        dy = zeros(precision, ny, stages)
         dy_LM = Array{precision}(undef, 0, 0)
     end
 
-    y_tmp = zeros(precision, dimensions)
-    f_tmp = zeros(precision, dimensions)
-    f     = zeros(precision, dimensions)
+    y_tmp = zeros(precision, ny)
+    f_tmp = zeros(precision, ny)
+    f     = zeros(precision, ny)
     # TODO: should have option to make it sparse
-    J     = zeros(precision, n, n)
+    J     = zeros(precision, nJ, nJ)
     y1    = zeros(precision, m)
     y2    = zeros(precision, m)
-    error = zeros(precision, p)
+    error = zeros(precision, ne)
 
-    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, error)
+    S = zeros(precision, ny, np)
+
+    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, error,
+                       S)
 end

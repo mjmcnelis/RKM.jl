@@ -21,7 +21,7 @@ for i = eachindex(p)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - p[i])
 end
 
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 # in-place version
 #=
 sol = Solution(options)

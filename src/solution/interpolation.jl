@@ -32,10 +32,13 @@ end
 
 function interpolate_solution!(::NoInterpolator, sol::Solution, update_cache::RKMCache,
                                t::Vector{T}) where T <: AbstractFloat
-    @unpack y_tmp = update_cache
+    @unpack y_tmp, S = update_cache
 
     append!(sol.y, y_tmp)
     append!(sol.t, t[1])
+
+    # TODO: skip if not getting sensitivities
+    append!(sol.S, S)       # use S_tmp instead once make it
     return nothing
 end
 

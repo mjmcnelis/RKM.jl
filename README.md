@@ -37,6 +37,7 @@ This code example shows how to use the ODE solver.
 ```julia
 using RKM
 using DoubleFloats: Double64
+using ProgressMeter
 using Plots; plotly()
 
 # logistic equation
@@ -53,7 +54,7 @@ B = 0.5
 t0 = -10.0 |> BigFloat
 y0 = exp(t0)/(1.0 + exp(t0)) - B
 
-# final time, initial time step, model parameters
+# final time, initial time step, sensitvity parameters
 tf = 10.0
 dt0 = 1e-4
 p = [B]
@@ -65,7 +66,7 @@ options = SolverOptions(; method = RungeKutta4(),
                        )
 
 # evolve ode, plot solution
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 y, t = get_solution(sol)
 plot(t, y)
 ```
@@ -81,9 +82,9 @@ dy_dt!(f, y; t, kwargs...)
 dy_dt!(f, y; p, kwargs...)
 dy_dt!(f, y; t, p)
 ```
-The first one is for ODEs that depend only on the state variable(s) `y`. The other three are for ODEs that also depend on time `t` and/or model parameters `p`.
+The first one is for ODEs that depend only on the state variable(s) `y`. The other three are for ODEs that also depend on time `t` and/or sensitivity parameters `p`.
 
-In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and model parameters `p` (if any).
+In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and sensitivity parameters `p` (if any).
 
 ### Solver options
 Next, we have to set two of the solver options: the ODE method `method` and the adaptive time step algorithm `adaptive`. In this example, we use the classic RK4 method and a fixed time step.
@@ -104,14 +105,14 @@ All Runge-Kutta methods are compatible with `Fixed` or `Doubling`, whereas `Embe
 ### ODE evolution
 Finally, we call the function `evolve_ode` to evolve the ODE system and store the numerical solution. An in-place version `evolve_ode!` is also available.
 ```julia
-sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 
 sol = Solution(options)
-evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
+evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options, p)
 ```
 You can adjust the numerical precision of the solver by changing `precision` in `options` (defaulted to `Float64`). For example, we could have used `Double64` or `BigFloat`.
 
-*Note: `model_parameters` can be omitted if `dy_dt!` does not depend on `p`.*
+*Note: `p` can be omitted if `dy_dt!` does not depend on it.*
 
 ### Post-processing
 The field `sol.t` stores the time series ($t_0, ..., t_n$), and `sol.y` stores the solution set ($\vec{y}_0, ..., \vec{y}_n$) in linear column format. If the state vector $\vec{y}$ is one-dimensional, we can plot the solution with
@@ -138,7 +139,7 @@ plot(t, y)
 
 After the solver finishes, we can print runtime statistics with the function `get_stats`. After recompiling, we get
 ```julia
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p);
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
   0.017149 seconds (183 allocations: 3.063 MiB)
 
 julia> get_stats(sol)
@@ -149,6 +150,7 @@ function evaluations = 800004
 jacobian evaluations = 0
 evolution runtime    = 0.01703 seconds
 solution size        = 3.052 MiB
+sensitivity size     = 0 bytes
 config memory        = 11.062 KiB
 excess memory        = 0 bytes
 ```
@@ -158,7 +160,6 @@ Here, we show the number of time steps saved and the number of times `dy_dt!` wa
 
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
-using ProgressMeter
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                           timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
                           show_progress = true                # display progress
@@ -167,7 +168,7 @@ options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
 julia> dt0_small = 2e-8;             # trigger timer
-julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options; model_parameters = p);
+julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options, p);
 Progress:  60%|███████████████████████████████                   |  ETA: 0:00:40 ( 1.00  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/timer.jl:58
