@@ -42,7 +42,7 @@ using Plots; plotly()
 
 # logistic equation
 if !(@isdefined dy_dt!)
-    function dy_dt!(f, y; p, kwargs...)
+    function dy_dt!(f, y, t; p, kwargs...)
         B = p[1]
         f[1] = (y[1] + B) * (1.0 - B - y[1])
         nothing
@@ -54,9 +54,11 @@ B = 0.5
 t0 = -10.0 |> BigFloat
 y0 = exp(t0)/(1.0 + exp(t0)) - B
 
-# final time, initial time step, sensitvity parameters
+# final time, initial time step
 tf = 10.0
 dt0 = 1e-4
+
+# sensitivity parameters
 p = [B]
 
 # solver options
@@ -77,14 +79,14 @@ The solver requires a user-defined function `dy_dt!` that numerically evaluates 
 ```
 We support the following in-place methods to store the result in a vector variable `f`:
 ```julia
-dy_dt!(f, y; kwargs...)
-dy_dt!(f, y; t, kwargs...)
-dy_dt!(f, y; p, kwargs...)
-dy_dt!(f, y; t, p)
+dy_dt!(f, y, t; kwargs...)
+dy_dt!(f, y, t; abstract_params, kwargs...)
+dy_dt!(f, y, t; p, kwargs...)
+dy_dt!(f, y, t; p, abstract_params)
 ```
-The first one is for ODEs that depend only on the state variable(s) `y`. The other three are for ODEs that also depend on time `t` and/or sensitivity parameters `p`.
+The first one is for ODEs that depend on the state variable(s) `y` and time `t`. The other three are for ODEs that also depend on sensitivity and/or abstract parameters `p` and `abstract_params`.
 
-In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and sensitivity parameters `p` (if any).
+In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and parameters `(p, abstract_params)` (if any).
 
 ### Solver options
 Next, we have to set two of the solver options: the ODE method `method` and the adaptive time step algorithm `adaptive`. In this example, we use the classic RK4 method and a fixed time step.

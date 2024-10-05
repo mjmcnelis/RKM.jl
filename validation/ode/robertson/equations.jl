@@ -1,6 +1,6 @@
 
 # for RKM
-function dy_dt!(f, y; kwargs...)
+function dy_dt!(f, y, t; kwargs...)
     k1 = 0.04
     k2 = 3.0e7
     k3 = 1.0e4

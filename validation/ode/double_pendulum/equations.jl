@@ -2,7 +2,7 @@
 const g = 9.81
 
 # for RKM
-function dy_dt!(f, y; p, kwargs...)
+function dy_dt!(f, y, t; p, kwargs...)
     L = p[1]
     θ1, θ2, pθ1, pθ2 = y
 

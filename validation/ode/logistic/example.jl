@@ -1,5 +1,6 @@
 using Revise, RKM, BenchmarkTools
 import DoubleFloats: Double64
+using LinearSolve
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 include("$RKM_root/validation/ode/logistic/parameters.jl")

@@ -52,7 +52,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         end
 
         # create ODE wrapper function
-        ode_wrap! = ODEWrapper([t0], p, dy_dt!) # TODO: pass abstract params
+        ode_wrap! = ODEWrapper([t0], p, abstract_params, dy_dt!)
 
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive,

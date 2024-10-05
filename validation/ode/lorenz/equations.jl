@@ -1,5 +1,5 @@
 # for RKM
-function dy_dt!(f, y; p, kwargs...)
+function dy_dt!(f, y, t; p, kwargs...)
     σ, ρ, β = p
     f[1] = σ*(y[2] - y[1])
     f[2] = y[1]*(ρ - y[3]) - y[2]

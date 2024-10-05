@@ -1,6 +1,6 @@
 
 # for RKM
-function dy_dt!(f, y; t, kwargs...)
+function dy_dt!(f, y, t; kwargs...)
     f[1] = - t * (y[1] - 1.0)
     return nothing
 end

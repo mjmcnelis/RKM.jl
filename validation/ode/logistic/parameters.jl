@@ -28,6 +28,7 @@ options = Dict(
                          jacobian_method = FiniteJacobian(),
                          root_method = Newton(),
                         #  root_method = FixedPoint(),
+                         linear_method = LUFactorization(),
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 

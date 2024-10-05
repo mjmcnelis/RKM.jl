@@ -1,5 +1,5 @@
 
-function dy_dt!(f, y; p, kwargs...)
+function dy_dt!(f, y, t; p, abstract_params)
     for i in eachindex(y)
         f[i] = (y[i] + p[i]) * (1.0 - p[i] - y[i])
     end
