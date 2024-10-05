@@ -12,6 +12,8 @@ SolverOptions for the ODE solver.
     controller::Controller = TimeStepController()
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
+    """Sensitivity method"""
+    sensitivity_method::SensitivityMethod = NoSensitivity()
     """Interpolation method for dense output"""
     interpolator::Interpolator = NoInterpolator()
     """Determines whether or not the solution is stored"""
@@ -30,7 +32,8 @@ end
 
 function lookup_options(options::SolverOptions)
     @unpack adaptive, method, timer, controller, stage_finder,
-            interpolator, save_solution, show_progress = options
+            interpolator, sensitivity_method, save_solution,
+            show_progress = options
     return nothing
 end
 

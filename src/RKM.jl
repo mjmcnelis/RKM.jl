@@ -32,6 +32,7 @@ include("controller/pid_control.jl")
 include("controller/limiter.jl")
 include("controller/time_step_controller.jl")
 include("stage_finder.jl")
+include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
 include("plots.jl")
 include("cache.jl")
@@ -76,7 +77,6 @@ include("updates/multistep/adams/fixed_step.jl")
 include("options.jl")
 include("evolve.jl")
 include("sensitivity/post_sensitivity.jl")
-include("sensitivity/sensitivity.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, CentralDiff
@@ -131,7 +131,7 @@ export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
 # Sensitivity
-export NoSensitivity, DecoupledDirect, post_sensitivity_analysis
+export NoSensitivity, DecoupledDirect, post_sensitivity_analysis, get_sensitivity
 # Plots
 export plot_ode
 # Utilities

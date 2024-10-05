@@ -32,6 +32,9 @@ options = Dict(
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 
+    :sensitivity_method => NoSensitivity(),
+    # :sensitivity_method => DecoupledDirect(),
+
     :interpolator => NoInterpolator(),
     # :interpolator => HermiteInterpolator(; dt_save = 0.1),
 

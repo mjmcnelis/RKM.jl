@@ -23,7 +23,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         # get solver options
         @unpack adaptive, controller, method, timer, stage_finder,
-                interpolator, show_progress, save_solution = options
+                interpolator, sensitivity_method, show_progress,
+                save_solution = options
 
         reset_timer!(timer)
 
@@ -56,7 +57,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive,
-                                   dimensions, coefficients)
+                                   dimensions, coefficients,
+                                   sensitivity_method)
 
         @unpack y, y_tmp, f, f_tmp, J, error, S = update_cache
 
@@ -81,7 +83,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
     # sizehint solution
     if save_solution
-        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0)
+        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, sensitivity_method)
     end
 
     loop_stats = @timed begin

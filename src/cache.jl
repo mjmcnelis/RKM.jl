@@ -19,14 +19,17 @@ end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      adaptive::AdaptiveStepSize,
-                     dimensions::Int64, coefficients::Int64) where T <: AbstractFloat
+                     dimensions::Int64, coefficients::Int64,
+                     sensitivity_method::SensitivityMethod) where T <: AbstractFloat
 
     @unpack iteration, stages = method
 
-    ny = dimensions                         # state/ode
-    np = coefficients                       # parameters
+    ny = dimensions                         # state
+    np = sensitivity_method isa NoSensitivity ? 0 : coefficients    # parameters
     nJ = iteration isa Explicit ? 0 : ny    # Jacobian
     m = adaptive isa Fixed ? 0 : ny         # primary/embedded
+    # TODO: okay use error for both root solver and stepsize control?
+    # TODO: rename error to err
     ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # error
 
     if method isa LinearMultistep
