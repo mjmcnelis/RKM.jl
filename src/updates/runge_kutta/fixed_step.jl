@@ -2,7 +2,7 @@
 function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
              controller::Controller, FE::MVector{1,Int64},
              t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapper, update_cache::RKMCache, linear_cache,
+             ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack iteration, explicit_stage, fsal = method

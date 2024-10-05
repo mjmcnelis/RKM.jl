@@ -76,6 +76,7 @@ include("updates/multistep/adams/fixed_step.jl")
 include("options.jl")
 include("evolve.jl")
 include("sensitivity/post_sensitivity.jl")
+include("sensitivity/sensitivity.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, CentralDiff
@@ -122,8 +123,7 @@ export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
 # Code names
 export make_code_name
 # ODE solution
-export Solution, get_solution, clear_solution!, get_stats,
-       get_sensitivity
+export Solution, get_solution, clear_solution!, get_stats
 # Solver options
 export SolverOptions
 # Time
@@ -131,7 +131,7 @@ export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
 # Sensitivity
-export post_sensitivity_analysis
+export NoSensitivity, DecoupledDirect, post_sensitivity_analysis
 # Plots
 export plot_ode
 # Utilities

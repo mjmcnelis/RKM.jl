@@ -1,6 +1,6 @@
 
 @muladd function adams_step!(method::Adams, ::Explicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
                      update_cache::RKMCache, args...) where T <: AbstractFloat
 
     @unpack b, stages = method
@@ -16,7 +16,7 @@
 end
 
 @muladd function adams_step!(method::Adams, ::SingleImplicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 

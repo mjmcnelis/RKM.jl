@@ -13,6 +13,8 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     y2::Vector{T}
     error::Vector{T}
     S::Matrix{T}
+    S_tmp::Matrix{T}
+    dS::Array{T,3}
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
@@ -46,7 +48,9 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     error = zeros(precision, ne)
 
     S = zeros(precision, ny, np)
+    S_tmp = zeros(precision, ny, np)
+    dS = zeros(precision, ny, np, stages)
 
     return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, error,
-                       S)
+                       S, S_tmp, dS)
 end

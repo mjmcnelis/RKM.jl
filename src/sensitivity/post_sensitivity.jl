@@ -1,16 +1,4 @@
 
-# TODO: replace ODEWrapper
-struct ODEWrapperState{T, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
-    t::Vector{T}
-    p::Vector{T}
-    # make abstract_params::P that is separate from p
-    dy_dt!::F
-end
-
-function (ode_wrap!::ODEWrapperState)(f, y)
-    return ode_wrap!.dy_dt!(f, y; p = ode_wrap!.p, t = ode_wrap!.t[1])
-end
-
 struct ODEWrapperParam{T, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
     t::Vector{T}
     y::Vector{T}    # make a new vector or reuse one?

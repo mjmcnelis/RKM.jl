@@ -3,7 +3,7 @@
 function evolve_one_time_step!(method::RungeKutta,
              adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64},
              t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapper, update_cache::RKMCache,
+             ode_wrap!::ODEWrapperState, update_cache::RKMCache,
              # TODO: may want to do kwargs for different caches used in adaptive methods
              # note: next argument was f but renamed it to y_prev here
              args...) where T <: AbstractFloat

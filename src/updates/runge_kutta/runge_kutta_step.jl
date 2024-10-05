@@ -1,7 +1,7 @@
 # benchmark.jl note: don't see as much benefit to @muladd as @..
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
                      update_cache::RKMCache, args...) where T <: AbstractFloat
     @unpack c, A_T, b, stages = method
     @unpack dy, y, y_tmp, f_tmp = update_cache
@@ -30,7 +30,7 @@
 end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapper, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
