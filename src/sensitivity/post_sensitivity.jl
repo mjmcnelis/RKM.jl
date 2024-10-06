@@ -1,14 +1,4 @@
 
-struct ODEWrapperParam{T, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
-    t::Vector{T}
-    y::Vector{T}    # make a new vector or reuse one?
-    dy_dt!::F
-end
-
-function (ode_wrap!::ODEWrapperParam)(f, p)
-    return ode_wrap!.dy_dt!(f, ode_wrap!.y; p, t = ode_wrap!.t[1])
-end
-
 # just make a playground function that outputs something
 # worry about organization, efficiency later
 function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
@@ -38,8 +28,9 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
     cache_p = JacobianCache(y0)
 
     # create wrappers wrt y and p
-    ode_wrap_y! = ODEWrapperState([t0], p, dy_dt!)
-    ode_wrap_p! = ODEWrapperParam([t0], y0, dy_dt!)
+    abstract_params = nothing   # TMP
+    ode_wrap_y! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
+    ode_wrap_p! = ODEWrapperParam([t0], y0, abstract_params, dy_dt!)
 
     # store as linear column, then reshape as nt x (ny*np) matrix
     # TODO: add sol.S (obj and objS)

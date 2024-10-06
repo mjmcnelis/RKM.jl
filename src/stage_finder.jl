@@ -45,9 +45,6 @@ function set_jacobian_cache(stage_finder::ImplicitStageFinder, ode_wrap!, f, y)
 end
 
 function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, FE, J, ode_wrap!, y, f)
-    # TODO: how to reduce allocations here, take it apart or make a wrapper?
-    # so in order for jacobian config (i.e. cache) to work, ode_wrap! argument
-    # has to be the same object stored in jacobian_method.cache
     @unpack cache, evaluations = jacobian_method
     jacobian!(J, ode_wrap!, f, y, cache)
     FE[1] += ceil(Int64, length(y)/DEFAULT_CHUNK_THRESHOLD)

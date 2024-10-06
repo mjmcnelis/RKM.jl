@@ -89,7 +89,7 @@ The first one is for ODEs that depend on the state variable(s) `y` and time `t`.
 
 In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and parameters `(p, abstract_params)` (if any).
 
-*Note: `p` is a vector of floats, while `abstract_params` represents any object.
+*Note: `p` is a `Vector{Float64}` type, while `abstract_params` represents any object.*
 </details>
 
 <details>

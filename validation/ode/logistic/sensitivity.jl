@@ -1,11 +1,13 @@
 using Revise, RKM
 using OrdinaryDiffEq, SciMLSensitivity
 using ForwardDiff: Dual, value, partials
+using LinearSolve, Setfield
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 include("$RKM_root/validation/ode/logistic/parameters.jl")
 
 options = SolverOptions(options)
+options = @set options.method = BackwardEuler1()
 
 t0 = -5.0
 tf = 5.0
@@ -18,7 +20,7 @@ for i = eachindex(p)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - p[i])
 end
 
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options; model_parameters = p)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 y, t = get_solution(sol)
 
 @time yp = post_sensitivity_analysis(sol, options, dy_dt!, p)
@@ -76,8 +78,8 @@ a_fs = reshape(view(yp_fs, t_idx, :), ny, np)
 
 if N <= 2
     plot(sol.t, yp, ylims = (0.0, 50.0)) |> display
-    plot(sol.t, yp_dual, ylims = (0.0, 50.0)) |> display
-    plot(sol.t, yp_fs, ylims = (0.0, 50.0)) |> display
+    plot(sol_dual.t, yp_dual, ylims = (0.0, 50.0)) |> display
+    plot(sol_fs.t, yp_fs, ylims = (0.0, 50.0)) |> display
 end
 
 println("\ndone")

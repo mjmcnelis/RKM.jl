@@ -52,15 +52,17 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             controller = reconstruct_controller(controller, method, adaptive, precision)
         end
 
-        # create ODE wrapper function
-        ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
-
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive,
                                    dimensions, coefficients,
                                    sensitivity_method)
 
         @unpack y, y_tmp, f, f_tmp, J, error, S = update_cache
+
+        # create ODE wrapper function
+        ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
+        # re-using y_tmp for now
+        ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!) # not used yet
 
         J[diagind(J)] .= 1.0
         # TODO: have option to use sparse jacobian
