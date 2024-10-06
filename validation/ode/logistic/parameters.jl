@@ -1,4 +1,3 @@
-# TODO: try adding precision to list
 
 options = Dict(
     :method => RungeKutta4(),
@@ -17,12 +16,13 @@ options = Dict(
 
     # :timer => TimeLimit(; wtime_min = 0),
 
-    :controller   => TimeStepController(;
-                         pid = PIControl(),
-                        #  pid = H312Control(),
-                         limiter = SmoothLimiter(),
-                        #  limiter = PiecewiseLimiter(),
-                     ),
+    :controller => TimeStepController(;
+                       pid = PIControl(),
+                      #  pid = H312Control(),
+                       limiter = SmoothLimiter(),
+                      #  limiter = PiecewiseLimiter(),
+                   ),
+
     :stage_finder => ImplicitStageFinder(;
                         #  jacobian_method = ForwardJacobian(),
                          jacobian_method = FiniteJacobian(),
