@@ -4,8 +4,17 @@ Manifest.toml
 docs/build/
 readme.jl
 
+references/
+
 # TMP for testing
 src/evolve_simple.jl
 append_example.jl
 append_large_vectors.jl
 validation/ode/logistic/df_example.jl
+
+# testing extensions
+ext/RKMFeaginExt.jl
+ext/RKMInteractiveUtilsExt.jl
+
+# testing sensitivity
+green_expand.jl
