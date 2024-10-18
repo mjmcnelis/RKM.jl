@@ -112,5 +112,5 @@ function get_sensitivity(sol::Solution)
     np = coefficients[1]
     # TODO: replace length(t) if use deleteat for PDEs
     S = reshape(S, ny*np, length(t)) |> transpose
-    return S
+    return S, t
 end

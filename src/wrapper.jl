@@ -32,6 +32,7 @@ struct ODEWrapperParam{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
 end
 
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, p)
+# TODO: does not work for R = DoubleFloat unless convert p
 function (ode_wrap!::ODEWrapperParam)(f::Vector{R}, p::Vector{R}) where R <: Real
     @unpack y, t, abstract_params = ode_wrap!
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)

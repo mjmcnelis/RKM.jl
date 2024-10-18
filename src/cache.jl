@@ -24,10 +24,12 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
 
     @unpack iteration, stages = method
 
-    ny = dimensions                         # state
-    np = sensitivity_method isa NoSensitivity ? 0 : coefficients    # parameters
-    nJ = iteration isa Explicit ? 0 : ny    # Jacobian
-    m = adaptive isa Fixed ? 0 : ny         # primary/embedded
+    no_sensitivity = sensitivity_method isa NoSensitivity
+
+    ny = dimensions                                             # state
+    np = no_sensitivity ? 0 : coefficients                      # parameters
+    nJ = (iteration isa Explicit && no_sensitivity) ? 0 : ny    # Jacobian
+    m = adaptive isa Fixed ? 0 : ny                             # primary/embedded
     # TODO: okay use error for both root solver and stepsize control?
     # TODO: rename error to err
     ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # error

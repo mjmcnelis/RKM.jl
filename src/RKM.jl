@@ -6,7 +6,7 @@ import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: LinearProblem, LUFactorization,
        AbstractFactorization#, SciMLLinearSolveAlgorithm
 import LinearAlgebra
-import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!
+import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!, mul!
 import StaticArrays: SVector, SMatrix, MVector
 # import SparseArrays: sparse
 import MuladdMacro: @muladd

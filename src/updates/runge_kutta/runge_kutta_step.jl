@@ -2,29 +2,43 @@
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
-                     update_cache::RKMCache, args...) where T <: AbstractFloat
+                     update_cache::RKMCache, linear_cache,
+                     stage_finder::ImplicitStageFinder,
+                     sensitivity_method::SensitivityMethod,
+                     ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
     @unpack c, A_T, b, stages = method
-    @unpack dy, y, y_tmp, f_tmp = update_cache
+    @unpack dy, y, y_tmp, f_tmp, S, S_tmp, dS = update_cache
 
     for i in 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         @.. y_tmp = y
+        @.. S_tmp = S
         # TODO: need a better dy cache for performance
         for j in 1:i-1
             A_T[j,i] == 0.0 ? continue : nothing
             dy_stage = view(dy,:,j)
+            dS_stage = view(dS,:,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
+            @.. S_tmp = S_tmp + A_T[j,i]*dS_stage       # TODO: skip this for no sensitivity
         end
         # TODO: skip if intermediate update not needed in next row(s)?
         ode_wrap!(f_tmp, t_tmp, y_tmp)
         FE[1] += 1
         @.. dy[:,i] = dt * f_tmp
+
+        # for sensitivity
+        explicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
+                                    t_tmp, dt, update_cache, ode_wrap!,
+                                    ode_wrap_p!, FE)
     end
     @.. y_tmp = y                                        # evaluate iteration
+    @.. S_tmp = S
     for j in 1:stages
         b[j] == 0.0 ? continue : nothing
         dy_stage = view(dy,:,j)
+        dS_stage = view(dS,:,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. S_tmp = S_tmp + b[j]*dS_stage
     end
     return nothing
 end
@@ -32,11 +46,13 @@ end
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
                      update_cache::RKMCache, linear_cache,
-                     stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+                     stage_finder::ImplicitStageFinder,
+                     sensitivity_method::SensitivityMethod,
+                     ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fsal = method
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
-    @unpack dy, y, y_tmp, f_tmp, J, error = update_cache
+    @unpack dy, y, y_tmp, f_tmp, J, error, S, S_tmp, dS = update_cache
 
     for i in 1:stages
         # first explicit stage should already be pre-evaluated elsewhere
@@ -47,12 +63,16 @@ end
         # set intermediate time in wrapper
         t_tmp = t + c[i]*dt
         ode_wrap!.t[1] = t_tmp
+        ode_wrap_p!.t[1] = t_tmp
 
         # sum over known stages
         @.. y_tmp = y
+        @.. S_tmp = S
         for j in 1:i-1
             dy_stage = view(dy,:,j)
+            dS_stage = view(dS,:,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
+            @.. S_tmp = S_tmp + A_T[j,i]*dS_stage
         end
 
         # guess stage before iterating
@@ -101,8 +121,7 @@ end
                     evaluate_system_jacobian!(jacobian_method, FE, J,
                                               ode_wrap!, y_tmp, f_tmp)
 
-                    # TODO: try fast broadcast, muladd?
-                    J .*= (-A_T[i,i]*dt)                 # J <- I - A.dt.J
+                    @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
                     for i in diagind(J)
                         J[i] += 1.0
                     end
@@ -115,12 +134,30 @@ end
                 end
             end
         end
+
+        # for sensitivity
+        explicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
+                                    t_tmp, dt, update_cache, ode_wrap!,
+                                    ode_wrap_p!, FE)
+
+        # TODO: skip if no sensitivity
+        # linear solve for implicit sensitivity stage
+        @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
+        for i in diagind(J)
+            J[i] += 1.0
+        end
+        dS_stage = view(dS,:,:,i)
+        F = lu!(J)
+        ldiv!(F, dS_stage)                  # dS_stage <- J \ dS_stage
     end
     # evaluate update
     @.. y_tmp = y
+    @.. S_tmp = S
     for j in 1:stages
         dy_stage = view(dy,:,j)
+        dS_stage = view(dS,:,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. S_tmp = S_tmp + b[j]*dS_stage
     end
     return nothing
 end

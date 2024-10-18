@@ -57,7 +57,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                                    dimensions, coefficients,
                                    sensitivity_method)
 
-        @unpack y, y_tmp, f, f_tmp, J, error, S = update_cache
+        @unpack y, y_tmp, f, f_tmp, J, error, S, S_tmp = update_cache
 
         # create ODE wrapper function
         ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
@@ -74,9 +74,11 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         linear_cache = init(LinearProblem(J, error), linear_method;
                             alias_A = true, alias_b = true)
 
-        if method.iteration isa Implicit
+        if method.iteration isa Implicit || !(sensitivity_method isa NoSensitivity)
             stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
         end
+
+        sensitivity_method = set_jacobian_cache(sensitivity_method, y)
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
@@ -102,7 +104,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
             evolve_one_time_step!(method, adaptive, controller,
                                   FE, t, dt, ode_wrap!, update_cache,
-                                  linear_cache, stage_finder)
+                                  linear_cache, stage_finder,
+                                  sensitivity_method, ode_wrap_p!)
             t[2] = t[1]
             t[1] += dt[1]
             timer.total_steps[1] += 1
@@ -110,8 +113,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             if save_solution
                 interpolate_solution!(interpolator, sol, update_cache, t)
             end
-            # note: make sure updated value is stored in y_tmp
+            # note: make sure updated value is stored in y_tmp, S_tmp
             @.. y = y_tmp
+            @.. S = S_tmp
         end
     end
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,
