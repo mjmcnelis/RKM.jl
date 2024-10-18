@@ -6,7 +6,7 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
                                    # TODO: make SensitivityMethod struct
                                    jacobian_method = FiniteJacobian()
                                   ) where {T <: AbstractFloat}
-    y, t = get_solution(sol)
+    t, y = get_solution(sol)
     @unpack precision = options
 
     nt = length(t)

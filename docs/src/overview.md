@@ -24,6 +24,6 @@ options = SolverOptions(; t_range, method = RungeKutta4(), adaptive = Fixed())
 sol = evolve_ode(y0, dy_dt!, options, precision = Float64)
 
 # plot solution
-y, t = get_solution(sol)
+t, y = get_solution(sol)
 plot(t, y)
 ```

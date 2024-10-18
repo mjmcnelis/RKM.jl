@@ -20,7 +20,7 @@ for i = eachindex(p)
 end
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
-S, t = get_sensitivity(sol)
+t, S = get_sensitivity(sol)
 
 ny = sol.dimensions[1]
 nt = length(sol.t)

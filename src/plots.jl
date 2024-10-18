@@ -9,7 +9,7 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function;
                   logx = false, logy = false, show_time_step = false)
 
     # TODO: put some more functionality (panel?)
-    y, t = get_solution(sol)
+    t, y = get_solution(sol)
 
     @unpack code_name = method
 

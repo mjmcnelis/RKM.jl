@@ -25,7 +25,7 @@ options = SolverOptions(; method = RungeKutta4(),
                           adaptive = Fixed(),
                         )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
-y, t = get_solution(sol)
+t, y = get_solution(sol)
 
 # save new answer keys
 if reset_answer_keys

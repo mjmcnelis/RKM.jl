@@ -102,7 +102,7 @@ function get_solution(sol::Solution)
     @unpack y, t, dimensions = sol
     # TODO: replace length(t) if use deleteat for PDEs
     y = reshape(y, dimensions[1], length(t)) |> transpose
-    return y, t
+    return t, y
 end
 
 function get_sensitivity(sol::Solution)
@@ -112,5 +112,5 @@ function get_sensitivity(sol::Solution)
     np = coefficients[1]
     # TODO: replace length(t) if use deleteat for PDEs
     S = reshape(S, ny*np, length(t)) |> transpose
-    return S, t
+    return t, S
 end

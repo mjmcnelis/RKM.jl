@@ -51,7 +51,7 @@ for epsilon in epsilon_vect
 
     append!(fe_rkm, sol.FE)
 
-    y, t = get_solution(sol)
+    t, y = get_solution(sol)
     y_ex = zeros(BigFloat, size(y)...)
     err = zeros(BigFloat, length(t))
     for i in eachindex(t)

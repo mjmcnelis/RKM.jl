@@ -22,7 +22,7 @@ options = SolverOptions(; adaptive, method, t_range, timer)
 GC.gc()
 println("\ndone")
 
-y, t = get_solution(sol)
+t, y = get_solution(sol)
 
 dt = t[2:end] .- t[1:end-1]
 plot!(t[1:end-1], dt; size = (900, 600), linewidth = 2,

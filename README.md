@@ -8,8 +8,9 @@
 
 - Explicit and diagonal-implicit Runge-Kutta methods
 - Linear multistep methods (fixed time step only)
-- Jacobian evaluation with finite differences or forward auto-differentiation
 - Adaptive time stepping with a PID controller
+- Jacobian evaluation with finite differences or forward auto-differentiation
+- First-order sensitivity analysis (fixed time step only)
 - Arbitrary float precision and dense output
 - Options to set a timer and display a progress bar
 - High runtime performance and efficient memory usage
@@ -60,14 +61,11 @@ tf = 10.0
 dt0 = 1e-4
 
 # solver options
-options = SolverOptions(; method = RungeKutta4(),
-                          adaptive = Fixed(),
-                          precision = Float64
-                       )
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(), precision = Float64)
 
 # evolve ode, plot solution
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
-y, t = get_solution(sol)
+t, y = get_solution(sol)
 plot(t, y)
 ```
 <details>
@@ -81,8 +79,8 @@ The solver requires a user-defined function `dy_dt!` that numerically evaluates 
 We support the following in-place methods to store the result in a vector variable `f`:
 ```julia
 dy_dt!(f, y, t; kwargs...)
-dy_dt!(f, y, t; abstract_params, kwargs...)
 dy_dt!(f, y, t; p, kwargs...)
+dy_dt!(f, y, t; abstract_params, kwargs...)
 dy_dt!(f, y, t; p, abstract_params)
 ```
 The first one is for ODEs that depend on the state variable(s) `y` and time `t`. The other three are for ODEs that also depend on sensitivity and/or abstract parameters.
@@ -138,7 +136,7 @@ plot(sol.t, sol.y)
 ```
 If $\vec{y}$ is multi-dimensional, we have to reshape `sol.y` as a (transposed) matrix
 ```julia
-julia> y, t = get_solution(sol);
+julia> t, y = get_solution(sol);
 julia> y
 200002×1 transpose(::Matrix{Float64}) with eltype Float64:
  -0.49995460213129755
@@ -184,9 +182,8 @@ Here, we show the number of time steps saved and the number of times `dy_dt!` wa
 We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                          timer = TimeLimit(; wtime_min = 1), # set timer to 1 minute
-                          show_progress = true                # display progress
-                       )
+                          timer = TimeLimit(; wtime_min = 1), # 1 minute
+                          show_progress = true)
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
@@ -199,3 +196,22 @@ Progress:  60%|█████████████████████�
 </details>
 
 ## Advanced solver options
+
+<details>
+<summary>Sensitivity analysis</summary>
+
+### Sensitivity analysis
+
+We can evolve the first-order sensitivity coefficients `S = dy/dp` by passing the argument `sensitivity_method`:
+```julia
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                          sensitivity = DecoupledDirect())
+```
+After solving ODE, we can plot the sensitivity curves
+```julia
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
+t, S = get_sensitivity(sol)
+plot(t, S)
+```
+*Note: the function `dy_dt!` must depend on `p`.*
+</details>

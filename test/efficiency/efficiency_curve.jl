@@ -23,7 +23,7 @@ function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Fu
                 options = SolverOptions(; adaptive, method, t_range)
 
                 sol = evolve_ode(y0, dy_dt!; parameters, precision)
-                y, t = get_solution(sol)
+                t, y = get_solution(sol)
 
                 # TODO: redo this for better memory efficiency
                 y_ex = zeros(BigFloat, size(y)...)
