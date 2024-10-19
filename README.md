@@ -211,7 +211,7 @@ sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 ```
 The field `sol.S` stores the sensitivities in linear column format. After reshaping it, we can plot the sensitivity curves
 ```math
-S = [\vec{S}_{1}(t) ... \vec{S}_{n_p}(t)]
+S = \[\vec{S}_{1}(t) \,...\, \vec{S}_{n_p}(t)\]
 ```
 ```julia
 t, S = get_sensitivity(sol)
