@@ -197,8 +197,8 @@ Progress:  60%|█████████████████████�
 
 ## Advanced solver options
 
-<!-- <details>
-<summary>Sensitivity analysis</summary> -->
+<details>
+<summary>Sensitivity analysis</summary>
 
 ### Sensitivity analysis
 
@@ -215,4 +215,4 @@ $S = [\vec{S}_{1}(t) \,...\, \vec{S}_{n_p}(t)]$
 t, S = get_sensitivity(sol)
 plot(t, S)
 ```
-<!-- </details> -->
+</details>
