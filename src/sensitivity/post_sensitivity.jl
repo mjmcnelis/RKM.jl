@@ -55,8 +55,8 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
         # TODO: add broadcast
         A = 1.0                 # stage coefficient (BackwardEuler)
         @.. J *= (-A*dt)        # J <- I - A.dt.J
-        for i in diagind(J)
-            J[i] += 1.0
+        for k in diagind(J)
+            J[k] = J[k] + 1.0
         end
 
         B = 1.0

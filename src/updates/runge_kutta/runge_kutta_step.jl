@@ -122,8 +122,8 @@ end
                                               ode_wrap!, y_tmp, f_tmp)
 
                     @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
-                    for i in diagind(J)
-                        J[i] += 1.0
+                    for k in diagind(J)
+                        J[k] = J[k] + 1.0
                     end
 
                     # pass Jacobian and residual error to linear cache
@@ -143,8 +143,8 @@ end
         # TODO: skip if no sensitivity
         # linear solve for implicit sensitivity stage
         @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
-        for i in diagind(J)
-            J[i] += 1.0
+        for k in diagind(J)
+            J[k] = J[k] + 1.0
         end
         dS_stage = view(dS,:,:,i)
         F = lu!(J)

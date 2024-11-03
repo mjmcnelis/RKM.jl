@@ -75,8 +75,8 @@ end
                                         ode_wrap!, y_tmp, f_tmp)
             # J <- I - b.dt.J
             @.. J *= (-b[1]*dt)
-            for i in diagind(J)
-                J[i] = J[i] + 1.0
+            for k in diagind(J)
+                J[k] = J[k] + 1.0
             end
 
             # pass Jacobian and residual error to linear cache
