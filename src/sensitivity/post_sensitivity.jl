@@ -25,7 +25,7 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
     # FiniteDiff cache
     cache_y = JacobianCache(y0)
-    cache_p = JacobianCache(y0)
+    cache_p = JacobianCache(p, y0)
 
     # create wrappers wrt y and p
     abstract_params = nothing   # TMP

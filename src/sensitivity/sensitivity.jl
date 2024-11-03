@@ -17,10 +17,10 @@ function set_jacobian_cache(sensitivity_method::DecoupledDirect, p, y)
 end
 
 explicit_sensitivity_stage!(::NoSensitivity, args...) = nothing
+implicit_sensitivity_stage!(::NoSensitivity, args...) = nothing
 
-function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder,
-                                     t, dt, update_cache, ode_wrap!, ode_wrap_p!, FE
-                                    )
+function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
+                                     dt, update_cache, ode_wrap!, ode_wrap_p!, FE)
 
     @unpack y_tmp, f_tmp, J, S_tmp, dS = update_cache
 
@@ -51,3 +51,24 @@ function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
 
     return nothing
 end
+
+function implicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
+                                     dt, update_cache, ode_wrap!, ode_wrap_p!, FE, A)
+
+    explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
+                                dt, update_cache, ode_wrap!, ode_wrap_p!, FE)
+
+    @unpack J, dS = update_cache
+
+    # linear solve for implicit sensitivity stage
+    @.. J = J * (-A*dt)                 # J <- I - A.dt.J
+    for k in diagind(J)
+        J[k] = J[k] + 1.0
+    end
+    dS_stage = view(dS, :, :, stage_idx)
+    F = lu!(J)
+    ldiv!(F, dS_stage)                  # dS_stage <- J \ dS_stage
+
+    return nothing
+end
+

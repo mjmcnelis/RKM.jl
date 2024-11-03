@@ -136,19 +136,9 @@ end
         end
 
         # for sensitivity
-        explicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
+        implicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
                                     t_tmp, dt, update_cache, ode_wrap!,
-                                    ode_wrap_p!, FE)
-
-        # TODO: skip if no sensitivity
-        # linear solve for implicit sensitivity stage
-        @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
-        for k in diagind(J)
-            J[k] = J[k] + 1.0
-        end
-        dS_stage = view(dS,:,:,i)
-        F = lu!(J)
-        ldiv!(F, dS_stage)                  # dS_stage <- J \ dS_stage
+                                    ode_wrap_p!, FE, A_T[i,i])
     end
     # evaluate update
     @.. y_tmp = y
