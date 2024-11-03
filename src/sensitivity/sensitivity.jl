@@ -10,8 +10,8 @@ end
 set_jacobian_cache(sensitivity_method::NoSensitivity, args...) = sensitivity_method
 
 # just borrow stage finder for now
-function set_jacobian_cache(sensitivity_method::DecoupledDirect, y)
-    cache = JacobianCache(y)
+function set_jacobian_cache(sensitivity_method::DecoupledDirect, p, y)
+    cache = JacobianCache(p, y)
     @set! sensitivity_method.jacobian_method.cache = cache
     return sensitivity_method
 end

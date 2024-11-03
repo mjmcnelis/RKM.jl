@@ -14,16 +14,16 @@ epsilon = 1e-8
 method = DormandPrince54()
 options = SolverOptions(; method,
                           adaptive = Embedded(; epsilon),
-                          t_range = TimeRange(; t0, tf, dt0)
+                          sensitivity_method = DecoupledDirect(),
                         )
-@time sol = evolve_ode(y0, dy_dt!; model_parameters = p, parameters, show_progress = false)
+@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 get_stats(sol)
 plot_ode(sol, method, Plots.plot);
 
 # OrdinaryDiffEq
 prob = ODEProblem(dy_dt!, y0, (t0, tf), p)
 @time sol = solve(prob, DP5(), reltol = epsilon, abstol = epsilon, dt = dt0)
-@show sol.destats
+sol.destats |> display
 plot!(sol.t,  mapreduce(permutedims, vcat, sol.u),
       color = :black, linewidth = 2, line = :dash) |> display
 

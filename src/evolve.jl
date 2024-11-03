@@ -78,7 +78,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
         end
 
-        sensitivity_method = set_jacobian_cache(sensitivity_method, y)
+        sensitivity_method = set_jacobian_cache(sensitivity_method, p, y)
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
