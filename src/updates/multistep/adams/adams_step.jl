@@ -18,22 +18,28 @@ end
 @muladd function adams_step!(method::Adams, ::SingleImplicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
                      update_cache::RKMCache, linear_cache,
-                     stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+                     stage_finder::ImplicitStageFinder,
+                     sensitivity_method::SensitivityMethod,
+                     ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack b, b_pred, stages = method
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
-    @unpack dy_LM, y, y_tmp, f_tmp, J, error = update_cache
+    @unpack dy_LM, y, y_tmp, f_tmp, J, error, S, S_tmp, dS = update_cache
 
     # set implicit time in wrapper
     t_tmp = t + dt
     ode_wrap!.t[1] = t_tmp
+    ode_wrap_p!.t[1] = t_tmp
 
     # compute predictor and evaluate ODE (i.e. PE)
     @.. y_tmp = y
+    @.. S_tmp = S
     # note: comment for loop if want to compare to BackwardEuler1, ImplicitTrapezoid21
     for j in 1:stages
         dy_stage = view(dy_LM,:,j)
+        dS_stage = view(dS,:,:,j)               # do I need dS_LM?
         @.. y_tmp = y_tmp + b_pred[j]*dy_stage
+        @.. S_tmp = S_tmp + b_pred[j]*dS_stage
     end
     ode_wrap!(f_tmp, t_tmp, y_tmp)
     FE[1] += 1
@@ -87,11 +93,19 @@ end
             @.. dy_LM[:,1] -= linear_cache.u
         end
     end
+    # for sensitivity
+    implicit_sensitivity_stage!(sensitivity_method, 1, stage_finder,
+                                t_tmp, dt, update_cache, ode_wrap!,
+                                ode_wrap_p!, FE, b[1])
+
     # evaluate update
     @.. y_tmp = y
+    @.. S_tmp = S
     for j in 1:stages
         dy_stage = view(dy_LM,:,j)
+        dS_stage = view(dS,:,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. S_tmp = S_tmp + b[j]*dS_stage
     end
     return nothing
 end

@@ -1,11 +1,11 @@
 
 options = Dict(
-    :method => RungeKutta4(),
+    # :method => RungeKutta4(),
     # :method => BogackiShampine32(),
     # :method => BackwardEuler1(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()
     # :method => AdamsBashforth(; order = 2),
-    # :method => AdamsMoulton(; order = 2),
+    :method => AdamsMoulton(; order = 1),
     # :method => BackwardDifferentiationFormula(; order = 2),   # BDF and NDF currently broken
     # :method => NumericalDifferentiationFormula(; order = 2),
     # :method => HeunEuler21(),
@@ -33,8 +33,8 @@ options = Dict(
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 
-    :sensitivity_method => NoSensitivity(),
-    # :sensitivity_method => DecoupledDirect(),
+    # :sensitivity_method => NoSensitivity(),
+    :sensitivity_method => DecoupledDirect(),
 
     :interpolator => NoInterpolator(),
     # :interpolator => HermiteInterpolator(; dt_save = 0.1),

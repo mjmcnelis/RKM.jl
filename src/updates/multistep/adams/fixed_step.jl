@@ -3,7 +3,9 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
              controller::Controller, FE::MVector{1,Int64},
              t::Vector{T}, dt::Vector{T},
              ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
-             stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+             stage_finder::ImplicitStageFinder,
+             sensitivity_method::SensitivityMethod,
+             ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack stages, iteration, order, start_counter = method
     @unpack dy, dy_LM, y, y_tmp, f = update_cache
@@ -28,11 +30,13 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
         start_iteration = start_method.iteration
 
         runge_kutta_step!(start_method, start_iteration, t[1], dt[1], ode_wrap!,
-                          FE, update_cache, linear_cache, stage_finder)
+                          FE, update_cache, linear_cache, stage_finder,
+                          sensitivity_method, ode_wrap_p!)
         start_counter[1] += 1
     else
         adams_step!(method, iteration, t[1], dt[1], ode_wrap!, FE,
-                    update_cache, linear_cache, stage_finder)
+                    update_cache, linear_cache, stage_finder,
+                    sensitivity_method, ode_wrap_p!)
     end
 
     # shift stages (except first one)
