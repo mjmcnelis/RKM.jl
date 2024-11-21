@@ -83,3 +83,41 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
     return yp
 end
+
+function psa_green_function(sol::Solution, options::SolverOptions,
+                            dy_dt!::Function, p::Vector{T};
+                            abstract_params = nothing) where {T <: AbstractFloat}
+    t, y = get_solution(sol)
+    @unpack precision = options
+
+    nt = length(t)
+    ny = sol.dimensions[1]
+
+    y0 = y[1,:]
+    t0 = sol.t[1]
+
+    y_tmp = copy(y0)
+    z0_tmp = zeros(precision, ny, ny)
+    J = zeros(precision, ny, ny)
+    cache_y = JacobianCache(y0)
+    ode_wrap_y! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
+
+    z0 = zeros(precision, ny^2)
+    sizehint!(z0, nt*ny^2)
+
+    # Backward Euler
+    for n in 1:nt-1
+        # note: n+1 is specific to Backward Euler
+        y_tmp .= view(y, n+1, :)
+        ode_wrap_y!.t[1] = t[n+1]
+
+        # compute Jacobian
+        finite_difference_jacobian!(J, ode_wrap_y!, y_tmp, cache_y)
+        dt = t[n+1] - t[n]
+
+        @.. z0_tmp += J*dt
+        append!(z0, z0_tmp)
+    end
+    z0 = reshape(z0, ny^2, nt) |> transpose
+    return z0
+end
