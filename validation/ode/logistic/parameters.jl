@@ -34,7 +34,10 @@ options = Dict(
                      ),
 
     :sensitivity_method => NoSensitivity(),
-    # :sensitivity_method => DecoupledDirect(),
+    # :sensitivity_method => DecoupledDirect(;
+    #                         #    jacobian_method = FiniteJacobian(),
+    #                            jacobian_method = ForwardJacobian(),
+    #                        ),
 
     :interpolator => NoInterpolator(),
     # :interpolator => HermiteInterpolator(; dt_save = 0.1),

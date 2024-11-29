@@ -14,7 +14,8 @@ epsilon = 1e-8
 method = DormandPrince54()
 options = SolverOptions(; method,
                           adaptive = Embedded(; epsilon),
-                          sensitivity_method = DecoupledDirect(),
+                        #   adaptive = Fixed(),
+                        #   sensitivity_method = DecoupledDirect(),
                         )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 get_stats(sol)

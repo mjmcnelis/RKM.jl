@@ -10,8 +10,13 @@ end
 set_jacobian_cache(sensitivity_method::NoSensitivity, args...) = sensitivity_method
 
 # just borrow stage finder for now
-function set_jacobian_cache(sensitivity_method::DecoupledDirect, p, y)
-    cache = JacobianCache(p, y)
+function set_jacobian_cache(sensitivity_method::DecoupledDirect, ode_wrap_p!, f, y, p)
+    @unpack jacobian_method = sensitivity_method
+    if jacobian_method isa FiniteJacobian
+        cache = JacobianCache(p, y)
+    elseif jacobian_method isa ForwardJacobian
+        cache = JacobianConfig(ode_wrap_p!, f, p)
+    end
     @set! sensitivity_method.jacobian_method.cache = cache
     return sensitivity_method
 end
@@ -28,15 +33,15 @@ function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
     ode_wrap!.t[1] = t
     ode_wrap_p!.t[1] = t
 
-    @unpack jacobian_method = stage_finder
-    cache_p = sensitivity_method.jacobian_method.cache
+    jacobian_method_y = stage_finder.jacobian_method
+    jacobian_method_p = sensitivity_method.jacobian_method
     @unpack p = ode_wrap!
 
     # evaluate explicit term dS = dt*(J*S_tmp + df/dp)
     dS_stage = view(dS, :, :, stage_idx)
 
     # compute Jacobian df/dy
-    evaluate_system_jacobian!(jacobian_method, FE, J,
+    evaluate_system_jacobian!(jacobian_method_y, FE, J,
                               ode_wrap!, y_tmp, f_tmp)
 
     # matrix multiplication is the bottleneck
@@ -44,8 +49,8 @@ function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
 
     # compute Jacobian df/dp
     @.. ode_wrap_p!.y = y_tmp
-    finite_difference_jacobian!(S_tmp, ode_wrap_p!, p, cache_p)
-
+    evaluate_parameter_jacobian!(jacobian_method_p, FE, S_tmp,
+                                 ode_wrap_p!, p, f_tmp)
     @.. dS_stage = dS_stage + S_tmp     # dS <- dS + df/dp
     @.. dS_stage = dS_stage * dt        # dS <- dS*dt
 
@@ -72,3 +77,20 @@ function implicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
     return nothing
 end
 
+function evaluate_parameter_jacobian!(jacobian_method::ForwardJacobian,
+                                      FE, S, ode_wrap_p!, p, f)
+    @unpack cache#=, evaluations=# = jacobian_method
+    jacobian!(S, ode_wrap_p!, f, p, cache)
+    FE[1] += ceil(Int64, length(p)/DEFAULT_CHUNK_THRESHOLD)
+    # evaluations[1] += 1
+    return nothing
+end
+
+function evaluate_parameter_jacobian!(jacobian_method::FiniteJacobian,
+                                      FE, S, ode_wrap_p!, p, args...)
+    @unpack cache#=, evaluations=# = jacobian_method
+    finite_difference_jacobian!(S, ode_wrap_p!, p, cache)
+    FE[1] += length(p) + 1
+    # evaluations[1] += 1
+    return nothing
+end
