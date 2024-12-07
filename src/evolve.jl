@@ -103,6 +103,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             show_progress && monitor_progress(t, progress, checkpoints)
             continue_solver(t, tf, timer) || break
 
+            adjust_final_time_steps!(adaptive, t, dt, tf)
+
             evolve_one_time_step!(method, adaptive, controller,
                                   FE, t, dt, ode_wrap!, update_cache,
                                   linear_cache, stage_finder,
