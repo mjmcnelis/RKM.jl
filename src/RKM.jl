@@ -6,7 +6,8 @@ import LinearSolve: init, solve!, LinearProblem, LUFactorization,
        AbstractFactorization#, SciMLLinearSolveAlgorithm
 import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!, mul!
 import StaticArrays: SVector, SMatrix, MVector
-# import SparseArrays: sparse
+import SparseArrays: sparse, SparseMatrixCSC
+import SparseDiffTools: matrix_colors
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack

@@ -1,11 +1,14 @@
 using Revise, RKM, LinearSolve
+using FiniteDiff: finite_difference_jacobian
+using SparseArrays: sparse
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
 show_plot = true            # plot solution
 
 a = 0.25                    # diffusion constant
-x = LinRange(-10, 10, 201)  # grid points
+Nx = 201
+x = range(-10, 10, Nx)      # grid points
 dx = x[2] - x[1]            # uniform spacing
 p = [a, dx]                 # parameters
 
@@ -20,17 +23,40 @@ CFL = 2.0*a*dt0/dx^2        # CFL number
 @show CFL
 Nt = 300                    # temporal stride
 
+# initial sparsity pattern
+ode_wrap! = RKM.ODEWrapperState([t0], p, nothing, dy_dt!)
+J = zeros(Nx, Nx)
+finite_difference_jacobian!(J, ode_wrap!, y0)
+sparsity = sparse(J)
+
 options = SolverOptions(
               method = BackwardEuler1(),
               adaptive = Fixed(),
               stage_finder = ImplicitStageFinder(
                                  linear_method = LUFactorization(),
-                                #  jacobian_method = ForwardJacobian(),
+                                 jacobian_method = FiniteJacobian(; sparsity),
                              ),
           )
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 get_stats(sol)
+
+# OrdinaryDiffEq
+#=
+println("")
+GC.gc()
+using OrdinaryDiffEq
+
+# prob = ODEProblem(diffeq!, y0, (t0, tf), p)
+func = ODEFunction(diffeq!; jac_prototype = sparsity)
+prob = ODEProblem(func, y0, (t0, tf), p)
+
+alg = ImplicitEuler(autodiff = false, linsolve = LUFactorization())
+
+@time sol_diffeq = solve(prob, alg, dt = dt0, adaptive = false);
+# display(sol_diffeq.destats)
+@show sol_diffeq.destats.nf sol_diffeq.destats.njacs
+=#
 
 if show_plot
     # initial time slice

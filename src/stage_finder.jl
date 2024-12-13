@@ -10,8 +10,10 @@ abstract type JacobianMethod end
     evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
 end
 
-@kwdef struct FiniteJacobian{JC} <: JacobianMethod where JC <: JacobianCache
+@kwdef struct FiniteJacobian{JC, T} <: JacobianMethod where {JC <: JacobianCache,
+                                                             T <: AbstractFloat}
     cache::JC = JacobianCache([0.0])
+    sparsity::SparseMatrixCSC{T, Int64} = SparseMatrixCSC(Float64[;;])
     evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
 end
 
@@ -36,7 +38,13 @@ function set_jacobian_cache(stage_finder::ImplicitStageFinder, ode_wrap!, f, y)
     # TODO: only set cache is use Newton method
     @unpack jacobian_method = stage_finder
     if jacobian_method isa FiniteJacobian
-        cache = JacobianCache(y)
+        @unpack sparsity = jacobian_method
+        if all(size(sparsity) .== length(y))
+            colorvec = matrix_colors(sparsity)
+            cache = JacobianCache(y; colorvec, sparsity)
+        else
+            cache = JacobianCache(y)
+        end
     elseif jacobian_method isa ForwardJacobian
         cache = JacobianConfig(ode_wrap!, f, y)
     end
@@ -54,8 +62,9 @@ end
 
 function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, FE, J, ode_wrap!, y, args...)
     @unpack cache, evaluations = jacobian_method
+    @unpack colorvec = cache
     finite_difference_jacobian!(J, ode_wrap!, y, cache)
-    FE[1] += length(y) + 1
+    FE[1] += maximum(colorvec) + 1
     evaluations[1] += 1
     return nothing
 end
