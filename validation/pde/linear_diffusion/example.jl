@@ -13,8 +13,7 @@ x = range(-10, 10, Nx)      # grid points
 dx = x[2] - x[1]            # uniform spacing
 p = [a, dx]                 # parameters
 
-# initial conditions
-t0 = 1.0
+t0 = 1.0                    # initial conditions
 y0 = gauss.(x, t0; p, t0)
 
 tf = 10.0
