@@ -18,14 +18,4 @@ function gauss(x, t; p, t0)
 end
 
 # OrdinaryDiffEq
-function diffeq!(f, y, p, t)
-    a, dx = p
-    N = length(y)
-    for i in 1:N
-        m = max(i-1, 1) # BC: y[0] = y[1]
-        p = min(i+1, N) # BC: y[N+1] = y[N]
-        ym, yc, yp = y[m], y[i], y[p]
-        f[i] = (yp - 2.0*yc + ym)*a/dx^2
-    end
-    nothing
-end
+diffeq!(f, y, p, t) = dy_dt!(f, y, t; p)
