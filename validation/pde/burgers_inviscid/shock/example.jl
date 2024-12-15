@@ -4,8 +4,10 @@ using SparseArrays: sparse
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/burgers_inviscid/shock/equations.jl") : nothing
 
-dy_dt! = dy_dt_central!
-# dy_dt! = dy_dt_rusanov!
+# dy_dt! = dy_dt_central!
+# dy_dt! = dy_dt_lax_friedrichs!
+# dy_dt! = dy_dt_murman_roe!
+dy_dt! = dy_dt_rusanov!
 
 show_plot = true            # plot solution
 
@@ -34,6 +36,8 @@ options = SolverOptions(; adaptive = Fixed(),
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 t, y = get_solution(sol)
+
+get_stats(sol)
 
 plt = plot(x, y0, label = "t = 0", color = "indianred", linewidth = 2,
            size = (900, 600), ylims = (-0.25, 1.25),
