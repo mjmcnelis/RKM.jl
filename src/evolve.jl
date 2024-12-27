@@ -24,7 +24,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # get solver options
         @unpack adaptive, controller, method, timer, stage_finder,
                 interpolator, sensitivity_method, show_progress,
-                save_solution = options
+                save_solution, benchmark_subroutines = options
 
         reset_timer!(timer)
 
@@ -123,6 +123,12 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     end
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,
                    stage_finder, loop_stats, config_bytes)
+
+    if benchmark_subroutines && save_solution
+        get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
+                                stage_finder, n_samples = 100)
+    end
+
     return nothing
 end
 

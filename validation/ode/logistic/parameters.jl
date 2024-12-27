@@ -1,8 +1,8 @@
 
 options = Dict(
-    :method => RungeKutta4(),
+    # :method => RungeKutta4(),
     # :method => BogackiShampine32(),
-    # :method => BackwardEuler1(),
+    :method => BackwardEuler1(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()
     # :method => AdamsBashforth(; order = 2),
     # :method => AdamsMoulton(; order = 2),
@@ -47,6 +47,9 @@ options = Dict(
 
     :show_progress => false,
     # :show_progress => true,
+
+    :benchmark_subroutines => false,
+    # :benchmark_subroutines => true,
 
     :precision => Float64
     # :precision => Double64

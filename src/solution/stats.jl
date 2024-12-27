@@ -37,3 +37,68 @@ function get_stats(sol::Solution)
     println("config memory        = $(format_bytes(config_memory[1]))")
     println("excess memory        = $(format_bytes(excess_memory[1]))")
 end
+
+function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
+                                 stage_finder; n_samples = 100)
+    @unpack f, y, J, error = update_cache
+    @unpack root_method, jacobian_method = stage_finder
+
+    ny = sol.dimensions[1]
+    nt = length(sol.t)
+    FE_dummy = [0]          # placeholder variable
+
+    FE_runtime = 0.0        # functional evaluation time
+    JE_runtime = 0.0        # jacobian evaluation time
+    LS_runtime = 0.0        # linear solve time
+
+    # note: could sample but need StatsBase
+    t_idxs = round.(Int64, LinRange(2, nt, min(nt, n_samples)))
+
+    for n in t_idxs
+        t = sol.t[n]
+        y .= view(sol.y, 1+(n-1)*ny:n*ny)
+
+        ode_wrap!.t[1] = t
+
+        FE_stat = @timed ode_wrap!(f, t, y)
+        FE_runtime += FE_stat.time
+
+        if !isempty(J) && root_method isa Newton
+            JE_stat = @timed evaluate_system_jacobian!(jacobian_method, FE_dummy,
+                                                    J, ode_wrap!, y, f)
+            JE_runtime += JE_stat.time
+
+            # note: linear solve estimate assumes Backward Euler
+            LS_stat = @timed begin
+                y_prev = view(sol.y, 1+(n-2)*ny:(n-1)*ny)
+                dt = sol.t[n] - sol.t[n-1]
+
+                @.. J *= dt
+                for k in diagind(J)
+                    J[k] += 1.0
+                end
+                @.. error = y - y_prev - dt*f
+                linear_cache.A = J
+                linear_cache.b = error
+                solve!(linear_cache)
+            end
+            LS_runtime += LS_stat.time
+        end
+    end
+
+    FE_runtime *= sol.FE[1] / length(t_idxs)    # TODO: subtract FEs from jacobian
+    JE_runtime *= sol.JE[1] / length(t_idxs)
+    LS_runtime *= sol.JE[1] / length(t_idxs)
+
+    println("")
+    println("  Subroutine runtimes (seconds)  ")
+    println("---------------------------------")
+    println("function evaluations | $(round(FE_runtime, sigdigits = 4))")
+    println("jacobian evaluations | $(round(JE_runtime, sigdigits = 4))")
+    println("linear solve         | $(round(LS_runtime, sigdigits = 4))")
+    # TODO: nothing here yet
+    println("saving solution      | ")
+    println("")
+
+    return nothing
+end
