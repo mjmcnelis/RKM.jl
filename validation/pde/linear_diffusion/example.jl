@@ -37,6 +37,7 @@ options = SolverOptions(
                                  jacobian_method = FiniteJacobian(; sparsity),
                              ),
               interpolator = HermiteInterpolator(; dt_save = 0.01),
+              benchmark_subroutines = true
           )
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
