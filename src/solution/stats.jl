@@ -39,7 +39,7 @@ function get_stats(sol::Solution)
 end
 
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
-                                 stage_finder; n_samples = 100)
+                                 stage_finder, S2_runtime; n_samples = 100)
     @unpack f, y, J, error = update_cache
     @unpack root_method, jacobian_method = stage_finder
 
@@ -50,21 +50,13 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
     # sample subset of time indices (could try StatsBase.sample)
     t_idxs = round.(Int64, LinRange(2, nt, min(nt, n_samples)))
 
-    # sample subset of state variables
-    y_sol = typeof(sol.y)()
-    @time sizehint!(y_sol, ny*length(t_idxs))
-
     FE_runtime = 0.0        # functional evaluation time
     JE_runtime = 0.0        # jacobian evaluation time
     LS_runtime = 0.0        # linear solve time
-    S2_runtime = 0.0        # save solution time
 
     for n in t_idxs
         t = sol.t[n]
         y .= view(sol.y, 1+(n-1)*ny:n*ny)
-
-        S2_stat = @timed append!(y_sol, y)
-        S2_runtime += S2_stat.time
 
         ode_wrap!.t[1] = t
 
@@ -97,7 +89,6 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
     FE_runtime *= sol.FE[1] / length(t_idxs)    # TODO: subtract FEs from jacobian
     JE_runtime *= sol.JE[1] / length(t_idxs)
     LS_runtime *= sol.JE[1] / length(t_idxs)
-    S2_runtime *= nt / length(t_idxs)
 
     println("")
     println("  Subroutine runtimes (seconds)  ")

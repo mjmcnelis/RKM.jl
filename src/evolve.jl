@@ -91,6 +91,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, sensitivity_method)
     end
 
+    # runtime to store solution (S2)
+    S2_runtime = 0.0
+
     loop_stats = @timed begin
         # save initial condition
         if save_solution
@@ -114,7 +117,14 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             timer.total_steps[1] += 1
 
             if save_solution
-                interpolate_solution!(interpolator, sol, update_cache, t)
+                # TODO: more compact way to do this?
+                # TODO: if skip 10, then dense output time is wrong
+                if benchmark_subroutines #&& length(sol.t) % 10 == 0
+                    S2_stat = @timed interpolate_solution!(interpolator, sol, update_cache, t)
+                    S2_runtime += #=10.0=#S2_stat.time
+                else
+                    interpolate_solution!(interpolator, sol, update_cache, t)
+                end
             end
             # note: make sure updated value is stored in y_tmp, S_tmp
             @.. y = y_tmp
@@ -126,7 +136,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
     if benchmark_subroutines && save_solution
         get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
-                                stage_finder, n_samples = 100)
+                                stage_finder, S2_runtime, n_samples = 100)
     end
 
     return nothing

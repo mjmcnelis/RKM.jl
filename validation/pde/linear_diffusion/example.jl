@@ -43,10 +43,11 @@ options = SolverOptions(
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 get_stats(sol)
 
+GC.gc()
+
 # OrdinaryDiffEq
 if benchmark_diffeq
     println("")
-    GC.gc()
     using OrdinaryDiffEq
 
     # prob = ODEProblem(diffeq!, y0, (t0, tf), p)

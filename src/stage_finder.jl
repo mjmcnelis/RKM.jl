@@ -35,6 +35,9 @@ abstract type StageFinder end
 end
 
 function set_jacobian_cache(stage_finder::ImplicitStageFinder, ode_wrap!, f, y)
+    # reset jacobian evaluations
+    stage_finder.jacobian_method.evaluations .= 0
+
     # TODO: only set cache is use Newton method
     @unpack jacobian_method = stage_finder
     if jacobian_method isa FiniteJacobian
