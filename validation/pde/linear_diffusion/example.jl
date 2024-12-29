@@ -34,7 +34,9 @@ options = SolverOptions(
               adaptive = Fixed(),
               stage_finder = ImplicitStageFinder(
                                  linear_method = LUFactorization(),
+                                 # TODO: finitediff w/ sparsity doesn't seem to be working
                                  jacobian_method = FiniteJacobian(; sparsity),
+                                #  jacobian_method = ForwardColorJacobian(; sparsity)
                              ),
               interpolator = HermiteInterpolator(; dt_save = 0.01),
               benchmark_subroutines = true

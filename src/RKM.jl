@@ -7,7 +7,7 @@ import LinearSolve: init, solve!, LinearProblem, LUFactorization,
 import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!, mul!
 import StaticArrays: SVector, SMatrix, MVector
 import SparseArrays: sparse, SparseMatrixCSC
-import SparseDiffTools: matrix_colors
+import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColorJacCache
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
@@ -85,7 +85,11 @@ export BasicControl, PIControl, H312Control, H321PredictiveControl,
        H211bPredictiveControl
 export PiecewiseLimiter, SmoothLimiter
 # Implicit stage finder
-export ImplicitStageFinder, FixedPoint, Newton, ForwardJacobian, FiniteJacobian
+export ImplicitStageFinder
+# Root finder methods
+export FixedPoint, Newton
+# Jacobian evaluation methods
+export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Interpolation methods

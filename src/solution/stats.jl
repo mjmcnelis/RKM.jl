@@ -65,7 +65,7 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
 
         if !isempty(J) && root_method isa Newton
             JE_stat = @timed evaluate_system_jacobian!(jacobian_method, FE_dummy,
-                                                    J, ode_wrap!, y, f)
+                                                       J, ode_wrap!, y, f)
             JE_runtime += JE_stat.time
 
             # note: linear solve estimate assumes Backward Euler

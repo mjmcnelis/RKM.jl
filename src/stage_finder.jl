@@ -5,8 +5,15 @@ struct FixedPoint <: RootMethod end
 
 abstract type JacobianMethod end
 
+# TODO: do I need two versions of ForwardJacobian?
 @kwdef struct ForwardJacobian{JC} <: JacobianMethod where JC <: JacobianConfig
     cache::JC = JacobianConfig(nothing, [0.0], [0.0])
+    evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
+end
+@kwdef struct ForwardColorJacobian{JC, T} <: JacobianMethod where {JC <: ForwardColorJacCache,
+                                                                   T <: AbstractFloat}
+    cache::JC = ForwardColorJacCache(nothing, [0.0])
+    sparsity::SparseMatrixCSC{T, Int64} = SparseMatrixCSC(Float64[;;])
     evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
 end
 
@@ -50,6 +57,14 @@ function set_jacobian_cache(stage_finder::ImplicitStageFinder, ode_wrap!, f, y)
         end
     elseif jacobian_method isa ForwardJacobian
         cache = JacobianConfig(ode_wrap!, f, y)
+    elseif jacobian_method isa ForwardColorJacobian
+        @unpack sparsity = jacobian_method
+        if all(size(sparsity) .== length(y))
+            colorvec = matrix_colors(sparsity)
+            cache = ForwardColorJacCache(ode_wrap!, y; colorvec, sparsity)
+        else
+            cache = ForwardColorJacCache(ode_wrap!, y)
+        end
     end
     @set! stage_finder.jacobian_method.cache = cache
     return stage_finder
@@ -59,6 +74,16 @@ function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, FE, J, ode_
     @unpack cache, evaluations = jacobian_method
     jacobian!(J, ode_wrap!, f, y, cache)
     FE[1] += ceil(Int64, length(y)/DEFAULT_CHUNK_THRESHOLD)
+    evaluations[1] += 1
+    return nothing
+end
+
+function evaluate_system_jacobian!(jacobian_method::ForwardColorJacobian,
+                                   FE, J, ode_wrap!, y, args...)
+    @unpack cache, evaluations = jacobian_method
+    @unpack colorvec = cache
+    forwarddiff_color_jacobian!(J, ode_wrap!, y, cache)
+    FE[1] += ceil(Int64, maximum(colorvec)/DEFAULT_CHUNK_THRESHOLD)
     evaluations[1] += 1
     return nothing
 end
