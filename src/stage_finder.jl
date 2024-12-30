@@ -5,7 +5,6 @@ struct FixedPoint <: RootMethod end
 
 abstract type JacobianMethod end
 
-# TODO: do I need two versions of ForwardJacobian?
 @kwdef struct ForwardJacobian{JC} <: JacobianMethod where JC <: JacobianConfig
     cache::JC = JacobianConfig(nothing, [0.0], [0.0])
     evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
