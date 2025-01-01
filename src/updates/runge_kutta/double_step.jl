@@ -1,7 +1,6 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
-             controller::Controller, FE::MVector{1,Int64},
-             t::Vector{T}, dt::Vector{T},
+             controller::Controller, t::Vector{T}, dt::Vector{T},
              ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for double step yet
@@ -16,10 +15,9 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
 
     order = method.order[1]                             # order of scheme
 
-    if FE[1] == 0
+    if ode_wrap!.FE[1] == 0
         # always evaluate first stage at initial time (should move outside of function)
         ode_wrap!(f, t[1], y)
-        FE[1] += 1
     else
         # get ODE of current time step (should already be stored in f_tmp)
         @.. f = f_tmp
@@ -32,7 +30,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, t[1], dt[1], ode_wrap!, FE, update_cache,
+        double_step!(method, t[1], dt[1], ode_wrap!, update_cache,
                      linear_cache, stage_finder,
                      sensitivity_method, ode_wrap_p!)
 
@@ -81,12 +79,11 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     # note: if do Richardson extrapolation, then always have
     # to evaluate (explicit) first stage at (t+dt,y+dy)
     ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
-    FE[1] += 1
 
     return nothing
 end
 
-function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
+function double_step!(method, t, dt, ode_wrap!, update_cache,
                       linear_cache, stage_finder, sensitivity_method,
                       ode_wrap_p!)
 
@@ -97,7 +94,7 @@ function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
     if explicit_stage[1]
         @.. dy[:,1] = dt * f
     end
-    runge_kutta_step!(method, iteration, t, dt, ode_wrap!, FE,
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap!,
                       update_cache, linear_cache, stage_finder,
                       sensitivity_method, ode_wrap_p!)
     @.. y1 = y_tmp
@@ -107,7 +104,7 @@ function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
     if explicit_stage[1]
         @.. dy[:,1] = (dt/2.0) * f
     end
-    runge_kutta_step!(method, iteration, t, dt/2, ode_wrap!, FE,
+    runge_kutta_step!(method, iteration, t, dt/2, ode_wrap!,
                       update_cache, linear_cache, stage_finder,
                       sensitivity_method, ode_wrap_p!)
     @.. y2 = y_tmp
@@ -116,7 +113,6 @@ function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
         # skip function evaluation if method is FSAL
         if !fsal
             ode_wrap!(f_tmp, t + dt/2.0, y2)
-            FE[1] += 1
         end
         @.. dy[:,1] = (dt/2.0) * f_tmp
     end
@@ -124,7 +120,7 @@ function double_step!(method, t, dt, ode_wrap!, FE, update_cache,
     @.. y_tmp = y2
     @.. y2 = y
     @.. y = y_tmp
-    runge_kutta_step!(method, iteration, t+dt/2, dt/2, ode_wrap!, FE,
+    runge_kutta_step!(method, iteration, t+dt/2, dt/2, ode_wrap!,
                       update_cache, linear_cache, stage_finder,
                       sensitivity_method, ode_wrap_p!)
     @.. y = y2

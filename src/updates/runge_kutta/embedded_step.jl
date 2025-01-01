@@ -1,7 +1,6 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
-             controller::Controller, FE::MVector{1,Int64},
-             t::Vector{T}, dt::Vector{T},
+             controller::Controller, t::Vector{T}, dt::Vector{T},
              ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for embedded step yet
@@ -14,10 +13,9 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @unpack dt_min, dt_max = limiter
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
 
-    if FE[1] == 0
+    if ode_wrap!.FE[1] == 0
         # always evaluate first stage at initial time (should move outside of function)
         ode_wrap!(f, t[1], y)
-        FE[1] += 1
     else
         # get ODE of current time step (should already be stored in f_tmp)
         @.. f = f_tmp
@@ -31,7 +29,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
         @.. dy[:,1] = dt[1] * f                         # primary iteration
-        runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!, FE,
+        runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!,
                           update_cache, linear_cache, stage_finder,
                           sensitivity_method, ode_wrap_p!)
         @.. y1 = y_tmp
@@ -86,7 +84,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fsal
     if !fsal
         ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
-        FE[1] += 1
     end
 
     return nothing

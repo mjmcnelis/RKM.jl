@@ -69,29 +69,26 @@ function set_jacobian_cache(stage_finder::ImplicitStageFinder, ode_wrap!, f, y)
     return stage_finder
 end
 
-function evaluate_system_jacobian!(jacobian_method::ForwardJacobian, FE, J, ode_wrap!, y, f)
+function evaluate_system_jacobian!(jacobian_method::ForwardJacobian,
+                                   J, ode_wrap!, y, f)
     @unpack cache, evaluations = jacobian_method
     jacobian!(J, ode_wrap!, f, y, cache)
-    FE[1] += ceil(Int64, length(y)/DEFAULT_CHUNK_THRESHOLD)
     evaluations[1] += 1
     return nothing
 end
 
 function evaluate_system_jacobian!(jacobian_method::ForwardColorJacobian,
-                                   FE, J, ode_wrap!, y, args...)
+                                   J, ode_wrap!, y, args...)
     @unpack cache, evaluations = jacobian_method
-    @unpack colorvec = cache
     forwarddiff_color_jacobian!(J, ode_wrap!, y, cache)
-    FE[1] += ceil(Int64, maximum(colorvec)/DEFAULT_CHUNK_THRESHOLD)
     evaluations[1] += 1
     return nothing
 end
 
-function evaluate_system_jacobian!(jacobian_method::FiniteJacobian, FE, J, ode_wrap!, y, args...)
+function evaluate_system_jacobian!(jacobian_method::FiniteJacobian,
+                                   J, ode_wrap!, y, args...)
     @unpack cache, evaluations = jacobian_method
-    @unpack colorvec = cache
     finite_difference_jacobian!(J, ode_wrap!, y, cache)
-    FE[1] += maximum(colorvec) + 1
     evaluations[1] += 1
     return nothing
 end

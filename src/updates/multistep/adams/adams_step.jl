@@ -1,6 +1,6 @@
 
 @muladd function adams_step!(method::Adams, ::Explicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, args...) where T <: AbstractFloat
 
     @unpack b, stages = method
@@ -16,7 +16,7 @@
 end
 
 @muladd function adams_step!(method::Adams, ::SingleImplicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
@@ -36,7 +36,6 @@ end
         @.. y_tmp = y_tmp + b_pred[j]*dy_stage
     end
     ode_wrap!(f_tmp, t_tmp, y_tmp)
-    FE[1] += 1
     @.. dy_LM[:,1] = dt * f_tmp
 
     for n in 1:max_iterations+1
@@ -47,7 +46,6 @@ end
             @.. y_tmp = y_tmp + b[j]*dy_stage
         end
         ode_wrap!(f_tmp, t_tmp, y_tmp)
-        FE[1] += 1
 
         # compute residual error of root equation
         # dy - dt.f(t_tmp, y_tmp + b.dy) = 0
@@ -71,8 +69,7 @@ end
             @.. dy_LM[:,1] -= error
         elseif root_method isa Newton
             # evaluate current Jacobian
-            evaluate_system_jacobian!(jacobian_method, FE, J,
-                                        ode_wrap!, y_tmp, f_tmp)
+            evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y_tmp, f_tmp)
             # J <- I - b.dt.J
             @.. J *= (-b[1]*dt)
             for k in diagind(J)

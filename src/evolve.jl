@@ -15,7 +15,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                                                        T1 <: AbstractFloat}
     config_bytes = @allocated begin
         clear_solution!(sol)
-        @unpack FE#=, JE=# = sol
         @unpack precision = options
 
         # @code_warntype lookup_options(options)
@@ -94,6 +93,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     # runtime to store solution (S2)
     S2_runtime = 0.0
 
+    # reset function evaluations (if any, start of loop assumes 0)
+    ode_wrap!.FE[1] = 0
+
     loop_stats = @timed begin
         # save initial condition
         if save_solution
@@ -109,7 +111,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             adjust_final_time_steps!(adaptive, t, dt, tf)
 
             evolve_one_time_step!(method, adaptive, controller,
-                                  FE, t, dt, ode_wrap!, update_cache,
+                                  t, dt, ode_wrap!, update_cache,
                                   linear_cache, stage_finder,
                                   sensitivity_method, ode_wrap_p!)
             t[2] = t[1]
@@ -131,6 +133,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             @.. S = S_tmp
         end
     end
+
+    # TODO: move to compute_stats!
+    sol.FE[1] = ode_wrap!.FE[1] + ode_wrap_p!.FE[1]
+
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,
                    stage_finder, loop_stats, config_bytes)
 

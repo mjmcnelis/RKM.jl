@@ -1,8 +1,7 @@
 
 # TODO: not really working that well right now, debug later (also out of date)
-function evolve_one_time_step!(method::RungeKutta,
-             adaptive::CentralDiff, controller::Controller, FE::MVector{1,Int64},
-             t::Vector{T}, dt::Vector{T},
+function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
+             controller::Controller, t::Vector{T}, dt::Vector{T},
              ode_wrap!::ODEWrapperState, update_cache::RKMCache,
              # TODO: may want to do kwargs for different caches used in adaptive methods
              # note: next argument was f but renamed it to y_prev here
@@ -15,7 +14,7 @@ function evolve_one_time_step!(method::RungeKutta,
     ode_wrap!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
 
     # TEMP: fixed time step for first update until estimate first time step w/ doubling
-    if FE[1] > 0
+    if ode_wrap!.FE[1] > 1
         @unpack epsilon, p_norm = adaptive
         @unpack low, high, dt_min, dt_max = controller.limiter
 
@@ -61,12 +60,11 @@ function evolve_one_time_step!(method::RungeKutta,
     end
     # evaluate first stage iteration w/ new time step (i.e. dt[2])
     @.. dy[:,1] = dt[2] * f_tmp
-    runge_kutta_step!(method, iteration, t[1], dt[2], ode_wrap!, FE, update_cache, args...)
+    runge_kutta_step!(method, iteration, t[1], dt[2], ode_wrap!, update_cache, args...)
 
     dt[1] = dt[2]                                       # store current time step
     @.. y_prev = y                                      # store current solution
     @.. y = y_tmp                                       # get iteration
 
-    FE[1] += 1                                          # from first evaluation above
     return nothing
 end

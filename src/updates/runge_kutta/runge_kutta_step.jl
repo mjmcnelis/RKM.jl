@@ -1,7 +1,7 @@
 # benchmark.jl note: don't see as much benefit to @muladd as @..
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder,
                      sensitivity_method::SensitivityMethod,
@@ -23,13 +23,12 @@
         end
         # TODO: skip if intermediate update not needed in next row(s)?
         ode_wrap!(f_tmp, t_tmp, y_tmp)
-        FE[1] += 1
         @.. dy[:,i] = dt * f_tmp
 
         # for sensitivity
         explicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
                                     t_tmp, dt, update_cache, ode_wrap!,
-                                    ode_wrap_p!, FE)
+                                    ode_wrap_p!)
     end
     @.. y_tmp = y                                        # evaluate iteration
     @.. S_tmp = S
@@ -44,7 +43,7 @@
 end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState, FE::MVector{1,Int64},
+                     t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder,
                      sensitivity_method::SensitivityMethod,
@@ -78,7 +77,6 @@ end
         # guess stage before iterating
         # TODO: look into predictors
         ode_wrap!(f_tmp, t_tmp, y_tmp)
-        FE[1] += 1
         @.. dy[:,i] = dt * f_tmp
 
         if !explicit_stage[i]
@@ -90,7 +88,6 @@ end
                     @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
                 end
                 ode_wrap!(f_tmp, t_tmp, y_tmp)
-                FE[1] += 1
 
                 # compute residual error of root equation
                 # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
@@ -118,8 +115,7 @@ end
                     @.. dy[:,i] -= error
                 elseif root_method isa Newton
                     # evaluate current Jacobian
-                    evaluate_system_jacobian!(jacobian_method, FE, J,
-                                              ode_wrap!, y_tmp, f_tmp)
+                    evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y_tmp, f_tmp)
 
                     @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
                     for k in diagind(J)
@@ -138,7 +134,7 @@ end
         # for sensitivity
         implicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
                                     t_tmp, dt, update_cache, ode_wrap!,
-                                    ode_wrap_p!, FE, A_T[i,i])
+                                    ode_wrap_p!, A_T[i,i])
     end
     # evaluate update
     @.. y_tmp = y
