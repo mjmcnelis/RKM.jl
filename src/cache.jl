@@ -8,7 +8,7 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     y_tmp::Vector{T}
     f_tmp::Vector{T}
     f::Vector{T}
-    J::Matrix{T}
+    J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
     y1::Vector{T}
     y2::Vector{T}
     error::Vector{T}
@@ -20,9 +20,11 @@ end
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      adaptive::AdaptiveStepSize,
                      dimensions::Int64, coefficients::Int64,
-                     sensitivity_method::SensitivityMethod) where T <: AbstractFloat
+                     sensitivity_method::SensitivityMethod,
+                     stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack iteration, stages = method
+    @unpack jacobian_method = stage_finder
 
     no_sensitivity = sensitivity_method isa NoSensitivity
 
@@ -45,17 +47,20 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
 
     y_tmp = zeros(precision, ny)
     f_tmp = zeros(precision, ny)
-    f     = zeros(precision, ny)
-    # TODO: should have option to make it sparse
-    J     = zeros(precision, nJ, nJ)
-    y1    = zeros(precision, m)
-    y2    = zeros(precision, m)
+    f = zeros(precision, ny)
+    # TODO: may be better to split jacobian methods into sparse and non-sparse
+    if hasproperty(jacobian_method, :sparsity) && all(size(jacobian_method.sparsity) .== ny)
+        J = jacobian_method.sparsity
+    else
+        J = zeros(precision, nJ, nJ)
+    end
+    y1 = zeros(precision, m)
+    y2 = zeros(precision, m)
     error = zeros(precision, ne)
 
     S = zeros(precision, ny, np)
     S_tmp = zeros(precision, ny, np)
     dS = zeros(precision, ny, np, stages)
 
-    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, error,
-                       S, S_tmp, dS)
+    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, error, S, S_tmp, dS)
 end

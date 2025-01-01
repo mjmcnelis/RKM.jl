@@ -1,6 +1,7 @@
 using Revise, RKM, LinearSolve
 using FiniteDiff: finite_difference_jacobian!
 using SparseArrays: sparse
+using BenchmarkTools: @btime
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
@@ -33,10 +34,10 @@ options = SolverOptions(
               method = BackwardEuler1(),
               adaptive = Fixed(),
               stage_finder = ImplicitStageFinder(
-                                 linear_method = LUFactorization(),
+                                 linear_method = KLUFactorization(),
                                  # TODO: finitediff w/ sparsity doesn't seem to be working
-                                 jacobian_method = FiniteJacobian(; sparsity),
-                                #  jacobian_method = ForwardColorJacobian(; sparsity)
+                                #  jacobian_method = FiniteJacobian(; sparsity),
+                                 jacobian_method = ForwardColorJacobian(; sparsity)
                              ),
               interpolator = HermiteInterpolator(; dt_save = 0.01),
               benchmark_subroutines = true
@@ -56,7 +57,7 @@ if benchmark_diffeq
     func = ODEFunction(diffeq!; jac_prototype = sparsity)
     prob = ODEProblem(func, y0, (t0, tf), p)
 
-    alg = ImplicitEuler(autodiff = false, linsolve = LUFactorization())
+    alg = ImplicitEuler(autodiff = true, linsolve = KLUFactorization())
 
     @time sol_diffeq = solve(prob, alg, dt = dt0, adaptive = false);
     # display(sol_diffeq.destats)

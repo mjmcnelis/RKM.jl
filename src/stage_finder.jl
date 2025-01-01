@@ -7,20 +7,20 @@ abstract type JacobianMethod end
 
 @kwdef struct ForwardJacobian{JC} <: JacobianMethod where JC <: JacobianConfig
     cache::JC = JacobianConfig(nothing, [0.0], [0.0])
-    evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
+    evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
 end
 @kwdef struct ForwardColorJacobian{JC, T} <: JacobianMethod where {JC <: ForwardColorJacCache,
                                                                    T <: AbstractFloat}
     cache::JC = ForwardColorJacCache(nothing, [0.0])
-    sparsity::SparseMatrixCSC{T, Int64} = SparseMatrixCSC(Float64[;;])
-    evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
+    sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
+    evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
 end
 
 @kwdef struct FiniteJacobian{JC, T} <: JacobianMethod where {JC <: JacobianCache,
                                                              T <: AbstractFloat}
     cache::JC = JacobianCache([0.0])
-    sparsity::SparseMatrixCSC{T, Int64} = SparseMatrixCSC(Float64[;;])
-    evaluations::MVector{1, Int64} = MVector{1,Int64}(0)
+    sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
+    evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
 end
 
 abstract type StageFinder end

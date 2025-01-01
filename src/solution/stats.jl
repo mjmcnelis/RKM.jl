@@ -45,7 +45,6 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
 
     ny = sol.dimensions[1]
     nt = length(sol.t)
-    FE_dummy = [0]          # placeholder variable
 
     # sample subset of time indices (could try StatsBase.sample)
     t_idxs = round.(Int64, LinRange(2, nt, min(nt, n_samples)))
@@ -64,8 +63,7 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
         FE_runtime += FE_stat.time
 
         if !isempty(J) && root_method isa Newton
-            JE_stat = @timed evaluate_system_jacobian!(jacobian_method, FE_dummy,
-                                                       J, ode_wrap!, y, f)
+            JE_stat = @timed evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y, f)
             JE_runtime += JE_stat.time
 
             # note: linear solve estimate assumes Backward Euler

@@ -54,7 +54,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive,
                                    dimensions, coefficients,
-                                   sensitivity_method)
+                                   sensitivity_method, stage_finder)
 
         @unpack y, y_tmp, f, f_tmp, J, error, S, S_tmp = update_cache
 
@@ -63,13 +63,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # re-using y_tmp for now
         ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!) # not used yet
 
-        J[diagind(J)] .= 1.0
-        # TODO: have option to use sparse jacobian
-        # J = sparse(J)
-
         @unpack linear_method = stage_finder
         # configure linear cache (see src/common.jl in LinearSolve.jl)
-        # note: assumes LU factorization for now
         linear_cache = init(LinearProblem(J, error), linear_method;
                             alias_A = true, alias_b = true)
 

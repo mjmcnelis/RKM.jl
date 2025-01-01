@@ -94,19 +94,24 @@ end
                 dy_stage = view(dy,:,i)
                 @.. error = dy_stage - dt*f_tmp
 
-                # compute norms and tolerance
-                e_norm  = norm(error, p_norm)           # compute norms
-                dy_norm = norm(dy_stage, p_norm)
-                tol = epsilon * dy_norm
+                # check for convergence (after at least one iteration)
+                if n > 1
+                    # compute norms and tolerance
+                    e_norm = norm(error, p_norm)
+                    dy_norm = norm(dy_stage, p_norm)
+                    # TODO: LinearAlgebra.norm is slow (can I get away with fast version?)
+                    # e_norm = sqrt(sum(abs2, error))
+                    # dy_norm = sqrt(sum(abs2, dy_stage))
+                    tol = epsilon * dy_norm
 
-                # check for root convergence
-                # TODO: test doing at least one iteration on helping stiff problems
-                if e_norm < tol
-                    break
-                elseif n == max_iterations + 1
+                    if e_norm <= tol
+                        break
+                    end
+                end
+
+                if n == max_iterations + 1
                     # println("failed to converge after $(n-1) iterations")
-                    # note: allow f_tmp to store dy_dt!
-                    # of last iteration for FSAL methods
+                    # note: allow f_tmp to store dy_dt! of last iteration for FSAL methods
                     # TODO: count convergence failures in stats
                     break
                 end
@@ -117,7 +122,14 @@ end
                     # evaluate current Jacobian
                     evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y_tmp, f_tmp)
 
-                    @.. J = J * (-A_T[i,i]*dt)          # J <- I - A.dt.J
+                    # TODO: make rescale methods
+                    if J isa SparseMatrixCSC                # J <- I - A.dt.J
+                        @.. J.nzval = J.nzval * (-A_T[i,i]*dt)
+                    else
+                        # note: allocates if J is sparse
+                        @.. J = J * (-A_T[i,i]*dt)
+                    end
+
                     for k in diagind(J)
                         J[k] = J[k] + 1.0
                     end
