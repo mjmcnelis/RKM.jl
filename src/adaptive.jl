@@ -103,8 +103,9 @@ function check_adaptive_parameters_2(; max_attempts)
     return nothing
 end
 
-# here
-get_adaptive_local_order(::CentralDiff, args...) = 2.0
+function get_adaptive_local_order(::CentralDiff, args...)
+    return 2.0
+end
 
 function get_adaptive_local_order(::Doubling,
                                   order::SVector{P,T}) where {P, T <: AbstractFloat}
