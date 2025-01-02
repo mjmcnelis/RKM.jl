@@ -94,35 +94,31 @@ export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 export DefaultPair, EulerPair, SecondPair
 # Interpolation methods
 export NoInterpolator, HermiteInterpolator
-
-# TODO: probably don't need to export these
-#---------------------------------------
 # Numerical ODE methods
 export RungeKutta, LinearMultistep
-    # Properties
+# Properties
 export Iteration, Explicit, DiagonalImplicit, FullImplicit
-#---------------------------------------
-    # Standard explicit Runge-Kutta
+# List of Runge-Kutta methods
 export list_explicit_runge_kutta_methods, list_implicit_runge_kutta_methods
+# Standard explicit Runge-Kutta
 export Euler1, Heun2, Midpoint2, Ralston2, Generic2, Heun3, Ralston3, RungeKutta3,
        ShuOsher3, SpiteriRuuth3, Generic3, RungeKutta4, ThreeEightsRule4, Ralston4,
        Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
-    # Embedded explicit Runge-Kutta
+# Embedded explicit Runge-Kutta
 export Fehlberg12, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, DormandPrince54,
        BogackiShampine54, Tsitouras54, Verner56, Verner65, Fehlberg78, DormandPrince87,
        Feagin108, Feagin1210, Feagin1412
-    # Standard implicit Runge-Kutta
-export BackwardEuler1, ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2, PareschiRusso2,
-       PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3, Norsett4, RaduaIA5
-# not sure which category it belongs to yet
-export TrapezoidRuleBDF2
-    # Embedded implicit Runge-Kutta
+# Standard implicit Runge-Kutta
+export BackwardEuler1, TrapezoidRuleBDF2, ImplicitMidpoint2,
+       QinZhang2, KraaijevangerSpijker2, PareschiRusso2, PareschiRusso3, Crouzeix3,
+       RadauIA3, RadauIIA3, DIRKL3, Norsett4, RaduaIA5
+# Embedded implicit Runge-Kutta
 export ImplicitTrapezoid21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42,
-       LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52, GaussLegendre64
-    # Linear multistep
+       LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52,
+       GaussLegendre64
+# Linear multistep
 export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
        NumericalDifferentiationFormula
-
 # Code names
 export make_code_name
 # ODE solution

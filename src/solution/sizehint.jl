@@ -24,7 +24,9 @@ function _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T1,
     return nothing
 end
 
-sizehint_solution!(::AdaptiveStepSize, ::NoInterpolator, args...) = nothing
+function sizehint_solution!(::AdaptiveStepSize, ::NoInterpolator, args...)
+    return nothing
+end
 
 function sizehint_solution!(::Fixed, ::NoInterpolator, args...)
     # note: may take (steps+1) steps before solver finishes b/c of float precision errors

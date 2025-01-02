@@ -7,7 +7,9 @@ struct NoSensitivity <: SensitivityMethod end
     jacobian_method::JM = FiniteJacobian()
 end
 
-set_jacobian_cache(sensitivity_method::NoSensitivity, args...) = sensitivity_method
+function set_jacobian_cache(sensitivity_method::NoSensitivity, args...)
+    return sensitivity_method
+end
 
 # just borrow stage finder for now
 function set_jacobian_cache(sensitivity_method::DecoupledDirect, ode_wrap_p!, f, y, p)
@@ -21,8 +23,13 @@ function set_jacobian_cache(sensitivity_method::DecoupledDirect, ode_wrap_p!, f,
     return sensitivity_method
 end
 
-explicit_sensitivity_stage!(::NoSensitivity, args...) = nothing
-implicit_sensitivity_stage!(::NoSensitivity, args...) = nothing
+function explicit_sensitivity_stage!(::NoSensitivity, args...)
+    return nothing
+end
+
+function implicit_sensitivity_stage!(::NoSensitivity, args...)
+    return nothing
+end
 
 function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
                                      dt, update_cache, ode_wrap!, ode_wrap_p!)

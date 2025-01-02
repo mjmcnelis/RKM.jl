@@ -103,6 +103,7 @@ function check_adaptive_parameters_2(; max_attempts)
     return nothing
 end
 
+# here
 get_adaptive_local_order(::CentralDiff, args...) = 2.0
 
 function get_adaptive_local_order(::Doubling,
@@ -127,7 +128,9 @@ function rescale_tolerance(::Embedded, order::SVector{P,T}) where {P, T <: Abstr
     return minimum(order) / maximum(order)
 end
 
-_reconstruct_adaptive(::CentralDiff; kwargs...) = CentralDiff(; kwargs...)
+function _reconstruct_adaptive(::CentralDiff; kwargs...)
+    return CentralDiff(; kwargs...)
+end
 
 function _reconstruct_adaptive(adaptive::Doubling; kwargs...)
     return Doubling(; kwargs..., max_attempts = adaptive.max_attempts)

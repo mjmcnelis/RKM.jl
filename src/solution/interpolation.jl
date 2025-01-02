@@ -19,7 +19,9 @@ function HermiteInterpolator(; dt_save::Float64)
     return HermiteInterpolator(dt_save, t_range, nt, t0)
 end
 
-reconstruct_interpolator(interpolator::NoInterpolator, args...) = interpolator
+function reconstruct_interpolator(interpolator::NoInterpolator, args...)
+    return interpolator
+end
 
 function reconstruct_interpolator(interpolator::HermiteInterpolator,
                                   t0::T, tf::T) where T <: AbstractFloat
