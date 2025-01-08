@@ -1,6 +1,6 @@
 module RKM
 
-import ForwardDiff: jacobian!, JacobianConfig
+import ForwardDiff: jacobian!, JacobianConfig, NANSAFE_MODE_ENABLED
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
        AbstractFactorization#, SciMLLinearSolveAlgorithm
@@ -90,6 +90,8 @@ export ImplicitStageFinder
 export FixedPoint, Newton
 # Jacobian evaluation methods
 export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
+# Jacobian sparsity pattern
+export nansafe_jacobian
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Interpolation methods

@@ -24,11 +24,9 @@ CFL = 2.0*a*dt0/dx^2        # CFL number
 @show CFL
 Nt = 300                    # temporal stride (for plot)
 
-# initial sparsity pattern
-ode_wrap! = RKM.ODEWrapperState([t0], p, nothing, dy_dt!)
-J = zeros(Nx, Nx)
-finite_difference_jacobian!(J, ode_wrap!, y0)
-sparsity = sparse(J)
+# generate sparsity pattern via nansafe
+sparsity = nansafe_jacobian(y0, t0, dy_dt!, p)
+display(sparsity)
 
 options = SolverOptions(
               method = BackwardEuler1(),
