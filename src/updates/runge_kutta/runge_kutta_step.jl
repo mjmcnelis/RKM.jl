@@ -2,12 +2,13 @@
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache,
+                     update_cache::UpdateCache{T},
+                     linear_cache::LinearCache,
                      stage_finder::ImplicitStageFinder,
                      sensitivity_method::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
     @unpack c, A_T, b, stages = method
-    @unpack dy, y, y_tmp, f_tmp, S, S_tmp, dS = update_cache
+    @unpack dy, y, y_tmp, f_tmp, S, S_tmp#=, dS=# = update_cache
 
     for i in 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
@@ -17,9 +18,9 @@
         for j in 1:i-1
             A_T[j,i] == 0.0 ? continue : nothing
             dy_stage = view(dy,:,j)
-            dS_stage = view(dS,:,:,j)
+            # dS_stage = view(dS,:,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
-            @.. S_tmp = S_tmp + A_T[j,i]*dS_stage       # TODO: skip this for no sensitivity
+            # @.. S_tmp = S_tmp + A_T[j,i]*dS_stage       # TODO: skip this for no sensitivity
         end
         # TODO: skip if intermediate update not needed in next row(s)?
         ode_wrap!(f_tmp, t_tmp, y_tmp)
@@ -35,16 +36,17 @@
     for j in 1:stages
         b[j] == 0.0 ? continue : nothing
         dy_stage = view(dy,:,j)
-        dS_stage = view(dS,:,:,j)
+        # dS_stage = view(dS,:,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
-        @.. S_tmp = S_tmp + b[j]*dS_stage
+        # @.. S_tmp = S_tmp + b[j]*dS_stage
     end
     return nothing
 end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache,
+                     update_cache::UpdateCache{T},
+                     linear_cache::LinearCache,
                      stage_finder::ImplicitStageFinder,
                      sensitivity_method::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat

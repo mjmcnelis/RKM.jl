@@ -56,13 +56,14 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                                    dimensions, coefficients,
                                    sensitivity_method, stage_finder)
 
-        @unpack y, y_tmp, f, f_tmp, J, error, S, S_tmp = update_cache
+        @unpack y, y_tmp, f, f_tmp, error, S, S_tmp = update_cache
 
         # create ODE wrapper function
         ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
         # re-using y_tmp for now
         ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!) # not used yet
 
+        J = zeros(0,0)
         @unpack linear_method = stage_finder
         # configure linear cache (see src/common.jl in LinearSolve.jl)
         linear_cache = init(LinearProblem(J, error), linear_method;
@@ -105,10 +106,11 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
             adjust_final_time_steps!(adaptive, t, dt, tf)
 
-            evolve_one_time_step!(method, adaptive, controller,
+            @time evolve_one_time_step!(method, adaptive, controller,
                                   t, dt, ode_wrap!, update_cache,
                                   linear_cache, stage_finder,
                                   sensitivity_method, ode_wrap_p!)
+                                  q()
             t[2] = t[1]
             t[1] += dt[1]
             timer.total_steps[1] += 1

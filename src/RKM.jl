@@ -2,8 +2,8 @@ module RKM
 
 import ForwardDiff: jacobian!, JacobianConfig, Chunk, NANSAFE_MODE_ENABLED
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
-import LinearSolve: init, solve!, LinearProblem, LUFactorization,
-       AbstractFactorization#, SciMLLinearSolveAlgorithm
+import LinearSolve: init, solve!, LinearProblem, LinearCache,
+       LUFactorization, AbstractFactorization#, SciMLLinearSolveAlgorithm
 import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!, mul!
 import StaticArrays: SVector, SMatrix, MVector
 import SparseArrays: sparse, SparseMatrixCSC
@@ -68,12 +68,12 @@ include("methods/utils.jl")
 # Runge-Kutta updates
 include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")
-include("updates/runge_kutta/double_step.jl")
-include("updates/runge_kutta/embedded_step.jl")
-include("updates/runge_kutta/central_step.jl")
+# include("updates/runge_kutta/double_step.jl")
+# include("updates/runge_kutta/embedded_step.jl")
+# include("updates/runge_kutta/central_step.jl")
 # Multistep updates
-include("updates/multistep/adams/adams_step.jl")
-include("updates/multistep/adams/fixed_step.jl")
+# include("updates/multistep/adams/adams_step.jl")
+# include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")

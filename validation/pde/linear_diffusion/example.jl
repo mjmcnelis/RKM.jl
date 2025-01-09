@@ -5,7 +5,7 @@ using BenchmarkTools: @btime
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
-show_plot = true            # plot solution
+show_plot = false            # plot solution
 benchmark_diffeq = true     # compare to OrdinaryDiffEq
 
 a = 0.25                    # diffusion constant
@@ -25,7 +25,7 @@ CFL = 2.0*a*dt0/dx^2        # CFL number
 Nt = 300                    # temporal stride (for plot)
 
 # generate sparsity pattern via nansafe
-sparsity = nansafe_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
+sparsity = nansafe_jacobian(y0, t0, dy_dt!, p; chunk_size = 12)
 display(sparsity)
 
 options = SolverOptions(
