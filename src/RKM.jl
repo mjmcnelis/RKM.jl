@@ -1,6 +1,6 @@
 module RKM
 
-import ForwardDiff: jacobian!, JacobianConfig, NANSAFE_MODE_ENABLED
+import ForwardDiff: jacobian!, JacobianConfig, Chunk, NANSAFE_MODE_ENABLED
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
        AbstractFactorization#, SciMLLinearSolveAlgorithm

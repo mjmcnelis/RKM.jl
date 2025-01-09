@@ -45,7 +45,7 @@ function evaluate_system_jacobian!(jacobian_method::FiniteJacobian,
 end
 
 function nansafe_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
-                          p::Vector{Float64} = Float64[];
+                          p::Vector{Float64} = Float64[]; chunk_size::Int64 = 12,
                           abstract_params = nothing) where {T <: AbstractFloat,
                                                             T1 <: AbstractFloat}
     if !NANSAFE_MODE_ENABLED
@@ -53,8 +53,8 @@ function nansafe_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
         println("""\nRun the following commands in your base (project) environment and
                 restart the Julia REPL:
 
-                    using ForwardDiff, Preferences
-                    set_preferences!(ForwardDiff, "nansafe_mode" => true, force = true)
+                using ForwardDiff, Preferences
+                set_preferences!(ForwardDiff, "nansafe_mode" => true, force = true)
 
                 The LocalPreferences.toml file can be edited directly in your base
                 (project) environment (e.g. ~/.julia/environments/v1.10/).\n""")
@@ -65,7 +65,8 @@ function nansafe_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
     y = NaN.*y0
     f = similar(y0)
     ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
+    cache = JacobianConfig(ode_wrap!, f, y, Chunk(chunk_size))
 
-    jacobian!(J, ode_wrap!, f, y)
+    jacobian!(J, ode_wrap!, f, y, cache)
     return sparse(J)
 end

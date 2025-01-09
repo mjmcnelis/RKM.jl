@@ -25,7 +25,7 @@ CFL = 2.0*a*dt0/dx^2        # CFL number
 Nt = 300                    # temporal stride (for plot)
 
 # generate sparsity pattern via nansafe
-sparsity = nansafe_jacobian(y0, t0, dy_dt!, p)
+sparsity = nansafe_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
 display(sparsity)
 
 options = SolverOptions(
