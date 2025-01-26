@@ -1,12 +1,13 @@
 using Revise, RKM, LinearSolve
 using FiniteDiff: finite_difference_jacobian!
 using SparseArrays: sparse
+using ForwardDiff: Dual # for test_nansafe
 using BenchmarkTools: @btime
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
-show_plot = true            # plot solution
-benchmark_diffeq = true     # compare to OrdinaryDiffEq
+show_plot = false           # plot solution
+benchmark_diffeq = false    # compare to OrdinaryDiffEq
 
 a = 0.25                    # diffusion constant
 Nx = 201
@@ -27,6 +28,10 @@ Nt = 300                    # temporal stride (for plot)
 # generate sparsity pattern via nansafe
 sparsity = nansafe_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
 display(sparsity)
+
+# test_nansafe(; x = Dual(NaN, 1.0))
+# test_nansafe(; x = Dual(NaN, 0.0))
+# q()
 
 options = SolverOptions(
               method = BackwardEuler1(),

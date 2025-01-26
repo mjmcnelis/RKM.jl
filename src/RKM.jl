@@ -1,6 +1,7 @@
 module RKM
 
-import ForwardDiff: jacobian!, JacobianConfig, Chunk, NANSAFE_MODE_ENABLED
+import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
+       NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
        AbstractFactorization#, SciMLLinearSolveAlgorithm
@@ -33,6 +34,7 @@ include("controller/time_step_controller.jl")
 include("implicit/root.jl")
 include("implicit/jacobian.jl")
 include("implicit/stage_finder.jl")
+include("implicit/nansafe_utils.jl")
 include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
 include("plots.jl")
@@ -93,7 +95,7 @@ export FixedPoint, Newton
 # Jacobian evaluation methods
 export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 # Jacobian sparsity pattern
-export nansafe_jacobian
+export nansafe_jacobian, test_nansafe
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Interpolation methods
