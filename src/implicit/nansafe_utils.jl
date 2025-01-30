@@ -1,47 +1,18 @@
-#=
-# requires Combinatorics package
-function max_nan(args...)
-    return sum(p -> maximum(p), permutations(args)) / factorial(length(args))
-end
-function min_nan(args...)
-    return sum(p -> minimum(p), permutations(args)) / factorial(length(args))
-end
-=#
 
-# TODO: allocates if mix float and dual numbers
 function max_nan(args...)
-    # idx = findfirst(x -> isnan(x), args)
-    # if !isnothing(idx)
-    #     ans = zero(args[idx])
-    if any(x -> isnan(x), args)
-        ans = zero(args[1])
-        n = 0
-        for i in eachindex(args)
-            if isnan(args[i])
-                ans += args[i]
-                n += 1
-            end
-        end
-        return ans/n
-    else
-        return max(args...)
-    end
+    return any(x -> isnan(x), args) ? mean(args) : max(args...)
 end
 
 function min_nan(args...)
-    if any(x -> isnan(x), args)
-        ans = zero(args[1])
-        n = 0
-        for i in eachindex(args)
-            if isnan(args[i])
-                ans += args[i]
-                n += 1
-            end
-        end
-        return ans/n
-    else
-        return min(args...)
-    end
+    return any(x -> isnan(x), args) ? mean(args) : min(args...)
+end
+
+function maximum_nan(v::Vector{T}) where T <: Real
+    return any(x -> isnan(x), v) ? mean(v) : maximum(v)
+end
+
+function minimum_nan(v::Vector{T}) where T <: Real
+    return any(x -> isnan(x), v) ? mean(v) : minimum(v)
 end
 
 function test_nansafe(; x = Dual(NaN, 1.0), y = Dual(NaN, 0.0),
@@ -129,32 +100,15 @@ function test_nansafe(; x = Dual(NaN, 1.0), y = Dual(NaN, 0.0),
     println("mod(x, y)    = $(mod(x, y))")
     println("rem(x, y)    = $(rem(x, y))")
     println("rem2pi(x, r) = $(rem2pi(x, r)); r = $r")
+    println("\n------------------------------------------\n")
     # max/min functions are a problem for nansafe jacobian
     # max(0, x) and min(x, 0) seem fine to use
-    println("max(x, y)    = $(max(x, y))")
-    println("min(x, y)    = $(min(x, y))")
-    println("")
-    # testing
-    println("max_nan(x, y) = $(max_nan(x, y))")
-    println("min_nan(x, y) = $(min_nan(x, y))")
-
-    #=
-    x = Dual(NaN, 1.0)
-    y = Dual(NaN, 0.0)
-    z = Dual(NaN, 10.0)
-    v = Dual(NaN, 5.0)
-
-    @show max_nan(x,y) max_nan(x,y,z) max_nan(x,y,v,z)
-    @show min_nan(x,y) min_nan(x,y,z) min_nan(x,y,v,z)
-
-    @time max_nan(x, y)
-    @time max_nan(x, y, z)
-    @time max_nan(x, y, z, v)
-
-    @time min_nan(x, y)
-    @time min_nan(x, y, z)
-    @time min_nan(x, y, z, v)
-    =#
+    println("max(x, y)           = $(max(x, y))")
+    println("min(x, y)           = $(min(x, y))")
+    println("max_nan(x, y)       = $(max_nan(x, y))")
+    println("min_nan(x, y)       = $(min_nan(x, y))")
+    println("maximum_nan([x, y]) = $(maximum_nan([x, y]))")
+    println("mininum_nan([x, y]) = $(minimum_nan([x, y]))")
 
     return nothing
 end

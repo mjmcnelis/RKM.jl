@@ -15,6 +15,7 @@ import UnPack: @unpack
 import Base: @kwdef, rationalize, format_bytes
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import Setfield: @set!
+import StatsBase: mean
 # tmp for testing type stablity
 import InteractiveUtils: @code_warntype
 
@@ -95,7 +96,7 @@ export FixedPoint, Newton
 # Jacobian evaluation methods
 export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 # Jacobian sparsity pattern
-export nansafe_jacobian, test_nansafe
+export nansafe_jacobian, test_nansafe, max_nan, min_nan, maximum_nan, minimum_nan
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Interpolation methods
