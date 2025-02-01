@@ -88,8 +88,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     # runtime to store solution (S2)
     S2_runtime = 0.0
 
-    # reset function evaluations (if any, start of loop assumes 0)
-    ode_wrap!.FE[1] = 0
+    # evaluate ODE at initial time and store in f/f_tmp
+    ode_wrap!(f, t[1], y)
+    @.. f_tmp = f
 
     loop_stats = @timed begin
         # save initial condition
@@ -123,9 +124,10 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                     interpolate_solution!(interpolator, sol, update_cache, t)
                 end
             end
-            # note: make sure updated value is stored in y_tmp, S_tmp
+            # store updated values in tmp caches
             @.. y = y_tmp
             @.. S = S_tmp
+            @.. f = f_tmp
         end
     end
 

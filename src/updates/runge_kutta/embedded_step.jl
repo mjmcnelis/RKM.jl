@@ -13,14 +13,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @unpack dt_min, dt_max = limiter
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
 
-    if ode_wrap!.FE[1] == 0
-        # always evaluate first stage at initial time (should move outside of function)
-        ode_wrap!(f, t[1], y)
-    else
-        # get ODE of current time step (should already be stored in f_tmp)
-        @.. f = f_tmp
-    end
-
     dt[1] = dt[2]                                       # initialize time step
     rescale = T(1.0)                                    # default time step rescaling
 
@@ -28,11 +20,13 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     while true                                          # start embedded routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        @.. dy[:,1] = dt[1] * f                         # primary iteration
+        if explicit_stage[1]
+            @.. dy[:,1] = dt[1] * f
+        end
         runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!,
                           update_cache, linear_cache, stage_finder,
                           sensitivity_method, ode_wrap_p!)
-        @.. y1 = y_tmp
+        @.. y1 = y_tmp                                  # primary iteration
 
         embedded_step!(method, y, dy, y_tmp)
         @.. y2 = y_tmp                                  # embedded iteration

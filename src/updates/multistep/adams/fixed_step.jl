@@ -52,7 +52,7 @@ function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
 
     # initialize previous states (trivial)
     # TODO: check if this works (moved FE to ode_wrap!)
-    if ode_wrap!.FE[1] == 0
+    if ode_wrap!.FE[1] == 1
         for j in 2:stages
             @.. dy[:,j] = y
         end
