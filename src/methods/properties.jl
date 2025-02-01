@@ -16,13 +16,7 @@ struct SingleImplicit <: Implicit end
 # TODO: determine if butcher table fixed (square matrix) or embedded (not square matrix)
 
 function method_is_fsal(butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
-    # TODO: BackwardEuler1 is incorrectly labeled as fsal = true
-    #       need to check if explicit stage[1] = true
     ncol = size(butcher, 2)
-
-    # TODO: if using implicit routine TRBDF2, then also need to check
-    #       whether first stage is explicit in order to use f = f_tmp
-    #       should probably test it out on TRBDF2 (fixed time step and embedded case)
 
     # remove any embedded rows
     B_square = butcher[1:ncol, :]

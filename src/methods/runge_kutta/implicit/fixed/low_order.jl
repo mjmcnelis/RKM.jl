@@ -28,7 +28,7 @@ and circuits. IEEE Transactions on Electron Devices, 32:1992–
 function TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloat
     s2 = sqrt(BigFloat(2))   # sqrt(2)
     g = 2 - s2               # gamma
-    # note: is it FSAL?
+
     name = :Trapezoid_Rule_B_D_F_2
     butcher = SMatrix{4, 4, precision, 16}(
         0, 0, 0, 0,
@@ -205,8 +205,6 @@ Third-order L-stable diagonal implicit method.
 https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 """
 function DIRKL3(precision::Type{T} = Float64) where T <: AbstractFloat
-    # note: method is FSAL but not first-stage explicit, but it's possible
-    #       I could use FSAL to initialize guess (not  very high priority)
     # TODO: find more specific name
     name = :DIRK_L_3
     butcher = SMatrix{5, 5, precision, 25}(

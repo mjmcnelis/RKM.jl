@@ -13,6 +13,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     if ode_wrap!.FE[1] == 0
         # always evaluate first stage at initial time (should move outside of function)
         ode_wrap!(f, t[1], y)
+        # note: this line needed for BackwardEuler fsal-like property:
+        @.. f_tmp = f
     else
         # get ODE of current time step (should already be stored in f_tmp)
         @.. f = f_tmp
