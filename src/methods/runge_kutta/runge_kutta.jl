@@ -24,8 +24,8 @@ struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, 
     order::SVector{P, T}
     """Determines whether the method is explicit or full/diagonal implicit"""
     iteration::I
-    """Determines whether the method has the FSAL property"""
-    fsal::Bool
+    """Determines whether the method has the FESAL property (see ../properties/fesal.jl)"""
+    fesal::Bool
     """Determines which stages are explicit"""
     explicit_stage::SVector{S, Bool}
     """Abbreviated name for the Runge-Kutta method"""
@@ -59,16 +59,16 @@ function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iter
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages, T}
 
-    # properties
-    order          = order_prop(name, T, p)         # order of each RK update
-    fsal           = method_is_fsal(butcher)        # whether method has FSAL property
+    # get properties
+    order = order_prop(name, T, p)                  # order of each RK update
+    fesal = get_fesal(A_T, b)                       # whether method has FESAL property
     explicit_stage = explicit_stage_prop(butcher)   # mark which stages are explicit
 
     # code name label
     code_name = make_code_name(name)
 
     return RungeKutta(name, c, A_T, b, b_hat, stages, order, iteration,
-                      fsal, explicit_stage, code_name, reconstructor)
+                      fesal, explicit_stage, code_name, reconstructor)
 end
 
 function Base.show(io::IO, RK::RungeKutta)

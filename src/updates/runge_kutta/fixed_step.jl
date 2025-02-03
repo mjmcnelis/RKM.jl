@@ -6,7 +6,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
              sensitivity_method::SensitivityMethod,
              ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
-    @unpack iteration, explicit_stage, fsal = method
+    @unpack iteration, explicit_stage, fesal = method
     @unpack dy, y, y_tmp, f, f_tmp = update_cache
 
     # evaluate first stage at current time
@@ -27,9 +27,9 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
                       update_cache, linear_cache, stage_finder,
                       sensitivity_method, ode_wrap_p!)
 
-    # evaluate ODE at next time step and store in f_tmp (skip if method is FSAL)
-    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fsal
-    if !fsal
+    # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
+    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fesal
+    if !fesal
         ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
     end
 

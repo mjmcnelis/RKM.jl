@@ -26,7 +26,7 @@ end
 
 # TODO: make docstring
 function get_runge_kutta_full_implicit_tables(; precision::Type{<:AbstractFloat})
-    # FIRK FSAL methods
+    # FIRK FESAL methods
     # method = RadauIIA3()      # not ES
     # method = LobattoIIIC21()  # not ES
     # method = LobattoIIIC42()  # not ES

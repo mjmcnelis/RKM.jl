@@ -8,7 +8,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
              ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts = adaptive
-    @unpack iteration, explicit_stage, fsal = method
+    @unpack iteration, explicit_stage, fesal = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
@@ -73,10 +73,10 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
 
     @.. y_tmp = y1                                      # get iteration
 
-    # evaluate ODE at next time step and store in f_tmp (skip if method is FSAL)
+    # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
     # note: get excess allocations if try to pass interpolator
-    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fsal
-    if !fsal
+    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fesal
+    if !fesal
         ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
     end
 
