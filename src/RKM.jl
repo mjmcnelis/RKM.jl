@@ -27,7 +27,7 @@ export RKM_root
 include("timer.jl")
 include("progress/default_progress.jl")
 include("wrapper.jl")
-include("embedded.jl")
+include("methods/properties/embedded.jl")
 include("adaptive.jl")
 include("controller/pid_control.jl")
 include("controller/limiter.jl")
@@ -45,7 +45,10 @@ include("solution/sizehint.jl")
 include("solution/stats.jl")
 
 include("methods/code_names.jl")
-include("methods/properties.jl")
+include("methods/properties/iteration.jl")
+include("methods/properties/fesal.jl")
+include("methods/properties/order.jl")
+include("methods/properties/explicit_stage.jl")
 # Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
 # include("methods/runge_kutta/debug_table.jl") # uses @test, @test_broken

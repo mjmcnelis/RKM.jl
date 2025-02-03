@@ -15,14 +15,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
 
     order = method.order[1]                             # order of scheme
 
-    if ode_wrap!.FE[1] == 0
-        # always evaluate first stage at initial time (should move outside of function)
-        ode_wrap!(f, t[1], y)
-    else
-        # get ODE of current time step (should already be stored in f_tmp)
-        @.. f = f_tmp
-    end
-
     dt[1] = dt[2]                                       # initialize time step
     rescale = T(1.0)                                    # default time step rescaling
 

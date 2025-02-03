@@ -9,18 +9,10 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     @unpack iteration, explicit_stage, fsal = method
     @unpack dy, y, y_tmp, f, f_tmp = update_cache
 
-    # don't want to commit just yet (should check TRBDF2 and Backward Euler)
-    if ode_wrap!.FE[1] == 0
-        # always evaluate first stage at initial time (should move outside of function)
-        ode_wrap!(f, t[1], y)
-        # note: this line needed for BackwardEuler fsal-like property:
-        @.. f_tmp = f
-    else
-        # get ODE of current time step (should already be stored in f_tmp)
-        @.. f = f_tmp
+    # evaluate first stage at current time
+    if explicit_stage[1]
+        @.. dy[:,1] = dt[1] * f
     end
-
-    @.. dy[:,1] = dt[1] * f
 
     # for sensitivity
     if explicit_stage[1]
