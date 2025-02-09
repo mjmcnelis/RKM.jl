@@ -76,10 +76,7 @@ end
 
         # guess stage before iterating
         # TODO: look into predictors
-        if !(i == 1 && fesal)
-            # TODO: can I throw sum-over-known-stages part in here?
-            ode_wrap!(f_tmp, t_tmp, y_tmp)
-        end
+        ode_wrap!(f_tmp, t_tmp, y_tmp)
         @.. dy[:,i] = dt * f_tmp
 
         if !explicit_stage[i]

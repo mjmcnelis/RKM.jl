@@ -28,7 +28,6 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
                       sensitivity_method, ode_wrap_p!)
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
-    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fesal
     if !fesal
         ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
     end
