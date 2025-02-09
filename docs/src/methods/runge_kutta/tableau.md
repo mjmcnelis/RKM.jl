@@ -48,7 +48,7 @@ b_hat = [0.16666666666666666, 0.3333333333333333, 0.3333333333333333, 0.16666666
 stages = 4
 order = [4.0]
 iteration = Explicit()
-fsal = false
+fesal = false
 code_name = RK4
 ```
 

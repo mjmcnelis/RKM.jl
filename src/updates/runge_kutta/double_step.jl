@@ -79,7 +79,7 @@ function double_step!(method, t, dt, ode_wrap!, update_cache,
                       linear_cache, stage_finder, sensitivity_method,
                       ode_wrap_p!)
 
-    @unpack explicit_stage, fsal, iteration = method
+    @unpack explicit_stage, fesal, iteration = method
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2 = update_cache
 
     # update full time step
@@ -102,8 +102,8 @@ function double_step!(method, t, dt, ode_wrap!, update_cache,
     @.. y2 = y_tmp
     #   second half step
     if explicit_stage[1]
-        # skip function evaluation if method is FSAL
-        if !fsal
+        # skip function evaluation if method is FESAL
+        if !fesal
             ode_wrap!(f_tmp, t + dt/2.0, y2)
         end
         @.. dy[:,1] = (dt/2.0) * f_tmp

@@ -49,7 +49,7 @@ end
                      sensitivity_method::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
-    @unpack c, A_T, b, stages, explicit_stage, fsal = method
+    @unpack c, A_T, b, stages, explicit_stage, fesal = method
     @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
     @unpack dy, y, y_tmp, f_tmp, J, error, S, S_tmp, dS = update_cache
 
@@ -111,7 +111,7 @@ end
 
                 if n == max_iterations + 1
                     # println("failed to converge after $(n-1) iterations")
-                    # note: allow f_tmp to store dy_dt! of last iteration for FSAL methods
+                    # note: allow f_tmp to store dy_dt! of last iteration for FESAL methods
                     # TODO: count convergence failures in stats
                     break
                 end

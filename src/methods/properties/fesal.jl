@@ -1,21 +1,19 @@
+"""
+    get_fesal(A_T::SMatrix{S, S, T, S2}, b::SVector{S, T},
+              c::SVector{S, T}) where {S, S2, T <: AbstractFloat}
 
-function method_is_fsal(butcher::SMatrix{N, M, T, NM}) where {N, M, T <: AbstractFloat, NM}
-    # TODO: BackwardEuler1 is incorrectly labeled as fsal = true
-    #       need to check if explicit stage[1] = true
-    ncol = size(butcher, 2)
+Checks whether the Runge-Kutta method has the First Explicit Same As Last (FESAL) property.
+The boolean `fesal` is set true if the last stage is equal to an explicit first stage
+evaluated at the next time step.
 
-    # TODO: if using implicit routine TRBDF2, then also need to check
-    #       whether first stage is explicit in order to use f = f_tmp
-    #       should probably test it out on TRBDF2 (fixed time step and embedded case)
+Unlike the conventional First Same As Last (FSAL) property, FESAL does not require that
+the first stage of the Butcher tableau is explicit. Therefore, some implicit Runge-Kutta
+methods like BackwardEuler1 are allowed to reuse the last stage for Hermite interpolation.
 
-    # remove any embedded rows
-    B_square = butcher[1:ncol, :]
-
-    # check if last, second-last rows are identical
-    if B_square[end, :] == B_square[end-1, :]
-        fsal = true
-    else
-        fsal = false
-    end
-    return fsal
+Required parameters: `A_T`, `b`, `c`
+"""
+function get_fesal(A_T::SMatrix{S, S, T, S2}, b::SVector{S, T},
+                   c::SVector{S, T}) where {S, S2, T <: AbstractFloat}
+    fesal = all(A_T[:,end] .== b) && c[end] == 1.0 ? true : false
+    return fesal
 end
