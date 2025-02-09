@@ -74,6 +74,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @.. y_tmp = y1                                      # get iteration
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
+    # note: get excess allocations if try to pass interpolator
+    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fesal
     if !fesal
         ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
     end
