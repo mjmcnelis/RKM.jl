@@ -61,7 +61,7 @@ function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iter
 
     # get properties
     order = order_prop(name, T, p)                  # order of each RK update
-    fesal = get_fesal(A_T, b)                       # whether method has FESAL property
+    fesal = get_fesal(A_T, b, c)                    # whether method has FESAL property
     explicit_stage = explicit_stage_prop(butcher)   # mark which stages are explicit
 
     # code name label
