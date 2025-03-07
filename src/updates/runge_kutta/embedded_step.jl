@@ -5,7 +5,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
              stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for embedded step yet
              sensitivity_method::SensitivityMethod,
-             ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
+             ode_wrap_p!::ODEWrapperParam,
+             interpolator::Interpolator) where T <: AbstractFloat
 
     @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts = adaptive
     @unpack iteration, explicit_stage, fesal = method
@@ -74,9 +75,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @.. y_tmp = y1                                      # get iteration
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
-    # note: get excess allocations if try to pass interpolator
-    # if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fesal
-    if !fesal
+    if (explicit_stage[1] || interpolator isa HermiteInterpolator) && !fesal
         ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
     end
 

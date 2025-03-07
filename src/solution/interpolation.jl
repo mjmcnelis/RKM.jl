@@ -3,75 +3,76 @@ abstract type Interpolator end
 abstract type DenseInterpolator <: Interpolator end
 
 struct NoInterpolator <: Interpolator end
+struct HermiteInterpolator <: DenseInterpolator end
 
-struct HermiteInterpolator{SRL} <: DenseInterpolator where SRL <: StepRangeLen
-    dt_save::Float64
-    t_range::SRL
-    nt::Int64
-    t0::Float64
+# TODO: might want to split files into structs/methods under a folder
+
+function interpolate_solution(interpolator::NoInterpolator, sol::Solution,
+                              args...; kwargs...)
+    @warn "No dense output for $(typeof(interpolator)), getting original solution..."
+    return get_solution(sol)
 end
 
-function HermiteInterpolator(; dt_save::Float64)
-    # note: nt, t0 and t_range are dummy values
-    nt = 2
-    t0 = 0.0
-    t_range = range(t0, 1.0, nt)
-    return HermiteInterpolator(dt_save, t_range, nt, t0)
-end
+function interpolate_solution(interpolator::HermiteInterpolator, sol::Solution,
+                              precision::Type{T} = Float64;
+                              dt_dense::Float64) where T <: AbstractFloat
+    # TODO: crashes if save_solution = false
+    @unpack t, y, f, dimensions = sol
 
-function reconstruct_interpolator(interpolator::NoInterpolator, args...)
-    return interpolator
-end
+    # get dimensions
+    nt = length(t)
+    ny = dimensions[1]
 
-function reconstruct_interpolator(interpolator::HermiteInterpolator,
-                                  t0::T, tf::T) where T <: AbstractFloat
-    @unpack dt_save = interpolator
-    nt = 1 + floor(Int64, Float64((tf - t0)/dt_save))
-    t_range = range(t0, tf, nt)
+    # initialize intermediate cache
+    y_interp = zeros(precision, ny)
+    y_interp .= view(y, 1:ny)
 
-    return HermiteInterpolator(dt_save, t_range, nt, Float64(t0))
-end
+    # dense time
+    t0 = t[1]
+    tf = t[end]
+    nt_dense = 1 + floor(Int64, Float64((tf - t0)/dt_dense))
+    t_dense = range(t0, tf, nt_dense)
 
-function interpolate_solution!(::NoInterpolator, sol::Solution, update_cache::RKMCache,
-                               t::Vector{T}) where T <: AbstractFloat
-    @unpack y_tmp, S_tmp = update_cache
+    # dense state vector
+    y_dense = Vector{precision}()
+    sizehint!(y_dense, ny*nt_dense)
+    append!(y_dense, y_interp)
 
-    append!(sol.y, y_tmp)
-    append!(sol.t, t[1])
+    # loop over original solution
+    for n in 1:nt-1
+        idxs_1 = (1 + (n-1)*ny):n*ny
+        idxs_2 = (1 + n*ny):(n+1)*ny
 
-    # TODO: skip if not doing sensitivity analysis
-    append!(sol.S, S_tmp)
-    return nothing
-end
+        y1 = view(y, idxs_1)
+        y2 = view(y, idxs_2)
 
-function interpolate_solution!(interpolator::HermiteInterpolator,
-                               sol::Solution, update_cache::RKMCache,
-                               t::Vector{T}) where T <: AbstractFloat
+        f1 = view(f, idxs_1)
+        f2 = view(f, idxs_2)
 
-    @unpack dt_save, t_range, t0, nt = interpolator
+        t1 = t[n]
+        t2 = t[n+1]
+        Δt = t2 - t1
 
-    t_curr, t_prev = t
-    Δt = t_curr - t_prev
+        nL = 2 + floor(Int64, Float64((t1 - t0)/dt_dense))
+        nR = 1 + floor(Int64, Float64((t2 - t0)/dt_dense))
 
-    nL = 2 + floor(Int64, Float64((t_prev - t0)/dt_save))
-    nR = 1 + floor(Int64, Float64((t_curr - t0)/dt_save))
+        # loop over dense points
+        for m in nL:min(nR, nt_dense)
+            t_interp = t_dense[m]
+            Θ = (t_interp - t1) / Δt
+            Θ2 = Θ * Θ
+            Θ3 = Θ2 * Θ
 
-    @unpack dy, y, y_tmp, f, f_tmp = update_cache
-    y1, y2, f1, f2 = y, y_tmp, f, f_tmp
-    y_interp = view(dy,:,1)
+            # Hermite interpolation formula
+            @.. y_interp = (2.0*(y1-y2) + (f1+f2)*Δt)*Θ3 +
+                           (3.0*(y2-y1) - (2.0*f1+f2)*Δt)*Θ2 + f1*Δt*Θ + y1
 
-    for n in nL:min(nR, nt)
-        t_interp = t_range[n]
-        Θ = (t_interp - t_prev) / Δt
-        Θ2 = Θ * Θ
-        Θ3 = Θ2 * Θ
-
-        @.. y_interp = (2*(y1-y2) + (f1+f2)*Δt)*Θ3 +
-                       (3*(y2-y1) - (2*f1+f2)*Δt)*Θ2 + f1*Δt*Θ + y1
-
-        append!(sol.y, y_interp)
-        append!(sol.t, t_interp)
+            # store interpolated solution
+            append!(y_dense, y_interp)
+        end
     end
+    # reshape dense solution
+    y_dense = reshape(y_dense, ny, nt_dense) |> transpose
 
-    return nothing
+    return t_dense, y_dense
 end

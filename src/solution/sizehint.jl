@@ -1,41 +1,33 @@
-
 """
-    _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T1,
-         sensitivity_method::SensitivityMethod) where {T <: AbstractFloat,
-                                                       T1 <: AbstractFloat}
+    sizehint_solution!(adaptive::Fixed, interpolator::Interpolator,
+                       sol::Solution, t0::T, tf::T, dt::T,
+                       sensitivity_method::SensitivityMethod) where T <: AbstractFloat
 
-Applies `sizehint!` to the vector fields `y` and `t` in the solution `sol`.
+Applies `sizehint!` to the state vector `y` and time `t` in the solution `sol`.
+The ODE function vector `f` and sensitivity coefficients `S` are also size-hinted
+if they are being outputted.
 
-Required parameters: `sol`, `t0`, `tf`, `dt0`, `sensitivity_method`
+Required parameters: `adaptive`, `interpolator`, `sol`, `t0`,
+                     `tf`, `dt`, `sensitivity_method`
 """
-function _sizehint_solution!(sol::Solution, t0::T, tf::T, dt::T1,
-             sensitivity_method::SensitivityMethod) where {T <: AbstractFloat,
-                                                           T1 <: AbstractFloat}
-    dimensions = sol.dimensions[1]
-    coefficients = sol.coefficients[1]
+function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator,
+                            sol::Solution, t0::T, tf::T, dt::T,
+                            sensitivity_method::SensitivityMethod) where T <: AbstractFloat
+    ny = sol.dimensions[1]
+    np = sol.coefficients[1]
+    nt = 2 + round(Int64, Float64((tf - t0)/dt))
 
-    steps = round(Int64, Float64((tf - t0)/dt))
-    # TODO: can I use steps + 1 if dense output?
-    sizehint!(sol.y, dimensions*(steps + 2))
-    sizehint!(sol.t, steps + 2)
+    sizehint!(sol.t, nt)
+    sizehint!(sol.y, ny*nt)
+    if interpolator isa DenseInterpolator
+        sizehint!(sol.f, ny*nt)
+    end
     if !(sensitivity_method isa NoSensitivity)
-        sizehint!(sol.S, dimensions*coefficients*(steps + 2))
+        sizehint!(sol.S, ny*np*nt)
     end
     return nothing
 end
 
-function sizehint_solution!(::AdaptiveStepSize, ::NoInterpolator, args...)
+function sizehint_solution!(adaptive::AdaptiveStepSize, args...)
     return nothing
-end
-
-function sizehint_solution!(::Fixed, ::NoInterpolator, args...)
-    # note: may take (steps+1) steps before solver finishes b/c of float precision errors
-    return _sizehint_solution!(args...)
-end
-
-function sizehint_solution!(::AdaptiveStepSize, interpolator::DenseInterpolator,
-                            sol::Solution, t0::T, tf::T, dt0::T,
-                            sensitivity_method::SensitivityMethod) where T <: AbstractFloat
-    @unpack dt_save = interpolator
-    return _sizehint_solution!(sol, t0, tf, dt_save, sensitivity_method)
 end

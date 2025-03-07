@@ -40,7 +40,7 @@ options = Dict(
     #                        ),
 
     :interpolator => NoInterpolator(),
-    # :interpolator => HermiteInterpolator(; dt_save = 0.1),
+    # :interpolator => HermiteInterpolator(),
 
     :save_solution => true,
     # :save_solution => false,

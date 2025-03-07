@@ -12,12 +12,11 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveSt
     JE .= jacobian_method.evaluations
     rejection_rate .= compute_step_rejection_rate(adaptive, timer)
     runtime .= loop_stats.time
-    solution_size .= sizeof(sol.y) + sizeof(sol.t)
+    solution_size .= sizeof(sol.t) + sizeof(sol.y) + sizeof(sol.f)
     sensitivity_size .= sizeof(sol.S)
     config_memory .= config_bytes
     excess_memory .= loop_stats.bytes
-    # I sizehint if Fixed (any interpolator) or use
-    if !(save_solution && (adaptive isa Fixed || interpolator isa DenseInterpolator))
+    if !(save_solution && adaptive isa Fixed)
         excess_memory .-= (solution_size .+ sensitivity_size)
     end
     return nothing

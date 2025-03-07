@@ -1,4 +1,4 @@
-using Revise, RKM, BenchmarkTools
+using Revise, RKM, BenchmarkTools, UnPack
 import DoubleFloats: Double64
 using LinearSolve, RecursiveFactorization
 using Plots; plotly()
@@ -33,6 +33,11 @@ sol = Solution(options)
 
 get_stats(sol)
 # plot_ode(sol, options.method, Plots.plot)
+
+# TODO: rename it to gen_dense_output, split files so can pass in options
+println("")
+@unpack interpolator = options
+@time t_dense, y_dense = interpolate_solution(interpolator, sol; dt_dense = 1e-5)
 
 GC.gc()
 println("\ndone")

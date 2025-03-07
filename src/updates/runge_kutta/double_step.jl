@@ -5,7 +5,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
              stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for double step yet
              sensitivity_method::SensitivityMethod,
-             ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
+             ode_wrap_p!::ODEWrapperParam,
+             interpolator::Interpolator) where T <: AbstractFloat
 
     @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts = adaptive
     @unpack explicit_stage = method

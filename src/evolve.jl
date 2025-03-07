@@ -40,12 +40,11 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         tf = rationalize(tf) |> precision
         dt0 = rationalize(dt0) |> precision
 
-        t  = [t0, t0]
+        t  = [t0]
         dt = [dt0, dt0]
 
         # reconstruction
         method = reconstruct_method(method, precision)
-        interpolator = reconstruct_interpolator(interpolator, t0, tf)
         if !(adaptive isa Fixed)
             adaptive = reconstruct_adaptive(adaptive, method, precision)
             controller = reconstruct_controller(controller, method, adaptive, precision)
@@ -95,9 +94,14 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     loop_stats = @timed begin
         # save initial condition
         if save_solution
-            append!(sol.y, y)
-            append!(sol.S, S)
             append!(sol.t, t[1])
+            append!(sol.y, y)
+            if interpolator isa DenseInterpolator
+                append!(sol.f, f)
+            end
+            if !(sensitivity_method isa NoSensitivity)
+                append!(sol.S, S)
+            end
         end
         # time evolution loop
         while true
@@ -109,19 +113,34 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             evolve_one_time_step!(method, adaptive, controller,
                                   t, dt, ode_wrap!, update_cache,
                                   linear_cache, stage_finder,
-                                  sensitivity_method, ode_wrap_p!)
-            t[2] = t[1]
+                                  sensitivity_method, ode_wrap_p!,
+                                  interpolator)
             t[1] += dt[1]
             timer.total_steps[1] += 1
 
             if save_solution
-                # TODO: more compact way to do this?
-                # TODO: if skip 10, then dense output time is wrong
-                if benchmark_subroutines #&& length(sol.t) % 10 == 0
-                    S2_stat = @timed interpolate_solution!(interpolator, sol, update_cache, t)
-                    S2_runtime += #=10.0=#S2_stat.time
+                # TODO: this is pretty cumbersome
+                if benchmark_subroutines && length(sol.t) % 10 == 0
+                    S2_stat = @timed begin
+                        append!(sol.t, t[1])
+                        append!(sol.y, y_tmp)
+                        if interpolator isa DenseInterpolator
+                            append!(sol.f, f_tmp)
+                        end
+                        if !(sensitivity_method isa NoSensitivity)
+                            append!(sol.S, S_tmp)
+                        end
+                    end
+                    S2_runtime += 10.0*S2_stat.time
                 else
-                    interpolate_solution!(interpolator, sol, update_cache, t)
+                    append!(sol.t, t[1])
+                    append!(sol.y, y_tmp)
+                    if interpolator isa DenseInterpolator
+                        append!(sol.f, f_tmp)
+                    end
+                    if !(sensitivity_method isa NoSensitivity)
+                        append!(sol.S, S_tmp)
+                    end
                 end
             end
             # store updated values in tmp caches

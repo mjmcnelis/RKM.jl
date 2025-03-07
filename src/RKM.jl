@@ -102,8 +102,6 @@ export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 export nansafe_jacobian, test_nansafe, max_nan, min_nan, maximum_nan, minimum_nan
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
-# Interpolation methods
-export NoInterpolator, HermiteInterpolator
 # Numerical ODE methods
 export RungeKutta, LinearMultistep
 # Properties
@@ -139,6 +137,8 @@ export SolverOptions
 export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
+# Dense output
+export NoInterpolator, HermiteInterpolator, interpolate_solution
 # Sensitivity
 export NoSensitivity, DecoupledDirect, post_sensitivity_analysis, get_sensitivity
 # Plots
