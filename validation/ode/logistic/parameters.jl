@@ -39,8 +39,9 @@ options = Dict(
     #                            jacobian_method = ForwardJacobian(),
     #                        ),
 
-    :interpolator => NoInterpolator(),
-    # :interpolator => HermiteInterpolator(),
+    :interpolator => NoInterpolation(),
+    # :interpolator => CubicHermite(),
+    # :interpolator => ContinuousFormula(),
 
     :save_solution => true,
     # :save_solution => false,

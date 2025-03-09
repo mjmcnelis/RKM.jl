@@ -42,7 +42,7 @@ options = SolverOptions(
                                 #  jacobian_method = FiniteJacobian(; sparsity),
                                  jacobian_method = ForwardColorJacobian(; sparsity)
                              ),
-              interpolator = HermiteInterpolator(; dt_save = 0.01),
+              interpolator = CubicHermite(),#; dt_save = 0.01),
               benchmark_subroutines = true
           )
 

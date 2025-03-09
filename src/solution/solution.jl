@@ -5,13 +5,13 @@ For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.
 is stored as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], t = [0.0, 0.5]`.
 """
 struct Solution{T <: AbstractFloat}
-    """Time vector of solution"""
+    """Time series of solution"""
     t::Vector{T}
-    """State vector of solution (stored as linear column)"""
+    """State variables of solution (stored as linear column)"""
     y::Vector{T}
-    """ODE function vector of solution (stored as linear column)"""
+    """Time derivatives of solution (stored as linear column)"""
     f::Vector{T}
-    """First-order sensitivity coefficient matrix (stored as linear column)"""
+    """First-order sensitivity coefficients (stored as linear column)"""
     S::Vector{T}
     """Number of time steps taken"""
     time_steps_taken::MVector{1,Int64}
@@ -96,7 +96,7 @@ end
 """
     get_solution(sol::Solution)
 
-Returns the solution tuple `(y,t)` from `sol`. The solution vector `y`, which has a length
+Returns the solution tuple `(t,y)` from `sol`. The solution vector `y`, which has a length
 `D*N`, is reshaped into an `N x D` matrix (`N` = time steps, `D` = dimensions).
 
 For example, the solution set `{y(0.0) = [1.0, 2.0, 3.0], y(0.5) = [4.0, 5.0, 6.0]}`
@@ -112,12 +112,19 @@ function get_solution(sol::Solution)
     return t, y
 end
 
+function get_time_derivative(sol::Solution)
+    @unpack t, f, dimensions = sol
+    ny = dimensions[1]
+    nt = length(t)
+    f = reshape(f, ny, nt) |> transpose
+    return t, f
+end
+
 function get_sensitivity(sol::Solution)
     @unpack t, S, dimensions, coefficients = sol
     ny = dimensions[1]
     np = coefficients[1]
     nt = length(t)
-    # TODO: replace length(t) if use deleteat for PDEs
     S = reshape(S, ny*np, nt) |> transpose
     return t, S
 end

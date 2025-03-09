@@ -15,7 +15,7 @@ SolverOptions for the ODE solver.
     """Sensitivity method"""
     sensitivity_method::SensitivityMethod = NoSensitivity()
     """Interpolation method for dense output"""
-    interpolator::Interpolator = NoInterpolator()
+    interpolator::Interpolator = NoInterpolation()
     """Determines whether or not the solution is stored"""
     save_solution::Bool = true
     """Determines whether or not the progress meter is displayed"""

@@ -40,7 +40,10 @@ include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
 include("plots.jl")
 include("cache.jl")
-include("solution/interpolation.jl")
+include("interpolation/interpolator.jl")
+include("interpolation/no_interpolation.jl")
+include("interpolation/cubic_hermite.jl")
+include("interpolation/continuous_formula.jl")
 include("solution/sizehint.jl")
 include("solution/stats.jl")
 
@@ -129,16 +132,18 @@ export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
        NumericalDifferentiationFormula
 # Code names
 export make_code_name
-# ODE solution
-export Solution, get_solution, clear_solution!, get_stats
 # Solver options
 export SolverOptions
-# Time
+# Timer
 export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
+# ODE solution
+export Solution, get_solution, get_stats
+# Time derivatives
+export get_time_derivative
 # Dense output
-export NoInterpolator, HermiteInterpolator, interpolate_solution
+export NoInterpolation, CubicHermite, ContinuousFormula, interpolate_solution
 # Sensitivity
 export NoSensitivity, DecoupledDirect, post_sensitivity_analysis, get_sensitivity
 # Plots

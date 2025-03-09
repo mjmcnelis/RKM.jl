@@ -31,7 +31,7 @@ Nt = 40                     # temporal stride (for plot)
 options = SolverOptions(; adaptive = Fixed(),
                           method = Euler1(),
                         #   method = BackwardEuler1(),
-                          interpolator = HermiteInterpolator(; dt_save = 0.05)
+                          interpolator = CubicHermite()#; dt_save = 0.05)
                        )
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)

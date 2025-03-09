@@ -1,23 +1,15 @@
 
-abstract type Interpolator end
-abstract type DenseInterpolator <: Interpolator end
-
-struct NoInterpolator <: Interpolator end
-struct HermiteInterpolator <: DenseInterpolator end
-
-# TODO: might want to split files into structs/methods under a folder
-
-function interpolate_solution(interpolator::NoInterpolator, sol::Solution,
-                              args...; kwargs...)
-    @warn "No dense output for $(typeof(interpolator)), getting original solution..."
-    return get_solution(sol)
-end
-
-function interpolate_solution(interpolator::HermiteInterpolator, sol::Solution,
+function interpolate_solution(interpolator::CubicHermite, sol::Solution,
                               precision::Type{T} = Float64;
                               dt_dense::Float64) where T <: AbstractFloat
-    # TODO: crashes if save_solution = false
+
     @unpack t, y, f, dimensions = sol
+
+    # TODO: grab save_solution = false
+    if isempty(y)
+        @warn "Original solution is empty, dense output will also be empty..."
+        return get_solution(sol)
+    end
 
     # get dimensions
     nt = length(t)
@@ -28,6 +20,7 @@ function interpolate_solution(interpolator::HermiteInterpolator, sol::Solution,
     y_interp .= view(y, 1:ny)
 
     # dense time
+    # TODO: pass t_dense directly (but need to fix nL/nR)
     t0 = t[1]
     tf = t[end]
     nt_dense = 1 + floor(Int64, Float64((tf - t0)/dt_dense))
@@ -37,6 +30,8 @@ function interpolate_solution(interpolator::HermiteInterpolator, sol::Solution,
     y_dense = Vector{precision}()
     sizehint!(y_dense, ny*nt_dense)
     append!(y_dense, y_interp)
+
+    # TODO: can I get dense derivatives easily?
 
     # loop over original solution
     for n in 1:nt-1
@@ -59,13 +54,13 @@ function interpolate_solution(interpolator::HermiteInterpolator, sol::Solution,
         # loop over dense points
         for m in nL:min(nR, nt_dense)
             t_interp = t_dense[m]
-            Θ = (t_interp - t1) / Δt
-            Θ2 = Θ * Θ
-            Θ3 = Θ2 * Θ
+            θ = (t_interp - t1) / Δt
+            θ2 = θ * θ
+            θ3 = θ2 * θ
 
             # Hermite interpolation formula
-            @.. y_interp = (2.0*(y1-y2) + (f1+f2)*Δt)*Θ3 +
-                           (3.0*(y2-y1) - (2.0*f1+f2)*Δt)*Θ2 + f1*Δt*Θ + y1
+            @.. y_interp = (2.0*(y1-y2) + (f1+f2)*Δt)*θ3 +
+                           (3.0*(y2-y1) - (2.0*f1+f2)*Δt)*θ2 + f1*Δt*θ + y1
 
             # store interpolated solution
             append!(y_dense, y_interp)
