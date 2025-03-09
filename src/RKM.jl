@@ -40,8 +40,7 @@ include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
 include("plots.jl")
 include("cache.jl")
-include("interpolation/interpolator.jl")
-include("interpolation/no_interpolation.jl")
+include("interpolation/interpolator_types.jl")
 include("interpolation/cubic_hermite.jl")
 include("interpolation/continuous_formula.jl")
 include("solution/sizehint.jl")
@@ -86,6 +85,7 @@ include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")
+include("interpolation/interpolation.jl")
 include("sensitivity/post_sensitivity.jl")
 
 # Adaptive methods
