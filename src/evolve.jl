@@ -23,7 +23,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # get solver options
         @unpack adaptive, controller, method, timer, stage_finder,
                 interpolator, sensitivity_method, show_progress,
-                save_solution, benchmark_subroutines = options
+                save_solution, save_time_derivative,
+                benchmark_subroutines = options
 
         reset_timer!(timer)
 
@@ -81,7 +82,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
     # sizehint solution
     if save_solution
-        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, sensitivity_method)
+        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0,
+                           sensitivity_method, save_time_derivative)
     end
 
     # runtime to store solution (S2)
@@ -96,7 +98,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         if save_solution
             append!(sol.t, t[1])
             append!(sol.y, y)
-            if interpolator isa DenseInterpolator
+            if save_time_derivative || interpolator isa DenseInterpolator
                 append!(sol.f, f)
             end
             if !(sensitivity_method isa NoSensitivity)
@@ -124,7 +126,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                     S2_stat = @timed begin
                         append!(sol.t, t[1])
                         append!(sol.y, y_tmp)
-                        if interpolator isa DenseInterpolator
+                        if save_time_derivative || interpolator isa DenseInterpolator
                             append!(sol.f, f_tmp)
                         end
                         if !(sensitivity_method isa NoSensitivity)
@@ -135,7 +137,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                 else
                     append!(sol.t, t[1])
                     append!(sol.y, y_tmp)
-                    if interpolator isa DenseInterpolator
+                    if save_time_derivative || interpolator isa DenseInterpolator
                         append!(sol.f, f_tmp)
                     end
                     if !(sensitivity_method isa NoSensitivity)

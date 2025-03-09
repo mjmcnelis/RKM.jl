@@ -105,26 +105,36 @@ vector is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 """
 function get_solution(sol::Solution)
     @unpack t, y, dimensions = sol
+    if isempty(y)
+        error("State variables y = $y are empty, set save_solution = true")
+    end
     ny = dimensions[1]
     nt = length(t)
     # TODO: replace nt if use deleteat for PDEs
-    y = reshape(y, ny, nt) |> transpose
-    return t, y
+    y_reshape = reshape(y, ny, nt) |> transpose
+    return t, y_reshape
 end
 
 function get_time_derivative(sol::Solution)
     @unpack t, f, dimensions = sol
+    if isempty(f)
+        error("Time derivatives f = $f are empty, set save_time_derivative = true")
+    end
     ny = dimensions[1]
     nt = length(t)
-    f = reshape(f, ny, nt) |> transpose
-    return t, f
+    f_reshape = reshape(f, ny, nt) |> transpose
+    return t, f_reshape
 end
 
 function get_sensitivity(sol::Solution)
     @unpack t, S, dimensions, coefficients = sol
+    if isempty(S)
+        error("Sensitivity coefficients S = $S are empty, set \
+               sensitivity_method != NoSensitivity()")
+    end
     ny = dimensions[1]
     np = coefficients[1]
     nt = length(t)
-    S = reshape(S, ny*np, nt) |> transpose
-    return t, S
+    S_reshape = reshape(S, ny*np, nt) |> transpose
+    return t, S_reshape
 end

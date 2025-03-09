@@ -18,6 +18,8 @@ SolverOptions for the ODE solver.
     interpolator::Interpolator = NoInterpolation()
     """Determines whether or not the solution is stored"""
     save_solution::Bool = true
+    """Determines whether or not to additionally output time derivatives"""
+    save_time_derivative::Bool = false
     """Determines whether or not the progress meter is displayed"""
     show_progress::Bool = false
     """Estimate runtime of core subroutines (e.g. function evaluations)"""

@@ -46,6 +46,9 @@ options = Dict(
     :save_solution => true,
     # :save_solution => false,
 
+    :save_time_derivative => false,
+    # :save_time_derivative => true,
+
     :show_progress => false,
     # :show_progress => true,
 
