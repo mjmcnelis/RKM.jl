@@ -5,15 +5,15 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveSt
                         config_bytes::Int64)
 
     @unpack jacobian_method = stage_finder
-    @unpack time_steps_taken, JE, rejection_rate, runtime,
+    @unpack t, y, f, dy, S, time_steps_taken, JE, rejection_rate, runtime,
             solution_size, sensitivity_size, config_memory, excess_memory = sol
 
     time_steps_taken .= timer.total_steps
     JE .= jacobian_method.evaluations
     rejection_rate .= compute_step_rejection_rate(adaptive, timer)
     runtime .= loop_stats.time
-    solution_size .= sizeof(sol.t) + sizeof(sol.y) + sizeof(sol.f)
-    sensitivity_size .= sizeof(sol.S)
+    solution_size .= sizeof(t) + sizeof(y) + sizeof(f) + sizeof(dy)
+    sensitivity_size .= sizeof(S)
     config_memory .= config_bytes
     excess_memory .= loop_stats.bytes
     if !(save_solution && adaptive isa Fixed)

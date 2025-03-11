@@ -3,7 +3,7 @@
                                       precision::Type{T} = Float64;
                                       dt_dense::Float64) where T <: AbstractFloat
 
-    @unpack t, y, f, dimensions = sol
+    @unpack t, y, f, dy, dimensions = sol
 
     if isempty(y)
         @warn "Original solution is empty, dense output will also be empty..."
@@ -39,23 +39,21 @@
         0, -1//2, 2//3
     ) |> transpose
 
-    s = size(ω, 1)  # number of stages
-    q = size(ω, 2)  # order of continuous formula
+    stages = size(ω, 1) # number of stages
+    q = size(ω, 2)      # order of continuous formula
     #--------------------------
 
-    bθ = MVector{s, precision}(zeros(s))
-    θ_pow = MVector{p, precision}(zeros(q))
+    bθ = MVector{stages, precision}(zeros(stages))
+    θ_pow = MVector{q, precision}(zeros(q))
     q_vect = SVector{q, Int64}(1:q)
 
     # loop over original solution
     for n in 1:nt-1
         idxs_y = (1 + (n-1)*ny):n*ny
+        idxs_dy = (1 + (n-1)*ny*stages):n*ny*stages
 
         y1 = view(y, idxs_y)
-
-        # TODO: get intermediate stages instead
-        # f1 = view(f, idxs_1)
-        # f2 = view(f, idxs_2)
+        dy1 = reshape(view(dy, idxs_dy), ny, stages)
 
         t1 = t[n]
         t2 = t[n+1]
@@ -73,8 +71,8 @@
 
             # continuous output formula
             @.. y_interp = y1
-            for j in 1:s
-                dy_stage = view(dy,:,j)
+            for j in 1:stages
+                dy_stage = view(dy1,:,j)
                 @.. y_interp = y_interp + bθ[j]*dy_stage
             end
 
@@ -83,7 +81,7 @@
         end
     end
     # reshape dense solution
-    # y_dense = reshape(y_dense, ny, nt_dense) |> transpose
+    y_dense = reshape(y_dense, ny, nt_dense) |> transpose
 
     return t_dense, y_dense
 end

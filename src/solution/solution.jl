@@ -11,6 +11,8 @@ struct Solution{T <: AbstractFloat}
     y::Vector{T}
     """Time derivatives of solution (stored as linear column)"""
     f::Vector{T}
+    """Intermediate stages of solution (stored as linear column)"""
+    dy::Vector{T}
     """First-order sensitivity coefficients (stored as linear column)"""
     S::Vector{T}
     """Number of time steps taken"""
@@ -48,6 +50,7 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     t = Vector{precision}()
     y = Vector{precision}()
     f = Vector{precision}()
+    dy = Vector{precision}()
     S = Vector{precision}()
     time_steps_taken = MVector{1,Int64}(0)
     FE = MVector{1,Int64}(0)
@@ -62,22 +65,24 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     coefficients = MVector{1,Int64}(0)
 
     # never understood why do {precision}
-    return Solution{precision}(t, y, f, S, time_steps_taken, FE, JE, rejection_rate,
+    return Solution{precision}(t, y, f, dy, S, time_steps_taken, FE, JE, rejection_rate,
                                runtime, solution_size, sensitivity_size, config_memory,
                                excess_memory, dimensions, coefficients)
 end
 
 function clear_solution!(sol::Solution)
-    @unpack t, y, f, S, time_steps_taken, FE, JE, rejection_rate,
+    @unpack t, y, f, dy, S, time_steps_taken, FE, JE, rejection_rate,
             runtime, solution_size, sensitivity_size, config_memory,
             excess_memory, dimensions, coefficients = sol
     empty!(t)
     empty!(y)
     empty!(f)
+    empty!(dy)
     empty!(S)
     sizehint!(t, 0)
     sizehint!(y, 0)
     sizehint!(f, 0)
+    sizehint!(dy, 0)
     sizehint!(S, 0)
     time_steps_taken .= 0
     FE .= 0
@@ -118,7 +123,8 @@ end
 function get_time_derivative(sol::Solution)
     @unpack t, f, dimensions = sol
     if isempty(f)
-        error("Time derivatives f = $f are empty, set save_time_derivative = true")
+        error("Time derivatives f = $f are empty, set save_solution = true \
+               and save_time_derivative = true")
     end
     ny = dimensions[1]
     nt = length(t)
@@ -129,8 +135,8 @@ end
 function get_sensitivity(sol::Solution)
     @unpack t, S, dimensions, coefficients = sol
     if isempty(S)
-        error("Sensitivity coefficients S = $S are empty, set \
-               sensitivity_method != NoSensitivity()")
+        error("Sensitivity coefficients S = $S are empty, set save_solution = true \
+               and sensitivity_method != NoSensitivity()")
     end
     ny = dimensions[1]
     np = coefficients[1]

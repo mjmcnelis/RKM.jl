@@ -36,6 +36,11 @@ get_stats(sol)
 
 # interpolation
 @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
+#=
+plot(t_dense, y_dense; color = [:red :blue], linewidth = 2, legend = :outertopright)
+plot!(t_dense, hcat(y_exact.(t_dense; N = 2)...)';
+      color = :black, linewidth = 2, line = :dash)
+=#
 
 GC.gc()
 println("\ndone")
