@@ -10,9 +10,15 @@ function Euler1(precision::Type{T} = Float64) where T <: AbstractFloat
         0, 0,
         1, 1
     ) |> transpose
+
+    # polynomial coefficients for continuous output
+    # are empty so just use Hermite interpolation
+    ω = SMatrix{0,0,Float64,0}()
+
     iteration = Explicit()
     reconstructor = Euler1
 
+    # return RungeKutta(name, butcher, #=ω,=# iteration, reconstructor)
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 

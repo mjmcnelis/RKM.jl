@@ -1,15 +1,15 @@
 
 function interpolate_solution(interpolator::CubicHermite, sol::Solution,
-                              precision::Type{T} = Float64;
+                              method::ODEMethod, precision::Type{T};
                               dt_dense::Float64) where T <: AbstractFloat
 
     @unpack t, y, f, dimensions = sol
 
-    # TODO: grab save_solution = false
     if isempty(y)
-        @warn "Original solution is empty, dense output will also be empty..."
-        return get_solution(sol)
+        error("Original solution set is empty, set save_solution = true")
     end
+
+    @info "Generating cubic Hermite interpolation"
 
     # get dimensions
     nt = length(t)

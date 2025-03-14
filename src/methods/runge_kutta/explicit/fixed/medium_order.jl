@@ -14,10 +14,20 @@ function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 0, 0, 1, 0,
         1, 1//6, 1//3, 1//3, 1//6
     ) |> transpose
+
+    # polynomial coefficients for continuous output
+    # TODO: any properties other than sum(ω, dims = 2) = b to check?
+    ω = SMatrix{3, 4, precision, 12}(
+        1, -3//2, 2//3,
+        0, 1, -2//3,
+        0, 1, -2//3,
+        0, -1//2, 2//3
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = RungeKutta4
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """

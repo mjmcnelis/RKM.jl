@@ -6,8 +6,10 @@ Stores the Butcher tableau and properties of a given Runge-Kutta method.
 # Fields
 $(TYPEDFIELDS)
 """
-struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, S2, P,
-                                                         I <: Iteration, F <: Function}
+struct RungeKutta{T, S, S2, R, Q, RQ, P, I, F} <: ODEMethod where {T <: AbstractFloat,
+                                                                   S, S2, R, Q, RQ, P,
+                                                                   I <: Iteration,
+                                                                   F <: Function}
     """Name of the Runge-Kutta method"""
     name::Symbol
     """Intermediate time update coefficient of each stage in the Butcher tableau"""
@@ -18,6 +20,8 @@ struct RungeKutta{T, S, S2, P, I, F} <: ODEMethod where {T <: AbstractFloat, S, 
     b::SVector{S, T}
     """Embedded state update coefficients (if any) of the Butcher tableau"""
     b_hat::SVector{S, T}            # TODO: generalize b_hat
+    """Polynomial coefficients used for continuous output"""
+    ω::SMatrix{R, Q, T, RQ}
     """Number of stages in the Runge-Kutta method"""
     stages::Int64
     """Order of the primary (and embedded) update(s) of the Runge-Kutta method"""
@@ -38,15 +42,23 @@ end
 #       should I just replace the embedded row and rename label?
 
 """
-    RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iteration,
-               reconstructor::Function) where {N, M, T <: AbstractFloat, NM}
+    RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM},
+               iteration::Iteration, reconstructor::Function;
+               ω::SMatrix{R, Q, T, RQ} = SMatrix{0,0,T,0}()
+              ) where {T <: AbstractFloat, N, M, NM, R, Q, RQ}
 
 Outer constructor for `RungeKutta`.
 
 Required parameters: `name`, `butcher`, `iteration`, `reconstructor`
+
+Note: `ω` are interpolation coefficients used for continuous output,
+      but some methods may not have them.
 """
-function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iteration,
-                    reconstructor::Function) where {N, M, T <: AbstractFloat, NM}
+function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM},
+                    iteration::Iteration, reconstructor::Function;
+                    ω::SMatrix{R, Q, T, RQ} = SMatrix{0,0,T,0}()
+                   ) where {T <: AbstractFloat, N, M, NM, R, Q, RQ}
+
 
     nrow, ncol = size(butcher)
     stages = ncol - 1                               # number of stages
@@ -58,6 +70,9 @@ function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iter
     b   = butcher[ncol, 2:ncol] |> SVector{stages, T}
     # TODO: generalize b_hat to multiple embedded pairs
     b_hat = butcher[nrow, 2:ncol] |> SVector{stages, T}
+    # TODO: do I really need to pipeline it like this? if I don't,
+    #       then ω appears as Core.Const(...) in @code_warntype
+    ω = Matrix(ω) |> SMatrix{R, Q, T, RQ}
 
     # get properties
     order = order_prop(name, T, p)                  # order of each RK update
@@ -67,7 +82,7 @@ function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM}, iteration::Iter
     # code name label
     code_name = make_code_name(name)
 
-    return RungeKutta(name, c, A_T, b, b_hat, stages, order, iteration,
+    return RungeKutta(name, c, A_T, b, b_hat, ω, stages, order, iteration,
                       fesal, explicit_stage, code_name, reconstructor)
 end
 

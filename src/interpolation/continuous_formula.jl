@@ -1,14 +1,26 @@
 
 @muladd function interpolate_solution(interpolator::ContinuousFormula, sol::Solution,
-                                      precision::Type{T} = Float64;
+                                      method::ODEMethod, precision::Type{T};
                                       dt_dense::Float64) where T <: AbstractFloat
 
-    @unpack t, y, f, dy, dimensions = sol
+    @unpack t, y, dy, dimensions = sol
 
     if isempty(y)
-        @warn "Original solution is empty, dense output will also be empty..."
-        return get_solution(sol)
+        error("Original solution set is empty, set save_solution = true")
     end
+
+    @unpack ω, stages, reconstructor = method
+
+    if isempty(ω)
+        error("$reconstructor has no coefficients for ContinuousFormula \
+               (use CubicHermite instead)")
+    end
+
+    # order of continuous formula
+    q = size(ω, 2)
+    q_vect = 1:q |> SVector{q, Int64}
+
+    @info "Generating order-$q continuous output with $reconstructor method"
 
     # get dimensions
     nt = length(t)
@@ -29,24 +41,6 @@
     sizehint!(y_dense, ny*nt_dense)
     append!(y_dense, y_interp)
 
-    # TMP:
-    #--------------------------
-    # get continuous coefficients ω from method
-    ω = SMatrix{3, 4, precision, 12}(
-        1, -3//2, 2//3,
-        0, 1, -2//3,
-        0, 1, -2//3,
-        0, -1//2, 2//3
-    ) |> transpose
-
-    stages = size(ω, 1) # number of stages
-    q = size(ω, 2)      # order of continuous formula
-    #--------------------------
-
-    bθ = MVector{stages, precision}(zeros(stages))
-    θ_pow = MVector{q, precision}(zeros(q))
-    q_vect = SVector{q, Int64}(1:q)
-
     # loop over original solution
     for n in 1:nt-1
         idxs_y = (1 + (n-1)*ny):n*ny
@@ -66,8 +60,8 @@
         for m in nL:min(nR, nt_dense)
             t_interp = t_dense[m]
             θ = (t_interp - t1) / Δt
-            θ_pow .= θ.^q_vect          # [θ, θ^2, ..., θ^q]
-            bθ .= ω * θ_pow             # bθ_j = ω_jk * θ^k
+            θ_pow = θ.^q_vect           # [θ, θ^2, ..., θ^q]
+            bθ = ω * θ_pow              # bθ_j = ω_jk * θ^k
 
             # continuous output formula
             @.. y_interp = y1
