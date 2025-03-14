@@ -20,7 +20,7 @@
     q = size(ω, 2)
     q_vect = 1:q |> SVector{q, Int64}
 
-    @info "Generating order-$q continuous output with $reconstructor method"
+    @info "Generating order-$q continuous output for $reconstructor"
 
     # get dimensions
     nt = length(t)

@@ -54,6 +54,7 @@ end
 Dormand and Prince's fifth(fourth)-order method.
 
 https://www.sciencedirect.com/science/article/pii/0771050X80900133?via%3Dihub
+https://www.sciencedirect.com/science/article/pii/0898122186900258
 """
 function DormandPrince54(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Dormand_Prince_5_4
@@ -68,10 +69,22 @@ function DormandPrince54(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 35//384, 0, 500//1113, 125//192, -2187//6784, 11//84, 0,
         1, 5179//57600, 0, 7571//16695, 393//640, -92097//339200, 187//2100, 1//40
     ) |> transpose
+
+    # polynomial coefficients for continuous output
+    ω = SMatrix{5, 7, precision, 35}(
+        1, -4034104133//1410260304, 105330401//33982176, -13107642775//11282082432, 6542295//470086768,
+        0, 0, 0, 0, 0,
+        0, 132343189600//32700410799, -833316000//131326951, 91412856700//32700410799, -523383600//10900136933,
+        0, -115792950//29380423, 185270875//16991088, -12653452475//1880347072, 98134425//235043384,
+        0, 70805911779//24914598704, -4531260609//600351776, 988140236175//199316789632, -14307999165//24914598704,
+        0, -331320693//205662961, 31361737//7433601, -2426908385//822651844, 97305120//205662961,
+        0, 44764047//29380423, -1532549//353981, 90730570//29380423, -8293050//29380423
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = DormandPrince54
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
