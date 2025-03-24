@@ -1,14 +1,17 @@
 module RKM
 
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
-       NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
-import FiniteDiff: finite_difference_jacobian!, JacobianCache
+                    NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD,
+                    derivative!, DerivativeConfig
+import FiniteDiff: finite_difference_jacobian!, JacobianCache#,
+                #    finite_difference_derivative!
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
-       AbstractFactorization#, SciMLLinearSolveAlgorithm
+                    AbstractFactorization#, SciMLLinearSolveAlgorithm
 import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!, mul!
 import StaticArrays: SVector, SMatrix, MVector
 import SparseArrays: sparse, SparseMatrixCSC
-import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColorJacCache
+import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColorJacCache#,
+                        # auto_jacvec!, num_jacvec!, DeivVecTag
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
@@ -36,6 +39,7 @@ include("implicit/root.jl")
 include("implicit/jacobian.jl")
 include("implicit/stage_finder.jl")
 include("implicit/nansafe_utils.jl")
+include("sensitivity/jacobian_vector.jl")
 include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
 include("plots.jl")
