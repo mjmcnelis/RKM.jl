@@ -1,9 +1,10 @@
 
 abstract type JacobianVectorMethod end
 
-@kwdef struct ForwardJacobianVector{DC1, DC2} <: JacobianVectorMethod where {
-                                                     DC1 <: DerivativeConfig,
-                                                     DC2 <: DerivativeConfig}
-    dcache_1::DC1 = DerivativeConfig(nothing, [0.0], 0.0)
-    dcache_2::DC2 = DerivativeConfig(nothing, [0.0], 0.0)
+# TODO: consider renaming this to AutoJacVec
+@kwdef struct ForwardJacobianVector{D1, D2} <: JacobianVectorMethod where {
+                                                     D1 <: Dual{DeivVecTag},
+                                                     D2 <: Dual{DeivVecTag}}
+    cache_1::Vector{D1} = Dual{DeivVecTag}.([0.0], [0.0])
+    cache_2::Vector{D2} = Dual{DeivVecTag}.([0.0], [0.0])
 end

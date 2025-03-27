@@ -1,8 +1,8 @@
 module RKM
 
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
-                    NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD,
-                    derivative!, DerivativeConfig
+                    NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD#,
+                    # derivative!, DerivativeConfig
 import FiniteDiff: finite_difference_jacobian!, JacobianCache#,
                 #    finite_difference_derivative!
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
@@ -10,8 +10,8 @@ import LinearSolve: init, solve!, LinearProblem, LUFactorization,
 import LinearAlgebra: norm, diagind, transpose, lu, lu!, ldiv!, mul!
 import StaticArrays: SVector, SMatrix, MVector
 import SparseArrays: sparse, SparseMatrixCSC
-import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColorJacCache#,
-                        # auto_jacvec!, num_jacvec!, DeivVecTag
+import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColorJacCache,
+                        auto_jacvec!,  DeivVecTag#, num_jacvec!
 import MuladdMacro: @muladd
 import FastBroadcast: @..
 import UnPack: @unpack
