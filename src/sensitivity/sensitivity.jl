@@ -18,7 +18,13 @@ end
 function set_jacobian_cache(sensitivity_method::DecoupledDirect, ode_wrap_p!, f, y, p)
     @unpack jacobian_method = sensitivity_method
     if jacobian_method isa FiniteJacobian
-        cache = JacobianCache(p, y)
+        @unpack sparsity = jacobian_method
+        if size(sparsity) == (length(y), length(p))
+            colorvec = matrix_colors(sparsity)
+            cache = JacobianCache(p, y; colorvec, sparsity)
+        else
+            cache = JacobianCache(p, y)
+        end
     elseif jacobian_method isa ForwardJacobian
         cache = JacobianConfig(ode_wrap_p!, f, p)
     end
@@ -114,8 +120,10 @@ function implicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
         J[k] = J[k] + 1.0
     end
     dS_stage = view(dS, :, :, stage_idx)
+    # note: factorization very slow if J is sparse
     F = lu!(J)
     ldiv!(F, dS_stage)                  # dS_stage <- J \ dS_stage
+    # dS_stage = J \ dS_stage
 
     return nothing
 end

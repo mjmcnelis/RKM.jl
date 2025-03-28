@@ -38,7 +38,8 @@ include("controller/time_step_controller.jl")
 include("implicit/root.jl")
 include("implicit/jacobian.jl")
 include("implicit/stage_finder.jl")
-include("implicit/nansafe_utils.jl")
+include("implicit/nansafe/nansafe_jacobian.jl")
+include("implicit/nansafe/nansafe_utils.jl")
 include("sensitivity/jacobian_vector.jl")
 include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
@@ -106,7 +107,8 @@ export FixedPoint, Newton
 # Jacobian evaluation methods
 export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 # Jacobian sparsity pattern
-export nansafe_jacobian, test_nansafe, max_nan, min_nan, maximum_nan, minimum_nan
+export nansafe_jacobian, nansafe_parameter_jacobian, test_nansafe,
+       max_nan, min_nan, maximum_nan, minimum_nan
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair
 # Numerical ODE methods
