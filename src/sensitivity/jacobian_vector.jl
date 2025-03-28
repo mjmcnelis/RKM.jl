@@ -8,3 +8,10 @@ abstract type JacobianVectorMethod end
     cache_1::Vector{D1} = Dual{DeivVecTag}.([0.0], [0.0])
     cache_2::Vector{D2} = Dual{DeivVecTag}.([0.0], [0.0])
 end
+
+# TODO: check if any T-type bugs
+@kwdef struct FiniteJacobianVector{T} <: JacobianVectorMethod where T <: AbstractFloat
+    cache_1::Vector{T} = [0.0]
+    cache_2::Vector{T} = [0.0]
+    cache_3::Vector{T} = [0.0]
+end

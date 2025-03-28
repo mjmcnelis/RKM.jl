@@ -6,8 +6,7 @@ struct NoSensitivity <: SensitivityMethod end
 @kwdef struct DecoupledDirect{JM, JVM} <: SensitivityMethod where {JM <: JacobianMethod,
                                                                    JVM <: JacobianVectorMethod}
     jacobian_method::JM = FiniteJacobian()
-    # TODO: default to FiniteJacobianVector once have method
-    jacobian_vector_method::JVM = ForwardJacobianVector()
+    jacobian_vector_method::JVM = FiniteJacobianVector()
 end
 
 function set_jacobian_cache(sensitivity_method::NoSensitivity, args...)
@@ -39,12 +38,17 @@ end
 function set_jacobian_vector_cache(sensitivity_method::DecoupledDirect, f, y)
     @unpack jacobian_vector_method = sensitivity_method
 
-    if jacobian_vector_method isa ForwardJacobianVector
+    if jacobian_vector_method isa FiniteJacobianVector
+        cache_1 = similar(y)
+        cache_2 = similar(y)
+        cache_3 = similar(y)
+        jvm = FiniteJacobianVector(cache_1, cache_2, cache_3)
+    elseif jacobian_vector_method isa ForwardJacobianVector
         cache_1 = Dual{DeivVecTag}.(y, y)
         cache_2 = Dual{DeivVecTag}.(f, f)
-        @set! sensitivity_method.jacobian_vector_method.cache_1 = cache_1
-        @set! sensitivity_method.jacobian_vector_method.cache_2 = cache_2
+        jvm = ForwardJacobianVector(cache_1, cache_2)
     end
+    @set! sensitivity_method.jacobian_vector_method = jvm
 
     return sensitivity_method
 end
@@ -62,15 +66,15 @@ function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
 
     @unpack y_tmp, f_tmp, J, S_tmp, dS = update_cache
     @unpack jacobian_method, jacobian_vector_method = sensitivity_method
+    # TODO: wrap jvm into a function
     @unpack cache_1, cache_2 = jacobian_vector_method
+    if jacobian_vector_method isa FiniteJacobianVector
+        # TODO: remove 3rd cache and use f_tmp instead
+        @unpack cache_3 = jacobian_vector_method
+    end
 
     # evaluate explicit term dS = dt*(J*S_tmp + df/dp)
     dS_stage = view(dS, :, :, stage_idx)
-
-    # v = view(S_tmp, :, 1)
-    # cache_1 = similar(v)
-    # cache_2 = similar(v)
-    # cache_3 = similar(v)
 
     ode_wrap!.t[1] = t
     @unpack p = ode_wrap!
@@ -80,15 +84,10 @@ function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
     for j in 1:length(p)                # dS <- J*S_tmp
         Jv = view(dS_stage, :, j)
         v = view(S_tmp, :, j)
-        auto_jacvec!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2)
-
-        # TODO: finite-diff version needs work
+        # auto_jacvec!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2)
+        num_jacvec_tmp!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2, cache_3)
+        # note: SparseDiffTools version is slow b/c of norm
         # num_jacvec!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2, cache_3)
-        #=
-        # doesn't give me exactly what I want
-        finite_difference_jacobian!(Jv, (g,λ) -> (ode_wrap!(g, y_tmp .+ λ.*v)),
-                                    zeros(length(y_tmp)))
-        =#
     end
 
     # compute parameter-Jacobian df/dp
@@ -141,5 +140,23 @@ function evaluate_parameter_jacobian!(jacobian_method::FiniteJacobian,
     @unpack cache#=, evaluations=# = jacobian_method
     finite_difference_jacobian!(S, ode_wrap_p!, p, cache)
     # evaluations[1] += 1
+    return nothing
+end
+
+# note: modified version of num_jacvec! from SparseDiffTools
+function num_jacvec_tmp!(dy, f, x, v, cache_1, cache_2, cache_3;
+                         relstep = sqrt(eps(1.0)), absstep = relstep)
+    v_norm = sqrt(sum(abs2, v))
+
+    if v_norm == 0.0
+        @.. dy = 0.0
+    else
+        ϵ = max(absstep, relstep*abs(dot(x, v))/v_norm)
+        @.. cache_3 = x + ϵ*v
+        f(cache_2, cache_3)
+        # note: only needs to be done once (reuse f_tmp?)
+        f(cache_1, x)
+        @.. dy = (cache_2 - cache_1) / ϵ
+    end
     return nothing
 end
