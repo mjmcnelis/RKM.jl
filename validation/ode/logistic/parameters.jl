@@ -33,11 +33,13 @@ options = Dict(
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 
-    :sensitivity_method => NoSensitivity(),
-    # :sensitivity_method => DecoupledDirect(;
-    #                         #    jacobian_method = FiniteJacobian(),
-    #                            jacobian_method = ForwardJacobian(),
-    #                        ),
+    :sensitivity => NoSensitivity(),
+    # :sensitivity => DecoupledDirect(;
+    #                     jacobian_method = FiniteJacobian(),
+    #                     jacobian_vector_method = FiniteJacobianVector(),
+    #                     # jacobian_method = ForwardJacobian(),
+    #                     # jacobian_vector_method = ForwardJacobianVector(),
+    #                 ),
 
     :interpolator => NoInterpolation(),
     # :interpolator => CubicHermite(),
@@ -56,6 +58,6 @@ options = Dict(
     # :benchmark_subroutines => true,
 
     :precision => Float64
-    # :precision => Double64
+    # :precision => Double64    # sensitivity doesn't work for Double64 rn
     # :precision => BigFloat
 );

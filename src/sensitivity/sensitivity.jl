@@ -41,8 +41,7 @@ function set_jacobian_vector_cache(sensitivity::DecoupledDirect, f, y)
     if jacobian_vector_method isa FiniteJacobianVector
         cache_1 = similar(y)
         cache_2 = similar(y)
-        cache_3 = similar(y)
-        jvm = FiniteJacobianVector(cache_1, cache_2, cache_3)
+        jvm = FiniteJacobianVector(cache_1, cache_2)
     elseif jacobian_vector_method isa ForwardJacobianVector
         cache_1 = Dual{DeivVecTag}.(y, y)
         cache_2 = Dual{DeivVecTag}.(f, f)
@@ -68,10 +67,6 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt
     @unpack jacobian_method, jacobian_vector_method = sensitivity
     # TODO: wrap jvm into a function
     @unpack cache_1, cache_2 = jacobian_vector_method
-    if jacobian_vector_method isa FiniteJacobianVector
-        # TODO: remove 3rd cache and use f_tmp instead
-        @unpack cache_3 = jacobian_vector_method
-    end
 
     # evaluate explicit term dS = dt*(J*S_tmp + df/dp)
     dS_stage = view(dS, :, :, stage_idx)
@@ -85,7 +80,7 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt
         Jv = view(dS_stage, :, j)
         v = view(S_tmp, :, j)
         # auto_jacvec!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2)
-        num_jacvec_tmp!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2, cache_3)
+        num_jacvec_tmp!(Jv, ode_wrap!, y_tmp, v, f_tmp, cache_1, cache_2)
         # note: SparseDiffTools version is slow b/c of norm
         # num_jacvec!(Jv, ode_wrap!, y_tmp, v, cache_1, cache_2, cache_3)
     end
@@ -93,6 +88,7 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt
     # compute parameter-Jacobian df/dp
     @.. ode_wrap_p!.y = y_tmp
     ode_wrap_p!.t[1] = t
+    # TODO: would it help to store result in a sparse Jp?
     evaluate_parameter_jacobian!(jacobian_method, S_tmp, ode_wrap_p!, p, f_tmp)
 
     @.. dS_stage = dt*(dS_stage + S_tmp)# dS <- dt*(J*S_tmp + df/dp)
@@ -144,19 +140,17 @@ function evaluate_parameter_jacobian!(jacobian_method::FiniteJacobian,
 end
 
 # note: modified version of num_jacvec! from SparseDiffTools
-function num_jacvec_tmp!(dy, f, x, v, cache_1, cache_2, cache_3;
-                         relstep = sqrt(eps(1.0)), absstep = relstep)
+function num_jacvec_tmp!(Jv, ode_wrap!, y, v, f, cache_1, cache_2;
+                         epsilon = sqrt(eps(1.0)), alpha = epsilon)
     v_norm = sqrt(sum(abs2, v))
 
-    if v_norm == 0.0
-        @.. dy = 0.0
+    if v_norm == 0.0    # note: assumes v is real
+        @.. Jv = 0.0
     else
-        ϵ = max(absstep, relstep*abs(dot(x, v))/v_norm)
-        @.. cache_3 = x + ϵ*v
-        f(cache_2, cache_3)
-        # note: only needs to be done once (reuse f_tmp?)
-        f(cache_1, x)
-        @.. dy = (cache_2 - cache_1) / ϵ
+        λ = max(alpha, epsilon*abs(dot(y, v))/v_norm)
+        @.. cache_2 = y + λ*v
+        ode_wrap!(cache_1, cache_2)
+        @.. Jv = (cache_1 - f) / λ
     end
     return nothing
 end

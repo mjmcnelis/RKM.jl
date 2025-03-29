@@ -13,5 +13,4 @@ end
 @kwdef struct FiniteJacobianVector{T} <: JacobianVectorMethod where T <: AbstractFloat
     cache_1::Vector{T} = [0.0]
     cache_2::Vector{T} = [0.0]
-    cache_3::Vector{T} = [0.0]
 end
