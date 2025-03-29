@@ -1,7 +1,6 @@
 """
-    sizehint_solution!(adaptive::Fixed, interpolator::Interpolator,
-                       sol::Solution, t0::T, tf::T, dt::T,
-                       sensitivity_method::SensitivityMethod,
+    sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::Solution,
+                       t0::T, tf::T, dt::T, sensitivity::SensitivityMethod,
                        save_time_derivative::Bool,
                        stages::Int64) where T <: AbstractFloat
 
@@ -10,11 +9,10 @@ The time derivative `f`, intermediate stages `dy` and sensitivity coefficients `
 are also size-hinted if they are being outputted.
 
 Required parameters: `adaptive`, `interpolator`, `sol`, `t0`, `tf`, `dt`,
-                     `sensitivity_method`, `save_time_derivative`, `stages`
+                     `sensitivity`, `save_time_derivative`, `stages`
 """
-function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator,
-                            sol::Solution, t0::T, tf::T, dt::T,
-                            sensitivity_method::SensitivityMethod,
+function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::Solution,
+                            t0::T, tf::T, dt::T, sensitivity::SensitivityMethod,
                             save_time_derivative::Bool,
                             stages::Int64) where T <: AbstractFloat
     ny = sol.dimensions[1]
@@ -31,7 +29,7 @@ function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator,
         # TODO: change back to nt if decide to output dy at final time
         sizehint!(sol.dy, ny*(nt-1)*stages)
     end
-    if !(sensitivity_method isa NoSensitivity)
+    if !(sensitivity isa NoSensitivity)
         sizehint!(sol.S, ny*np*nt)
     end
     return nothing

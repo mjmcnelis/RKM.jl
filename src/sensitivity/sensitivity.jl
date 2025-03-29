@@ -9,13 +9,13 @@ struct NoSensitivity <: SensitivityMethod end
     jacobian_vector_method::JVM = FiniteJacobianVector()
 end
 
-function set_jacobian_cache(sensitivity_method::NoSensitivity, args...)
-    return sensitivity_method
+function set_jacobian_cache(sensitivity::NoSensitivity, args...)
+    return sensitivity
 end
 
 # just borrow stage finder for now
-function set_jacobian_cache(sensitivity_method::DecoupledDirect, ode_wrap_p!, f, y, p)
-    @unpack jacobian_method = sensitivity_method
+function set_jacobian_cache(sensitivity::DecoupledDirect, ode_wrap_p!, f, y, p)
+    @unpack jacobian_method = sensitivity
     if jacobian_method isa FiniteJacobian
         @unpack sparsity = jacobian_method
         if size(sparsity) == (length(y), length(p))
@@ -27,16 +27,16 @@ function set_jacobian_cache(sensitivity_method::DecoupledDirect, ode_wrap_p!, f,
     elseif jacobian_method isa ForwardJacobian
         cache = JacobianConfig(ode_wrap_p!, f, p)
     end
-    @set! sensitivity_method.jacobian_method.cache = cache
-    return sensitivity_method
+    @set! sensitivity.jacobian_method.cache = cache
+    return sensitivity
 end
 
-function set_jacobian_vector_cache(sensitivity_method::NoSensitivity, args...)
-    return sensitivity_method
+function set_jacobian_vector_cache(sensitivity::NoSensitivity, args...)
+    return sensitivity
 end
 
-function set_jacobian_vector_cache(sensitivity_method::DecoupledDirect, f, y)
-    @unpack jacobian_vector_method = sensitivity_method
+function set_jacobian_vector_cache(sensitivity::DecoupledDirect, f, y)
+    @unpack jacobian_vector_method = sensitivity
 
     if jacobian_vector_method isa FiniteJacobianVector
         cache_1 = similar(y)
@@ -48,9 +48,9 @@ function set_jacobian_vector_cache(sensitivity_method::DecoupledDirect, f, y)
         cache_2 = Dual{DeivVecTag}.(f, f)
         jvm = ForwardJacobianVector(cache_1, cache_2)
     end
-    @set! sensitivity_method.jacobian_vector_method = jvm
+    @set! sensitivity.jacobian_vector_method = jvm
 
-    return sensitivity_method
+    return sensitivity
 end
 
 function explicit_sensitivity_stage!(::NoSensitivity, args...)
@@ -61,11 +61,11 @@ function implicit_sensitivity_stage!(::NoSensitivity, args...)
     return nothing
 end
 
-function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
-                                     dt, update_cache, ode_wrap!, ode_wrap_p!)
+function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt,
+                                     update_cache, ode_wrap!, ode_wrap_p!)
 
     @unpack y_tmp, f_tmp, J, S_tmp, dS = update_cache
-    @unpack jacobian_method, jacobian_vector_method = sensitivity_method
+    @unpack jacobian_method, jacobian_vector_method = sensitivity
     # TODO: wrap jvm into a function
     @unpack cache_1, cache_2 = jacobian_vector_method
     if jacobian_vector_method isa FiniteJacobianVector
@@ -100,11 +100,11 @@ function explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder
     return nothing
 end
 
-function implicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
-                                     dt, update_cache, ode_wrap!, ode_wrap_p!, A)
+function implicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt,
+                                     update_cache, ode_wrap!, ode_wrap_p!, A)
 
-    explicit_sensitivity_stage!(sensitivity_method, stage_idx, stage_finder, t,
-                                dt, update_cache, ode_wrap!, ode_wrap_p!)
+    explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt,
+                                update_cache, ode_wrap!, ode_wrap_p!)
 
     @unpack y_tmp, f_tmp, J, dS = update_cache
 

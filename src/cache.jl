@@ -20,13 +20,13 @@ end
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      adaptive::AdaptiveStepSize,
                      dimensions::Int64, coefficients::Int64,
-                     sensitivity_method::SensitivityMethod,
+                     sensitivity::SensitivityMethod,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack iteration, stages = method
     @unpack jacobian_method = stage_finder
 
-    no_sensitivity = sensitivity_method isa NoSensitivity
+    no_sensitivity = sensitivity isa NoSensitivity
 
     ny = dimensions                                             # state
     np = no_sensitivity ? 0 : coefficients                      # parameters

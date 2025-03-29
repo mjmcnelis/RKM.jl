@@ -21,9 +21,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # q()
 
         # get solver options
-        @unpack adaptive, controller, method, timer, stage_finder,
-                interpolator, sensitivity_method, show_progress,
-                save_solution, save_time_derivative,
+        @unpack adaptive, controller, method, timer, stage_finder, interpolator,
+                sensitivity, show_progress, save_solution, save_time_derivative,
                 benchmark_subroutines = options
 
         reset_timer!(timer)
@@ -52,9 +51,8 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         end
 
         # configure cache
-        update_cache = UpdateCache(precision, y, method, adaptive,
-                                   dimensions, coefficients,
-                                   sensitivity_method, stage_finder)
+        update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
+                                   coefficients, sensitivity, stage_finder)
 
         @unpack y, y_tmp, f, f_tmp, dy, J, error, S, S_tmp = update_cache
 
@@ -69,13 +67,12 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                             alias_A = true, alias_b = true)
 
         @unpack iteration = method
-        if iteration isa Implicit || !(sensitivity_method isa NoSensitivity)
+        if iteration isa Implicit || !(sensitivity isa NoSensitivity)
             stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
         end
 
-        sensitivity_method = set_jacobian_cache(sensitivity_method, ode_wrap_p!,
-                                                f_tmp, y, p)
-        sensitivity_method = set_jacobian_vector_cache(sensitivity_method, f_tmp, y)
+        sensitivity = set_jacobian_cache(sensitivity, ode_wrap_p!, f_tmp, y, p)
+        sensitivity = set_jacobian_vector_cache(sensitivity, f_tmp, y)
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
@@ -86,7 +83,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
     if save_solution
         @unpack stages = method
         sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0,
-                           sensitivity_method, save_time_derivative, stages)
+                           sensitivity, save_time_derivative, stages)
     end
 
     # runtime to store solution (S2)
@@ -104,7 +101,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
             if save_time_derivative || interpolator isa CubicHermite
                 append!(sol.f, f)
             end
-            if !(sensitivity_method isa NoSensitivity)
+            if !(sensitivity isa NoSensitivity)
                 append!(sol.S, S)
             end
         end
@@ -115,11 +112,9 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
             adjust_final_time_steps!(adaptive, t, dt, tf)
 
-            evolve_one_time_step!(method, adaptive, controller,
-                                  t, dt, ode_wrap!, update_cache,
-                                  linear_cache, stage_finder,
-                                  sensitivity_method, ode_wrap_p!,
-                                  interpolator)
+            evolve_one_time_step!(method, adaptive, controller, t, dt, ode_wrap!,
+                                  update_cache, linear_cache, stage_finder,
+                                  sensitivity, ode_wrap_p!, interpolator)
             t[1] += dt[1]
             timer.total_steps[1] += 1
 
@@ -137,7 +132,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                         if interpolator isa ContinuousFormula
                             append!(sol.dy, dy)
                         end
-                        if !(sensitivity_method isa NoSensitivity)
+                        if !(sensitivity isa NoSensitivity)
                             append!(sol.S, S_tmp)
                         end
                     end
@@ -153,7 +148,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
                     if interpolator isa ContinuousFormula
                         append!(sol.dy, dy)
                     end
-                    if !(sensitivity_method isa NoSensitivity)
+                    if !(sensitivity isa NoSensitivity)
                         append!(sol.S, S_tmp)
                     end
                 end

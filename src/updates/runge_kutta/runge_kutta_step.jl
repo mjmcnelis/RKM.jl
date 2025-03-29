@@ -4,7 +4,7 @@
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder,
-                     sensitivity_method::SensitivityMethod,
+                     sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
     @unpack c, A_T, b, stages = method
     @unpack dy, y, y_tmp, f_tmp, S, S_tmp, dS = update_cache
@@ -26,9 +26,8 @@
         @.. dy[:,i] = dt * f_tmp
 
         # for sensitivity
-        explicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
-                                    t_tmp, dt, update_cache, ode_wrap!,
-                                    ode_wrap_p!)
+        explicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt,
+                                    update_cache, ode_wrap!, ode_wrap_p!)
     end
     @.. y_tmp = y                                        # evaluate iteration
     @.. S_tmp = S
@@ -46,7 +45,7 @@ end
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder,
-                     sensitivity_method::SensitivityMethod,
+                     sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
@@ -144,9 +143,8 @@ end
         end
 
         # for sensitivity
-        implicit_sensitivity_stage!(sensitivity_method, i, stage_finder,
-                                    t_tmp, dt, update_cache, ode_wrap!,
-                                    ode_wrap_p!, A_T[i,i])
+        implicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt, update_cache,
+                                    ode_wrap!, ode_wrap_p!, A_T[i,i])
     end
     # evaluate update
     @.. y_tmp = y

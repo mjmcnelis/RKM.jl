@@ -13,7 +13,7 @@ SolverOptions for the ODE solver.
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
     """Sensitivity method"""
-    sensitivity_method::SensitivityMethod = NoSensitivity()
+    sensitivity::SensitivityMethod = NoSensitivity()
     """Interpolation method for dense output"""
     interpolator::Interpolator = NoInterpolation()
     """Determines whether or not the solution is stored"""
@@ -36,7 +36,7 @@ end
 
 function lookup_options(options::SolverOptions)
     @unpack adaptive, method, timer, controller, stage_finder,
-            interpolator, sensitivity_method, save_solution,
+            interpolator, sensitivity, save_solution,
             show_progress, benchmark_subroutines, precision = options
     return nothing
 end

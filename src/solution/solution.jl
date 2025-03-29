@@ -136,7 +136,7 @@ function get_sensitivity(sol::Solution)
     @unpack t, S, dimensions, coefficients = sol
     if isempty(S)
         error("Sensitivity coefficients S = $S are empty, set save_solution = true \
-               and sensitivity_method != NoSensitivity()")
+               and sensitivity != NoSensitivity()")
     end
     ny = dimensions[1]
     np = coefficients[1]

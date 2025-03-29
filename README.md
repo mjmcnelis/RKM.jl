@@ -202,10 +202,10 @@ Progress:  60%|█████████████████████�
 
 ### Sensitivity analysis
 
-If the ODE function `dy_dt!` depends on $m$ parameters `p`, we can evolve the sensitivity coefficients $\vec{S}_{j} = {\partial\vec{y}/\partial p_j}$ ($j \in m$) with the solver option `sensitivity_method`.
+If the ODE function `dy_dt!` depends on $m$ parameters `p`, we can evolve the sensitivity coefficients $\vec{S}_{j} = {\partial\vec{y}/\partial p_j}$ ($j \in m$) with the solver option `sensitivity`.
 ```julia
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                          sensitivity_method = DecoupledDirect())
+                          sensitivity = DecoupledDirect())
 
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 ```
