@@ -35,10 +35,10 @@ options = Dict(
 
     :sensitivity => NoSensitivity(),
     # :sensitivity => DecoupledDirect(;
-    #                     jacobian_method = FiniteJacobian(),
-    #                     jacobian_vector_method = FiniteJacobianVector(),
-    #                     # jacobian_method = ForwardJacobian(),
-    #                     # jacobian_vector_method = ForwardJacobianVector(),
+    #                     param_jacobian = FiniteJacobian(),
+    #                     jacobian_vector = FiniteJacobianVector(),
+    #                     # param_jacobian = ForwardJacobian(),
+    #                     # jacobian_vector = ForwardJacobianVector(),
     #                 ),
 
     :interpolator => NoInterpolation(),

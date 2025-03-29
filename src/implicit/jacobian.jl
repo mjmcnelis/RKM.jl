@@ -43,3 +43,19 @@ function evaluate_system_jacobian!(jacobian_method::FiniteJacobian,
     evaluations[1] += 1
     return nothing
 end
+
+function evaluate_parameter_jacobian!(param_jacobian::ForwardJacobian,
+                                      S, ode_wrap_p!, p, f)
+    @unpack cache, evaluations = param_jacobian
+    jacobian!(S, ode_wrap_p!, f, p, cache)
+    evaluations[1] += 1
+    return nothing
+end
+
+function evaluate_parameter_jacobian!(param_jacobian::FiniteJacobian,
+                                      S, ode_wrap_p!, p, args...)
+    @unpack cache, evaluations = param_jacobian
+    finite_difference_jacobian!(S, ode_wrap_p!, p, cache)
+    evaluations[1] += 1
+    return nothing
+end

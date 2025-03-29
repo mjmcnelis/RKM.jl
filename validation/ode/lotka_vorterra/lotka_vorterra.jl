@@ -13,20 +13,22 @@ epsilon = 1e-8
 # RKM
 method = DormandPrince54()
 options = SolverOptions(; method,
-                          adaptive = Embedded(; epsilon),
-                        #   adaptive = Fixed(),
-                        #   sensitivity_method = DecoupledDirect(),
+                        #   adaptive = Embedded(; epsilon),
+                          adaptive = Fixed(),
+                          sensitivity = DecoupledDirect(),
                         )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 get_stats(sol)
-plot_ode(sol, method, Plots.plot);
+plot(get_sensitivity(sol)) |> display
+
+plt = plot_ode(sol, method, Plots.plot);
 
 # OrdinaryDiffEq
 prob = ODEProblem(dy_dt!, y0, (t0, tf), p)
 @time sol = solve(prob, DP5(), reltol = epsilon, abstol = epsilon, dt = dt0)
 sol.destats |> display
 plot!(sol.t,  mapreduce(permutedims, vcat, sol.u),
-      color = :black, linewidth = 2, line = :dash) |> display
-
+      color = :black, linewidth = 2, line = :dash)
+display(plt)
 GC.gc()
 println("\ndone")
