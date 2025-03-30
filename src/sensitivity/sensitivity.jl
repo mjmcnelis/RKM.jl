@@ -14,7 +14,10 @@ function set_jacobian_cache(sensitivity::NoSensitivity, args...)
 end
 
 # just borrow stage finder for now
-function set_jacobian_cache(sensitivity::DecoupledDirect, ode_wrap_p!, f, y, p)
+function set_jacobian_cache(sensitivity::DecoupledDirect, ode_wrap_p!::ODEWrapperParam,
+                            f::Vector{T}, y::Vector{T},
+                            p::Vector{Float64}) where T <: AbstractFloat
+
     @unpack param_jacobian = sensitivity
     if param_jacobian isa FiniteJacobian
         @unpack sparsity = param_jacobian
@@ -26,6 +29,14 @@ function set_jacobian_cache(sensitivity::DecoupledDirect, ode_wrap_p!, f, y, p)
         end
     elseif param_jacobian isa ForwardJacobian
         cache = JacobianConfig(ode_wrap_p!, f, p)
+    elseif param_jacobian isa ForwardColorJacobian
+        @unpack sparsity = param_jacobian
+        if size(sparsity) == (length(y), length(p))
+            colorvec = matrix_colors(sparsity)
+            cache = ForwardColorJacCache(ode_wrap_p!, p; colorvec, sparsity)
+        else
+            cache = ForwardColorJacCache(ode_wrap_p!, p)
+        end
     end
     @set! sensitivity.param_jacobian.cache = cache
     return sensitivity

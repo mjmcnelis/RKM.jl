@@ -52,6 +52,14 @@ function evaluate_parameter_jacobian!(param_jacobian::ForwardJacobian,
     return nothing
 end
 
+function evaluate_parameter_jacobian!(jacobian_method::ForwardColorJacobian,
+                                      S, ode_wrap_p!, p, args...)
+    @unpack cache, evaluations = jacobian_method
+    forwarddiff_color_jacobian!(S, ode_wrap_p!, p, cache)
+    evaluations[1] += 1
+    return nothing
+end
+
 function evaluate_parameter_jacobian!(param_jacobian::FiniteJacobian,
                                       S, ode_wrap_p!, p, args...)
     @unpack cache, evaluations = param_jacobian
