@@ -133,10 +133,14 @@ function implicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt
         J[k] = J[k] + 1.0
     end
     dS_stage = view(dS, :, :, stage_idx)
-    # note: factorization very slow if J is sparse
-    F = lu!(J)
-    ldiv!(F, dS_stage)                  # dS_stage <- J \ dS_stage
-    # dS_stage = J \ dS_stage
+
+    # note: use LinearAlgebra (LinearSolve doesn't support matrix-matrix equations AX = B)
+    if J isa SparseMatrixCSC          # dS_stage <- J \ dS_stage
+        dS_stage = J \ dS_stage
+    else
+        F = lu!(J)
+        ldiv!(F, dS_stage)
+    end
 
     return nothing
 end
