@@ -24,7 +24,7 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack iteration, stages = method
-    @unpack jacobian_method = stage_finder
+    @unpack state_jacobian = stage_finder
 
     no_sensitivity = sensitivity isa NoSensitivity
 
@@ -49,8 +49,10 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     f_tmp = zeros(precision, ny)
     f = zeros(precision, ny)
     # TODO: may be better to split jacobian methods into sparse and non-sparse
-    if hasproperty(jacobian_method, :sparsity) && all(size(jacobian_method.sparsity) .== ny)
-        J = jacobian_method.sparsity
+    if hasproperty(state_jacobian, :sparsity) && size(state_jacobian.sparsity) == (ny, ny)
+        J = state_jacobian.sparsity
+        # TODO: still didn't work for Double64
+        # J = state_jacobian.sparsity .|> precision
     else
         J = zeros(precision, nJ, nJ)
     end

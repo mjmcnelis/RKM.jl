@@ -39,11 +39,12 @@ options = SolverOptions(
               stage_finder = ImplicitStageFinder(
                                  linear_method = KLUFactorization(),
                                  # TODO: finitediff w/ sparsity doesn't seem to be working
-                                #  jacobian_method = FiniteJacobian(; sparsity),
-                                 jacobian_method = ForwardColorJacobian(; sparsity)
+                                #  state_jacobian = FiniteJacobian(; sparsity),
+                                 state_jacobian = ForwardColorJacobian(; sparsity)
                              ),
-              interpolator = CubicHermite(),#; dt_save = 0.01),
-              benchmark_subroutines = true
+              benchmark_subroutines = true,
+              # TODO: this doesn't work
+            #   precision = Double64
           )
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)

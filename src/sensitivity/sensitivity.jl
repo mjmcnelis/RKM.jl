@@ -95,7 +95,7 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt
     ode_wrap_p!.t[1] = t
     @.. ode_wrap_p!.y = y_tmp
     # TODO: would it help to store result in a sparse Jp?
-    evaluate_parameter_jacobian!(param_jacobian, S_tmp, ode_wrap_p!, p, f_tmp)
+    evaluate_jacobian!(param_jacobian, S_tmp, ode_wrap_p!, p, f_tmp)
 
     # dS <- dt*(J*S_tmp + df/dp)
     @.. dS_stage = dt*(dS_stage + S_tmp)
@@ -118,9 +118,9 @@ function implicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t, dt
     # compute Jacobian df/dy if not already done in explicit sensitivity
     @unpack jacobian_vector = sensitivity
     if !(jacobian_vector isa NaiveJacobianVector)
-        @unpack jacobian_method = stage_finder
+        @unpack state_jacobian = stage_finder
         ode_wrap!.t[1] = t
-        evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y_tmp, f_tmp)
+        evaluate_jacobian!(state_jacobian, J, ode_wrap!, y_tmp, f_tmp)
     end
 
     # linear solve for implicit sensitivity stage

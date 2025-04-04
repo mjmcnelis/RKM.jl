@@ -49,7 +49,7 @@ end
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
-    @unpack root_method, jacobian_method, epsilon, max_iterations, p_norm = stage_finder
+    @unpack root_method, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
     @unpack dy, y, y_tmp, f_tmp, J, error, S, S_tmp, dS = update_cache
 
     for i in 1:stages
@@ -119,7 +119,7 @@ end
                     @.. dy[:,i] -= error
                 elseif root_method isa Newton
                     # evaluate current Jacobian
-                    evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y_tmp, f_tmp)
+                    evaluate_jacobian!(state_jacobian, J, ode_wrap!, y_tmp, f_tmp)
 
                     # TODO: make rescale methods
                     if J isa SparseMatrixCSC                # J <- I - A.dt.J

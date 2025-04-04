@@ -24,12 +24,12 @@ options = Dict(
                    ),
 
     :stage_finder => ImplicitStageFinder(;
-                        #  jacobian_method = ForwardJacobian(),
-                         jacobian_method = FiniteJacobian(),
+                        #  state_jacobian = ForwardJacobian(),
+                         state_jacobian = FiniteJacobian(),
                          root_method = Newton(),
                         #  root_method = FixedPoint(),
-                        #  linear_method = LUFactorization(),
-                         linear_method = RFLUFactorization(),
+                         linear_method = LUFactorization(),
+                        #  linear_method = RFLUFactorization(),
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 
@@ -37,6 +37,7 @@ options = Dict(
     # :sensitivity => DecoupledDirect(;
     #                     param_jacobian = FiniteJacobian(),
     #                     jacobian_vector = FiniteJacobianVector(),
+    #                     # jacobian_vector = NaiveJacobianVector(),
     #                     # param_jacobian = ForwardJacobian(),
     #                     # jacobian_vector = ForwardJacobianVector(),
     #                 ),

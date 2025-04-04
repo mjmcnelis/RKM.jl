@@ -28,7 +28,7 @@ options = SolverOptions(;
                         #   method = Ketcheson4(), # barely stable for ω = 10.0^(3/2)
                           adaptive = Fixed(),
                           stage_finder = ImplicitStageFinder(;
-                                             jacobian_method = ForwardJacobian(),
+                                             state_jacobian = ForwardJacobian(),
                                              epsilon = 1e-6,
                                             ),
                        )

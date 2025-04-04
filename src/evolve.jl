@@ -68,7 +68,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         @unpack iteration = method
         if iteration isa Implicit || !(sensitivity isa NoSensitivity)
-            stage_finder = set_jacobian_cache(stage_finder, ode_wrap!, f_tmp, y)
+            stage_finder = reconstruct_stage_finder(stage_finder, ode_wrap!, f_tmp, y)
         end
 
         sensitivity = set_jacobian_cache(sensitivity, ode_wrap_p!, f_tmp, y, p)

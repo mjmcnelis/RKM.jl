@@ -23,11 +23,11 @@ function evaluate_jacobian_sensitivity!(jacobian_vector::NaiveJacobianVector,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         f::Vector{T}) where T <: AbstractFloat
-    @unpack jacobian_method = stage_finder
+    @unpack state_jacobian = stage_finder
     ode_wrap!.t[1] = t
 
     # note: still allocate J for sensitivity methods that don't use it directly
-    evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y, f)
+    evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
     # runtime isn't that bad if J is sparse
     mul!(JS, J, S)
     return nothing
@@ -78,10 +78,10 @@ function num_jacvec_tmp!(Jv, ode_wrap!, y, v, f, cache_1, cache_2;
     if v_norm == 0.0
         @.. Jv = 0.0
     else
-        λ = max(alpha, epsilon*abs(dot(y, v))/v_norm)
-        @.. cache_2 = y + λ*v
+        lambda = max(alpha, epsilon*abs(dot(y, v))/v_norm)
+        @.. cache_2 = y + lambda*v
         ode_wrap!(cache_1, cache_2)
-        @.. Jv = (cache_1 - f) / λ
+        @.. Jv = (cache_1 - f) / lambda
     end
     return nothing
 end

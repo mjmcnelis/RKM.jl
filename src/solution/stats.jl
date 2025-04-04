@@ -4,12 +4,14 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveSt
                         stage_finder::StageFinder, loop_stats::NamedTuple,
                         config_bytes::Int64)
 
-    @unpack jacobian_method = stage_finder
+    @unpack state_jacobian = stage_finder
+
     @unpack t, y, f, dy, S, time_steps_taken, JE, rejection_rate, runtime,
             solution_size, sensitivity_size, config_memory, excess_memory = sol
 
     time_steps_taken .= timer.total_steps
-    JE .= jacobian_method.evaluations
+    # TODO: missing param-jacobian evaluations
+    JE .= state_jacobian.evaluations
     rejection_rate .= compute_step_rejection_rate(adaptive, timer)
     runtime .= loop_stats.time
     solution_size .= sizeof(t) + sizeof(y) + sizeof(f) + sizeof(dy)
@@ -40,7 +42,7 @@ end
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
                                  stage_finder, S2_runtime; n_samples = 100)
     @unpack f, y, J, error = update_cache
-    @unpack root_method, jacobian_method = stage_finder
+    @unpack root_method, state_jacobian = stage_finder
 
     ny = sol.dimensions[1]
     nt = length(sol.t)
@@ -62,7 +64,7 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
         FE_runtime += FE_stat.time
 
         if !isempty(J)
-            JE_stat = @timed evaluate_system_jacobian!(jacobian_method, J, ode_wrap!, y, f)
+            JE_stat = @timed evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
             JE_runtime += JE_stat.time
         end
 
