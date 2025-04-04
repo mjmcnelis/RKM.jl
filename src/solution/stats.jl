@@ -1,17 +1,24 @@
 
 function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveStepSize,
                         interpolator::Interpolator, timer::TimeLimit,
-                        stage_finder::StageFinder, loop_stats::NamedTuple,
-                        config_bytes::Int64)
+                        stage_finder::StageFinder, sensitivity::SensitivityMethod,
+                        loop_stats::NamedTuple, config_bytes::Int64)
 
     @unpack state_jacobian = stage_finder
+    JE_y = state_jacobian.evaluations[1]
+    # TODO: simplify this
+    JE_p = 0
+    if !(sensitivity isa NoSensitivity)
+        @unpack param_jacobian = sensitivity
+        JE_p = param_jacobian.evaluations[1]
+    end
 
     @unpack t, y, f, dy, S, time_steps_taken, JE, rejection_rate, runtime,
             solution_size, sensitivity_size, config_memory, excess_memory = sol
 
     time_steps_taken .= timer.total_steps
     # TODO: missing param-jacobian evaluations
-    JE .= state_jacobian.evaluations
+    JE .= JE_y + JE_p
     rejection_rate .= compute_step_rejection_rate(adaptive, timer)
     runtime .= loop_stats.time
     solution_size .= sizeof(t) + sizeof(y) + sizeof(f) + sizeof(dy)

@@ -9,65 +9,20 @@ struct NoSensitivity <: SensitivityMethod end
     jacobian_vector::JVM = FiniteJacobianVector()
 end
 
-function set_jacobian_cache(sensitivity::NoSensitivity, args...)
+function reconstruct_sensitivity(sensitivity::NoSensitivity, args...)
     return sensitivity
 end
 
-# just borrow stage finder for now
-function set_jacobian_cache(sensitivity::DecoupledDirect, ode_wrap_p!::ODEWrapperParam,
-                            f::Vector{T}, y::Vector{T},
-                            p::Vector{Float64}) where T <: AbstractFloat
+function reconstruct_sensitivity(sensitivity::DecoupledDirect,
+                                 ode_wrap_p!::ODEWrapperParam,
+                                 f::Vector{T}, p::Vector{Float64}) where T <: AbstractFloat
+    @unpack param_jacobian, jacobian_vector = sensitivity
 
-    @unpack param_jacobian = sensitivity
-    if param_jacobian isa FiniteJacobian
-        @unpack sparsity = param_jacobian
-        if size(sparsity) == (length(y), length(p))
-            colorvec = matrix_colors(sparsity)
-            cache = JacobianCache(p, y; colorvec, sparsity)
-        else
-            cache = JacobianCache(p, y)
-        end
-    elseif param_jacobian isa ForwardJacobian
-        cache = JacobianConfig(ode_wrap_p!, f, p)
-    elseif param_jacobian isa ForwardColorJacobian
-        @unpack sparsity = param_jacobian
-        if size(sparsity) == (length(y), length(p))
-            colorvec = matrix_colors(sparsity)
-            cache = ForwardColorJacCache(ode_wrap_p!, p; colorvec, sparsity)
-        else
-            cache = ForwardColorJacCache(ode_wrap_p!, p)
-        end
-    end
-    @set! sensitivity.param_jacobian.cache = cache
-    return sensitivity
-end
+    param_jacobian = reconstruct_jacobian_method(param_jacobian, ode_wrap_p!, f, p)
+    jacobian_vector = reconstruct_jacobian_vector(jacobian_vector, f)
 
-function set_jacobian_vector_cache(sensitivity::NoSensitivity, args...)
-    return sensitivity
-end
-
-function reconstruct_jacobian_vector(::FiniteJacobianVector, y, args...)
-    cache_1 = similar(y)
-    cache_2 = similar(y)
-    return FiniteJacobianVector(cache_1, cache_2)
-end
-
-function reconstruct_jacobian_vector(::ForwardJacobianVector, y, f)
-    cache_1 = Dual{DeivVecTag}.(y, y)
-    cache_2 = Dual{DeivVecTag}.(f, f)
-    return ForwardJacobianVector(cache_1, cache_2)
-end
-
-# TODO: replace w/ main reconstruction where remake both J and Jv
-function set_jacobian_vector_cache(sensitivity::DecoupledDirect, y, f)
-    @unpack jacobian_vector = sensitivity
-
-    if jacobian_vector isa NaiveJacobianVector
-        return sensitivity
-    end
-    jvm = reconstruct_jacobian_vector(jacobian_vector, y, f)
-    @set! sensitivity.jacobian_vector = jvm
-
+    @set! sensitivity.param_jacobian = param_jacobian
+    @set! sensitivity.jacobian_vector = jacobian_vector
     return sensitivity
 end
 

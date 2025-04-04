@@ -32,7 +32,8 @@ function reconstruct_jacobian_method(jacobian_method::FiniteJacobian,
         colorvec = matrix_colors(sparsity)
         cache = JacobianCache(x, f; colorvec, sparsity)
     else
-        cache = JacobianCache(x)
+        # TODO: T = Double64, T2 = Float64 doesn't work here
+        cache = JacobianCache(x, f)
     end
 
     @set! jacobian_method.cache = cache

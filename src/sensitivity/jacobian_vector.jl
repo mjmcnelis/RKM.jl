@@ -3,6 +3,12 @@ abstract type JacobianVectorMethod end
 
 struct NaiveJacobianVector <: JacobianVectorMethod end
 
+# TODO: check if any T-type bugs
+@kwdef struct FiniteJacobianVector{T} <: JacobianVectorMethod where T <: AbstractFloat
+    cache_1::Vector{T} = [0.0]
+    cache_2::Vector{T} = [0.0]
+end
+
 # TODO: consider renaming this to AutoJacVec
 @kwdef struct ForwardJacobianVector{D1, D2} <: JacobianVectorMethod where {
                                                      D1 <: Dual{DeivVecTag},
@@ -11,10 +17,22 @@ struct NaiveJacobianVector <: JacobianVectorMethod end
     cache_2::Vector{D2} = Dual{DeivVecTag}.([0.0], [0.0])
 end
 
-# TODO: check if any T-type bugs
-@kwdef struct FiniteJacobianVector{T} <: JacobianVectorMethod where T <: AbstractFloat
-    cache_1::Vector{T} = [0.0]
-    cache_2::Vector{T} = [0.0]
+function reconstruct_jacobian_vector(::NaiveJacobianVector, args...)
+    return NaiveJacobianVector()
+end
+
+function reconstruct_jacobian_vector(::FiniteJacobianVector,
+                                     f::Vector{T}) where T <: AbstractFloat
+    cache_1 = similar(f)
+    cache_2 = similar(f)
+    return FiniteJacobianVector(; cache_1, cache_2)
+end
+
+function reconstruct_jacobian_vector(::ForwardJacobianVector,
+                                     f::Vector{T}) where T <: AbstractFloat
+    cache_1 = Dual{DeivVecTag}.(f, f)
+    cache_2 = Dual{DeivVecTag}.(f, f)
+    return ForwardJacobianVector(; cache_1, cache_2)
 end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::NaiveJacobianVector,

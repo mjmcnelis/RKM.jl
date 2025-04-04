@@ -107,7 +107,7 @@ export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
 # Jacobian-vector evaluation methods
 export NaiveJacobianVector, ForwardJacobianVector, FiniteJacobianVector
 # Jacobian sparsity pattern
-export nansafe_jacobian, nansafe_parameter_jacobian, test_nansafe,
+export nansafe_state_jacobian, nansafe_param_jacobian, test_nansafe,
        max_nan, min_nan, maximum_nan, minimum_nan
 # Embedded pairs
 export DefaultPair, EulerPair, SecondPair

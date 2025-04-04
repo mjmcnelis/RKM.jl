@@ -1,11 +1,11 @@
 """
-    nansafe_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
-                     p::Vector{Float64} = Float64[];
-                     chunk_size::Int64 = DEFAULT_CHUNK_THRESHOLD,
-                     abstract_params = nothing) where {T <: AbstractFloat,
-                                                       T1 <: AbstractFloat}
+    nansafe_state_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
+                           p::Vector{Float64} = Float64[];
+                           chunk_size::Int64 = DEFAULT_CHUNK_THRESHOLD,
+                           abstract_params = nothing) where {T <: AbstractFloat,
+                                                             T1 <: AbstractFloat}
 
-Estimates the sparsity pattern of the Jacobian J = df/dy via forward-mode
+Estimates the sparsity pattern of the state-Jacobian J = df/dy via forward-mode
 auto-differentiation. The Jacobian is evaluated at y = NaN, which only works if
 NANSAFE_MODE_ENABLED = true in ForwardDiff.jl. Reducing the chunk size can help
 remove excess matrix elements from the sparsity pattern. For more details
@@ -23,11 +23,11 @@ Required parameters: `y0`, `t0`, `dy_dt!`
 
 Optional parameters: `p`, `chunk_size`, `abstract_params`
 """
-function nansafe_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
-                          p::Vector{Float64} = Float64[];
-                          chunk_size::Int64 = DEFAULT_CHUNK_THRESHOLD,
-                          abstract_params = nothing) where {T <: AbstractFloat,
-                                                            T1 <: AbstractFloat}
+function nansafe_state_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
+                                p::Vector{Float64} = Float64[];
+                                chunk_size::Int64 = DEFAULT_CHUNK_THRESHOLD,
+                                abstract_params = nothing) where {T <: AbstractFloat,
+                                                                    T1 <: AbstractFloat}
     print_nansafe_warning()
 
     ny = length(y0)
@@ -42,11 +42,11 @@ function nansafe_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
     return sparse(J)
 end
 
-function nansafe_parameter_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
-                                    p::Vector{Float64};
-                                    chunk_size::Int64 = DEFAULT_CHUNK_THRESHOLD,
-                                    abstract_params = nothing) where {T <: AbstractFloat,
-                                                                      T1 <: AbstractFloat}
+function nansafe_param_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
+                                p::Vector{Float64};
+                                chunk_size::Int64 = DEFAULT_CHUNK_THRESHOLD,
+                                abstract_params = nothing) where {T <: AbstractFloat,
+                                                                  T1 <: AbstractFloat}
     print_nansafe_warning()
 
     ny = length(y0)

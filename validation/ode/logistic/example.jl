@@ -1,6 +1,6 @@
-using Revise, RKM, BenchmarkTools, UnPack
+using Revise, RKM, BenchmarkTools, UnPack, Setfield
 import DoubleFloats: Double64
-using LinearSolve, RecursiveFactorization
+using LinearSolve, RecursiveFactorization, ProgressMeter
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 include("$RKM_root/validation/ode/logistic/parameters.jl")
@@ -21,6 +21,12 @@ y0 = Float64[]
 for i = eachindex(p)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - p[i])
 end
+
+# for sensitivity testing only
+# sparse_Jy = nansafe_state_jacobian(y0, t0, dy_dt!, p; chunk_size = 1);
+# sparse_Jp = nansafe_param_jacobian(y0, t0, dy_dt!, p; chunk_size = 1);
+# @set! options.stage_finder.state_jacobian = ForwardColorJacobian(; sparsity = sparse_Jy)
+# @set! options.sensitivity.param_jacobian = ForwardColorJacobian(; sparsity = sparse_Jp)
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 # in-place version
