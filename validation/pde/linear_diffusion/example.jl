@@ -1,8 +1,5 @@
-using Revise, RKM, LinearSolve
-using FiniteDiff: finite_difference_jacobian!
-using SparseArrays: sparse
-using ForwardDiff: Dual # for test_nansafe
-using BenchmarkTools: @btime
+using Revise, RKM, LinearSolve, ForwardDiff
+using AppleAccelerate
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
@@ -26,11 +23,11 @@ CFL = 2.0*a*dt0/dx^2        # CFL number
 Nt = 300                    # temporal stride (for plot)
 
 # generate sparsity pattern via nansafe
-sparsity = nansafe_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
+sparsity = nansafe_state_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
 display(sparsity)
 
-# test_nansafe(; x = Dual(NaN, 1.0))
-# test_nansafe(; x = Dual(NaN, 0.0))
+# test_nansafe(; x = ForwardDiff.Dual(NaN, 1.0))
+# test_nansafe(; x = ForwardDiff.Dual(NaN, 0.0))
 # q()
 
 options = SolverOptions(

@@ -96,11 +96,9 @@ end
                 # check for convergence (after at least one iteration)
                 if n > 1
                     # compute norms and tolerance
+                    # note: LinearAlgebra.norm is slow on mac (so use AppleAccelerate)
                     e_norm = norm(error, p_norm)
                     dy_norm = norm(dy_stage, p_norm)
-                    # TODO: LinearAlgebra.norm is slow (can I get away with fast version?)
-                    # e_norm = sqrt(sum(abs2, error))
-                    # dy_norm = sqrt(sum(abs2, dy_stage))
                     tol = epsilon * dy_norm
 
                     if e_norm <= tol
