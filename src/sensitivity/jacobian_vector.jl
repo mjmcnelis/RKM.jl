@@ -37,12 +37,11 @@ end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::NaiveJacobianVector,
                                         JS::SubArray{T}, ode_wrap!::ODEWrapperState,
-                                        stage_finder::ImplicitStageFinder, t::T,
+                                        stage_finder::ImplicitStageFinder,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         f::Vector{T}) where T <: AbstractFloat
     @unpack state_jacobian = stage_finder
-    ode_wrap!.t[1] = t
 
     # note: still allocate J for sensitivity methods that don't use it directly
     evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
@@ -53,13 +52,12 @@ end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::FiniteJacobianVector,
                                         JS::SubArray{T}, ode_wrap!::ODEWrapperState,
-                                        stage_finder::ImplicitStageFinder, t::T,
+                                        stage_finder::ImplicitStageFinder,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         f::Vector{T}) where T <: AbstractFloat
     @unpack cache_1, cache_2 = jacobian_vector
     @unpack p = ode_wrap!
-    ode_wrap!.t[1] = t
 
     # TODO: type-dispatch Jv subroutine
     for j in eachindex(p)
@@ -72,13 +70,12 @@ end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::ForwardJacobianVector,
                                         JS::SubArray{T}, ode_wrap!::ODEWrapperState,
-                                        stage_finder::ImplicitStageFinder, t::T,
+                                        stage_finder::ImplicitStageFinder,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         args...) where T <: AbstractFloat
     @unpack cache_1, cache_2 = jacobian_vector
     @unpack p = ode_wrap!
-    ode_wrap!.t[1] = t
 
     for j in eachindex(p)
         Jv = view(JS, :, j)

@@ -1,7 +1,7 @@
 # benchmark.jl note: don't see as much benefit to @muladd as @..
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState,
+                     t::T, dt::T, ode_wrap_y!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder,
                      sensitivity::SensitivityMethod,
@@ -22,12 +22,12 @@
             @.. S_tmp = S_tmp + A_T[j,i]*dS_stage       # TODO: skip this for no sensitivity
         end
         # TODO: skip if intermediate update not needed in next row(s)?
-        ode_wrap!(f_tmp, t_tmp, y_tmp)
+        ode_wrap_y!(f_tmp, t_tmp, y_tmp)
         @.. dy[:,i] = dt * f_tmp
 
         # for sensitivity
         explicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt,
-                                    update_cache, ode_wrap!, ode_wrap_p!)
+                                    update_cache, ode_wrap_y!, ode_wrap_p!)
     end
     @.. y_tmp = y                                        # evaluate iteration
     @.. S_tmp = S
@@ -42,7 +42,7 @@
 end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState,
+                     t::T, dt::T, ode_wrap_y!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
                      stage_finder::ImplicitStageFinder,
                      sensitivity::SensitivityMethod,
@@ -50,7 +50,7 @@ end
 
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
     @unpack root_method, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
-    @unpack dy, y, y_tmp, f_tmp, J, error, S, S_tmp, dS = update_cache
+    @unpack dy, y, y_tmp, f_tmp, J, res, S, S_tmp, dS = update_cache
 
     for i in 1:stages
         # first explicit stage should already be pre-evaluated elsewhere
@@ -60,8 +60,7 @@ end
 
         # set intermediate time in wrapper
         t_tmp = t + c[i]*dt
-        ode_wrap!.t[1] = t_tmp
-        ode_wrap_p!.t[1] = t_tmp
+        set_wrapper!(ode_wrap_y!, t_tmp)
 
         # sum over known stages
         @.. y_tmp = y
@@ -75,8 +74,11 @@ end
 
         # guess stage before iterating
         # TODO: look into predictors
-        ode_wrap!(f_tmp, t_tmp, y_tmp)
+        ode_wrap_y!(f_tmp, t_tmp, y_tmp)
         @.. dy[:,i] = dt * f_tmp
+
+        # get diagonal coefficient
+        A = A_T[i,i]
 
         if !explicit_stage[i]
             for n in 1:max_iterations+1
@@ -86,18 +88,18 @@ end
                     dy_stage = view(dy,:,j)
                     @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
                 end
-                ode_wrap!(f_tmp, t_tmp, y_tmp)
+                ode_wrap_y!(f_tmp, t_tmp, y_tmp)
 
                 # compute residual error of root equation
                 # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
                 dy_stage = view(dy,:,i)
-                @.. error = dy_stage - dt*f_tmp
+                @.. res = dy_stage - dt*f_tmp
 
                 # check for convergence (after at least one iteration)
                 if n > 1
                     # compute norms and tolerance
                     # note: LinearAlgebra.norm is slow on mac (so use AppleAccelerate)
-                    e_norm = norm(error, p_norm)
+                    e_norm = norm(res, p_norm)
                     dy_norm = norm(dy_stage, p_norm)
                     tol = epsilon * dy_norm
 
@@ -114,17 +116,17 @@ end
                 end
 
                 if root_method isa FixedPoint
-                    @.. dy[:,i] -= error
+                    @.. dy[:,i] -= res
                 elseif root_method isa Newton
                     # evaluate current Jacobian
-                    evaluate_jacobian!(state_jacobian, J, ode_wrap!, y_tmp, f_tmp)
+                    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
 
                     # TODO: make rescale methods
                     if J isa SparseMatrixCSC                # J <- I - A.dt.J
-                        @.. J.nzval = J.nzval * (-A_T[i,i]*dt)
+                        @.. J.nzval = J.nzval * (-A*dt)
                     else
                         # note: allocates if J is sparse
-                        @.. J = J * (-A_T[i,i]*dt)
+                        @.. J = J * (-A*dt)
                     end
 
                     for k in diagind(J)
@@ -133,7 +135,7 @@ end
 
                     # pass Jacobian and residual error to linear cache
                     linear_cache.A = J
-                    linear_cache.b = error
+                    linear_cache.b = res
                     solve!(linear_cache)
                     @.. dy[:,i] -= linear_cache.u
                 end
@@ -141,8 +143,8 @@ end
         end
 
         # for sensitivity
-        implicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt, update_cache,
-                                    ode_wrap!, ode_wrap_p!, A_T[i,i])
+        implicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt,
+                                    update_cache, ode_wrap_y!, ode_wrap_p!, A)
     end
     # evaluate update
     @.. y_tmp = y

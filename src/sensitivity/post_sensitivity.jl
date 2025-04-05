@@ -42,9 +42,8 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
         # note: n+1 is specific to Backward Euler
         y_tmp .= view(y, n+1, :)            # can't do FastBroadcast here
         # set wrappers
-        @.. ode_wrap_p!.y = y_tmp
-        ode_wrap_y!.t[1] = t[n+1]
-        ode_wrap_p!.t[1] = t[n+1]
+        set_wrapper!(ode_wrap_y!, t[n+1])
+        set_wrapper!(ode_wrap_p!, t[n+1], y_tmp)
 
         # compute Jacobian wrt y and p
         finite_difference_jacobian!(J, ode_wrap_y!, y_tmp, cache_y)

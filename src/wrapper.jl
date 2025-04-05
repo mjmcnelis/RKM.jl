@@ -52,3 +52,17 @@ function (ode_wrap!::ODEWrapperParam)(f::Vector{R}, p::Vector{R}) where R <: Rea
     FE[1] += 1
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)
 end
+
+function set_wrapper!(ode_wrap!::ODEWrapperState, t::T) where T <: AbstractFloat
+    ode_wrap!.t[1] = t
+    return nothing
+end
+
+function set_wrapper!(ode_wrap!::ODEWrapperParam,
+                      t::T, y::Vector{T}) where T <: AbstractFloat
+    ode_wrap!.t[1] = t
+    # note: safe but may be redundant if they share same pointer,
+    # depends on what I need to set ode_wrap!.y to (so far y_tmp)
+    @.. ode_wrap!.y = y
+    return nothing
+end

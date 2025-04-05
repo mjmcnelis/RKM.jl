@@ -1,7 +1,7 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
              controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
+             ode_wrap_y!::ODEWrapperState, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for embedded step yet
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
@@ -11,7 +11,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     @unpack iteration, explicit_stage, fesal = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
-    @unpack dy, y, y_tmp, f, f_tmp, y1, y2, error = update_cache
+    @unpack dy, y, y_tmp, f, f_tmp, y1, y2, res = update_cache
 
     dt[1] = dt[2]                                       # initialize time step
     rescale = T(1.0)                                    # default time step rescaling
@@ -23,16 +23,16 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         if explicit_stage[1]
             @.. dy[:,1] = dt[1] * f
         end
-        runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap!, update_cache,
+        runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap_y!, update_cache,
                           linear_cache, stage_finder, sensitivity, ode_wrap_p!)
         @.. y1 = y_tmp                                  # primary iteration
 
         embedded_step!(method, y, dy, y_tmp)
         @.. y2 = y_tmp                                  # embedded iteration
 
-        @.. error = y2 - y1                             # local error of embedded pair
+        @.. res = y2 - y1                               # local error of embedded pair
 
-        e_norm = norm(error, p_norm)                # compute norms
+        e_norm = norm(res, p_norm)                      # compute norms
         y_norm = norm(y1, p_norm)
         # TODO: need to use Δy = y2 since it's secondary method
         #       but should make labeling consistent w/ doubling
@@ -74,7 +74,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
     if (explicit_stage[1] || interpolator isa CubicHermite) && !fesal
-        ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
+        ode_wrap_y!(f_tmp, t[1] + dt[1], y_tmp)
     end
 
     return nothing

@@ -1,7 +1,7 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
              controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
+             ode_wrap_y!::ODEWrapperState, update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for double step yet
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
@@ -11,7 +11,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     @unpack explicit_stage = method
     @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
-    @unpack y, y_tmp, f, f_tmp, y1, y2, error = update_cache
+    @unpack y, y_tmp, f, f_tmp, y1, y2, res = update_cache
 
     order = method.order[1]                             # order of scheme
 
@@ -22,14 +22,14 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, t[1], dt[1], ode_wrap!, update_cache,
+        double_step!(method, t[1], dt[1], ode_wrap_y!, update_cache,
                      linear_cache, stage_finder, sensitivity, ode_wrap_p!)
 
-        @.. error = (y2 - y1) / (2.0^order - 1.0)       # estimate local truncation error
-        @.. y2 = y2 + error                             # Richardson extrapolation
+        @.. res = (y2 - y1) / (2.0^order - 1.0)     # estimate local truncation error
+        @.. y2 = y2 + res                           # Richardson extrapolation
 
         # note: have modified norm function for DoubleFloat
-        e_norm = norm(error, p_norm)                # compute norms
+        e_norm = norm(res, p_norm)                  # compute norms
         y_norm = norm(y2, p_norm)
         Δy = y1
         @.. Δy = y2 - y
@@ -69,12 +69,12 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     # evaluate ODE at next time step and store in f_tmp
     # note: if do Richardson extrapolation, then always have
     # to evaluate (explicit) first stage at (t+dt,y+dy)
-    ode_wrap!(f_tmp, t[1] + dt[1], y_tmp)
+    ode_wrap_y!(f_tmp, t[1] + dt[1], y_tmp)
 
     return nothing
 end
 
-function double_step!(method, t, dt, ode_wrap!, update_cache, linear_cache,
+function double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
                       stage_finder, sensitivity, ode_wrap_p!)
 
     @unpack explicit_stage, fesal, iteration = method
@@ -84,7 +84,7 @@ function double_step!(method, t, dt, ode_wrap!, update_cache, linear_cache,
     if explicit_stage[1]
         @.. dy[:,1] = dt * f
     end
-    runge_kutta_step!(method, iteration, t, dt, ode_wrap!, update_cache,
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
     @.. y1 = y_tmp
 
@@ -93,14 +93,14 @@ function double_step!(method, t, dt, ode_wrap!, update_cache, linear_cache,
     if explicit_stage[1]
         @.. dy[:,1] = (dt/2.0) * f
     end
-    runge_kutta_step!(method, iteration, t, dt/2, ode_wrap!, update_cache,
+    runge_kutta_step!(method, iteration, t, dt/2, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
     @.. y2 = y_tmp
     #   second half step
     if explicit_stage[1]
         # skip function evaluation if method is FESAL
         if !fesal
-            ode_wrap!(f_tmp, t + dt/2.0, y2)
+            ode_wrap_y!(f_tmp, t + dt/2.0, y2)
         end
         @.. dy[:,1] = (dt/2.0) * f_tmp
     end
@@ -108,7 +108,7 @@ function double_step!(method, t, dt, ode_wrap!, update_cache, linear_cache,
     @.. y_tmp = y2
     @.. y2 = y
     @.. y = y_tmp
-    runge_kutta_step!(method, iteration, t+dt/2, dt/2, ode_wrap!, update_cache,
+    runge_kutta_step!(method, iteration, t+dt/2, dt/2, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
     @.. y = y2
     @.. y2 = y_tmp

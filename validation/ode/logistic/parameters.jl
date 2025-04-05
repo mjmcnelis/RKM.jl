@@ -36,9 +36,9 @@ options = Dict(
     :sensitivity => NoSensitivity(),
     # :sensitivity => DecoupledDirect(;
     #                     param_jacobian = FiniteJacobian(),
-    #                     jacobian_vector = FiniteJacobianVector(),
-    #                     # jacobian_vector = NaiveJacobianVector(),
     #                     # param_jacobian = ForwardJacobian(),
+    #                     # jacobian_vector = NaiveJacobianVector(),
+    #                     jacobian_vector = FiniteJacobianVector(),
     #                     # jacobian_vector = ForwardJacobianVector(),
     #                 ),
 

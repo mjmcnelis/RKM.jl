@@ -11,7 +11,7 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
     y1::Vector{T}
     y2::Vector{T}
-    error::Vector{T}
+    res::Vector{T}
     S::Matrix{T}
     S_tmp::Matrix{T}
     dS::Array{T,3}
@@ -32,9 +32,8 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     np = no_sensitivity ? 0 : coefficients                      # parameters
     nJ = (iteration isa Explicit && no_sensitivity) ? 0 : ny    # Jacobian
     m = adaptive isa Fixed ? 0 : ny                             # primary/embedded
-    # TODO: okay use error for both root solver and stepsize control?
-    # TODO: rename error to err
-    ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # error
+    # TODO: okay use res for both root solver and stepsize control?
+    ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # residual error (res)
 
     if method isa LinearMultistep
         @unpack start_method = method
@@ -58,11 +57,11 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     end
     y1 = zeros(precision, m)
     y2 = zeros(precision, m)
-    error = zeros(precision, ne)
+    res = zeros(precision, ne)
 
     S = zeros(precision, ny, np)
     S_tmp = zeros(precision, ny, np)
     dS = zeros(precision, ny, np, stages)
 
-    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, error, S, S_tmp, dS)
+    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, res, S, S_tmp, dS)
 end

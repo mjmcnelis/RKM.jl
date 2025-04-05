@@ -22,11 +22,11 @@ end
 
     @unpack b, b_pred, stages = method
     @unpack root_method, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
-    @unpack dy_LM, y, y_tmp, f_tmp, J, error = update_cache
+    @unpack dy_LM, y, y_tmp, f_tmp, J, res = update_cache
 
     # set implicit time in wrapper
     t_tmp = t + dt
-    ode_wrap!.t[1] = t_tmp
+    set_wrapper!(ode_wrap!, t_tmp)
 
     # compute predictor and evaluate ODE (i.e. PE)
     @.. y_tmp = y
@@ -50,10 +50,10 @@ end
         # compute residual error of root equation
         # dy - dt.f(t_tmp, y_tmp + b.dy) = 0
         dy_stage = view(dy_LM,:,1)
-        @.. error = dy_stage - dt*f_tmp
+        @.. res = dy_stage - dt*f_tmp
 
         # compute norms and tolerance
-        e_norm  = norm(error, p_norm)           # compute norms
+        e_norm  = norm(res, p_norm)           # compute norms
         dy_norm = norm(dy_stage, p_norm)
         tol = epsilon * dy_norm
 
@@ -66,7 +66,7 @@ end
         end
 
         if root_method isa FixedPoint
-            @.. dy_LM[:,1] -= error
+            @.. dy_LM[:,1] -= res
         elseif root_method isa Newton
             # evaluate current Jacobian
             evaluate_jacobian!(state_jacobian, J, ode_wrap!, y_tmp, f_tmp)
@@ -78,7 +78,7 @@ end
 
             # pass Jacobian and residual error to linear cache
             linear_cache.A = J
-            linear_cache.b = error
+            linear_cache.b = res
             # solve and apply Newton iteration
             solve!(linear_cache)
             @.. dy_LM[:,1] -= linear_cache.u

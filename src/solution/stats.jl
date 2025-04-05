@@ -48,7 +48,7 @@ end
 
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
                                  stage_finder, S2_runtime; n_samples = 100)
-    @unpack f, y, J, error = update_cache
+    @unpack f, y, J, res = update_cache
     @unpack root_method, state_jacobian = stage_finder
 
     ny = sol.dimensions[1]
@@ -76,7 +76,7 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
         end
 
         # note: linear solve estimate assumes Backward Euler
-        if !isempty(error) && root_method isa Newton
+        if !isempty(res) && root_method isa Newton
             LS_stat = @timed begin
                 y_prev = view(sol.y, 1+(n-2)*ny:(n-1)*ny)
                 dt = sol.t[n] - sol.t[n-1]
@@ -85,9 +85,9 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
                 for k in diagind(J)
                     J[k] += 1.0
                 end
-                @.. error = y - y_prev - dt*f
+                @.. res = y - y_prev - dt*f
                 linear_cache.A = J
-                linear_cache.b = error
+                linear_cache.b = res
                 solve!(linear_cache)
             end
             LS_runtime += LS_stat.time
