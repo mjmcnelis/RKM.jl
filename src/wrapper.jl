@@ -7,11 +7,14 @@ struct ODEWrapperState{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
     abstract_params::P
     dy_dt!::F
     FE::MVector{1,Int64}
+    # JE::Vector{Int64}
 end
 
-function ODEWrapperState(t, p, abstract_params, dy_dt!)
+function ODEWrapperState(t, p, abstract_params, dy_dt!)#, method)
     FE = MVector{1,Int64}(0)
-    return ODEWrapperState(t, p, abstract_params, dy_dt!, FE)
+    # TODO: not sure why I couldn't do MVector
+    # JE = zeros(Int64, method.stages)
+    return ODEWrapperState(t, p, abstract_params, dy_dt!, FE)#, JE)
 end
 
 # note: t is a vector in first method but float in the other
@@ -38,11 +41,13 @@ struct ODEWrapperParam{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
     abstract_params::P
     dy_dt!::F
     FE::MVector{1,Int64}
+    # JE::Vector{Int64}
 end
 
-function ODEWrapperParam(t, y, abstract_params, dy_dt!)
+function ODEWrapperParam(t, y, abstract_params, dy_dt!)#, method)
     FE = MVector{1,Int64}(0)
-    return ODEWrapperParam(t, y, abstract_params, dy_dt!, FE)
+    # JE = zeros(Int64, method.stages)
+    return ODEWrapperParam(t, y, abstract_params, dy_dt!, FE)#, JE)
 end
 
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, p)

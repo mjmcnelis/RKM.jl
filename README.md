@@ -22,7 +22,7 @@ This package is not registered. To install, clone the repository
     cd <your_path_dir>
     git clone https://github.com/mjmcnelis/RKM.jl.git
 
-and develop the package in a Julia REPL (assumes v1.10.5 or higher):
+and develop the package in a Julia REPL (assumes v1.11.4 or higher):
 ```julia
 using Pkg
 Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
@@ -45,7 +45,7 @@ using Plots; plotly()
 if !(@isdefined dy_dt!)
     function dy_dt!(f, y, t; p, kwargs...)
         f[1] = (y[1] + p[1]) * (1.0 - p[1] - y[1])
-        nothing
+        return nothing
     end
 end
 
@@ -141,7 +141,7 @@ julia> y
 200002×1 transpose(::Matrix{Float64}) with eltype Float64:
  -0.49995460213129755
   ⋮
-  0.49995460667064867
+  0.4999546021312957
 ```
 before plotting the results
 ```julia
@@ -158,18 +158,18 @@ plot(t, y)
 After the solver finishes, we can print runtime statistics with the function `get_stats`. After recompiling, we get
 ```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
-  0.017149 seconds (183 allocations: 3.063 MiB)
+  0.023003 seconds (149 allocations: 3.060 MiB)
 
 julia> get_stats(sol)
 time steps taken     = 200001
 time points saved    = 200002
 step rejection rate  = 0.0 %
-function evaluations = 800004
+function evaluations = 800005
 jacobian evaluations = 0
-evolution runtime    = 0.01703 seconds
+evolution runtime    = 0.02292 seconds
 solution size        = 3.052 MiB
 sensitivity size     = 0 bytes
-config memory        = 11.062 KiB
+config memory        = 7.641 KiB
 excess memory        = 0 bytes
 ```
 Here, we show the number of time steps saved and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size, the configuration memory, and the excess memory allocated during the time evolution loop. In this example, almost all of the allocated memory went towards storing the solution.
@@ -189,7 +189,7 @@ The solver stops if it exceeds the time limit, but it still saves part of the so
 ```julia
 julia> dt0_small = 2e-8;             # trigger timer
 julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options, p);
-Progress:  60%|███████████████████████████████                   |  ETA: 0:00:40 ( 1.00  s/it)
+Progress:  50%|██████████████████████                      |  ETA: 0:00:59 ( 1.18  s/it)
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/timer.jl:58
 ```

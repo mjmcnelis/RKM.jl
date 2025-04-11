@@ -8,9 +8,6 @@ include("$RKM_root/validation/ode/logistic/parameters.jl")
 # TODO: do asserts between adaptive, method in parameters outer-constructor
 options = SolverOptions(options)
 
-# @code_warntype TimeStepController(precision; pid = PIControl(), limiter = SmoothLimiter())
-# q()
-
 t0 = -10.0
 tf = 10.0
 dt0 = 1e-4

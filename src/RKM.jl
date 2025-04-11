@@ -18,7 +18,7 @@ import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import Setfield: @set!
 import StatsBase: mean
 # tmp for testing type stablity
-import InteractiveUtils: @code_warntype
+import InteractiveUtils: @code_warntype, @code_typed
 
 abstract type ODEMethod end
 
@@ -88,6 +88,7 @@ include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")
 include("evolve.jl")
+include("solution/output.jl")
 include("interpolation/interpolation.jl")
 include("sensitivity/post_sensitivity.jl")
 

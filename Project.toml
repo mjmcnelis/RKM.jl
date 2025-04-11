@@ -1,7 +1,7 @@
 name = "RKM"
 uuid = "513e9137-a254-4132-8c60-49dde1d32878"
 authors = ["Mike McNelis"]
-version = "0.1.0"
+version = "0.5.0-alpha"
 
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"

@@ -89,22 +89,11 @@ function reconstruct_controller(controller::TimeStepController,
     return TimeStepController(precision; pid, limiter)
 end
 
-function adjust_final_time_steps!(adaptive::Fixed, t::Vector{T},
-                                  dt::Vector{T}, tf::T) where T <: AbstractFloat
-    if dt[1] > tf - t[1]
-        dt[1] = tf - t[1]
-        dt[2] = dt[1]
-    end
-    return nothing
-end
-
-function adjust_final_time_steps!(adaptive::AdaptiveStepSize, t::Vector{T},
-                                  dt::Vector{T}, tf::T) where T <: AbstractFloat
-    # limit proposed time step
-    # TODO: might already be sufficient but not 100% sure
-    #       might need to also adjust dt_max
+function adjust_final_time_steps!(t::Vector{T}, dt::Vector{T},
+                                  tf::T) where T <: AbstractFloat
     if dt[2] > tf - t[1]
         dt[2] = tf - t[1]
+        dt[1] = dt[2]
     end
     return nothing
 end
