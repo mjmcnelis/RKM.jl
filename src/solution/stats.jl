@@ -70,6 +70,8 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
         FE_stat = @timed ode_wrap!(f, t, y)
         FE_runtime += FE_stat.time
 
+        # TMP commented b/c FE_stat is sensitive to it?
+        #=
         if !isempty(J)
             JE_stat = @timed evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
             JE_runtime += JE_stat.time
@@ -92,6 +94,7 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
             end
             LS_runtime += LS_stat.time
         end
+        =#
     end
 
     FE_runtime *= sol.FE[1] / length(t_idxs)    # TODO: subtract FEs from jacobian

@@ -144,3 +144,8 @@ function get_sensitivity(sol::Solution)
     S_reshape = reshape(S, ny*np, nt) |> transpose
     return t, S_reshape
 end
+
+function get_dimensions(sol::Solution)
+    @unpack t, dimensions, coefficients = sol
+    return (; ny = dimensions[1], nt = length(t), np = coefficients[1])
+end
