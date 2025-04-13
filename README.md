@@ -54,7 +54,7 @@ p = [0.5]
 
 # initial conditions
 t0 = -10.0 |> BigFloat
-y0 = exp(t0)/(1.0 + exp(t0)) - p[1]
+y0 = [exp(t0)/(1.0 + exp(t0)) - p[1]]
 
 # final time, initial time step
 tf = 10.0
@@ -85,7 +85,7 @@ dy_dt!(f, y, t; p, abstract_params)
 ```
 The first one is for ODEs that depend on the state variable(s) `y` and time `t`. The other three are for ODEs that also depend on sensitivity and/or abstract parameters.
 
-In addition, we need to specify the initial state `y0` (either scalar or vector), the initial and final times `t0` and `tf`, the initial time step `dt0`, and parameters `(p, abstract_params)` (if any).
+In addition, we need to specify the initial state vector `y0`, the initial and final times `t0` and `tf`, the initial time step `dt0`, and parameters `(p, abstract_params)` (if any).
 
 *Note: `p` is a `Vector{Float64}` type, while `abstract_params` represents any object.*
 </details>

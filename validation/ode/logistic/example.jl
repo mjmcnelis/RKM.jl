@@ -29,16 +29,16 @@ end
 # in-place version
 #=
 sol = Solution(options)
-@time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)
+@time evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options, p)
 =#
 
-# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
+# @btime sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 
 get_stats(sol)
 # plot_ode(sol, options.method, Plots.plot)
 
 # interpolation
-@time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
+# @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
 #=
 plot(t_dense, y_dense; color = [:red :blue], linewidth = 2, legend = :outertopright);
 plot!(t_dense, hcat(y_exact.(t_dense; N = 2)...)';

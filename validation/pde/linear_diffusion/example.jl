@@ -4,7 +4,7 @@ using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
 show_plot = true            # plot solution
-benchmark_diffeq = true     # compare to OrdinaryDiffEq
+benchmark_diffeq = false    # compare to OrdinaryDiffEq
 
 a = 0.25                    # diffusion constant
 Nx = 201

@@ -147,5 +147,5 @@ end
 
 function get_dimensions(sol::Solution)
     @unpack t, dimensions, coefficients = sol
-    return (; ny = dimensions[1], nt = length(t), np = coefficients[1])
+    return (; nt = length(t), ny = dimensions[1], np = coefficients[1])
 end

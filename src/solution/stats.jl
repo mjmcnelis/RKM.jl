@@ -47,67 +47,66 @@ function get_stats(sol::Solution)
 end
 
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
-                                 stage_finder, S2_runtime; n_samples = 100)
+                                 stage_finder, save_time)
     @unpack f, y, J, res = update_cache
     @unpack root_method, state_jacobian = stage_finder
 
-    ny = sol.dimensions[1]
-    nt = length(sol.t)
+    @unpack nt, ny, np = get_dimensions(sol)
 
-    # sample subset of time indices (could try StatsBase.sample)
-    t_idxs = round.(Int64, LinRange(2, nt, min(nt, n_samples)))
+    n_samples = round(Int64, nt/10)
+    t_idxs = round.(Int64, LinRange(2, nt, n_samples))
 
-    FE_runtime = 0.0        # functional evaluation time
-    JE_runtime = 0.0        # jacobian evaluation time
-    LS_runtime = 0.0        # linear solve time
+    FE_time = 0.0           # functional evaluation time
+    JE_time = 0.0           # jacobian evaluation time
+    LS_time = 0.0           # linear solve time
 
     for n in t_idxs
         t = sol.t[n]
         y .= view(sol.y, 1+(n-1)*ny:n*ny)
 
-        ode_wrap!.t[1] = t
-
         FE_stat = @timed ode_wrap!(f, t, y)
-        FE_runtime += FE_stat.time
+        FE_time += FE_stat.time
 
-        # TMP commented b/c FE_stat is sensitive to it?
-        #=
         if !isempty(J)
+            set_wrapper!(ode_wrap!, t)
             JE_stat = @timed evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
-            JE_runtime += JE_stat.time
+            JE_time += JE_stat.time
         end
 
         # note: linear solve estimate assumes Backward Euler
-        if !isempty(res) && root_method isa Newton
-            LS_stat = @timed begin
-                y_prev = view(sol.y, 1+(n-2)*ny:(n-1)*ny)
-                dt = sol.t[n] - sol.t[n-1]
+        if !isempty(J) && !isempty(res) && root_method isa Newton
+            y_prev = view(sol.y, 1+(n-2)*ny:(n-1)*ny)
+            dt = sol.t[n] - sol.t[n-1]
+            @.. res = y - y_prev - dt*f
 
-                @.. J *= dt
+            LS_stat = @timed begin
+                if J isa SparseMatrixCSC                # J <- I - dt.J
+                    @.. J.nzval *= (-dt)
+                else
+                    @.. J *= (-dt)
+                end
                 for k in diagind(J)
                     J[k] += 1.0
                 end
-                @.. res = y - y_prev - dt*f
                 linear_cache.A = J
                 linear_cache.b = res
                 solve!(linear_cache)
             end
-            LS_runtime += LS_stat.time
+            LS_time += LS_stat.time
         end
-        =#
     end
 
-    FE_runtime *= sol.FE[1] / length(t_idxs)    # TODO: subtract FEs from jacobian
-    JE_runtime *= sol.JE[1] / length(t_idxs)
-    LS_runtime *= sol.JE[1] / length(t_idxs)
+    FE_time *= sol.FE[1] / length(t_idxs)   # TODO: subtract FEs from jacobian
+    JE_time *= sol.JE[1] / length(t_idxs)
+    LS_time *= sol.JE[1] / length(t_idxs)
 
     println("")
-    println("  Subroutine runtimes (seconds)  ")
+    println("  Subroutine times (seconds)  ")
     println("---------------------------------")
-    println("function evaluations | $(round(FE_runtime, sigdigits = 4))")
-    println("jacobian evaluations | $(round(JE_runtime, sigdigits = 4))")
-    println("linear solve         | $(round(LS_runtime, sigdigits = 4))")
-    println("save solution        | $(round(S2_runtime, sigdigits = 4))")
+    println("function evaluations | $(round(FE_time, sigdigits = 4))")
+    println("jacobian evaluations | $(round(JE_time, sigdigits = 4))")
+    println("linear solve         | $(round(LS_time, sigdigits = 4))")
+    println("save solution        | $(round(save_time, sigdigits = 4))")
     println("")
 
     return nothing

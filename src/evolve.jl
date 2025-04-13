@@ -1,31 +1,25 @@
 # TODO update docstring
 """
-    evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
-                dt0::Float64, dy_dt!::Function, options::SolverOptions{T2};
-                p::Vector{Float64} = Float64[],
+    evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
+                dt0::Float64, dy_dt!::Function, options::SolverOptions{T1},
+                p::Vector{Float64} = Float64[];
                 abstract_params = nothing) where {T <: AbstractFloat,
-                                                  T1 <: AbstractFloat,
-                                                  T2 <: AbstractFloat}
+                                                  T1 <: AbstractFloat}
 
 Required parameters: `sol`, `y0`, `t0`, tf`, `dt0`, `dy_dt!`, `options`
 """
-function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64,
-                     dt0::Float64, dy_dt!::Function, options::SolverOptions{T2},
+function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
+                     dt0::Float64, dy_dt!::Function, options::SolverOptions{T1},
                      p::Vector{Float64} = Float64[];
                      abstract_params = nothing) where {T <: AbstractFloat,
-                                                       T1 <: AbstractFloat,
-                                                       T2 <: AbstractFloat}
+                                                       T1 <: AbstractFloat}
     config_bytes = @allocated begin
         clear_solution!(sol)
-        @unpack precision = options
-
-        # @code_warntype lookup_options(options)
-        # q()
 
         # get solver options
         @unpack adaptive, controller, method, timer, stage_finder, interpolator,
                 sensitivity, show_progress, save_solution, save_time_derivative,
-                benchmark_subroutines = options
+                benchmark_subroutines, precision = options
 
         reset_timer!(timer)
 
@@ -36,7 +30,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
         # initial conditions
         y = y0 .|> precision
-        y isa Vector ? nothing : y = [y]
 
         t0 = rationalize(t0) |> precision
         tf = rationalize(tf) |> precision
@@ -80,6 +73,13 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
         progress = create_progress(100; showspeed = true, color = :gray)
+
+        # time to store solution
+        save_time = [0.0]
+
+        # evaluate ODE at initial time and store in f/f_tmp
+        ode_wrap_y!(f, t[1], y)
+        @.. f_tmp = f
     end
 
     # sizehint solution
@@ -88,13 +88,6 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
         sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0,
                            sensitivity, save_time_derivative, stages)
     end
-
-    # runtime to store solution (S2)
-    S2_runtime = 0.0
-
-    # evaluate ODE at initial time and store in f/f_tmp
-    ode_wrap_y!(f, t[1], y)
-    @.. f_tmp = f
 
     loop_stats = @timed begin
         # save initial condition
@@ -126,7 +119,7 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
             # note: missing dy evaluation at final time (not critical but awkward)
             if save_solution
-                output_solution!(sol, update_cache, options, t)
+                output_solution!(sol, save_time, update_cache, t, options, timer)
             end
             # get updated values from tmp caches
             @.. y = y_tmp
@@ -143,28 +136,26 @@ function evolve_ode!(sol::Solution, y0::Union{T, Vector{T}}, t0::T1, tf::Float64
 
     if benchmark_subroutines && save_solution
         get_subroutine_runtimes(sol, ode_wrap_y!, update_cache, linear_cache,
-                                stage_finder, S2_runtime, n_samples = 100)
+                                stage_finder, save_time[1])
     end
 
     return nothing
 end
 
 """
-    evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-               dy_dt!::Function, options::SolverOptions{T2};
-               p::Vector{Float64} = Float64[],
-               model_parameters = nothing) where {T <: AbstractFloat,
-                                                  T1 <: AbstractFloat,
-                                                  T2 <: AbstractFloat}
+    evolve_ode(y0::Vector{T}, t0::T, tf::Float64, dt0::Float64,
+               dy_dt!::Function, options::SolverOptions{T1},
+               p::Vector{Float64} = Float64[];
+               abstract_params = nothing) where {T <: AbstractFloat,
+                                                    T1 <: AbstractFloat}
 
 Required parameters: `y0`, `t0`, `tf`, `dt0`, `dy_dt!`, `options`
 """
-function evolve_ode(y0::Union{T, Vector{T}}, t0::T1, tf::Float64, dt0::Float64,
-                    dy_dt!::Function, options::SolverOptions{T2},
+function evolve_ode(y0::Vector{T}, t0::T, tf::Float64, dt0::Float64,
+                    dy_dt!::Function, options::SolverOptions{T1},
                     p::Vector{Float64} = Float64[];
                     abstract_params = nothing) where {T <: AbstractFloat,
-                                                      T1 <: AbstractFloat,
-                                                      T2 <: AbstractFloat}
+                                                      T1 <: AbstractFloat}
     sol = Solution(options)
     evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options, p; abstract_params)
     return sol

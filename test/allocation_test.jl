@@ -17,7 +17,7 @@ tf = 8.0
 dt0 = 1e-4
 
 p = [0.5]
-y0 = exp(t0)/(1.0 + exp(t0)) - p[1]
+y0 = [exp(t0)/(1.0 + exp(t0)) - p[1]]
 
 for precision in precision_vect, method in method_vect,
                                  adaptive in adaptive_vect,

@@ -89,7 +89,6 @@ include("updates/multistep/adams/fixed_step.jl")
 include("options.jl")
 include("evolve.jl")
 include("solution/output.jl")
-include("solution/subroutines.jl")
 include("interpolation/interpolation.jl")
 include("sensitivity/post_sensitivity.jl")
 
@@ -148,8 +147,6 @@ export TimeLimit
 export evolve_ode, evolve_ode!
 # ODE solution
 export Solution, get_solution, get_stats
-# Benchmarking
-export benchmark_subroutines
 # Time derivatives
 export get_time_derivative
 # Dense output
