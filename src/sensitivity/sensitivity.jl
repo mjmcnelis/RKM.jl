@@ -31,10 +31,20 @@ function explicit_sensitivity_stage!(::NoSensitivity, args...)
 end
 
 function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp,
-                                     dt, update_cache, ode_wrap_y!, ode_wrap_p!)
+                                     dt, update_cache, ode_wrap_y!, ode_wrap_p!,
+                                     method)
 
-    @unpack y_tmp, f_tmp, J, S_tmp, dS = update_cache
+    @unpack y_tmp, f_tmp, J, S, S_tmp, dS = update_cache
     @unpack param_jacobian, jacobian_vector = sensitivity
+
+    @unpack A_T = method
+
+    @.. S_tmp = S
+    for j in 1:stage_idx-1
+        A_T[j,stage_idx] == 0.0 ? continue : nothing
+        dS_stage = view(dS,:,:,j)
+        @.. S_tmp = S_tmp + A_T[j,stage_idx]*dS_stage
+    end
 
     # set wrapper variables
     set_wrapper!(ode_wrap_y!, t_tmp)
@@ -63,10 +73,12 @@ function implicit_sensitivity_stage!(::NoSensitivity, args...)
 end
 
 function implicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp,
-                                     dt, update_cache, ode_wrap_y!, ode_wrap_p!, A)
+                                     dt, update_cache, ode_wrap_y!, ode_wrap_p!, A,
+                                     method)
 
     explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp,
-                                dt, update_cache, ode_wrap_y!, ode_wrap_p!)
+                                dt, update_cache, ode_wrap_y!, ode_wrap_p!,
+                                method)
 
     @unpack y_tmp, f_tmp, J, dS = update_cache
 

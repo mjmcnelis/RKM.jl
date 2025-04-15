@@ -12,14 +12,11 @@
     for i in 2:stages                                    # evaluate remaining stages
         t_tmp = t + c[i]*dt                             # assumes first stage pre-evaluated
         @.. y_tmp = y
-        @.. S_tmp = S
         # TODO: need a better dy cache for performance
         for j in 1:i-1
             A_T[j,i] == 0.0 ? continue : nothing
             dy_stage = view(dy,:,j)
-            dS_stage = view(dS,:,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
-            @.. S_tmp = S_tmp + A_T[j,i]*dS_stage       # TODO: skip this for no sensitivity
         end
         # TODO: skip if intermediate update not needed in next row(s)?
         ode_wrap_y!(f_tmp, t_tmp, y_tmp)
@@ -27,16 +24,23 @@
 
         # for sensitivity
         explicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt,
-                                    update_cache, ode_wrap_y!, ode_wrap_p!)
+                                    update_cache, ode_wrap_y!, ode_wrap_p!,
+                                    method)
     end
     @.. y_tmp = y                                        # evaluate iteration
-    @.. S_tmp = S
     for j in 1:stages
         b[j] == 0.0 ? continue : nothing
         dy_stage = view(dy,:,j)
-        dS_stage = view(dS,:,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
-        @.. S_tmp = S_tmp + b[j]*dS_stage
+    end
+    # TODO: just make a function
+    if !(sensitivity isa NoSensitivity)
+        @.. S_tmp = S
+        for j in 1:stages
+            b[j] == 0.0 ? continue : nothing
+            dS_stage = view(dS,:,:,j)
+            @.. S_tmp = S_tmp + b[j]*dS_stage
+        end
     end
     return nothing
 end
@@ -64,12 +68,9 @@ end
 
         # sum over known stages
         @.. y_tmp = y
-        @.. S_tmp = S
         for j in 1:i-1
             dy_stage = view(dy,:,j)
-            dS_stage = view(dS,:,:,j)
             @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
-            @.. S_tmp = S_tmp + A_T[j,i]*dS_stage
         end
 
         # guess stage before iterating
@@ -144,16 +145,23 @@ end
 
         # for sensitivity
         implicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt,
-                                    update_cache, ode_wrap_y!, ode_wrap_p!, A)
+                                    update_cache, ode_wrap_y!, ode_wrap_p!, A,
+                                    method)
     end
     # evaluate update
     @.. y_tmp = y
-    @.. S_tmp = S
     for j in 1:stages
         dy_stage = view(dy,:,j)
-        dS_stage = view(dS,:,:,j)
         @.. y_tmp = y_tmp + b[j]*dy_stage
-        @.. S_tmp = S_tmp + b[j]*dS_stage
+    end
+    # TODO: just make a function
+    if !(sensitivity isa NoSensitivity)
+        @.. S_tmp = S
+        for j in 1:stages
+            b[j] == 0.0 ? continue : nothing
+            dS_stage = view(dS,:,:,j)
+            @.. S_tmp = S_tmp + b[j]*dS_stage
+        end
     end
     return nothing
 end

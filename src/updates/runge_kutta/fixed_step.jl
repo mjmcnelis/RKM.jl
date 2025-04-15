@@ -19,7 +19,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
         stage_idx = 1
         @.. y_tmp = y
         explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t[1],
-                                    dt[1], update_cache, ode_wrap_y!, ode_wrap_p!)
+                                    dt[1], update_cache, ode_wrap_y!, ode_wrap_p!,
+                                    method)
     end
 
     runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap_y!, update_cache,
