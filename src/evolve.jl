@@ -106,7 +106,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             if show_progress
                 monitor_progress(t, progress, checkpoints)
             end
-            if !continue_solver(t, tf, timer)
+            if !continue_solver(t, dt, tf, timer)
                 break
             end
             adjust_final_time_steps!(t, dt, tf)

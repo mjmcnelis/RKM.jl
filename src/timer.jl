@@ -37,14 +37,16 @@ function reset_timer!(timer::TimeLimit)
 end
 
 """
-    continue_solver(t::Vector{T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
+    continue_solver(t::Vector{T}, dt::Vector{T},
+                    tf::T, timer::TimeLimit) where T <: AbstractFloat
 
-Checks whether to continue running the ODE solver. The solver stops (`false`) if either
-the simulation finishes `t >= tf` or the runtime exceeds the time limit set by `timer`.
+Checks whether to continue running the ODE solver. The solver stops if the simulation
+finishes, the runtime exceeds the limit set by `timer` or the time step is too small.
 
-Required parameters: `t`, `tf`, `timer`
+Required parameters: `t`, `dt`, `tf`, `timer`
 """
-function continue_solver(t::Vector{T}, tf::T, timer::TimeLimit) where T <: AbstractFloat
+function continue_solver(t::Vector{T}, dt::Vector{T},
+                         tf::T, timer::TimeLimit) where T <: AbstractFloat
     @unpack wtime_min, time_sys, total_steps = timer
 
     # note: check timer every 10 time steps
@@ -58,6 +60,11 @@ function continue_solver(t::Vector{T}, tf::T, timer::TimeLimit) where T <: Abstr
             @warn "Exceeded time limit of $wtime_min minutes (stopping evolve_ode!...)\n"
             return false
         end
+    end
+    if dt[1] < eps(1.0)
+        println("")
+        @warn "Time step dt = $(dt[1]) is too small (stopping evolve_ode!...)"
+        return false
     end
     return t[1] < tf
 end
