@@ -4,8 +4,12 @@ Sets a timer for the ODE solver.
 struct TimeLimit
     """Wall time (minutes)"""
     wtime_min::Float64
-    """System time since epoch (seconds)"""
-    time_sys::MVector{1,Float64}
+    """Initial/current system time since epoch (seconds)"""
+    time_sys::MVector{2,Float64}
+    """Runtime in HH:MM:SS format"""
+    runtime::Vector{String}
+    """Runtime that was previously displayed on progress bar (seconds)"""
+    t_prev::MVector{1,Int64}
     """Total number of time steps taken by the solver"""
     total_steps::MVector{1,Int64}
 end
@@ -17,10 +21,13 @@ Outer constructor for `TimeLimit`.
 """
 function TimeLimit(; wtime_min::Real = 60)
     @assert wtime_min >= 0 "wtime_min = $wtime_min is not greater than or equal to 0"
-    time_sys = MVector{1,Float64}(time())
+    t_epoch = time()
+    time_sys = MVector{2,Float64}(t_epoch, t_epoch)
+    runtime = String["00:00:00"]
+    t_prev = MVector{1,Int64}(0)
     total_steps = MVector{1,Int64}(0)
 
-    return TimeLimit(wtime_min, time_sys, total_steps)
+    return TimeLimit(wtime_min, time_sys, runtime, t_prev, total_steps)
 end
 
 """
@@ -31,8 +38,31 @@ Resets the `timer` fields to the values given by the `TimeLimit` outer construct
 Required parameters: `timer`
 """
 function reset_timer!(timer::TimeLimit)
-    timer.time_sys[1] = time()
+    t_epoch = time()
+    timer.time_sys .= t_epoch
+    timer.runtime[1] = "00:00:00"
+    timer.t_prev[1] = 0
     timer.total_steps[1] = 0
+    return nothing
+end
+
+function set_current_system_time!(timer::TimeLimit)
+    @unpack time_sys = timer
+    time_sys[2] = time()
+    return nothing
+end
+
+function set_runtime!(timer::TimeLimit)
+    @unpack time_sys, runtime, t_prev = timer
+
+    dt_sys = floor(Int64, time_sys[2] - time_sys[1])
+    t_prev[1] = dt_sys
+
+    h = floor(Int64, dt_sys / 3600)
+    m = floor(Int64, (dt_sys % 3600) / 60)
+    s = floor(Int64, dt_sys % 60)
+
+    runtime[1] = @sprintf("%02d:%02d:%02d", h, m, s)
     return nothing
 end
 

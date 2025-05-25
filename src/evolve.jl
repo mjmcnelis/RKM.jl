@@ -104,7 +104,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         # time evolution loop
         while true
             if show_progress
-                monitor_progress(t, progress, checkpoints)
+                set_current_system_time!(timer)
+                monitor_progress(t, progress, checkpoints, timer)
             end
             if !continue_solver(t, dt, tf, timer)
                 break
