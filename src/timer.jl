@@ -52,12 +52,14 @@ function reset_timer!(timer::TimeLimit)
     return nothing
 end
 
+# TODO: make docstring
 function set_current_system_time!(timer::TimeLimit)
     @unpack time_sys = timer
     time_sys[2] = time()
     return nothing
 end
 
+# TODO: make docstring
 function set_runtime_display!(timer::TimeLimit)
     @unpack time_sys, runtime, runtime_prev, display_values = timer
 

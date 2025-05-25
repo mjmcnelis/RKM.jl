@@ -4,22 +4,26 @@ function RKM.create_progress(n; showspeed = true, color = :gray)
 end
 
 """
-    RKM.monitor_progress(t::Vector{T}, progress::Progress, checkpoints::Vector{T},
-                         timer::TimeLimit) where T <: AbstractFloat
+    RKM.monitor_progress(progress::Progress, checkpoints::Vector{T},
+                         t::Vector{T}, timer::TimeLimit, dt::Vector{T})
 
-Updates the `progress` meter percentage points depending on how many
-`checkpoints` the current time `t` has passed.
+Updates a progress meter every second in real time. The percentage points
+indicate how much time evolution the solver has completed. ODE variables
+and solver stats are also displayed in real time.
 
-Required parameters: `t`, `progress`, `checkpoints`, `timer`
+Required parameters: `progress`, `checkpoints`, `t`, `timer`, `dt`
 """
-function RKM.monitor_progress(t::Vector{T}, progress::Progress, checkpoints::Vector{T},
-                              timer::TimeLimit) where T <: AbstractFloat
+function RKM.monitor_progress(progress::Progress, checkpoints::Vector{T}, t::Vector{T},
+                              timer::TimeLimit, dt::Vector{T}) where T <: AbstractFloat
 
     set_runtime_display!(timer)
-    @unpack runtime, display_values = timer
+    @unpack runtime, display_values, total_steps = timer
 
-    generate_showvalues(runtime, t) = () -> [("runtime", runtime[1]),
-                                              ("t", t[1]),]
+    generate_showvalues(runtime, total_steps, t, dt) = () -> [
+        (:runtime, runtime[1]),
+        (:total_steps, total_steps[1]),
+        (:t, t[1]),
+        (:dt, dt[1]),]
 
     if length(checkpoints) > 1
         dt_check = checkpoints[2] - checkpoints[1]
@@ -29,12 +33,12 @@ function RKM.monitor_progress(t::Vector{T}, progress::Progress, checkpoints::Vec
             popfirst!(checkpoints)
         end
         if display_values[1]
-            showvalues = generate_showvalues(runtime, t)
+            showvalues = generate_showvalues(runtime, total_steps, t, dt)
             update!(progress, 100 - length(checkpoints); showvalues)
         end
     else
         if t[1] >= checkpoints[1]
-            showvalues = generate_showvalues(runtime, t)
+            showvalues = generate_showvalues(runtime, total_steps, t, dt)
             update!(progress, 100; showvalues)
             sleep(1e-3)
         end
