@@ -15,36 +15,22 @@ Required parameters: `t`, `progress`, `checkpoints`, `timer`
 function RKM.monitor_progress(t::Vector{T}, progress::Progress, checkpoints::Vector{T},
                               timer::TimeLimit) where T <: AbstractFloat
 
-    @unpack time_sys, runtime, t_prev, total_steps = timer
-
-    dt_sys = floor(Int64, time_sys[2] - time_sys[1])
-
-    if dt_sys > t_prev[1]
-        set_runtime!(timer)
-        display_values = true
-    else
-        display_values = false
-    end
+    set_runtime_display!(timer)
+    @unpack runtime, display_values = timer
 
     generate_showvalues(runtime, t) = () -> [("runtime", runtime[1]),
                                               ("t", t[1]),]
 
     if length(checkpoints) > 1
-        dt_chkpt = checkpoints[2] - checkpoints[1]
-
-        idx = floor(Int64, Float64((t[1] - checkpoints[1])/dt_chkpt)) + 1
+        dt_check = checkpoints[2] - checkpoints[1]
+        idx = floor(Int64, Float64((t[1] - checkpoints[1])/dt_check)) + 1
         idx = min(length(checkpoints), idx)
-
-        if idx > 0
-            @unpack counter = progress
+        for i in 1:idx
+            popfirst!(checkpoints)
+        end
+        if display_values[1]
             showvalues = generate_showvalues(runtime, t)
-            update!(progress, counter + idx; showvalues)
-            for i in 1:idx
-                popfirst!(checkpoints)
-            end
-        elseif display_values
-            showvalues = generate_showvalues(runtime, t)
-            update!(progress; showvalues)
+            update!(progress, 100 - length(checkpoints); showvalues)
         end
     else
         if t[1] >= checkpoints[1]
