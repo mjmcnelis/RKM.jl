@@ -1,6 +1,7 @@
 # TODO: make docstring
 function RKM.create_progress(n; showspeed = true, color = :gray)
-    return Progress(n; showspeed, color)
+    # TODO: not sure why cursor box highlights P
+    return Progress(n; desc = "  Progress: ", showspeed, color)
 end
 
 """

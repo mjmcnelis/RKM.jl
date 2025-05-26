@@ -176,23 +176,28 @@ Here, we show the number of time steps saved and the number of times `dy_dt!` wa
 </details>
 
 <details>
-<summary>Timer and progress display</summary>
+<summary>Timer and progress bar</summary>
 
-### Timer and progress display
-We can set a time limit and display a progress bar by passing `timer` and `show_progress` to the solver options:
+### Timer and progress bar
+We can set a timer and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                           timer = TimeLimit(; wtime_min = 1), # 1 minute
                           show_progress = true)
+dt0 = 4e-8  # trigger timer
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
-julia> dt0_small = 2e-8;             # trigger timer
-julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options, p);
-Progress:  50%|██████████████████████                      |  ETA: 0:00:59 ( 1.18  s/it)
+julia> sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+  Progress:  82%|███████████████████████████▉      |  ETA: 0:00:13 ( 0.73  s/it)
+       runtime: 00:01:00
+   total_steps: 413612356
+             t: 6.544494206390023
+            dt: 4.0e-8
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
-└ @ RKM ~/Desktop/RKM.jl/src/timer.jl:58
+└ @ RKM ~/Desktop/RKM.jl/src/timer.jl:108
 ```
+The progress bar can also display variables in real-time. This helps track the current runtime and determine whether or not the solver is stalling.
 </details>
 
 ## Advanced solver options

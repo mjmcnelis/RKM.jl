@@ -80,22 +80,27 @@ function set_runtime_display!(timer::TimeLimit)
 end
 
 """
-    continue_solver(t::Vector{T}, dt::Vector{T},
-                    tf::T, timer::TimeLimit) where T <: AbstractFloat
+    continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
+                    timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
 
 Checks whether to continue running the ODE solver. The solver stops if the simulation
 finishes, the runtime exceeds the limit set by `timer` or the time step is too small.
 
-Required parameters: `t`, `dt`, `tf`, `timer`
+Required parameters: `t`, `dt`, `tf`, `timer`, `show_progress`
 """
-function continue_solver(t::Vector{T}, dt::Vector{T},
-                         tf::T, timer::TimeLimit) where T <: AbstractFloat
+function continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
+                         timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
     @unpack wtime_min, time_sys, total_steps = timer
 
     # note: check timer every 10 time steps
     if !isinf(wtime_min) && total_steps[1] % 10 == 0
         if time() > time_sys[1] + 60*wtime_min
-            println("")
+            # note: hack seems to work, but need to maintain # blank lines
+            if show_progress
+                println("\n\n\n\n")
+            else
+                println("")
+            end
             # note: @code_warntype shows logger and err are type-unstable (from @warn)
             #       logger::Union{Nothing, Base.CoreLogging.AbstractLogger} (red)
             #       err::Any (red)
