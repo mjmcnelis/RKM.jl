@@ -109,8 +109,7 @@ function continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
             return false
         end
     end
-    if dt[1] < eps(1.0)
-        println("")
+    if t[1] + dt[1] == t[1]
         @warn "Time step dt = $(dt[1]) is too small (stopping evolve_ode!...)"
         return false
     end
