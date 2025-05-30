@@ -1,26 +1,27 @@
 module RKM
 
+import Base: @kwdef, rationalize, format_bytes
+import DocStringExtensions: TYPEDEF, TYPEDFIELDS
+import FastBroadcast: @..
+import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
-import FiniteDiff: finite_difference_jacobian!, JacobianCache
+import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
                     AbstractFactorization#, SciMLLinearSolveAlgorithm
-import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!
-import StaticArrays: SVector, SMatrix, MVector
+import MuladdMacro: @muladd
+import Printf: @sprintf
+import ProgressMeter: Progress, update!
+import Setfield: @set!
 import SparseArrays: sparse, SparseMatrixCSC
 import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColorJacCache,
                         auto_jacvec!, DeivVecTag#, num_jacvec!
-import MuladdMacro: @muladd
-import FastBroadcast: @..
-import UnPack: @unpack
-import Base: @kwdef, rationalize, format_bytes
-import DocStringExtensions: TYPEDEF, TYPEDFIELDS
-import Setfield: @set!
+import StaticArrays: SVector, SMatrix, MVector
 import StatsBase: mean
+import UnPack: @unpack
+
 # tmp for testing type stablity
 import InteractiveUtils: @code_warntype, @code_typed
-import Printf: @sprintf
-import ProgressMeter: Progress, update!
 
 abstract type ODEMethod end
 
