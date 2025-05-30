@@ -23,7 +23,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
                                     method)
     end
 
-    runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap_y!, update_cache,
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)

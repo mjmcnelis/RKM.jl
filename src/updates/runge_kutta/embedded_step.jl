@@ -23,7 +23,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         if explicit_stage[1]
             @.. dy[:,1] = dt[1] * f
         end
-        runge_kutta_step!(method, iteration, t[1], dt[1], ode_wrap_y!, update_cache,
+        runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
                           linear_cache, stage_finder, sensitivity, ode_wrap_p!)
         @.. y1 = y_tmp                                  # primary iteration
 

@@ -96,3 +96,20 @@ function evaluate_jacobian!(jacobian_method::ForwardColorJacobian,
     evaluations[1] += 1
     return nothing
 end
+
+function root_jacobian!(J::Matrix{T}, A::T, dt::T) where T <: AbstractFloat
+    @.. J = J * (-A*dt)
+    for k in diagind(J)
+        J[k] = J[k] + 1.0
+    end
+    return nothing
+end
+
+function root_jacobian!(J::SparseMatrixCSC{T,Int64},
+                        A::T, dt::T) where T <: AbstractFloat
+    @.. J.nzval = J.nzval * (-A*dt)
+    for k in diagind(J)
+        J[k] = J[k] + 1.0
+    end
+    return nothing
+end

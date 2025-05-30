@@ -27,10 +27,10 @@ t, y = get_solution(sol)
 
 # save new answer keys
 if reset_answer_keys
-    y_ans, t_ans = get_solution(sol)
-    @save loadpath y_ans t_ans
+    t_ans, y_ans = get_solution(sol)
+    @save loadpath t_ans y_ans
 end
-@load loadpath y_ans t_ans
+@load loadpath t_ans y_ans
 
 # plot comparison
 if show_plot

@@ -22,8 +22,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, t[1], dt[1], ode_wrap_y!, update_cache,
-                     linear_cache, stage_finder, sensitivity, ode_wrap_p!)
+        double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
+                     stage_finder, sensitivity, ode_wrap_p!)
 
         @.. res = (y2 - y1) / (2.0^order - 1.0)     # estimate local truncation error
         @.. y2 = y2 + res                           # Richardson extrapolation
@@ -80,37 +80,47 @@ function double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
     @unpack explicit_stage, fesal, iteration = method
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2 = update_cache
 
+    t_start = t[1]
+    dt_start = dt[1]
+
     # update full time step
     if explicit_stage[1]
-        @.. dy[:,1] = dt * f
+        @.. dy[:,1] = dt[1] * f
     end
     runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
     @.. y1 = y_tmp
 
     # update two half time steps
+    dt[1] /= 2.0
     #   first half step
     if explicit_stage[1]
-        @.. dy[:,1] = (dt/2.0) * f
+        @.. dy[:,1] = dt[1] * f
     end
-    runge_kutta_step!(method, iteration, t, dt/2, ode_wrap_y!, update_cache,
+
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
     @.. y2 = y_tmp
     #   second half step
+    t[1] += dt[1]
     if explicit_stage[1]
         # skip function evaluation if method is FESAL
         if !fesal
-            ode_wrap_y!(f_tmp, t + dt/2.0, y2)
+            ode_wrap_y!(f_tmp, t[1], y2)
         end
-        @.. dy[:,1] = (dt/2.0) * f_tmp
+        @.. dy[:,1] = dt[1] * f_tmp
     end
     # note: swap y, y2 values before/after second runge_kutta_step!
     @.. y_tmp = y2
     @.. y2 = y
     @.. y = y_tmp
-    runge_kutta_step!(method, iteration, t+dt/2, dt/2, ode_wrap_y!, update_cache,
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
                       linear_cache, stage_finder, sensitivity, ode_wrap_p!)
     @.. y = y2
     @.. y2 = y_tmp
+
+    # undo changes to t, dt after double step finished
+    t[1] = t_start
+    dt[1] = dt_start
     return nothing
 end
