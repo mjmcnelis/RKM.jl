@@ -20,6 +20,7 @@ import StatsBase: mean
 # tmp for testing type stablity
 import InteractiveUtils: @code_warntype, @code_typed
 import Printf: @sprintf
+import ProgressMeter: Progress, update!
 
 abstract type ODEMethod end
 
@@ -27,7 +28,7 @@ RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
 include("timer.jl")
-include("progress/default_progress.jl")
+include("progress.jl")
 include("wrapper.jl")
 include("methods/properties/embedded.jl")
 include("adaptive.jl")

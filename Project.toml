@@ -14,6 +14,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseDiffTools = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
@@ -23,11 +24,9 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [weakdeps]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
-ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 
 [extensions]
 RKMDoubleFloatsExt = "DoubleFloats"
-RKMProgressMeterExt = "ProgressMeter"
 
 [compat]
 DocStringExtensions = "0.9"
@@ -40,7 +39,7 @@ JLD2 = "0.4, 0.5"
 LinearSolve = "2, 3"
 MuladdMacro = "0.2"
 Printf = "1.10.0"
-ProgressMeter = "1"
+ProgressMeter = "1.10.4"
 SafeTestsets = "0.1"
 Setfield = "1"
 SparseDiffTools = "2"

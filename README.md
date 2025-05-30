@@ -197,7 +197,7 @@ julia> sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
 └ @ RKM ~/Desktop/RKM.jl/src/timer.jl:108
 ```
-The progress bar can also display variables in real-time. This helps track the current runtime and determine whether or not the solver is stalling.
+Some variables are displayed in real-time to determine how fast (or slow) the solver is progressing.
 </details>
 
 ## Advanced solver options

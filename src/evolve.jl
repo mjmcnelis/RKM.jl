@@ -72,7 +72,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
-        progress = create_progress(100; showspeed = true, color = :gray)
+        progress = Progress(100; desc = "  Progress: ", showspeed = true, color = :gray)
 
         # time to store solution
         save_time = [0.0]

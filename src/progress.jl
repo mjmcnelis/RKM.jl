@@ -1,21 +1,15 @@
-# TODO: make docstring
-function RKM.create_progress(n; showspeed = true, color = :gray)
-    # TODO: not sure why cursor box highlights P
-    return Progress(n; desc = "  Progress: ", showspeed, color)
-end
 
 """
-    RKM.monitor_progress(progress::Progress, checkpoints::Vector{T},
-                         t::Vector{T}, timer::TimeLimit, dt::Vector{T})
+    monitor_progress(progress::Progress, checkpoints::Vector{T},
+                     t::Vector{T}, timer::TimeLimit, dt::Vector{T})
 
-Updates a progress meter every second in real time. The percentage points
-indicate how much time evolution the solver has completed. ODE variables
-and solver stats are also displayed in real time.
+Updates the `progress` bar percentage points if the current time `t` has passed any
+`checkpoints`. ODE variables and solver stats are also displayed in real time.
 
 Required parameters: `progress`, `checkpoints`, `t`, `timer`, `dt`
 """
-function RKM.monitor_progress(progress::Progress, checkpoints::Vector{T}, t::Vector{T},
-                              timer::TimeLimit, dt::Vector{T}) where T <: AbstractFloat
+function monitor_progress(progress::Progress, checkpoints::Vector{T}, t::Vector{T},
+                          timer::TimeLimit, dt::Vector{T}) where T <: AbstractFloat
 
     set_runtime_display!(timer)
     @unpack runtime, display_values, total_steps = timer
