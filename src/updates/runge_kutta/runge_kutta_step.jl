@@ -53,7 +53,8 @@ end
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
-    @unpack root_method, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
+    @unpack root_method, state_jacobian, epsilon,
+            max_iterations, p_norm, eigenmax = stage_finder
     @unpack dy, y, y_tmp, f, f_tmp, J, res, S, S_tmp, dS = update_cache
 
     # have while loop stashed but couldn't figure out why it was allocating
@@ -138,6 +139,9 @@ end
                 elseif root_method isa Newton
                     # evaluate current Jacobian
                     evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
+
+                    # estimate max eigenvalue of jacobian
+                    compute_max_eigenvalue!(eigenmax, t, J)
 
                     # J <- I - dt*A*J
                     root_jacobian!(J, A_T[i,i], dt[1])

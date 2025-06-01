@@ -6,7 +6,8 @@ import FastBroadcast: @..
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
-import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!
+import KrylovKit: eigsolve
+import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals, eigmax
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
                     AbstractFactorization#, SciMLLinearSolveAlgorithm
 import MuladdMacro: @muladd
@@ -38,6 +39,7 @@ include("controller/limiter.jl")
 include("controller/time_step_controller.jl")
 include("implicit/root.jl")
 include("implicit/jacobian.jl")
+include("implicit/eigenmax.jl")
 include("implicit/stage_finder.jl")
 include("implicit/nansafe/nansafe_jacobian.jl")
 include("implicit/nansafe/nansafe_utils.jl")
@@ -104,6 +106,8 @@ export BasicControl, PIControl, H312Control, H321PredictiveControl,
 export PiecewiseLimiter, SmoothLimiter
 # Implicit stage finder
 export ImplicitStageFinder
+# Eigenmax methods
+export NoEigenMax, LinearEigenMax, KrylovEigenMax
 # Root finder methods
 export FixedPoint, Newton
 # Jacobian evaluation methods
