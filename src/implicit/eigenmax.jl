@@ -4,7 +4,9 @@ struct NoEigenMax <: EigenMaxMethod end
 
 # use linear algebra eigvals, eigmax, only use for small systems
 # TODO: how do I sort out real part
-struct LinearEigenMax <: EigenMaxMethod end
+@kwdef struct LinearEigenMax <: EigenMaxMethod
+    lambda_LR::Vector{ComplexF64} = ComplexF64[0.0]
+end
 
 # TODO: also store max eigenvalue (can you pass it to eigsolve?)
 # should I store x_tmp in some manner (b/c I may want to reset x0 or update it)
@@ -24,8 +26,12 @@ function reconstruct_eigenmax(eigenmax::NoEigenMax, args...)
     return eigenmax
 end
 
+function reconstruct_eigenmax(eigenmax::LinearEigenMax, args...)
+    return eigenmax
+end
+
 function reconstruct_eigenmax(eigenmax::KrylovEigenMax, ny::Int64)
-    # should imaginary part be random or zero?
+    # TODO: should imaginary part be random or zero?
     # @set! eigenmax.x0 = rand(ComplexF64, ny)
     @set! eigenmax.x0 = ComplexF64.(rand(ny))
     return eigenmax
@@ -36,15 +42,23 @@ function compute_max_eigenvalue!(::NoEigenMax, args...)
     return nothing
 end
 
-function compute_max_eigenvalue!(eigenmax::LinearEigenMax,
+# note: t is tmp
+function compute_max_eigenvalue!(eigenmax::LinearEigenMax, t::Vector{T},
              J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}) where T <: AbstractFloat
-    # TODO: fill out later
+
+    @unpack lambda_LR = eigenmax
+
+    # compute eigenvalues
     if J isa SparseMatrixCSC
-        lambda = 1
+        @warn "LinearEigenMax() replaces sparse jacobian J with Matrix(J) for
+               computing eigenvalues (only use for small systems)" maxlog = 1
+        lambda = eigvals(Matrix(J))
     else
-        lambda = 1
-        #
+        lambda = eigvals(J)
     end
+
+    # get eigenvalue with largest real part (still keeps imaginary part)
+    lambda_LR[1] = argmax(real, lambda)
     return nothing
 end
 
