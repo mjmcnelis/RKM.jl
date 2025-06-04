@@ -15,11 +15,12 @@ end
 # x0 <- x_tmp or x0 <- x0 # update after completed time step
 
 @kwdef struct KrylovEigenMax <: EigenMaxMethod
+    lambda_LR::Vector{ComplexF64} = ComplexF64[0.0]
     x0::Vector{ComplexF64} = ComplexF64[]   # maybe Vector{Vector{ComplexF64}}() is better?
     tol::Float64 = 1e-4 # note: varies problem to problem
     maxiter::Int64 = 10
     krylovdim::Int64 = 100 # check that <= ny
-    # verbosity = 0
+    verbosity::Int64 = 1
 end
 
 function reconstruct_eigenmax(eigenmax::NoEigenMax, args...)
@@ -59,24 +60,35 @@ function compute_max_eigenvalue!(eigenmax::LinearEigenMax, t::Vector{T},
 
     # get eigenvalue with largest real part (still keeps imaginary part)
     lambda_LR[1] = argmax(real, lambda)
+
+    # @show t lambda_LR[1]
+    # println("")
+    # sleep(0.1)
+    # q()
     return nothing
 end
 
 function compute_max_eigenvalue!(eigenmax::KrylovEigenMax, t::Vector{T},
              J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}) where T <: AbstractFloat
 
-    @unpack x0, tol, maxiter, krylovdim = eigenmax
+    @unpack lambda_LR, x0, tol, maxiter, krylovdim, verbosity = eigenmax
 
-    @time lambda, x, status = eigsolve(J, x0, 1, :LR; tol, maxiter, krylovdim)
+    lambda, x, status = eigsolve(J, x0, 1, :LR; tol, maxiter, krylovdim, verbosity)
     idx = findfirst(x -> x == argmax(real, lambda), lambda)
-    @show t[1], lambda[idx]#, eigmax(Matrix(J))
 
-    @show status
-    if Bool(status.converged)
-        sleep(0.1)
-    end
+    # if status.converged > 0
+    #     @show t[1] lambda[idx] #eigmax(Matrix(J))
+    #     println("")
+    #     sleep(0.1)
+    #     # q()
+    # end
+
+    # get eigenvalue with largest real part (still keeps imaginary part)
+    lambda_LR[1] = lambda[idx]
+
+    # get corresponding eigenvector
     # TODO: use x_prev instead?
     x0 .= x[idx]
-    # TODO: save eigenvalue
+
     return nothing
 end
