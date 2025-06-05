@@ -96,6 +96,7 @@ include("evolve.jl")
 include("solution/output.jl")
 include("interpolation/interpolation.jl")
 include("sensitivity/post_sensitivity.jl")
+include("post_process/eigenvalues.jl")
 
 # Adaptive methods
 export Fixed, Doubling, Embedded, CentralDiff
@@ -160,6 +161,8 @@ export get_time_derivative
 export NoInterpolation, CubicHermite, ContinuousFormula, interpolate_solution
 # Sensitivity
 export NoSensitivity, DecoupledDirect, post_sensitivity_analysis, get_sensitivity
+# Post-process
+export get_eigenvalues
 # Plots
 export plot_ode
 # Utilities

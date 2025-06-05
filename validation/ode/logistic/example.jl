@@ -37,6 +37,11 @@ sol = Solution(options)
 get_stats(sol)
 # plot_ode(sol, options.method, Plots.plot)
 
+# analyze jacobian spectrum
+# TODO: interpolation should follow same arguments as get_eigenvalues
+# @time t, lambda = get_eigenvalues(sol, dy_dt!, options, p; dt_dense = 1e-2)
+# plot(t, real.(lambda)) |> display
+
 # interpolation
 # @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
 #=
