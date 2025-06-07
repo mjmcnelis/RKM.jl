@@ -30,7 +30,7 @@ Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
 
 It is also recommended to install these packages in your base environment:
 ```julia
-] add DoubleFloats ProgressMeter Plots
+] add DoubleFloats Plots
 ```
 
 ## Example
@@ -38,7 +38,6 @@ This code example shows how to use the ODE solver.
 ```julia
 using RKM
 using DoubleFloats: Double64
-using ProgressMeter
 using Plots; plotly()
 
 # logistic equation
@@ -184,11 +183,11 @@ We can set a timer and display a progress bar by passing `timer` and `show_progr
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                           timer = TimeLimit(; wtime_min = 1), # 1 minute
                           show_progress = true)
-dt0 = 4e-8  # trigger timer
+dt0_small = 4e-8  # trigger timer
 ```
 The solver stops if it exceeds the time limit, but it still saves part of the solution.
 ```julia
-julia> sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options, p);
   Progress:  82%|███████████████████████████▉      |  ETA: 0:00:13 ( 0.73  s/it)
        runtime: 00:01:00
    total_steps: 413612356
