@@ -15,6 +15,8 @@ struct Solution{T <: AbstractFloat}
     dy::Vector{T}
     """First-order sensitivity coefficients (stored as linear column)"""
     S::Vector{T}
+    """Eigenvalue of state Jacobian with largest real part"""
+    lambda_LR::Vector{ComplexF64}
     """Number of time steps taken"""
     time_steps_taken::MVector{1,Int64}
     """Number of function evaluations"""
@@ -52,6 +54,7 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     f = Vector{precision}()
     dy = Vector{precision}()
     S = Vector{precision}()
+    lambda_LR = Vector{ComplexF64}()
     time_steps_taken = MVector{1,Int64}(0)
     FE = MVector{1,Int64}(0)
     JE = MVector{1,Int64}(0)
@@ -65,13 +68,13 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     coefficients = MVector{1,Int64}(0)
 
     # never understood why do {precision}
-    return Solution{precision}(t, y, f, dy, S, time_steps_taken, FE, JE, rejection_rate,
-                               runtime, solution_size, sensitivity_size, config_memory,
-                               excess_memory, dimensions, coefficients)
+    return Solution{precision}(t, y, f, dy, S, lambda_LR, time_steps_taken, FE, JE,
+                               rejection_rate, runtime, solution_size, sensitivity_size,
+                               config_memory, excess_memory, dimensions, coefficients)
 end
 
 function clear_solution!(sol::Solution)
-    @unpack t, y, f, dy, S, time_steps_taken, FE, JE, rejection_rate,
+    @unpack t, y, f, dy, S, lambda_LR, time_steps_taken, FE, JE, rejection_rate,
             runtime, solution_size, sensitivity_size, config_memory,
             excess_memory, dimensions, coefficients = sol
     empty!(t)
@@ -79,6 +82,7 @@ function clear_solution!(sol::Solution)
     empty!(f)
     empty!(dy)
     empty!(S)
+    empty!(lambda_LR)
     sizehint!(t, 0)
     sizehint!(y, 0)
     sizehint!(f, 0)
@@ -143,6 +147,15 @@ function get_sensitivity(sol::Solution)
     nt = length(t)
     S_reshape = reshape(S, ny*np, nt) |> transpose
     return t, S_reshape
+end
+
+function get_eigenmax(sol::Solution)
+    @unpack t, lambda_LR = sol
+    if isempty(lambda_LR)
+        # TODO: say what options to change
+        error("Max eigenvalues lambda_LR = $lambda_LR are empty")
+    end
+    return t, lambda_LR
 end
 
 function get_dimensions(sol::Solution)

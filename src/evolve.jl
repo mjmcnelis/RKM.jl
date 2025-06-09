@@ -52,21 +52,21 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
                                    coefficients, sensitivity, stage_finder)
 
-        @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp = update_cache
+        @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp, lambda_LR = update_cache
 
         # create ODE wrappers
         ode_wrap_y! = ODEWrapperState([t0], p, abstract_params, dy_dt!)#, method)
         ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!)#, method)
 
-        @unpack linear_method = stage_finder
-        # configure linear cache (see src/common.jl in LinearSolve.jl)
-        linear_cache = init(LinearProblem(J, res), linear_method;
-                            alias_A = true, alias_b = true)
-
         @unpack iteration = method
         if iteration isa Implicit || !(sensitivity isa NoSensitivity)
             stage_finder = reconstruct_stage_finder(stage_finder, ode_wrap_y!, f_tmp, y)
         end
+
+        @unpack linear_method, eigenmax = stage_finder
+        # configure linear cache (see src/common.jl in LinearSolve.jl)
+        linear_cache = init(LinearProblem(J, res), linear_method;
+                            alias_A = true, alias_b = true)
 
         sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp, p)
 
@@ -85,13 +85,15 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
     # sizehint solution
     if save_solution
         @unpack stages = method
-        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0,
-                           sensitivity, save_time_derivative, stages)
+        sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, sensitivity,
+                           save_time_derivative, stages, iteration, eigenmax)
     end
 
     loop_stats = @timed begin
         # save initial condition
         if save_solution
+            # TODO: this output function still allocates
+            # initial_output!(sol, update_cache, t, options)
             append!(sol.t, t[1])
             append!(sol.y, y)
             if save_time_derivative || interpolator isa CubicHermite
@@ -99,6 +101,9 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             end
             if !(sensitivity isa NoSensitivity)
                 append!(sol.S, S)
+            end
+            if iteration isa Implicit && !(eigenmax isa NoEigenMax)
+                append!(sol.lambda_LR, lambda_LR)
             end
         end
         # time evolution loop
@@ -121,6 +126,10 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             # note: missing dy evaluation at final time (not critical but awkward)
             if save_solution
                 output_solution!(sol, save_time, update_cache, t, options, timer)
+                # TODO: move to output_solution
+                if iteration isa Implicit && !(eigenmax isa NoEigenMax)
+                    append!(sol.lambda_LR, lambda_LR)
+                end
             end
             # get updated values from tmp caches
             @.. y = y_tmp

@@ -11,6 +11,9 @@ show_plot = false
 plot_compare = "ans"
 # plot_compare = "diffeq"
 
+# plot eigenvalues of state jacobian
+plot_eigvals = false
+
 δ = 1e-4
 y0 = [δ]
 t0 = 0.0
@@ -20,10 +23,22 @@ dt0 = δ
 # TODO: need to interpolate solution
 options = SolverOptions(; method = TrapezoidRuleBDF2(),
                           adaptive = Doubling(; epsilon = 1e-7, alpha = 1e-7, delta = 1e-7),
-                          stage_finder = ImplicitStageFinder(; state_jacobian = ForwardJacobian()),
+                          stage_finder = ImplicitStageFinder(;
+                                             state_jacobian = ForwardJacobian(),
+                                             eigenmax = KrylovEigenMax(; krylovdim = 1)
+                                         ),
                         )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
 t, y = get_solution(sol)
+
+# might want to create a plot function to compare eigenvalues
+if plot_eigvals
+    using Plots; plotly()
+    t, lambda = get_eigenvalues(sol, dy_dt!, options; dt_dense = 1e-2)
+    plot(t, real.(lambda))
+    _, lambda_LR = get_eigenmax(sol)
+    plot!(sol.t, real.(lambda_LR), line = :dash) |> display
+end
 
 # save new answer keys
 if reset_answer_keys

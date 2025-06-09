@@ -28,8 +28,10 @@ options = Dict(
                          state_jacobian = FiniteJacobian(),
                          root_method = Newton(),
                         #  root_method = FixedPoint(),
-                         linear_method = LUFactorization(),
-                        #  linear_method = RFLUFactorization(),
+                        #  linear_method = LUFactorization(),
+                         linear_method = RFLUFactorization(),
+                        # TODO: limit krylovdim to ny
+                        #  eigenmax = KrylovEigenMax(; krylovdim = 1),
                          epsilon = 1e-8, max_iterations = 10, p_norm = 2.0,
                      ),
 

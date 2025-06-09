@@ -7,7 +7,7 @@ import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
 import KrylovKit: eigsolve
-import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals, eigmax
+import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals
 import LinearSolve: init, solve!, LinearProblem, LUFactorization,
                     AbstractFactorization#, SciMLLinearSolveAlgorithm
 import MuladdMacro: @muladd
@@ -51,11 +51,11 @@ include("cache.jl")
 include("post_process/interpolation/interpolator_types.jl")
 include("post_process/interpolation/cubic_hermite.jl")
 include("post_process/interpolation/continuous_formula.jl")
-include("solution/sizehint.jl")
 include("solution/stats.jl")
 
 include("methods/code_names.jl")
 include("methods/properties/iteration.jl")
+include("solution/sizehint.jl")
 include("methods/properties/fesal.jl")
 include("methods/properties/order.jl")
 include("methods/properties/explicit_stage.jl")
@@ -145,8 +145,6 @@ export ImplicitTrapezoid21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, Lobat
 # Linear multistep
 export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
        NumericalDifferentiationFormula
-# Code names
-export make_code_name
 # Solver options
 export SolverOptions
 # Timer
@@ -154,17 +152,16 @@ export TimeLimit
 # ODE solver
 export evolve_ode, evolve_ode!
 # ODE solution
-export Solution, get_solution, get_stats
-# Time derivatives
-export get_time_derivative
+export Solution, get_stats
 # Dense output
-export NoInterpolation, CubicHermite, ContinuousFormula, interpolate_solution
+export NoInterpolation, CubicHermite, ContinuousFormula
 # Sensitivity
-export NoSensitivity, DecoupledDirect, post_sensitivity_analysis, get_sensitivity
+export NoSensitivity, DecoupledDirect
 # Post-process
-export get_eigenvalues
+export get_solution, get_time_derivative, get_sensitivity, get_eigenmax,
+       get_eigenvalues, interpolate_solution, post_sensitivity_analysis
 # Plots
-export plot_ode
+export plot_ode, make_code_name
 # Utilities
 export debug_table
 

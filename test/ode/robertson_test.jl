@@ -11,6 +11,8 @@ show_plot = false
 plot_compare = "ans"
 # plot_compare = "diffeq"
 
+plot_eigvals = false
+
 y0 = [1.0, 0.0, 0.0]
 t0 = 0.01
 tf = 1.0e4
@@ -19,10 +21,21 @@ dt0 = 0.01
 # TODO: need to interpolate solution
 options = SolverOptions(; method = TrapezoidRuleBDF2(),
                           adaptive = Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6),
-                          stage_finder = ImplicitStageFinder(; state_jacobian = ForwardJacobian()),
+                          stage_finder = ImplicitStageFinder(;
+                                             state_jacobian = ForwardJacobian(),
+                                             eigenmax = KrylovEigenMax(; krylovdim = 3),
+                                         ),
                         )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options)
 t, y = get_solution(sol)
+
+if plot_eigvals
+    using Plots; plotly()
+    t, lambda = get_eigenvalues(sol, dy_dt!, options; dt_dense = 1e-2)
+    plot(t, real.(lambda))
+    _, lambda_LR = get_eigenmax(sol)
+    plot!(sol.t, real.(lambda_LR), line = :dash) |> display
+end
 
 # save new answer keys
 if reset_answer_keys

@@ -15,6 +15,7 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     S::Matrix{T}
     S_tmp::Matrix{T}
     dS::Array{T,3}
+    lambda_LR::Vector{ComplexF64}
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
@@ -24,7 +25,7 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack iteration, stages = method
-    @unpack state_jacobian = stage_finder
+    @unpack state_jacobian, eigenmax = stage_finder
 
     no_sensitivity = sensitivity isa NoSensitivity
 
@@ -34,6 +35,7 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     m = adaptive isa Fixed ? 0 : ny                             # primary/embedded
     # TODO: okay use res for both root solver and stepsize control?
     ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # residual error (res)
+    nl = eigenmax isa NoEigenMax ? 0 : 1
 
     if method isa LinearMultistep
         @unpack start_method = method
@@ -63,5 +65,8 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     S_tmp = zeros(precision, ny, np)
     dS = zeros(precision, ny, np, stages)
 
-    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, res, S, S_tmp, dS)
+    lambda_LR = zeros(ComplexF64, nl)
+
+    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1,
+                       y2, res, S, S_tmp, dS, lambda_LR)
 end

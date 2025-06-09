@@ -1,20 +1,22 @@
 """
     sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::Solution,
                        t0::T, tf::T, dt::T, sensitivity::SensitivityMethod,
-                       save_time_derivative::Bool,
-                       stages::Int64) where T <: AbstractFloat
+                       save_time_derivative::Bool, stages::Int64
+                       iteration::Iteration,
+                       eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
 Applies `sizehint!` to the time `t` and state variables `y` in the solution `sol`.
-The time derivative `f`, intermediate stages `dy` and sensitivity coefficients `S`
-are also size-hinted if they are being outputted.
+The time derivative `f`, intermediate stages `dy`, sensitivity coefficients `S`
+and max eigenvalue `lamnda_LR` are also size-hinted if they are being outputted.
 
-Required parameters: `adaptive`, `interpolator`, `sol`, `t0`, `tf`, `dt`,
-                     `sensitivity`, `save_time_derivative`, `stages`
+Required parameters: `adaptive`, `interpolator`, `sol`, `t0`, `tf`, `dt`, `sensitivity`,
+                     `save_time_derivative`, `stages`, `iteration`, `eigenmax`
 """
 function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::Solution,
                             t0::T, tf::T, dt::T, sensitivity::SensitivityMethod,
-                            save_time_derivative::Bool,
-                            stages::Int64) where T <: AbstractFloat
+                            save_time_derivative::Bool, stages::Int64,
+                            iteration::Iteration,
+                            eigenmax::EigenMaxMethod) where T <: AbstractFloat
     ny = sol.dimensions[1]
     np = sol.coefficients[1]
     # note: add 2 instead of 1 b/c of round-off errors
@@ -31,6 +33,9 @@ function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::So
     end
     if !(sensitivity isa NoSensitivity)
         sizehint!(sol.S, ny*np*nt)
+    end
+    if iteration isa Implicit && !(eigenmax isa NoEigenMax)
+        sizehint!(sol.lambda_LR, nt)
     end
     return nothing
 end

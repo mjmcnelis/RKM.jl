@@ -8,7 +8,7 @@ abstract type StageFinder end
     root_method::RootMethod = Newton()  # TODO: try RM
     state_jacobian::JM = FiniteJacobian()
     linear_method::AF = LUFactorization()
-    eigenmax::EMM = KrylovEigenMax()
+    eigenmax::EMM = NoEigenMax()
     # TODO: reuse adaptive epsilon or 100x smaller?
     epsilon::Float64 = 1e-8
     max_iterations::Int64 = 10
