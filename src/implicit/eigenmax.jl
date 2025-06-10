@@ -42,7 +42,12 @@ end
 
 # note: t is tmp
 function compute_max_eigenvalue!(eigenmax::LinearEigenMax, lambda_LR::Vector{ComplexF64},
-             J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}) where T <: AbstractFloat
+                                 J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
+                                 state_jacobian::JacobianMethod,
+                                 ode_wrap!::ODEWrapperState, y::Vector{T},
+                                 f::Vector{T}) where T <: AbstractFloat
+
+    evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
 
     # compute eigenvalues
     if J isa SparseMatrixCSC
@@ -64,12 +69,17 @@ function compute_max_eigenvalue!(eigenmax::LinearEigenMax, lambda_LR::Vector{Com
 end
 
 function compute_max_eigenvalue!(eigenmax::KrylovEigenMax, lambda_LR::Vector{ComplexF64},
-             J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}) where T <: AbstractFloat
+                                 J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
+                                 state_jacobian::JacobianMethod,
+                                 ode_wrap!::ODEWrapperState, y::Vector{T},
+                                 f::Vector{T}) where T <: AbstractFloat
+
+    evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
 
     @unpack x0, tol, maxiter, krylovdim, verbosity = eigenmax
 
     lambda, x, status = eigsolve(J, x0, 1, :LR; tol, maxiter, krylovdim, verbosity)
-    idx = findfirst(x -> x == argmax(real, lambda), lambda)
+    idx = argmax(real.(lambda))
 
     # if status.converged > 0
     #     @show t[1] lambda[idx]

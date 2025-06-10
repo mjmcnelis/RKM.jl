@@ -140,9 +140,6 @@ end
                     # evaluate current Jacobian
                     evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
 
-                    # estimate max eigenvalue of jacobian
-                    compute_max_eigenvalue!(eigenmax, lambda_LR, J)
-
                     # J <- I - dt*A*J
                     root_jacobian!(J, A_T[i,i], dt[1])
 
@@ -175,5 +172,10 @@ end
             @.. S_tmp = S_tmp + b[j]*dS_stage
         end
     end
+
+    # estimate max eigenvalue of jacobian
+    compute_max_eigenvalue!(eigenmax, lambda_LR, J, state_jacobian,
+                            ode_wrap_y!, y_tmp, f_tmp)
+
     return nothing
 end
