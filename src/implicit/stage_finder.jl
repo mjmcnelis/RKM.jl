@@ -21,14 +21,9 @@ function reconstruct_stage_finder(stage_finder::ImplicitStageFinder,
                                   ode_wrap!::ODEWrapperState, f::Vector{T},
                                   y::Vector{T}) where T <: AbstractFloat
     @unpack state_jacobian, eigenmax = stage_finder
-    ny = length(y)
 
     # TODO: move state_jacobian out of stage_finder?
     state_jacobian = reconstruct_jacobian_method(state_jacobian, ode_wrap!, f, y)
-    # TODO: initialize eigenvector w/ eigsolve
-    eigenmax = reconstruct_eigenmax(eigenmax, ny)
-
     @set! stage_finder.state_jacobian = state_jacobian
-    @set! stage_finder.eigenmax = eigenmax
     return stage_finder
 end

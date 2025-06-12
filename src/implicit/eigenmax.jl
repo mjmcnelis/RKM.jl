@@ -10,29 +10,11 @@ struct LinearEigenMax <: EigenMaxMethod end
 # x_tmp = x0     # initialize before iteration loop
 # x_tmp = x[idx] # update during iteration loop
 # x0 <- x_tmp or x0 <- x0 # update after completed time step
-
 @kwdef struct KrylovEigenMax <: EigenMaxMethod
-    x0::Vector{ComplexF64} = ComplexF64[]   # maybe Vector{Vector{ComplexF64}}() is better?
     tol::Float64 = 1e-4 # note: varies problem to problem
     maxiter::Int64 = 10
     krylovdim::Int64 = 100 # check that <= ny
     verbosity::Int64 = 1
-end
-
-function reconstruct_eigenmax(eigenmax::NoEigenMax, args...)
-    return eigenmax
-end
-
-function reconstruct_eigenmax(eigenmax::LinearEigenMax, args...)
-    return eigenmax
-end
-
-# x0 could be in update_cache too, maybe...
-function reconstruct_eigenmax(eigenmax::KrylovEigenMax, ny::Int64)
-    # TODO: should imaginary part be random or zero?
-    # @set! eigenmax.x0 = rand(ComplexF64, ny)
-    @set! eigenmax.x0 = ComplexF64.(rand(ny))
-    return eigenmax
 end
 
 # put methods here
@@ -41,7 +23,10 @@ function compute_max_eigenvalue!(::NoEigenMax, args...)
 end
 
 # note: t is tmp
+# TODO: pass update_cache and @unpack lambda_LR, x0, J, y_tmp, f_tmp
+#       (but may still need to pass (lambda_LR, x0) or (lambda_LR_tmp, x0_tmp), etc)
 function compute_max_eigenvalue!(eigenmax::LinearEigenMax, lambda_LR::Vector{ComplexF64},
+                                 x0::Vector{ComplexF64},
                                  J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                  state_jacobian::JacobianMethod,
                                  ode_wrap!::ODEWrapperState, y::Vector{T},
@@ -69,6 +54,7 @@ function compute_max_eigenvalue!(eigenmax::LinearEigenMax, lambda_LR::Vector{Com
 end
 
 function compute_max_eigenvalue!(eigenmax::KrylovEigenMax, lambda_LR::Vector{ComplexF64},
+                                 x0::Vector{ComplexF64},
                                  J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                  state_jacobian::JacobianMethod,
                                  ode_wrap!::ODEWrapperState, y::Vector{T},
@@ -76,7 +62,7 @@ function compute_max_eigenvalue!(eigenmax::KrylovEigenMax, lambda_LR::Vector{Com
 
     evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
 
-    @unpack x0, tol, maxiter, krylovdim, verbosity = eigenmax
+    @unpack tol, maxiter, krylovdim, verbosity = eigenmax
 
     lambda, x, status = eigsolve(J, x0, 1, :LR; tol, maxiter, krylovdim, verbosity)
     idx = argmax(real.(lambda))

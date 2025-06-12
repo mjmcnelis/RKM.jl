@@ -52,7 +52,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
                                    coefficients, sensitivity, stage_finder)
 
-        @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp, lambda_LR = update_cache
+        @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp, lambda_LR, x0 = update_cache
 
         # create ODE wrappers
         ode_wrap_y! = ODEWrapperState([t0], p, abstract_params, dy_dt!)#, method)
@@ -63,7 +63,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             stage_finder = reconstruct_stage_finder(stage_finder, ode_wrap_y!, f_tmp, y)
         end
 
-        @unpack linear_method, eigenmax = stage_finder
+        @unpack linear_method, eigenmax, state_jacobian = stage_finder
         # configure linear cache (see src/common.jl in LinearSolve.jl)
         linear_cache = init(LinearProblem(J, res), linear_method;
                             alias_A = true, alias_b = true)
@@ -80,6 +80,11 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         # evaluate ODE at initial time and store in f/f_tmp
         ode_wrap_y!(f, t[1], y)
         @.. f_tmp = f
+
+        # initialize eigenvalue/eigenvector
+        @.. y_tmp = y
+        compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
+                                ode_wrap_y!, y_tmp, f_tmp)
     end
 
     # sizehint solution

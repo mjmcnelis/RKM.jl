@@ -16,6 +16,7 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     S_tmp::Matrix{T}
     dS::Array{T,3}
     lambda_LR::Vector{ComplexF64}
+    x0::Vector{ComplexF64}
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
@@ -67,6 +68,14 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
 
     lambda_LR = zeros(ComplexF64, nl)
 
+    if eigenmax isa KrylovEigenMax
+        # TODO: should imaginary part be random or zero?
+        # x0 = rand(ComplexF64, ny)
+        x0 = ComplexF64.(rand(ny))
+    else
+        x0 = ComplexF64[]
+    end
+
     return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1,
-                       y2, res, S, S_tmp, dS, lambda_LR)
+                       y2, res, S, S_tmp, dS, lambda_LR, x0)
 end

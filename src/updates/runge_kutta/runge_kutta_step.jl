@@ -55,7 +55,7 @@ end
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
     @unpack root_method, state_jacobian, epsilon,
             max_iterations, p_norm, eigenmax = stage_finder
-    @unpack dy, y, y_tmp, f, f_tmp, J, res, S, S_tmp, dS, lambda_LR = update_cache
+    @unpack dy, y, y_tmp, f, f_tmp, J, res, S, S_tmp, dS, lambda_LR, x0 = update_cache
 
     # have while loop stashed but couldn't figure out why it was allocating
     #= while loop: can try something like
@@ -174,7 +174,7 @@ end
     end
 
     # estimate max eigenvalue of jacobian
-    compute_max_eigenvalue!(eigenmax, lambda_LR, J, state_jacobian,
+    compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
                             ode_wrap_y!, y_tmp, f_tmp)
 
     return nothing
