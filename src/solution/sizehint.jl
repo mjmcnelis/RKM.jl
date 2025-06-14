@@ -40,6 +40,6 @@ function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::So
     return nothing
 end
 
-function sizehint_solution!(adaptive::AdaptiveStepSize, args...)
+function sizehint_solution!(adaptive::AdaptiveTimeStep, args...)
     return nothing
 end

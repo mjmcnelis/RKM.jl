@@ -67,13 +67,13 @@ function set_previous_control_vars!(controller::TimeStepController, e_norm::T,
 end
 
 function reconstruct_controller(controller::TimeStepController,
-                                method::ODEMethod, adaptive::AdaptiveStepSize,
+                                method::ODEMethod, adaptive::AdaptiveTimeStep,
                                 precision::Type{T}) where T <: AbstractFloat
 
     @unpack pid, limiter = controller
     @unpack order = method
 
-    local_order = get_adaptive_local_order(adaptive, order)
+    local_order = get_local_order(adaptive, order)
     repower_high = rescale_tolerance(adaptive, order)
 
     @set! pid.beta1 = pid.beta1 / local_order

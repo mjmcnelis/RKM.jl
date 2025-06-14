@@ -11,7 +11,7 @@ function make_code_name(name)
     return code_name
 end
 
-function adaptive_code_label(::AdaptiveStepSize)
+function adaptive_code_label(::AdaptiveTimeStep)
     return ""
 end
 
@@ -19,6 +19,6 @@ function adaptive_code_label(::Doubling)
     return "D"
 end
 
-function adaptive_code_label(::CentralDiff)
-    return "M"
-end
+# function adaptive_code_label(::CentralDiff)
+#     return "M"
+# end

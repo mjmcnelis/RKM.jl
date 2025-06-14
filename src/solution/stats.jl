@@ -1,5 +1,5 @@
 
-function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveStepSize,
+function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveTimeStep,
                         interpolator::Interpolator, timer::TimeLimit,
                         stage_finder::StageFinder, sensitivity::SensitivityMethod,
                         loop_stats::NamedTuple, config_bytes::Int64)

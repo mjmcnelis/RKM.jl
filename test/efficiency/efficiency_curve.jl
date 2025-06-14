@@ -1,11 +1,11 @@
-import RKM: AdaptiveStepSize, adaptive_code_label, get_linestyle
+import RKM: AdaptiveTimeStep, adaptive_code_label, get_linestyle
 import LinearAlgebra: norm
 import Statistics: mean
 import Plots: plot, plot!
 import Setfield: @set
 
 function efficiency_curve(y0::Union{T, Vector{T}}, y_exact::Function, dy_dt!::Function;
-             precision::Type{T2}, methods::OrderedDict{<:AdaptiveStepSize, <:Vector},
+             precision::Type{T2}, methods::OrderedDict{<:AdaptiveTimeStep, <:Vector},
              epsilon_vect::Vector{Float64}, t_range::TimeRange, xlims = (1e2, 1e5),
              ylims = (1e-20, 1e0)) where {T <: AbstractFloat, T2 <: AbstractFloat}
     plt = plot()

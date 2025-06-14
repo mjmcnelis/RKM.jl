@@ -1,17 +1,17 @@
 
-abstract type AdaptiveStepSize end
+abstract type AdaptiveTimeStep end
 
-struct Fixed <: AdaptiveStepSize end
-
-struct CentralDiff{T} <: AdaptiveStepSize where T <: AbstractFloat
+struct Fixed <: AdaptiveTimeStep end
+#=
+struct CentralDiff <: AdaptiveTimeStep
     """Relative error tolerance"""
-    epsilon::T
+    epsilon::Float64
     """Absolute error tolerance"""
-    alpha::T
+    alpha::Float64
     """Incremental error tolerance"""
-    delta::T
+    delta::Float64
     """Integer used to compute L--norms"""
-    p_norm::T
+    p_norm::Float64
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool
 end
@@ -23,7 +23,7 @@ function CentralDiff(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,
 
     return CentralDiff(epsilon, alpha, delta, p_norm, benchmark_diffeq)
 end
-
+=#
 """
 $(TYPEDEF)
 
@@ -32,15 +32,15 @@ Step doubling adaptive time step algorithm
 # Fields
 $(TYPEDFIELDS)
 """
-struct Doubling{T} <: AdaptiveStepSize where T <: AbstractFloat
+struct Doubling <: AdaptiveTimeStep
     """Relative error tolerance"""
-    epsilon::T
+    epsilon::Float64
     """Absolute error tolerance"""
-    alpha::T
+    alpha::Float64
     """Incremental error tolerance"""
-    delta::T
+    delta::Float64
     """Integer used to compute L--norms"""
-    p_norm::T
+    p_norm::Float64
     """Maximum number of attempts to compute time step per update"""
     max_attempts::Int64
     """Total number of attempts in evolution loop"""
@@ -60,15 +60,15 @@ function Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,p_norm = 2.0,
                     total_attempts, benchmark_diffeq)
 end
 
-struct Embedded{T} <: AdaptiveStepSize where T <: AbstractFloat
+struct Embedded <: AdaptiveTimeStep
     """Relative error tolerance"""
-    epsilon::T
+    epsilon::Float64
     """Absolute error tolerance"""
-    alpha::T
+    alpha::Float64
     """Incremental error tolerance"""
-    delta::T
+    delta::Float64
     """Integer used to compute L--norms"""
-    p_norm::T
+    p_norm::Float64
     """Maximum number of attempts to compute time step per update"""
     max_attempts::Int64
     """Total number of attempts in evolution loop"""
@@ -103,23 +103,21 @@ function check_adaptive_parameters_2(; max_attempts)
     return nothing
 end
 
-function get_adaptive_local_order(::CentralDiff, args...)
-    return 2.0
-end
+# function get_local_order(::CentralDiff, args...)
+#     return 2.0
+# end
 
-function get_adaptive_local_order(::Doubling,
-                                  order::SVector{P,T}) where {P, T <: AbstractFloat}
+function get_local_order(::Doubling, order::SVector{P,T}) where {P, T <: AbstractFloat}
     return order[1] + 1.0
 end
 
-function get_adaptive_local_order(::Embedded,
-                                  order::SVector{P,T}) where {P, T <: AbstractFloat}
+function get_local_order(::Embedded, order::SVector{P,T}) where {P, T <: AbstractFloat}
     return minimum(order) + 1.0
 end
 
-function rescale_tolerance(::CentralDiff, order::SVector{P,T}) where {P,T <: AbstractFloat}
-    return 1.0 / order[1]
-end
+# function rescale_tolerance(::CentralDiff, order::SVector{P,T}) where {P,T <: AbstractFloat}
+#     return 1.0 / order[1]
+# end
 
 function rescale_tolerance(::Doubling, order::SVector{P,T}) where {P, T <: AbstractFloat}
     return order[1] / (1.0 + order[1])
@@ -129,38 +127,25 @@ function rescale_tolerance(::Embedded, order::SVector{P,T}) where {P, T <: Abstr
     return minimum(order) / maximum(order)
 end
 
-function _reconstruct_adaptive(::CentralDiff; kwargs...)
-    return CentralDiff(; kwargs...)
+function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
+    return adaptive
 end
 
-function _reconstruct_adaptive(adaptive::Doubling; kwargs...)
-    return Doubling(; kwargs..., max_attempts = adaptive.max_attempts)
-end
-
-function _reconstruct_adaptive(adaptive::Embedded; kwargs...)
-    return Embedded(; kwargs..., max_attempts = adaptive.max_attempts)
-end
-
-function reconstruct_adaptive(adaptive::AdaptiveStepSize, method::ODEMethod,
-                              precision::Type{T}) where T <: AbstractFloat
-
-    epsilon = adaptive.epsilon |> precision
-    alpha   = adaptive.alpha |> precision
-    delta   = adaptive.delta |> precision
-    p_norm  = adaptive.p_norm |> precision
+function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
+    @unpack benchmark_diffeq = adaptive
 
     # rescale tolerance parameters
-    if !adaptive.benchmark_diffeq
+    if !benchmark_diffeq
         repower_high = rescale_tolerance(adaptive, method.order)
-        epsilon ^= repower_high
-        alpha   ^= repower_high
-        delta   ^= repower_high
+        @set! adaptive.epsilon ^= repower_high
+        @set! adaptive.alpha ^= repower_high
+        @set! adaptive.delta ^= repower_high
     end
 
-    return _reconstruct_adaptive(adaptive; epsilon, alpha, delta, p_norm)
+    return adaptive
 end
 
-function compute_step_rejection_rate(adaptive::AdaptiveStepSize, timer::TimeLimit)
+function compute_step_rejection_rate(adaptive::AdaptiveTimeStep, timer::TimeLimit)
     if hasproperty(adaptive, :total_attempts)
         @unpack total_steps = timer
         @unpack total_attempts = adaptive

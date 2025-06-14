@@ -20,7 +20,7 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
-                     adaptive::AdaptiveStepSize,
+                     adaptive::AdaptiveTimeStep,
                      dimensions::Int64, coefficients::Int64,
                      sensitivity::SensitivityMethod,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat

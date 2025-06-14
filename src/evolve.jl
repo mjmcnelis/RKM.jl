@@ -43,8 +43,12 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         # reconstruction
         method = reconstruct_method(method, precision)
+
+        # TODO: put this before method reconstruction?
+        #       or maybe unpack and pass localorder
+        adaptive = reconstruct_adaptive(adaptive, method)
+
         if !(adaptive isa Fixed)
-            adaptive = reconstruct_adaptive(adaptive, method, precision)
             controller = reconstruct_controller(controller, method, adaptive, precision)
         end
 

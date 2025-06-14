@@ -3,7 +3,7 @@ SolverOptions for the ODE solver.
 """
 @kwdef struct SolverOptions{T <: AbstractFloat}
     """Adaptive time step method"""
-    adaptive::AdaptiveStepSize
+    adaptive::AdaptiveTimeStep
     """ODE solver method"""
     method::ODEMethod
     """Timer for ODE solver"""

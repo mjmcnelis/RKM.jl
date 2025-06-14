@@ -32,7 +32,7 @@ export RKM_root
 include("timer.jl")
 include("progress.jl")
 include("wrapper.jl")
-include("methods/properties/embedded.jl")
+# include("methods/properties/embedded.jl")
 include("adaptive.jl")
 include("controller/pid_control.jl")
 include("controller/limiter.jl")
@@ -86,7 +86,7 @@ include("updates/runge_kutta/runge_kutta_step.jl")
 include("updates/runge_kutta/fixed_step.jl")
 include("updates/runge_kutta/double_step.jl")
 include("updates/runge_kutta/embedded_step.jl")
-include("updates/runge_kutta/central_step.jl")
+# include("updates/runge_kutta/central_step.jl")
 # Multistep updates
 include("updates/multistep/adams/adams_step.jl")
 include("updates/multistep/adams/fixed_step.jl")
@@ -99,7 +99,7 @@ include("sensitivity/post_sensitivity.jl")
 include("post_process/eigenvalues.jl")
 
 # Adaptive methods
-export Fixed, Doubling, Embedded, CentralDiff
+export Fixed, Doubling, Embedded#, CentralDiff
 # Time step controller
 export TimeStepController, PIDControlBeta, PIDControlK
 export BasicControl, PIControl, H312Control, H321PredictiveControl,
@@ -119,7 +119,7 @@ export NaiveJacobianVector, ForwardJacobianVector, FiniteJacobianVector
 export nansafe_state_jacobian, nansafe_param_jacobian, test_nansafe,
        max_nan, min_nan, maximum_nan, minimum_nan
 # Embedded pairs
-export DefaultPair, EulerPair, SecondPair
+# export DefaultPair, EulerPair, SecondPair
 # Numerical ODE methods
 export RungeKutta, LinearMultistep
 # Properties

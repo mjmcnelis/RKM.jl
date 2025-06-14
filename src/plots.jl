@@ -33,6 +33,6 @@ function plot_ode(sol::Solution, method::ODEMethod, plot::Function;
     return plt
 end
 
-get_linestyle(::AdaptiveStepSize) = :solid
+get_linestyle(::AdaptiveTimeStep) = :solid
 get_linestyle(::Doubling) = :dot
 get_linestyle(::Embedded) = :dash
