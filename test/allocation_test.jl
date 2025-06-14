@@ -1,4 +1,4 @@
-using RKM, Test
+using RKM, Test, Setfield
 # using Plots; plotly()
 import DoubleFloats: Double64
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
@@ -24,7 +24,10 @@ for precision in precision_vect, method in method_vect,
                                  limiter in limiter_vect,
                                  pid in pid_vect
 
-    controller = TimeStepController(precision; pid, limiter)
+    controller = TimeStepController(precision; pid)
+    if !(adaptive isa Fixed)
+        @set! adaptive.limiter = limiter
+    end
     save_solution = adaptive isa Fixed
     # save_solution = true
 

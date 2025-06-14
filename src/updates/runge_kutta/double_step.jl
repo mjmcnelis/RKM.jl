@@ -7,9 +7,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
-    @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts = adaptive
+    @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts, limiter = adaptive
     @unpack explicit_stage = method
-    @unpack limiter = controller
     @unpack dt_min, dt_max = limiter
     @unpack y, y_tmp, f, f_tmp, y1, y2, res = update_cache
 

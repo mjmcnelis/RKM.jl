@@ -32,7 +32,7 @@ Step doubling adaptive time step algorithm
 # Fields
 $(TYPEDFIELDS)
 """
-struct Doubling <: AdaptiveTimeStep
+struct Doubling{L} <: AdaptiveTimeStep where L <: LimiterMethod
     """Relative error tolerance"""
     epsilon::Float64
     """Absolute error tolerance"""
@@ -47,20 +47,25 @@ struct Doubling <: AdaptiveTimeStep
     total_attempts::MVector{1,Int64}
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool
+    """Limiter method for time step controller"""
+    limiter::L
 end
 
-function Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,p_norm = 2.0,
-                    max_attempts = 10, benchmark_diffeq = false)
+function Doubling(; epsilon::Float64 = 1e-6, alpha::Float64 = 1e-6, delta::Float64 = 1e-6,
+                    p_norm::Float64 = 2.0, max_attempts::Int64 = 10,
+                    # consider making this a constant global
+                    benchmark_diffeq::Bool = false,
+                    limiter::L = PiecewiseLimiter()) where L <: LimiterMethod
 
     check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
     check_adaptive_parameters_2(; max_attempts)
     total_attempts = MVector{1,Int64}(0)
 
     return Doubling(epsilon, alpha, delta, p_norm, max_attempts,
-                    total_attempts, benchmark_diffeq)
+                    total_attempts, benchmark_diffeq, limiter)
 end
 
-struct Embedded <: AdaptiveTimeStep
+struct Embedded{L} <: AdaptiveTimeStep where L <: LimiterMethod
     """Relative error tolerance"""
     epsilon::Float64
     """Absolute error tolerance"""
@@ -75,17 +80,22 @@ struct Embedded <: AdaptiveTimeStep
     total_attempts::MVector{1,Int64}
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool
+    """Limiter method for time step controller"""
+    limiter::L
 end
 
-function Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
-                    max_attempts = 10, benchmark_diffeq = false)
+function Embedded(; epsilon::Float64 = 1e-6, alpha::Float64 = 1e-6, delta::Float64 = 1e-6,
+                    p_norm::Float64 = 2.0, max_attempts::Int64 = 10,
+                    # consider making this a constant global
+                    benchmark_diffeq::Bool = false,
+                    limiter::L = PiecewiseLimiter()) where L <: LimiterMethod
 
     check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
     check_adaptive_parameters_2(; max_attempts)
     total_attempts = MVector{1,Int64}(0)
 
     return Embedded(epsilon, alpha, delta, p_norm, max_attempts,
-                    total_attempts, benchmark_diffeq)
+                    total_attempts, benchmark_diffeq, limiter)
 end
 
 function check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
@@ -132,14 +142,24 @@ function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
 end
 
 function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
-    @unpack benchmark_diffeq = adaptive
+    @unpack benchmark_diffeq, limiter = adaptive
 
     # rescale tolerance parameters
     if !benchmark_diffeq
-        repower_high = rescale_tolerance(adaptive, method.order)
+        @unpack order = method
+        repower_high = rescale_tolerance(adaptive, order) |> Float64
+
         @set! adaptive.epsilon ^= repower_high
         @set! adaptive.alpha ^= repower_high
         @set! adaptive.delta ^= repower_high
+        @set! limiter.high ^= repower_high
+
+        # TODO: add message
+        # reminder: reason I need this is b/c I default rescale = high when error = 0
+        # @code_warntype red %88 = Base.AssertionError("limiter.safety * limiter.high > 1.0")::Any
+        @assert limiter.safety * limiter.high > 1.0
+
+        @set! adaptive.limiter = limiter
     end
 
     return adaptive

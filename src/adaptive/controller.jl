@@ -9,27 +9,24 @@ Time step controller based on PID control
 # Fields
 $(TYPEDFIELDS)
 """
-struct TimeStepController{P, L, T} <: Controller where {P <: PIDControlBeta,
-                                                        L <: LimiterMethod,
-                                                        T <: AbstractFloat}
+struct TimeStepController{P, T} <: Controller where {P <: PIDControlBeta,
+                                                     T <: AbstractFloat}
     pid::P
-    limiter::L
     e_prev::Vector{T}
     tol_prev::Vector{T}
     dt_prev::Vector{T}
     initialized::MVector{1,Bool}
 end
 
-function TimeStepController(precision::Type{T} = Float64; pid::P = PIControl(),
-                            limiter::L = PiecewiseLimiter()) where {P <: PIDControlBeta,
-                                                                    L <: LimiterMethod,
-                                                                    T <: AbstractFloat}
-    e_prev   = ones(precision, 2)
+function TimeStepController(precision::Type{T} = Float64;
+                            pid::P = PIControl()) where {P <: PIDControlBeta,
+                                                         T <: AbstractFloat}
+    e_prev   = ones(precision, 2)   # move these to update_cache
     tol_prev = ones(precision, 2)
     dt_prev  = ones(precision, 3)
     initialized = MVector{1, Bool}(false)
 
-    return TimeStepController(pid, limiter, e_prev, tol_prev, dt_prev, initialized)
+    return TimeStepController(pid, e_prev, tol_prev, dt_prev, initialized)
 end
 
 function rescale_time_step(controller::TimeStepController, tol::T,
@@ -69,8 +66,7 @@ end
 function reconstruct_controller(controller::TimeStepController,
                                 method::ODEMethod, adaptive::AdaptiveTimeStep,
                                 precision::Type{T}) where T <: AbstractFloat
-
-    @unpack pid, limiter = controller
+    @unpack pid = controller
     @unpack order = method
 
     local_order = get_local_order(adaptive, order)
@@ -79,14 +75,8 @@ function reconstruct_controller(controller::TimeStepController,
     @set! pid.beta1 = pid.beta1 / local_order
     @set! pid.beta2 = pid.beta2 / local_order
     @set! pid.beta3 = pid.beta3 / local_order
-    @set! limiter.high = limiter.high^repower_high
 
-    # TODO: add message
-    # reminder: reason I need this is b/c I default rescale = high when error = 0
-    # @code_warntype red %88 = Base.AssertionError("limiter.safety * limiter.high > 1.0")::Any
-    @assert limiter.safety * limiter.high > 1.0
-
-    return TimeStepController(precision; pid, limiter)
+    return TimeStepController(precision; pid)
 end
 
 function adjust_final_time_steps!(t::Vector{T}, dt::Vector{T},
