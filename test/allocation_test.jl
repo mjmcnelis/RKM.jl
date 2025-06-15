@@ -24,8 +24,9 @@ for precision in precision_vect, method in method_vect,
                                  limiter in limiter_vect,
                                  pid in pid_vect
 
-    controller = TimeStepController(precision; pid)
+    controller = TimeStepController(precision)
     if !(adaptive isa Fixed)
+        @set! adaptive.pid = pid
         @set! adaptive.limiter = limiter
     end
     save_solution = adaptive isa Fixed

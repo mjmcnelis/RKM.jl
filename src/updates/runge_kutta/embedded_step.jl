@@ -49,7 +49,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         if e_norm == 0.0                                # compute scaling factor for dt
             rescale = T(limiter.high)
         else
-            rescale = rescale_time_step(controller, tol, e_norm)
+            rescale = rescale_time_step(controller, adaptive, tol, e_norm)
             rescale = limit_time_step(limiter, rescale)
             # TODO: need to track rescale in the controller
             #       both for accepted and rejected step

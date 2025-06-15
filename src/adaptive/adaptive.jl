@@ -32,7 +32,8 @@ Step doubling adaptive time step algorithm
 # Fields
 $(TYPEDFIELDS)
 """
-struct Doubling{L} <: AdaptiveTimeStep where L <: LimiterMethod
+struct Doubling{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
+                                                    LM <: LimiterMethod}
     """Relative error tolerance"""
     epsilon::Float64
     """Absolute error tolerance"""
@@ -47,25 +48,29 @@ struct Doubling{L} <: AdaptiveTimeStep where L <: LimiterMethod
     total_attempts::MVector{1,Int64}
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool
+    """PID controller gain parameters"""
+    pid::PCB
     """Limiter method for time step controller"""
-    limiter::L
+    limiter::LM
 end
 
 function Doubling(; epsilon::Float64 = 1e-6, alpha::Float64 = 1e-6, delta::Float64 = 1e-6,
                     p_norm::Float64 = 2.0, max_attempts::Int64 = 10,
                     # consider making this a constant global
-                    benchmark_diffeq::Bool = false,
-                    limiter::L = PiecewiseLimiter()) where L <: LimiterMethod
+                    benchmark_diffeq::Bool = false, pid::PCB = PIControl(),
+                    limiter::LM = PiecewiseLimiter()) where {PCB <: PIDControlBeta,
+                                                             LM <: LimiterMethod}
 
     check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
     check_adaptive_parameters_2(; max_attempts)
     total_attempts = MVector{1,Int64}(0)
 
-    return Doubling(epsilon, alpha, delta, p_norm, max_attempts,
-                    total_attempts, benchmark_diffeq, limiter)
+    return Doubling(epsilon, alpha, delta, p_norm, max_attempts, total_attempts,
+                    benchmark_diffeq, pid, limiter)
 end
 
-struct Embedded{L} <: AdaptiveTimeStep where L <: LimiterMethod
+struct Embedded{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
+                                                    LM <: LimiterMethod}
     """Relative error tolerance"""
     epsilon::Float64
     """Absolute error tolerance"""
@@ -80,22 +85,25 @@ struct Embedded{L} <: AdaptiveTimeStep where L <: LimiterMethod
     total_attempts::MVector{1,Int64}
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool
+    """PID controller gain parameters"""
+    pid::PCB
     """Limiter method for time step controller"""
-    limiter::L
+    limiter::LM
 end
 
 function Embedded(; epsilon::Float64 = 1e-6, alpha::Float64 = 1e-6, delta::Float64 = 1e-6,
                     p_norm::Float64 = 2.0, max_attempts::Int64 = 10,
                     # consider making this a constant global
-                    benchmark_diffeq::Bool = false,
-                    limiter::L = PiecewiseLimiter()) where L <: LimiterMethod
+                    benchmark_diffeq::Bool = false, pid::PCB = PIControl(),
+                    limiter::LM = PiecewiseLimiter()) where {PCB <: PIDControlBeta,
+                                                             LM <: LimiterMethod}
 
     check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
     check_adaptive_parameters_2(; max_attempts)
     total_attempts = MVector{1,Int64}(0)
 
-    return Embedded(epsilon, alpha, delta, p_norm, max_attempts,
-                    total_attempts, benchmark_diffeq, limiter)
+    return Embedded(epsilon, alpha, delta, p_norm, max_attempts, total_attempts,
+                    benchmark_diffeq, pid, limiter)
 end
 
 function check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
@@ -142,25 +150,32 @@ function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
 end
 
 function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
-    @unpack benchmark_diffeq, limiter = adaptive
+    @unpack benchmark_diffeq, pid, limiter = adaptive
+    @unpack order = method
 
     # rescale tolerance parameters
     if !benchmark_diffeq
-        @unpack order = method
         repower_high = rescale_tolerance(adaptive, order) |> Float64
 
         @set! adaptive.epsilon ^= repower_high
         @set! adaptive.alpha ^= repower_high
         @set! adaptive.delta ^= repower_high
         @set! limiter.high ^= repower_high
+        @set! adaptive.limiter = limiter
 
         # TODO: add message
         # reminder: reason I need this is b/c I default rescale = high when error = 0
         # @code_warntype red %88 = Base.AssertionError("limiter.safety * limiter.high > 1.0")::Any
         @assert limiter.safety * limiter.high > 1.0
-
-        @set! adaptive.limiter = limiter
     end
+
+    # TODO: why don't I need |> Float64 here...
+    local_order = get_local_order(adaptive, order)
+
+    @set! pid.beta1 /= local_order
+    @set! pid.beta2 /= local_order
+    @set! pid.beta3 /= local_order
+    @set! adaptive.pid = pid
 
     return adaptive
 end

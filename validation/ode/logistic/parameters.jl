@@ -12,20 +12,15 @@ options = Dict(
 
     :adaptive => Fixed(),
     # :adaptive => Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
-    #                         # limiter = SmoothLimiter(),
-    #                         limiter = PiecewiseLimiter(),
+    #                         pid = PIControl(), limiter = SmoothLimiter(),
     #                      ),
     # :adaptive => Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
-    #                         limiter = SmoothLimiter(),
-    #                         # limiter = PiecewiseLimiter(),
+    #                         pid = PIControl(), limiter = SmoothLimiter(),
     #                      ),
 
     # :timer => TimeLimit(; wtime_min = 0),
 
-    :controller => TimeStepController(;
-                       pid = PIControl(),
-                      #  pid = H312Control(),
-                   ),
+    :controller => TimeStepController(),
 
     :stage_finder => ImplicitStageFinder(;
                         #  state_jacobian = ForwardJacobian(),
