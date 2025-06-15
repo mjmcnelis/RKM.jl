@@ -32,92 +32,65 @@ Step doubling adaptive time step algorithm
 # Fields
 $(TYPEDFIELDS)
 """
-struct Doubling{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
-                                                    LM <: LimiterMethod}
+@kwdef struct Doubling{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
+                                                           LM <: LimiterMethod}
     """Relative error tolerance"""
-    epsilon::Float64
+    epsilon::Float64 = 1e-6
     """Absolute error tolerance"""
-    alpha::Float64
+    alpha::Float64 = 1e-6
     """Incremental error tolerance"""
-    delta::Float64
+    delta::Float64 = 1e-6
     """Integer used to compute L--norms"""
-    p_norm::Float64
+    p_norm::Float64 = 2.0
     """Maximum number of attempts to compute time step per update"""
-    max_attempts::Int64
-    """Total number of attempts in evolution loop"""
-    total_attempts::MVector{1,Int64}
+    max_attempts::Int64 = 10
+    """Total number of attempts in evolution loop""" # TODO: move to update cache or solver
+    total_attempts::MVector{1,Int64} = MVector{1,Int64}(0)
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
-    benchmark_diffeq::Bool
+    benchmark_diffeq::Bool = false
     """PID controller gain parameters"""
-    pid::PCB
+    pid::PCB = PIControl()
     """Limiter method for time step controller"""
-    limiter::LM
+    limiter::LM = PiecewiseLimiter()
 end
 
-function Doubling(; epsilon::Float64 = 1e-6, alpha::Float64 = 1e-6, delta::Float64 = 1e-6,
-                    p_norm::Float64 = 2.0, max_attempts::Int64 = 10,
-                    # consider making this a constant global
-                    benchmark_diffeq::Bool = false, pid::PCB = PIControl(),
-                    limiter::LM = PiecewiseLimiter()) where {PCB <: PIDControlBeta,
-                                                             LM <: LimiterMethod}
-
-    check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
-    check_adaptive_parameters_2(; max_attempts)
-    total_attempts = MVector{1,Int64}(0)
-
-    return Doubling(epsilon, alpha, delta, p_norm, max_attempts, total_attempts,
-                    benchmark_diffeq, pid, limiter)
-end
-
-struct Embedded{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
-                                                    LM <: LimiterMethod}
+@kwdef struct Embedded{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
+                                                           LM <: LimiterMethod}
     """Relative error tolerance"""
-    epsilon::Float64
+    epsilon::Float64 = 1e-6
     """Absolute error tolerance"""
-    alpha::Float64
+    alpha::Float64 = 1e-6
     """Incremental error tolerance"""
-    delta::Float64
+    delta::Float64 = 1e-6
     """Integer used to compute L--norms"""
-    p_norm::Float64
+    p_norm::Float64 = 2.0
     """Maximum number of attempts to compute time step per update"""
-    max_attempts::Int64
-    """Total number of attempts in evolution loop"""
-    total_attempts::MVector{1,Int64}
+    max_attempts::Int64 = 10
+    """Total number of attempts in evolution loop""" # TODO: move to update cache or solver
+    total_attempts::MVector{1,Int64} = MVector{1,Int64}(0)
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
-    benchmark_diffeq::Bool
+    benchmark_diffeq::Bool = false
     """PID controller gain parameters"""
-    pid::PCB
+    pid::PCB = PIControl()
     """Limiter method for time step controller"""
-    limiter::LM
+    limiter::LM = PiecewiseLimiter()
 end
 
-function Embedded(; epsilon::Float64 = 1e-6, alpha::Float64 = 1e-6, delta::Float64 = 1e-6,
-                    p_norm::Float64 = 2.0, max_attempts::Int64 = 10,
-                    # consider making this a constant global
-                    benchmark_diffeq::Bool = false, pid::PCB = PIControl(),
-                    limiter::LM = PiecewiseLimiter()) where {PCB <: PIDControlBeta,
-                                                             LM <: LimiterMethod}
-
-    check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
-    check_adaptive_parameters_2(; max_attempts)
-    total_attempts = MVector{1,Int64}(0)
-
-    return Embedded(epsilon, alpha, delta, p_norm, max_attempts, total_attempts,
-                    benchmark_diffeq, pid, limiter)
+function check_adaptive_parameters(adaptive::Fixed)
+    return nothing
 end
 
-function check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
+function check_adaptive_parameters(adaptive::AdaptiveTimeStep)
+    @unpack epsilon, alpha, delta, p_norm, max_attempts = adaptive
+
     @assert epsilon >= 0.0 "epsilon = $epsilon cannot be negative"
     @assert alpha >= 0.0 "alpha = $alpha cannot be negative"
     @assert delta >= 0.0 "delta = $delta cannot be negative"
     msg = "one of the tolerance parameters (epsilon, alpha, delta) must be positive"
     @assert !all(x -> x == 0.0, [epsilon, alpha, delta]) msg
     @assert p_norm >= 1 "p_norm = $p_norm is not valid"
-    return nothing
-end
-
-function check_adaptive_parameters_2(; max_attempts)
     @assert max_attempts > 0 "max_attempts = $max_attempts is not greater than 0"
+
     return nothing
 end
 
@@ -150,8 +123,10 @@ function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
 end
 
 function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
-    @unpack benchmark_diffeq, pid, limiter = adaptive
+    @unpack total_attempts, benchmark_diffeq, pid, limiter = adaptive
     @unpack order = method
+
+    total_attempts .= 0
 
     # rescale tolerance parameters
     if !benchmark_diffeq
@@ -176,6 +151,8 @@ function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
     @set! pid.beta2 /= local_order
     @set! pid.beta3 /= local_order
     @set! adaptive.pid = pid
+
+    check_adaptive_parameters(adaptive)
 
     return adaptive
 end
