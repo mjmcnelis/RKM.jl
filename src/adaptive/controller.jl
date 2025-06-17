@@ -1,34 +1,20 @@
 
-abstract type Controller end
+function initialize_controller!(update_cache::UpdateCache, e_norm::T,
+                                tol::T, dt::T) where T <: AbstractFloat
 
-"""
-$(TYPEDEF)
+    @unpack e_prev, tol_prev, dt_prev = update_cache
 
-Time step controller based on PID control
+    e_prev .= e_norm
+    tol_prev .= tol
+    dt_prev .= dt
 
-# Fields
-$(TYPEDFIELDS)
-"""
-struct TimeStepController{T} <: Controller where T <: AbstractFloat
-    e_prev::Vector{T}
-    tol_prev::Vector{T}
-    dt_prev::Vector{T}
-    initialized::MVector{1,Bool}
+    return nothing
 end
 
-function TimeStepController(precision::Type{T} = Float64) where T <: AbstractFloat
-    e_prev   = ones(precision, 2)   # move these to update_cache
-    tol_prev = ones(precision, 2)
-    dt_prev  = ones(precision, 3)
-    initialized = MVector{1, Bool}(false)
-
-    return TimeStepController(e_prev, tol_prev, dt_prev, initialized)
-end
-
-function rescale_time_step(controller::TimeStepController, adaptive::ATS, tol::T,
+function rescale_time_step(adaptive::ATS, update_cache::UpdateCache, tol::T,
                            e_norm::T) where {ATS <: AdaptiveTimeStep, T <: AbstractFloat}
 
-    @unpack e_prev, tol_prev, dt_prev = controller
+    @unpack e_prev, tol_prev, dt_prev = update_cache
     @unpack pid = adaptive
     @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
 
@@ -39,31 +25,20 @@ function rescale_time_step(controller::TimeStepController, adaptive::ATS, tol::T
     return rescale
 end
 
-function initialize_controller!(controller::TimeStepController, e_norm::T,
-                                tol::T, dt::T) where T <: AbstractFloat
-    controller.e_prev   .= e_norm
-    controller.tol_prev .= tol
-    controller.dt_prev  .= dt
-    return nothing
-end
-
-function set_previous_control_vars!(controller::TimeStepController, e_norm::T,
+function set_previous_control_vars!(update_cache::UpdateCache, e_norm::T,
                                     tol::T, dt::T) where T <: AbstractFloat
-    controller.e_prev[2]   = controller.e_prev[1]
-    controller.e_prev[1]   = e_norm
-    controller.tol_prev[2] = controller.tol_prev[1]
-    controller.tol_prev[1] = tol
-    controller.dt_prev[3]  = controller.dt_prev[2]
-    controller.dt_prev[2]  = controller.dt_prev[1]
-    controller.dt_prev[1]  = dt
+
+    @unpack e_prev, tol_prev, dt_prev = update_cache
+
+    e_prev[2]   = e_prev[1]
+    e_prev[1]   = e_norm
+    tol_prev[2] = tol_prev[1]
+    tol_prev[1] = tol
+    dt_prev[3]  = dt_prev[2]
+    dt_prev[2]  = dt_prev[1]
+    dt_prev[1]  = dt
+
     return nothing
-end
-
-function reconstruct_controller(controller::TimeStepController,
-                                method::ODEMethod, adaptive::AdaptiveTimeStep,
-                                precision::Type{T}) where T <: AbstractFloat
-
-    return TimeStepController(precision)
 end
 
 function adjust_final_time_steps!(t::Vector{T}, dt::Vector{T},

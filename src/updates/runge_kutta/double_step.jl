@@ -1,13 +1,13 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
-             controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap_y!::ODEWrapperState, update_cache::RKMCache, linear_cache,
-             stage_finder::ImplicitStageFinder,
+             t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState, update_cache::RKMCache,
+             linear_cache, stage_finder::ImplicitStageFinder,
              # note: sensitivity not implemented for double step yet
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
-    @unpack epsilon, alpha, delta, p_norm, max_attempts, total_attempts, limiter = adaptive
+    @unpack epsilon, alpha, delta, p_norm, max_attempts,
+            total_attempts, limiter, initialized_controller = adaptive
     @unpack explicit_stage = method
     @unpack dt_min, dt_max = limiter
     @unpack y, y_tmp, f, f_tmp, y1, y2, res = update_cache
@@ -36,14 +36,15 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
 
         tol = max(epsilon*y_norm, alpha, delta*Δy_norm) # compute tolerance
 
-        if !controller.initialized[1]                   # initialize controller
-            initialize_controller!(controller, e_norm, tol, dt[1])
+        if !initialized_controller[1]                   # initialize controller variables
+            initialize_controller!(update_cache, e_norm, tol, dt[1])
         end
 
         if e_norm == 0.0                                # compute scaling factor for dt
             rescale = T(limiter.high)
         else
-            rescale = rescale_time_step(controller, adaptive, tol, e_norm)
+            # TODO: pass pid instead of adaptive
+            rescale = rescale_time_step(adaptive, update_cache, tol, e_norm)
             rescale = limit_time_step(limiter, rescale)
             # TODO: need to track rescale in the controller
             #       both for accepted and rejected step
@@ -52,16 +53,16 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         dt[2] = min(dt_max, max(dt_min, dt[1]*rescale)) # projected dt for next iteration
 
         if e_norm <= tol                                # compare error to tolerance
-            set_previous_control_vars!(controller, e_norm, tol, dt[1])
+            set_previous_control_vars!(update_cache, e_norm, tol, dt[1])
             break
         end
         attempts <= max_attempts || (println("step doubling exceeded $max_attempts attempts");
-                                     set_previous_control_vars!(controller, e_norm, tol, dt[1]);
+                                     set_previous_control_vars!(update_cache, e_norm, tol, dt[1]);
                                      break)
         attempts += 1
     end
     total_attempts[1] += attempts
-    controller.initialized[1] = true
+    initialized_controller[1] = true
 
     @.. y_tmp = y2                                      # get iteration
 

@@ -17,6 +17,9 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
     dS::Array{T,3}
     lambda_LR::Vector{ComplexF64}
     x0::Vector{ComplexF64}
+    e_prev::Vector{T}
+    tol_prev::Vector{T}
+    dt_prev::Vector{T}
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
@@ -33,10 +36,10 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     ny = dimensions                                             # state
     np = no_sensitivity ? 0 : coefficients                      # parameters
     nJ = (iteration isa Explicit && no_sensitivity) ? 0 : ny    # Jacobian
-    m = adaptive isa Fixed ? 0 : ny                             # primary/embedded
+    nm = adaptive isa Fixed ? 0 : ny                            # primary/embedded
     # TODO: okay use res for both root solver and stepsize control?
     ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # residual error (res)
-    nl = eigenmax isa NoEigenMax ? 0 : 1
+    nl = eigenmax isa NoEigenMax ? 0 : 1                        # eigenvalue
 
     if method isa LinearMultistep
         @unpack start_method = method
@@ -58,8 +61,8 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     else
         J = zeros(precision, nJ, nJ)
     end
-    y1 = zeros(precision, m)
-    y2 = zeros(precision, m)
+    y1 = zeros(precision, nm)
+    y2 = zeros(precision, nm)
     res = zeros(precision, ne)
 
     S = zeros(precision, ny, np)
@@ -76,6 +79,11 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
         x0 = ComplexF64[]
     end
 
-    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1,
-                       y2, res, S, S_tmp, dS, lambda_LR, x0)
+    # for time step controller
+    e_prev = ones(precision, 2)
+    tol_prev = ones(precision, 2)
+    dt_prev  = ones(precision, 3)
+
+    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, res, S,
+                       S_tmp, dS, lambda_LR, x0, e_prev, tol_prev, dt_prev)
 end

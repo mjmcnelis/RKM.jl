@@ -23,8 +23,6 @@ for precision in precision_vect, method in method_vect,
                                  adaptive in adaptive_vect,
                                  limiter in limiter_vect,
                                  pid in pid_vect
-
-    controller = TimeStepController(precision)
     if !(adaptive isa Fixed)
         @set! adaptive.pid = pid
         @set! adaptive.limiter = limiter
@@ -34,7 +32,7 @@ for precision in precision_vect, method in method_vect,
 
     # @show precision adaptive limiter pid
 
-    options = SolverOptions(; method, adaptive, controller, save_solution, precision)
+    options = SolverOptions(; method, adaptive, save_solution, precision)
 
     # sol = Solution(precision)
     # evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options)

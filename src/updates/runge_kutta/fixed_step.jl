@@ -1,8 +1,7 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
-             controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap_y!::ODEWrapperState, update_cache::RKMCache, linear_cache,
-             stage_finder::ImplicitStageFinder,
+             t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
+             update_cache::RKMCache, linear_cache, stage_finder::ImplicitStageFinder,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 

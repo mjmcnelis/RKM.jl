@@ -8,8 +8,6 @@ SolverOptions for the ODE solver.
     method::ODEMethod
     """Timer for ODE solver"""
     timer::TimeLimit = TimeLimit(; wtime_min = Inf)
-    """Adaptive time step controller"""
-    controller::Controller = TimeStepController()
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
     """Sensitivity method"""
@@ -35,9 +33,8 @@ function SolverOptions(dict::Dict)
 end
 
 function lookup_options(options::SolverOptions)
-    @unpack adaptive, method, timer, controller, stage_finder,
-            interpolator, sensitivity, save_solution,
-            show_progress, benchmark_subroutines, precision = options
+    @unpack adaptive, method, timer, stage_finder, interpolator, sensitivity,
+            save_solution, show_progress, benchmark_subroutines, precision = options
     return nothing
 end
 

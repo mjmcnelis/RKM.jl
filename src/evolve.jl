@@ -17,9 +17,9 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         clear_solution!(sol)
 
         # get solver options
-        @unpack adaptive, controller, method, timer, stage_finder, interpolator,
-                sensitivity, show_progress, save_solution, save_time_derivative,
-                benchmark_subroutines, precision = options
+        @unpack adaptive, method, timer, stage_finder, interpolator,
+                sensitivity, show_progress, save_solution,
+                save_time_derivative, benchmark_subroutines, precision = options
 
         reset_timer!(timer)
 
@@ -38,19 +38,15 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         t  = [t0]
         dt = [dt0, dt0]
 
-        # reconstruct: method, adaptive, controller, stage_finder, sensitivity
+        # reconstruct: method, adaptive, stage_finder, sensitivity
         # can these be done in SolverOptions constructor?
 
         # reconstruction
         method = reconstruct_method(method, precision)
 
         # TODO: put this before method reconstruction?
-        #       or maybe unpack and pass localorder
+        #       or maybe unpack and pass local order
         adaptive = reconstruct_adaptive(adaptive, method)
-
-        if !(adaptive isa Fixed)
-            controller = reconstruct_controller(controller, method, adaptive, precision)
-        end
 
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
@@ -126,7 +122,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             end
             adjust_final_time_steps!(t, dt, tf)
 
-            evolve_one_time_step!(method, adaptive, controller, t, dt, ode_wrap_y!,
+            evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!,
                                   update_cache, linear_cache, stage_finder,
                                   sensitivity, ode_wrap_p!, interpolator)
             t[1] += dt[1]

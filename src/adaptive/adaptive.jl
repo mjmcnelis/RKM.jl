@@ -52,6 +52,8 @@ $(TYPEDFIELDS)
     pid::PCB = PIControl()
     """Limiter method for time step controller"""
     limiter::LM = PiecewiseLimiter()
+    """Whether the time step controller has been initialized"""
+    initialized_controller::MVector{1,Bool} = MVector{1, Bool}(false)
 end
 
 @kwdef struct Embedded{PCB, LM} <: AdaptiveTimeStep where {PCB <: PIDControlBeta,
@@ -74,6 +76,8 @@ end
     pid::PCB = PIControl()
     """Limiter method for time step controller"""
     limiter::LM = PiecewiseLimiter()
+    """Whether the time step controller has been initialized"""
+    initialized_controller::MVector{1,Bool} = MVector{1, Bool}(false)
 end
 
 function check_adaptive_parameters(adaptive::Fixed)
@@ -123,10 +127,11 @@ function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
 end
 
 function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
-    @unpack total_attempts, benchmark_diffeq, pid, limiter = adaptive
+    @unpack benchmark_diffeq, pid, limiter = adaptive
     @unpack order = method
 
-    total_attempts .= 0
+    @set! adaptive.total_attempts = MVector{1,Int64}(0)
+    @set! adaptive.initialized_controller = MVector{1,Bool}(false)
 
     # rescale tolerance parameters
     if !benchmark_diffeq

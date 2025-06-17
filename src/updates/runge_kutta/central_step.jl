@@ -1,13 +1,14 @@
 
 # TODO: not really working that well right now, debug later (also out of date)
 function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
-             controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapperState, update_cache::RKMCache,
+             t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
+             update_cache::RKMCache,
              # TODO: may want to do kwargs for different caches used in adaptive methods
              # note: next argument was f but renamed it to y_prev here
              args...) where T <: AbstractFloat
 
     @unpack iteration = method
+    @unpack limiter = adaptive
     @unpack y, y_tmp, f_tmp, dy = update_cache
     y_prev = update_cache.f
 
@@ -16,7 +17,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
     # TEMP: fixed time step for first update until estimate first time step w/ doubling
     if ode_wrap!.FE[1] > 1
         @unpack epsilon, p_norm = adaptive
-        @unpack low, high, dt_min, dt_max = controller.limiter
+        @unpack low, high, dt_min, dt_max = limiter
 
         order = method.order[1]                         # order of scheme
 

@@ -36,7 +36,6 @@ include("wrapper.jl")
 include("adaptive/limiter.jl")
 include("adaptive/pid_control.jl")
 include("adaptive/adaptive.jl")
-include("adaptive/controller.jl")
 include("implicit/root.jl")
 include("implicit/jacobian.jl")
 include("implicit/eigenmax.jl")
@@ -48,6 +47,7 @@ include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
 include("plots.jl")
 include("cache.jl")
+include("adaptive/controller.jl")
 include("post_process/interpolation/interpolator_types.jl")
 include("post_process/interpolation/cubic_hermite.jl")
 include("post_process/interpolation/continuous_formula.jl")
@@ -101,7 +101,7 @@ include("post_process/eigenvalues.jl")
 # Adaptive methods
 export Fixed, Doubling, Embedded#, CentralDiff
 # Time step controller
-export TimeStepController, PIDControlBeta, PIDControlK
+export PIDControlBeta, PIDControlK
 export BasicControl, PIControl, H312Control, H321PredictiveControl,
        H211bPredictiveControl
 export PiecewiseLimiter, SmoothLimiter

@@ -1,7 +1,7 @@
 
 function evolve_one_time_step!(method::Adams, adaptive::Fixed,
-             controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
+             t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
+             update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack stages, iteration, order, start_counter = method
@@ -43,8 +43,8 @@ end
 
 
 function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
-             controller::Controller, t::Vector{T}, dt::Vector{T},
-             ode_wrap!::ODEWrapperState, update_cache::RKMCache, linear_cache,
+             t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
+             update_cache::RKMCache, linear_cache,
              stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack stages, iteration = method
