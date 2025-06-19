@@ -2,12 +2,10 @@
 abstract type StageFinder end
 
 # good enough start (wrap caches later)
-@kwdef struct ImplicitStageFinder{RFM, JM, AF, EMM} <: StageFinder where {
-                                                               RFM <: RootFinderMethod,
+@kwdef struct ImplicitStageFinder{JM, AF, EMM} <: StageFinder where {
                                                                JM <: JacobianMethod,
                                                                AF <: AbstractFactorization,
                                                                EMM <: EigenMaxMethod}
-    root_finder::RFM = Newton()
     state_jacobian::JM = FiniteJacobian()
     linear_method::AF = LUFactorization()
     eigenmax::EMM = NoEigenMax()

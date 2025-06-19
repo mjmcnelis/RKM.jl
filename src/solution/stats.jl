@@ -47,9 +47,9 @@ function get_stats(sol::Solution)
 end
 
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
-                                 stage_finder, save_time)
+                                 root_finder, stage_finder, save_time)
     @unpack f, y, J, res = update_cache
-    @unpack root_finder, state_jacobian = stage_finder
+    @unpack state_jacobian = stage_finder
 
     @unpack nt, ny, np = get_dimensions(sol)
 

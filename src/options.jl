@@ -10,6 +10,8 @@ SolverOptions for the ODE solver.
     timer::TimeLimit = TimeLimit(; wtime_min = Inf)
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
+    """Root finder for implicit ODE methods"""
+    root_finder::RootFinderMethod = Newton()
     """Sensitivity method"""
     sensitivity::SensitivityMethod = NoSensitivity()
     """Interpolation method for dense output"""
@@ -33,7 +35,7 @@ function SolverOptions(dict::Dict)
 end
 
 function lookup_options(options::SolverOptions)
-    @unpack adaptive, method, timer, stage_finder, interpolator, sensitivity,
+    @unpack adaptive, method, timer, stage_finder, root_finder, interpolator, sensitivity,
             save_solution, show_progress, benchmark_subroutines, precision = options
     return nothing
 end

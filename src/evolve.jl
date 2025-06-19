@@ -17,7 +17,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         clear_solution!(sol)
 
         # get solver options
-        @unpack adaptive, method, timer, stage_finder, interpolator,
+        @unpack adaptive, method, timer, root_finder, stage_finder, interpolator,
                 sensitivity, show_progress, save_solution,
                 save_time_derivative, benchmark_subroutines, precision = options
 
@@ -123,7 +123,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             adjust_final_time_steps!(t, dt, tf)
 
             evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!,
-                                  update_cache, linear_cache, stage_finder,
+                                  update_cache, linear_cache, root_finder, stage_finder,
                                   sensitivity, ode_wrap_p!, interpolator)
             t[1] += dt[1]
             timer.total_steps[1] += 1
@@ -151,7 +151,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
     if benchmark_subroutines && save_solution
         get_subroutine_runtimes(sol, ode_wrap_y!, update_cache, linear_cache,
-                                stage_finder, save_time[1])
+                                root_finder, stage_finder, save_time[1])
     end
 
     return nothing
