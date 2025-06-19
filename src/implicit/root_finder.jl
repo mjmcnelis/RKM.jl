@@ -8,12 +8,14 @@ abstract type RootFinderMethod end
     # TODO: make outer constructor to check p_norm value
     p_norm::Float64 = 2.0
     max_iterations::Int64 = 10
+    # TODO: track how many iterations were performed each step
 end
 
 @kwdef struct FixedPoint <: RootFinderMethod
     epsilon::Float64 = 1e-8
     p_norm::Float64 = 2.0
     max_iterations::Int64 = 10
+    # TODO: track how many iterations were performed each step
 end
 
 function root_iteration!(root_finder::FixedPoint, dy::Matrix{T}, i::Int64,

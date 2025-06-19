@@ -31,9 +31,9 @@ options = SolverOptions(; adaptive = Fixed(),
                         #   method = Ketcheson4(), # barely stable for ω = 10.0^(3/2)
                           stage_finder = ImplicitStageFinder(;
                                              state_jacobian = ForwardJacobian(),
-                                             eigenmax = KrylovEigenMax(; krylovdim = 2),
                                          ),
                           root_finder = Newton(; epsilon = 1e-6),
+                          eigenmax = KrylovEigenMax(; krylovdim = 2),
                        )
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 t, y = get_solution(sol)

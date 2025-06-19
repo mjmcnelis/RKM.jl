@@ -10,8 +10,10 @@ SolverOptions for the ODE solver.
     timer::TimeLimit = TimeLimit(; wtime_min = Inf)
     """Stage finder for implicit ODE methods"""
     stage_finder::StageFinder = ImplicitStageFinder()
-    """Root finder for implicit ODE methods"""
+    """Root finder for implicit ODE solvers"""
     root_finder::RootFinderMethod = Newton()
+    """Max eigenvalue method for implicit ODE solvers"""
+    eigenmax::EigenMaxMethod = NoEigenMax()
     """Sensitivity method"""
     sensitivity::SensitivityMethod = NoSensitivity()
     """Interpolation method for dense output"""

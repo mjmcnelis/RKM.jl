@@ -1,14 +1,16 @@
 
 function evolve_one_time_step!(method::Adams, adaptive::Fixed,
-             t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
-             update_cache::RKMCache, linear_cache,
-             stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+             t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
+             update_cache::RKMCache, linear_cache, root_finder::RootFinderMethod,
+             eigenmax::EigenMaxMethod, stage_finder::ImplicitStageFinder,
+             sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
+             interpolator::Interpolator) where T <: AbstractFloat
 
     @unpack stages, iteration, order, start_counter = method
     @unpack dy, dy_LM, y, y_tmp, f = update_cache
 
     # evaluate ODE at current state/time (i.e E)
-    ode_wrap!(f, t[1], y)
+    ode_wrap_y!(f, t[1], y)
 
     @.. dy[:,1] = dt[1] * f
     @.. dy_LM[:,1] = dt[1] * f
@@ -25,12 +27,15 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
         @unpack start_method = method
         start_iteration = start_method.iteration
 
-        runge_kutta_step!(start_method, start_iteration, t[1], dt[1], ode_wrap!,
-                          update_cache, linear_cache, stage_finder)
+        runge_kutta_step!(start_method, start_iteration, t, dt, ode_wrap_y!,
+                          update_cache, linear_cache, root_finder, eigenmax,
+                          stage_finder, sensitivity, ode_wrap_p!)
+
         start_counter[1] += 1
     else
-        adams_step!(method, iteration, t[1], dt[1], ode_wrap!,
-                    update_cache, linear_cache, stage_finder)
+        adams_step!(method, iteration, t[1], dt[1], ode_wrap_y!,
+                    update_cache, linear_cache, root_finder, eigenmax,
+                    stage_finder)
     end
 
     # shift stages (except first one)

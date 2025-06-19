@@ -17,8 +17,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         clear_solution!(sol)
 
         # get solver options
-        @unpack method, adaptive, timer, root_finder, stage_finder, interpolator,
-                sensitivity, show_progress, save_solution,
+        @unpack method, adaptive, timer, root_finder, eigenmax, stage_finder,
+                interpolator, sensitivity, show_progress, save_solution,
                 save_time_derivative, benchmark_subroutines, precision = options
 
         reset_timer!(timer)
@@ -50,7 +50,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
-                                   coefficients, sensitivity, stage_finder)
+                                   coefficients, sensitivity, stage_finder, eigenmax)
 
         @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp, lambda_LR, x0 = update_cache
 
@@ -63,7 +63,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             stage_finder = reconstruct_stage_finder(stage_finder, ode_wrap_y!, f_tmp, y)
         end
 
-        @unpack eigenmax, state_jacobian = stage_finder
+        @unpack state_jacobian = stage_finder
 
         @unpack linear_method = root_finder
         # TODO: reconstruct_root_finder to remake linear cache, then unpack it
@@ -126,7 +126,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             adjust_final_time_steps!(t, dt, tf)
 
             evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!,
-                                  update_cache, linear_cache, root_finder, stage_finder,
+                                  update_cache, linear_cache, root_finder, eigenmax,
+                                  stage_finder,
                                   sensitivity, ode_wrap_p!, interpolator)
             t[1] += dt[1]
             timer.total_steps[1] += 1

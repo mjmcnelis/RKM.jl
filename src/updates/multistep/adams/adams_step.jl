@@ -18,10 +18,12 @@ end
 @muladd function adams_step!(method::Adams, ::SingleImplicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
+                     root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack b, b_pred, stages = method
-    @unpack root_finder, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
+    @unpack state_jacobian = stage_finder
+    @unpack epsilon, p_norm, max_iterations = root_finder
     @unpack dy_LM, y, y_tmp, f_tmp, J, res = update_cache
 
     # set implicit time in wrapper

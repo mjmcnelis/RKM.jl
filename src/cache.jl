@@ -26,10 +26,11 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      adaptive::AdaptiveTimeStep,
                      dimensions::Int64, coefficients::Int64,
                      sensitivity::SensitivityMethod,
-                     stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+                     stage_finder::ImplicitStageFinder,
+                     eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
     @unpack iteration, stages = method
-    @unpack state_jacobian, eigenmax = stage_finder
+    @unpack state_jacobian = stage_finder
 
     no_sensitivity = sensitivity isa NoSensitivity
 
