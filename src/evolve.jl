@@ -17,7 +17,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         clear_solution!(sol)
 
         # get solver options
-        @unpack adaptive, method, timer, root_finder, stage_finder, interpolator,
+        @unpack method, adaptive, timer, root_finder, stage_finder, interpolator,
                 sensitivity, show_progress, save_solution,
                 save_time_derivative, benchmark_subroutines, precision = options
 
@@ -63,7 +63,10 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             stage_finder = reconstruct_stage_finder(stage_finder, ode_wrap_y!, f_tmp, y)
         end
 
-        @unpack linear_method, eigenmax, state_jacobian = stage_finder
+        @unpack eigenmax, state_jacobian = stage_finder
+
+        @unpack linear_method = root_finder
+        # TODO: reconstruct_root_finder to remake linear cache, then unpack it
         # configure linear cache (see src/common.jl in LinearSolve.jl)
         linear_cache = init(LinearProblem(J, res), linear_method;
                             alias_A = true, alias_b = true)

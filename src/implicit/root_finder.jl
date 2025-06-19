@@ -1,7 +1,8 @@
 
 abstract type RootFinderMethod end
 
-@kwdef struct Newton <: RootFinderMethod
+@kwdef struct Newton{AF} <: RootFinderMethod where AF <: AbstractFactorization
+    linear_method::AF = LUFactorization()
     # TODO: reuse adaptive epsilon or 100x smaller?
     epsilon::Float64 = 1e-8
     # TODO: make outer constructor to check p_norm value

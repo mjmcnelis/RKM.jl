@@ -34,11 +34,11 @@ options = SolverOptions(
               method = BackwardEuler1(),
               adaptive = Fixed(),
               stage_finder = ImplicitStageFinder(
-                                 linear_method = KLUFactorization(),
                                  # TODO: finitediff w/ sparsity doesn't seem to be working
                                 #  state_jacobian = FiniteJacobian(; sparsity),
                                  state_jacobian = ForwardColorJacobian(; sparsity)
                              ),
+              root_finder = Newton(; linear_method = KLUFactorization(),),
               benchmark_subroutines = true,
               # TODO: this doesn't work
             #   precision = Double64

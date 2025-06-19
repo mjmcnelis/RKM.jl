@@ -21,13 +21,14 @@ options = Dict(
     :stage_finder => ImplicitStageFinder(;
                         #  state_jacobian = ForwardJacobian(),
                          state_jacobian = FiniteJacobian(),
-                        #  linear_method = LUFactorization(),
-                         linear_method = RFLUFactorization(),
                         # TODO: limit krylovdim to ny
                         # eigenmax = KrylovEigenMax(; krylovdim = 1),
                      ),
 
-    :root_finder => Newton(),
+    :root_finder => Newton(;
+                        # linear_method = LUFactorization(),
+                        linear_method = RFLUFactorization(),
+                    ),
     # :root_finder => FixedPoint(),
 
     :sensitivity => NoSensitivity(),
