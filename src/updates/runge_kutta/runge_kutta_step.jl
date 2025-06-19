@@ -53,8 +53,8 @@ end
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
-    @unpack root_method, state_jacobian, epsilon,
-            max_iterations, p_norm, eigenmax = stage_finder
+    @unpack root_finder, state_jacobian, eigenmax = stage_finder
+    @unpack epsilon, p_norm, max_iterations = root_finder
     @unpack dy, y, y_tmp, f, f_tmp, J, res, S, S_tmp, dS, lambda_LR, x0 = update_cache
 
     # have while loop stashed but couldn't figure out why it was allocating
@@ -134,21 +134,17 @@ end
                     break
                 end
 
-                if root_method isa FixedPoint
-                    @.. dy[:,i] -= res
-                elseif root_method isa Newton
-                    # evaluate current Jacobian
+                # TODO: if J is sparse, make sure all diagonals are nonzero
+                if root_finder isa Newton
+                    # evaluate current state Jacobian
                     evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
+                    # note: might want to compute eigenvalues before this
 
                     # J <- I - dt*A*J
                     root_jacobian!(J, A_T[i,i], dt[1])
-
-                    # pass Jacobian and residual error to linear cache
-                    linear_cache.A = J
-                    linear_cache.b = res
-                    solve!(linear_cache)
-                    @.. dy[:,i] -= linear_cache.u
                 end
+
+                root_iteration!(root_finder, dy, i, res, J, linear_cache)
             end
         end
 

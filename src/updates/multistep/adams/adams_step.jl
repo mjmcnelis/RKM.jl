@@ -21,7 +21,7 @@ end
                      stage_finder::ImplicitStageFinder) where T <: AbstractFloat
 
     @unpack b, b_pred, stages = method
-    @unpack root_method, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
+    @unpack root_finder, state_jacobian, epsilon, max_iterations, p_norm = stage_finder
     @unpack dy_LM, y, y_tmp, f_tmp, J, res = update_cache
 
     # set implicit time in wrapper
@@ -65,9 +65,9 @@ end
             break
         end
 
-        if root_method isa FixedPoint
+        if root_finder isa FixedPoint
             @.. dy_LM[:,1] -= res
-        elseif root_method isa Newton
+        elseif root_finder isa Newton
             # evaluate current Jacobian
             evaluate_jacobian!(state_jacobian, J, ode_wrap!, y_tmp, f_tmp)
             # J <- I - b.dt.J

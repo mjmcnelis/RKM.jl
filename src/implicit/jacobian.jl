@@ -105,8 +105,7 @@ function root_jacobian!(J::Matrix{T}, A::T, dt::T) where T <: AbstractFloat
     return nothing
 end
 
-function root_jacobian!(J::SparseMatrixCSC{T,Int64},
-                        A::T, dt::T) where T <: AbstractFloat
+function root_jacobian!(J::SparseMatrixCSC{T,Int64}, A::T, dt::T) where T <: AbstractFloat
     @.. J.nzval = J.nzval * (-A*dt)
     for k in diagind(J)
         J[k] = J[k] + 1.0

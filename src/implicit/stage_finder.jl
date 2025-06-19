@@ -2,18 +2,15 @@
 abstract type StageFinder end
 
 # good enough start (wrap caches later)
-@kwdef struct ImplicitStageFinder{JM, AF, EMM} <: StageFinder where {JM <: JacobianMethod,
+@kwdef struct ImplicitStageFinder{RFM, JM, AF, EMM} <: StageFinder where {
+                                                               RFM <: RootFinderMethod,
+                                                               JM <: JacobianMethod,
                                                                AF <: AbstractFactorization,
                                                                EMM <: EigenMaxMethod}
-    root_method::RootMethod = Newton()  # TODO: try RM
+    root_finder::RFM = Newton()
     state_jacobian::JM = FiniteJacobian()
     linear_method::AF = LUFactorization()
     eigenmax::EMM = NoEigenMax()
-    # TODO: reuse adaptive epsilon or 100x smaller?
-    epsilon::Float64 = 1e-8
-    max_iterations::Int64 = 10
-    # TODO: make outer constructor to check p_norm value
-    p_norm::Float64 = 2.0
     # add iterations_per_stage
 end
 
