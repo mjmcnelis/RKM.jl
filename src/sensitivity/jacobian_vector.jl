@@ -37,12 +37,10 @@ end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::NaiveJacobianVector,
                                         JS::SubArray{T}, ode_wrap!::ODEWrapperState,
-                                        stage_finder::ImplicitStageFinder,
+                                        state_jacobian::JacobianMethod,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         f::Vector{T}) where T <: AbstractFloat
-    @unpack state_jacobian = stage_finder
-
     # note: still allocate J for sensitivity methods that don't use it directly
     evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
     # runtime isn't that bad if J is sparse
@@ -52,7 +50,7 @@ end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::FiniteJacobianVector,
                                         JS::SubArray{T}, ode_wrap!::ODEWrapperState,
-                                        stage_finder::ImplicitStageFinder,
+                                        state_jacobian::JacobianMethod,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         f::Vector{T}) where T <: AbstractFloat
@@ -70,7 +68,7 @@ end
 
 function evaluate_jacobian_sensitivity!(jacobian_vector::ForwardJacobianVector,
                                         JS::SubArray{T}, ode_wrap!::ODEWrapperState,
-                                        stage_finder::ImplicitStageFinder,
+                                        state_jacobian::JacobianMethod,
                                         J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                         S::Matrix{T}, y::Vector{T},
                                         args...) where T <: AbstractFloat

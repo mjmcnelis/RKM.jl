@@ -18,13 +18,14 @@ end
     # TODO: track how many iterations were performed each step
 end
 
+# TODO: pass dy_stage::SubArray{T} instead
 function root_iteration!(root_finder::FixedPoint, dy::Matrix{T}, i::Int64,
                          res::Vector{T}, args...) where T <: AbstractFloat
     @.. dy[:,i] -= res
-
     return nothing
 end
 
+# TODO: pass dy_stage::SubArray{T} instead
 function root_iteration!(root_finder::Newton, dy::Matrix{T}, i::Int64, res::Vector{T},
                          J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                          linear_cache) where T <: AbstractFloat
@@ -33,6 +34,5 @@ function root_iteration!(root_finder::Newton, dy::Matrix{T}, i::Int64, res::Vect
     linear_cache.b = res
     solve!(linear_cache)
     @.. dy[:,i] -= linear_cache.u
-
     return nothing
 end

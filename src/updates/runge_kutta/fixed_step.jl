@@ -1,8 +1,8 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
              t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-             update_cache::RKMCache, linear_cache, root_finder::RootFinderMethod,
-             eigenmax::EigenMaxMethod, stage_finder::ImplicitStageFinder,
+             update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
+             root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
@@ -18,13 +18,13 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     if explicit_stage[1]
         stage_idx = 1
         @.. y_tmp = y
-        explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t[1],
+        explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t[1],
                                     dt[1], update_cache, ode_wrap_y!, ode_wrap_p!,
                                     method)
     end
 
     runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
-                      linear_cache, root_finder, eigenmax, stage_finder,
+                      linear_cache, state_jacobian, root_finder, eigenmax,
                       sensitivity, ode_wrap_p!)
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)

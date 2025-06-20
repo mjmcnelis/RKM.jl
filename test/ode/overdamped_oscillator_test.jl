@@ -29,9 +29,7 @@ p = [γ, ω]
 options = SolverOptions(; adaptive = Fixed(),
                           method = TrapezoidRuleBDF2(),
                         #   method = Ketcheson4(), # barely stable for ω = 10.0^(3/2)
-                          stage_finder = ImplicitStageFinder(;
-                                             state_jacobian = ForwardJacobian(),
-                                         ),
+                          state_jacobian = ForwardJacobian(),
                           root_finder = Newton(; epsilon = 1e-6),
                           eigenmax = KrylovEigenMax(; krylovdim = 2),
                        )

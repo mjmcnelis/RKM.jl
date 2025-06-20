@@ -1,8 +1,8 @@
 
 function evolve_one_time_step!(method::Adams, adaptive::Fixed,
              t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-             update_cache::RKMCache, linear_cache, root_finder::RootFinderMethod,
-             eigenmax::EigenMaxMethod, stage_finder::ImplicitStageFinder,
+             update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
+             root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
@@ -28,14 +28,14 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
         start_iteration = start_method.iteration
 
         runge_kutta_step!(start_method, start_iteration, t, dt, ode_wrap_y!,
-                          update_cache, linear_cache, root_finder, eigenmax,
-                          stage_finder, sensitivity, ode_wrap_p!)
+                          update_cache, linear_cache, state_jacobian, root_finder,
+                          eigenmax, sensitivity, ode_wrap_p!)
 
         start_counter[1] += 1
     else
-        adams_step!(method, iteration, t[1], dt[1], ode_wrap_y!,
-                    update_cache, linear_cache, root_finder, eigenmax,
-                    stage_finder)
+        adams_step!(method, iteration, t[1], dt[1], ode_wrap_y!, update_cache,
+                    linear_cache, state_jacobian, root_finder, eigenmax)
+
     end
 
     # shift stages (except first one)
@@ -50,7 +50,7 @@ end
 function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
              t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
              update_cache::RKMCache, linear_cache,
-             stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+             state_jacobian::JacobianMethod) where T <: AbstractFloat
 
     @unpack stages, iteration = method
     @unpack dy, y, y_tmp = update_cache
@@ -64,7 +64,7 @@ function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
     end
 
     differentiation_formula_step!(method, iteration, t[1], dt[1], ode_wrap!,
-                                  update_cache, linear_cache, stage_finder)
+                                  update_cache, linear_cache, state_jacobian)
 
     # shift states
     for j in 1:stages-2

@@ -3,10 +3,9 @@
 function initial_output!(sol::Solution{T}, update_cache::UpdateCache{T}, t::Vector{T},
                          options::SolverOptions{T}) where T <: AbstractFloat
 
-    @unpack save_time_derivative, interpolator, sensitivity, stage_finder = options
+    @unpack save_time_derivative, interpolator, eigenmax, sensitivity = options
     @unpack y, f, S, lambda_LR = update_cache
     # try passing eigenmax directly again
-    @unpack eigenmax = stage_finder
 
     append!(sol.t, t[1])
     append!(sol.y, y)

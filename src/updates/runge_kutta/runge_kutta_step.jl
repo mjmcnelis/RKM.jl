@@ -2,9 +2,8 @@
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
                      t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache,
+                     update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
                      root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-                     stage_finder::ImplicitStageFinder,
                      sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
     @unpack c, A_T, b, stages = method
@@ -24,7 +23,7 @@
         @.. dy[:,i] = dt[1] * f_tmp
 
         # for sensitivity
-        explicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt[1],
+        explicit_sensitivity_stage!(sensitivity, i, state_jacobian, t_tmp, dt[1],
                                     update_cache, ode_wrap_y!, ode_wrap_p!,
                                     method)
     end
@@ -48,14 +47,12 @@ end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache,
+                     update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
                      root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-                     stage_finder::ImplicitStageFinder,
                      sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
     @unpack c, A_T, b, stages, explicit_stage, fesal = method
-    @unpack state_jacobian = stage_finder
     @unpack epsilon, p_norm, max_iterations = root_finder
     @unpack dy, y, y_tmp, f, f_tmp, J, res, S, S_tmp, dS, lambda_LR, x0 = update_cache
 
@@ -79,7 +76,7 @@ end
             if attempt > 0
                 @.. dy[:,i] = dt[1] * f
                 @.. y_tmp = y
-                explicit_sensitivity_stage!(sensitivity, i, stage_finder, t[1], dt[1],
+                explicit_sensitivity_stage!(sensitivity, i, state_jacobian, t[1], dt[1],
                                             update_cache, ode_wrap_y!, ode_wrap_p!, method)
             end
             =#
@@ -153,7 +150,7 @@ end
         end
 
         # for sensitivity
-        implicit_sensitivity_stage!(sensitivity, i, stage_finder, t_tmp, dt[1],
+        implicit_sensitivity_stage!(sensitivity, i, state_jacobian, t_tmp, dt[1],
                                     update_cache, ode_wrap_y!, ode_wrap_p!,
                                     A_T[i,i], method)
     end

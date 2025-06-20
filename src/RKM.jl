@@ -39,7 +39,6 @@ include("adaptive/adaptive.jl")
 include("implicit/root_finder.jl")
 include("implicit/jacobian.jl")
 include("implicit/eigenmax.jl")
-include("implicit/stage_finder.jl")
 include("implicit/nansafe/nansafe_jacobian.jl")
 include("implicit/nansafe/nansafe_utils.jl")
 include("sensitivity/jacobian_vector.jl")
@@ -105,8 +104,6 @@ export PIDControlBeta, PIDControlK
 export BasicControl, PIControl, H312Control, H321PredictiveControl,
        H211bPredictiveControl
 export PiecewiseLimiter, SmoothLimiter
-# Implicit stage finder
-export ImplicitStageFinder
 # Eigenmax methods
 export NoEigenMax, LinearEigenMax, KrylovEigenMax
 # Root finder methods

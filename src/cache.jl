@@ -23,14 +23,11 @@ struct UpdateCache{T <: AbstractFloat} <: RKMCache
 end
 
 function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
-                     adaptive::AdaptiveTimeStep,
-                     dimensions::Int64, coefficients::Int64,
-                     sensitivity::SensitivityMethod,
-                     stage_finder::ImplicitStageFinder,
+                     adaptive::AdaptiveTimeStep, dimensions::Int64, coefficients::Int64,
+                     sensitivity::SensitivityMethod, state_jacobian::JacobianMethod,
                      eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
     @unpack iteration, stages = method
-    @unpack state_jacobian = stage_finder
 
     no_sensitivity = sensitivity isa NoSensitivity
 

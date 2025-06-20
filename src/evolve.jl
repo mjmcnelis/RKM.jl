@@ -17,9 +17,9 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         clear_solution!(sol)
 
         # get solver options
-        @unpack method, adaptive, timer, root_finder, eigenmax, stage_finder,
-                interpolator, sensitivity, show_progress, save_solution,
-                save_time_derivative, benchmark_subroutines, precision = options
+        @unpack method, adaptive, timer, state_jacobian, root_finder, eigenmax,
+                sensitivity, interpolator, save_solution, save_time_derivative,
+                show_progress, benchmark_subroutines, precision = options
 
         reset_timer!(timer)
 
@@ -38,7 +38,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         t  = [t0]
         dt = [dt0, dt0]
 
-        # reconstruct: method, adaptive, stage_finder, sensitivity
+        # reconstruct: method, adaptive, state_jacobian, sensitivity
         # can these be done in SolverOptions constructor?
 
         # reconstruction
@@ -50,7 +50,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
-                                   coefficients, sensitivity, stage_finder, eigenmax)
+                                   coefficients, sensitivity, state_jacobian, eigenmax)
 
         @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp, lambda_LR, x0 = update_cache
 
@@ -60,10 +60,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         @unpack iteration = method
         if iteration isa Implicit || !(sensitivity isa NoSensitivity)
-            stage_finder = reconstruct_stage_finder(stage_finder, ode_wrap_y!, f_tmp, y)
+            state_jacobian = reconstruct_jacobian(state_jacobian, ode_wrap_y!, f_tmp, y)
         end
-
-        @unpack state_jacobian = stage_finder
 
         @unpack linear_method = root_finder
         # TODO: reconstruct_root_finder to remake linear cache, then unpack it
@@ -125,9 +123,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             end
             adjust_final_time_steps!(t, dt, tf)
 
-            evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!,
-                                  update_cache, linear_cache, root_finder, eigenmax,
-                                  stage_finder,
+            evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!, update_cache,
+                                  linear_cache, state_jacobian, root_finder, eigenmax,
                                   sensitivity, ode_wrap_p!, interpolator)
             t[1] += dt[1]
             timer.total_steps[1] += 1
@@ -151,11 +148,11 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
     sol.FE[1] = ode_wrap_y!.FE[1] + ode_wrap_p!.FE[1]
 
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,
-                   stage_finder, sensitivity, loop_stats, config_bytes)
+                   state_jacobian, sensitivity, loop_stats, config_bytes)
 
     if benchmark_subroutines && save_solution
         get_subroutine_runtimes(sol, ode_wrap_y!, update_cache, linear_cache,
-                                root_finder, stage_finder, save_time[1])
+                                root_finder, state_jacobian, save_time[1])
     end
 
     return nothing

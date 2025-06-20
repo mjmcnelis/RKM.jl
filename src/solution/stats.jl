@@ -1,10 +1,9 @@
 
 function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveTimeStep,
                         interpolator::Interpolator, timer::TimeLimit,
-                        stage_finder::StageFinder, sensitivity::SensitivityMethod,
+                        state_jacobian::JacobianMethod, sensitivity::SensitivityMethod,
                         loop_stats::NamedTuple, config_bytes::Int64)
 
-    @unpack state_jacobian = stage_finder
     JE_y = state_jacobian.evaluations[1]
     # TODO: simplify this
     JE_p = 0
@@ -47,9 +46,8 @@ function get_stats(sol::Solution)
 end
 
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
-                                 root_finder, stage_finder, save_time)
+                                 root_finder, state_jacobian, save_time)
     @unpack f, y, J, res = update_cache
-    @unpack state_jacobian = stage_finder
 
     @unpack nt, ny, np = get_dimensions(sol)
 

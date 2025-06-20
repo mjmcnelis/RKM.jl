@@ -20,11 +20,10 @@ end
     evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
 end
 
-function reconstruct_jacobian_method(jacobian_method::FiniteJacobian,
-                                     ode_wrap!::W, f::Vector{T},
-                                     x::Vector{T2}) where {W <: Wrapper,
-                                                           T <: AbstractFloat,
-                                                           T2 <: AbstractFloat}
+function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W,
+                              f::Vector{T}, x::Vector{T2}) where {W <: Wrapper,
+                                                                  T <: AbstractFloat,
+                                                                  T2 <: AbstractFloat}
     @unpack evaluations, sparsity = jacobian_method
     evaluations[1] = 0
 
@@ -40,11 +39,10 @@ function reconstruct_jacobian_method(jacobian_method::FiniteJacobian,
     return jacobian_method
 end
 
-function reconstruct_jacobian_method(jacobian_method::ForwardJacobian,
-                                     ode_wrap!::W, f::Vector{T},
-                                     x::Vector{T2}) where {W <: Wrapper,
-                                                           T <: AbstractFloat,
-                                                           T2 <: AbstractFloat}
+function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W,
+                              f::Vector{T}, x::Vector{T2}) where {W <: Wrapper,
+                                                                  T <: AbstractFloat,
+                                                                  T2 <: AbstractFloat}
     @unpack evaluations = jacobian_method
     evaluations[1] = 0
 
@@ -54,11 +52,10 @@ function reconstruct_jacobian_method(jacobian_method::ForwardJacobian,
     return jacobian_method
 end
 
-function reconstruct_jacobian_method(jacobian_method::ForwardColorJacobian,
-                                     ode_wrap!::W, f::Vector{T},
-                                     x::Vector{T2}) where {W <: Wrapper,
-                                                           T <: AbstractFloat,
-                                                           T2 <: AbstractFloat}
+function reconstruct_jacobian(jacobian_method::ForwardColorJacobian, ode_wrap!::W,
+                              f::Vector{T}, x::Vector{T2}) where {W <: Wrapper,
+                                                                  T <: AbstractFloat,
+                                                                  T2 <: AbstractFloat}
     @unpack evaluations, sparsity = jacobian_method
     evaluations[1] = 0
 

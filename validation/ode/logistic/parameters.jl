@@ -1,13 +1,10 @@
 
 options = Dict(
     :method => RungeKutta4(),
-    # :method => BogackiShampine32(),
     # :method => BackwardEuler1(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()
     # :method => AdamsBashforth(; order = 2),
     # :method => AdamsMoulton(; order = 2),
-    # :method => BackwardDifferentiationFormula(; order = 2),   # BDF and NDF currently broken
-    # :method => NumericalDifferentiationFormula(; order = 2),
     # :method => HeunEuler21(),
 
     :adaptive => Fixed(),
@@ -18,10 +15,8 @@ options = Dict(
 
     # :timer => TimeLimit(; wtime_min = 0),
 
-    :stage_finder => ImplicitStageFinder(;
-                        #  state_jacobian = ForwardJacobian(),
-                         state_jacobian = FiniteJacobian(),
-                     ),
+    :state_jacobian => FiniteJacobian(),
+    # :state_jacobian => ForwardJacobian(),
 
     :root_finder => Newton(; linear_method = RFLUFactorization(),),
     # :root_finder => FixedPoint(),

@@ -18,11 +18,10 @@ end
 @muladd function adams_step!(method::Adams, ::SingleImplicit,
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, linear_cache,
-                     root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-                     stage_finder::ImplicitStageFinder) where T <: AbstractFloat
+                     state_jacobian::JacobianMethod, root_finder::RootFinderMethod,
+                     eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
     @unpack b, b_pred, stages = method
-    @unpack state_jacobian = stage_finder
     @unpack epsilon, p_norm, max_iterations = root_finder
     @unpack dy_LM, y, y_tmp, f_tmp, J, res = update_cache
 

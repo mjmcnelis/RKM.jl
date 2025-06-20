@@ -18,7 +18,7 @@ function reconstruct_sensitivity(sensitivity::DecoupledDirect,
                                  f::Vector{T}, p::Vector{Float64}) where T <: AbstractFloat
     @unpack param_jacobian, jacobian_vector = sensitivity
 
-    param_jacobian = reconstruct_jacobian_method(param_jacobian, ode_wrap_p!, f, p)
+    param_jacobian = reconstruct_jacobian(param_jacobian, ode_wrap_p!, f, p)
     jacobian_vector = reconstruct_jacobian_vector(jacobian_vector, f)
 
     @set! sensitivity.param_jacobian = param_jacobian
@@ -30,7 +30,7 @@ function explicit_sensitivity_stage!(::NoSensitivity, args...)
     return nothing
 end
 
-function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp,
+function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_tmp,
                                      dt, update_cache, ode_wrap_y!, ode_wrap_p!,
                                      method)
 
@@ -55,7 +55,7 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp
 
     # compute Jacobian-sensitivity product: dS <- J*S_tmp
     evaluate_jacobian_sensitivity!(jacobian_vector, dS_stage, ode_wrap_y!,
-                                   stage_finder, J, S_tmp, y_tmp, f_tmp)
+                                   state_jacobian, J, S_tmp, y_tmp, f_tmp)
 
     # compute parameter-Jacobian: S_tmp <- df/dp
     @unpack p = ode_wrap_y!
@@ -72,11 +72,11 @@ function implicit_sensitivity_stage!(::NoSensitivity, args...)
     return nothing
 end
 
-function implicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp,
+function implicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_tmp,
                                      dt, update_cache, ode_wrap_y!, ode_wrap_p!, A,
                                      method)
 
-    explicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp,
+    explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_tmp,
                                 dt, update_cache, ode_wrap_y!, ode_wrap_p!,
                                 method)
 
@@ -85,7 +85,6 @@ function implicit_sensitivity_stage!(sensitivity, stage_idx, stage_finder, t_tmp
     # compute Jacobian df/dy if not already done in explicit sensitivity
     @unpack jacobian_vector = sensitivity
     if !(jacobian_vector isa NaiveJacobianVector)
-        @unpack state_jacobian = stage_finder
         evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
     end
 

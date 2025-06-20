@@ -8,8 +8,8 @@ SolverOptions for the ODE solver.
     adaptive::AdaptiveTimeStep
     """Timer for ODE solver"""
     timer::TimeLimit = TimeLimit(; wtime_min = Inf)
-    """Stage finder for implicit ODE methods"""
-    stage_finder::StageFinder = ImplicitStageFinder()
+    """State Jacobian method for implicit ODE solvers or sensitivity analysis"""
+    state_jacobian::JacobianMethod = FiniteJacobian()
     """Root finder for implicit ODE solvers"""
     root_finder::RootFinderMethod = Newton()
     """Max eigenvalue method for implicit ODE solvers"""
@@ -37,8 +37,9 @@ function SolverOptions(dict::Dict)
 end
 
 function lookup_options(options::SolverOptions)
-    @unpack adaptive, method, timer, stage_finder, root_finder, interpolator, sensitivity,
-            save_solution, show_progress, benchmark_subroutines, precision = options
+    @unpack adaptive, method, timer, state_jaconian, root_finder, eigenmax,
+            sensitivity, interpolator, save_solution, save_time_derivative,
+            show_progress, benchmark_subroutines, precision = options
     return nothing
 end
 
