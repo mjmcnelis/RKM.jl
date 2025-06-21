@@ -45,9 +45,10 @@ function get_stats(sol::Solution)
     println("excess memory        = $(format_bytes(excess_memory[1]))")
 end
 
-function get_subroutine_runtimes(sol, ode_wrap!, update_cache, linear_cache,
-                                 root_finder, state_jacobian, save_time)
+function get_subroutine_runtimes(sol, ode_wrap!, update_cache, root_finder,
+                                 state_jacobian, save_time)
     @unpack f, y, J, res = update_cache
+    @unpack linear_cache = root_finder
 
     @unpack nt, ny, np = get_dimensions(sol)
 

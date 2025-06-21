@@ -8,8 +8,8 @@ import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
 import KrylovKit: eigsolve
 import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals
-import LinearSolve: init, solve!, LinearProblem, LUFactorization,
-                    AbstractFactorization#, SciMLLinearSolveAlgorithm
+import LinearSolve: init, solve!, LinearProblem, LinearCache, LinearAliasSpecifier,
+                    LUFactorization, AbstractFactorization#, SciMLLinearSolveAlgorithm
 import MuladdMacro: @muladd
 import Printf: @sprintf
 import ProgressMeter: Progress, update!

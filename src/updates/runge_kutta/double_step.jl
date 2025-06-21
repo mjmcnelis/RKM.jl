@@ -1,7 +1,7 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
              t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-             update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
+             update_cache::RKMCache, state_jacobian::JacobianMethod,
              root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
              # note: sensitivity not implemented for double step yet
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
@@ -22,8 +22,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     while true                                          # start step doubling routine
         dt[1] = min(dt_max, max(dt_min, dt[1]*rescale)) # increase dt for next attempt
 
-        double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
-                     state_jacobian, root_finder, eigenmax, sensitivity, ode_wrap_p!)
+        double_step!(method, t, dt, ode_wrap_y!, update_cache, state_jacobian,
+                     root_finder, eigenmax, sensitivity, ode_wrap_p!)
 
         @.. res = (y2 - y1) / (2.0^order - 1.0)     # estimate local truncation error
         @.. y2 = y2 + res                           # Richardson extrapolation
@@ -75,8 +75,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     return nothing
 end
 
-function double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
-                      state_jacobian, root_finder, eigenmax, sensitivity, ode_wrap_p!)
+function double_step!(method, t, dt, ode_wrap_y!, update_cache, state_jacobian,
+                      root_finder, eigenmax, sensitivity, ode_wrap_p!)
 
     @unpack explicit_stage, fesal, iteration = method
     @unpack dy, y, y_tmp, f, f_tmp, y1, y2 = update_cache
@@ -88,9 +88,8 @@ function double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
     if explicit_stage[1]
         @.. dy[:,1] = dt[1] * f
     end
-    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
-                      linear_cache, state_jacobian, root_finder, eigenmax,
-                      sensitivity, ode_wrap_p!)
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache, state_jacobian,
+                      root_finder, eigenmax, sensitivity, ode_wrap_p!)
     @.. y1 = y_tmp
 
     # update two half time steps
@@ -101,8 +100,7 @@ function double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
     end
 
     runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
-                      linear_cache, state_jacobian, root_finder, eigenmax,
-                      sensitivity, ode_wrap_p!)
+                      state_jacobian, root_finder, eigenmax, sensitivity, ode_wrap_p!)
     @.. y2 = y_tmp
     #   second half step
     t[1] += dt[1]
@@ -117,9 +115,8 @@ function double_step!(method, t, dt, ode_wrap_y!, update_cache, linear_cache,
     @.. y_tmp = y2
     @.. y2 = y
     @.. y = y_tmp
-    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
-                      linear_cache, state_jacobian, root_finder, eigenmax,
-                      sensitivity, ode_wrap_p!)
+    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache, state_jacobian,
+                      root_finder, eigenmax, sensitivity, ode_wrap_p!)
     @.. y = y2
     @.. y2 = y_tmp
 

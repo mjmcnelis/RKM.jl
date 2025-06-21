@@ -63,12 +63,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             state_jacobian = reconstruct_jacobian(state_jacobian, ode_wrap_y!, f_tmp, y)
         end
 
-        @unpack linear_method = root_finder
-        # TODO: reconstruct_root_finder to remake linear cache, then unpack it
-        # configure linear cache (see src/common.jl in LinearSolve.jl)
-        linear_cache = init(LinearProblem(J, res), linear_method;
-                            alias_A = true, alias_b = true)
-
+        root_finder = reconstruct_root_finder(root_finder, res, J)
         sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp, p)
 
         # for progress meter
@@ -124,8 +119,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             adjust_final_time_steps!(t, dt, tf)
 
             evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!, update_cache,
-                                  linear_cache, state_jacobian, root_finder, eigenmax,
-                                  sensitivity, ode_wrap_p!, interpolator)
+                                  state_jacobian, root_finder, eigenmax, sensitivity,
+                                  ode_wrap_p!, interpolator)
             t[1] += dt[1]
             timer.total_steps[1] += 1
 
@@ -151,8 +146,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
                    state_jacobian, sensitivity, loop_stats, config_bytes)
 
     if benchmark_subroutines && save_solution
-        get_subroutine_runtimes(sol, ode_wrap_y!, update_cache, linear_cache,
-                                root_finder, state_jacobian, save_time[1])
+        get_subroutine_runtimes(sol, ode_wrap_y!, update_cache, root_finder,
+                                state_jacobian, save_time[1])
     end
 
     return nothing

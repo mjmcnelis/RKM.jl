@@ -2,7 +2,7 @@
 # benchmark.jl note: @.. doesn't help much when switch to MVector
 @muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
                      t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
+                     update_cache::RKMCache, state_jacobian::JacobianMethod,
                      root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
                      sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
@@ -47,7 +47,7 @@ end
 
 @muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
                      t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
+                     update_cache::RKMCache, state_jacobian::JacobianMethod,
                      root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
                      sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
@@ -145,7 +145,7 @@ end
                     root_jacobian!(J, A_T[i,i], dt[1])
                 end
 
-                root_iteration!(root_finder, dy, i, res, J, linear_cache)
+                root_iteration!(root_finder, dy_stage, res, J)
             end
         end
 
