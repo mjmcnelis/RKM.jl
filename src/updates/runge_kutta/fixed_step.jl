@@ -6,8 +6,15 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
-    @unpack iteration, explicit_stage, fesal = method
-    @unpack dy, y, y_tmp, f, f_tmp = update_cache
+    iteration = method.iteration
+    explicit_stage = method.explicit_stage
+    fesal = method.fesal
+
+    dy = update_cache.dy
+    y = update_cache.y
+    f = update_cache.f
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
 
     # evaluate first stage at current time
     if explicit_stage[1]

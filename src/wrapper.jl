@@ -23,16 +23,27 @@ end
 # used by RKM routines: ode_wrap!(f, t, y)
 function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
                                       y::Vector{T}) where T <: AbstractFloat
-    @unpack p, abstract_params, FE = ode_wrap!
+    p = ode_wrap!.p
+    abstract_params = ode_wrap!.abstract_params
+    FE = ode_wrap!.FE
+
     FE[1] += 1
     ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
+
+    return nothing
 end
 
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, y)
 function (ode_wrap!::ODEWrapperState)(f::Vector{R}, y::Vector{R}) where R <: Real
-    @unpack t, p, abstract_params, FE = ode_wrap!
+    t = ode_wrap!.t
+    p = ode_wrap!.p
+    abstract_params = ode_wrap!.abstract_params
+    FE = ode_wrap!.FE
+
     FE[1] += 1
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)
+
+    return nothing
 end
 
 struct ODEWrapperParam{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
@@ -53,9 +64,15 @@ end
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, p)
 # TODO: does not work for R = DoubleFloat unless convert p
 function (ode_wrap!::ODEWrapperParam)(f::Vector{R}, p::Vector{R}) where R <: Real
-    @unpack y, t, abstract_params, FE = ode_wrap!
+    y = ode_wrap!.y
+    t = ode_wrap!.t
+    abstract_params = ode_wrap!.abstract_params
+    FE = ode_wrap!.FE
+
     FE[1] += 1
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)
+
+    return nothing
 end
 
 function set_wrapper!(ode_wrap!::ODEWrapperState, t::T) where T <: AbstractFloat

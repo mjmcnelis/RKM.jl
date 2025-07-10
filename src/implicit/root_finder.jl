@@ -48,13 +48,13 @@ function reconstruct_root_finder(root_finder::Newton, res::Vector{T},
     return root_finder
 end
 
-function root_iteration!(root_finder::FixedPoint, dy_stage::SubArray{T},
+function root_iteration!(root_finder::FixedPoint, dy::Matrix{T}, i::Int64,
                          res::Vector{T}, args...) where T <: AbstractFloat
-    @.. dy_stage -= res
+    @.. dy[:,i] -= res
     return nothing
 end
 
-function root_iteration!(root_finder::Newton, dy_stage::SubArray{T}, res::Vector{T},
+function root_iteration!(root_finder::Newton, dy::Matrix{T}, i::Int64, res::Vector{T},
                          J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
                         ) where T <: AbstractFloat
 
@@ -63,7 +63,7 @@ function root_iteration!(root_finder::Newton, dy_stage::SubArray{T}, res::Vector
     linear_cache.A = J
     linear_cache.b = res
     solve!(linear_cache)
-    @.. dy_stage -= linear_cache.u
+    @.. dy[:,i] -= linear_cache.u
 
     return nothing
 end

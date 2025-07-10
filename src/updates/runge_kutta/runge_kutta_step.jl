@@ -6,8 +6,19 @@
                      root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
                      sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
-    @unpack c, A_T, b, stages = method
-    @unpack dy, y, y_tmp, f_tmp, S, S_tmp, dS = update_cache
+
+    c = method.c
+    A_T = method.A_T
+    b = method.b
+    stages = method.stages
+
+    dy = update_cache.dy
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    S = update_cache.S
+    S_tmp = update_cache.S_tmp
+    dS = update_cache.dS
 
     for i in 2:stages                                    # evaluate remaining stages
         t_tmp = t[1] + c[i]*dt[1]                        # assumes first stage pre-evaluated
@@ -15,8 +26,7 @@
         # TODO: need a better dy cache for performance
         for j in 1:i-1
             A_T[j,i] == 0.0 ? continue : nothing
-            dy_stage = view(dy,:,j)
-            @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
+            @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
         end
         # TODO: skip if intermediate update not needed in next row(s)?
         ode_wrap_y!(f_tmp, t_tmp, y_tmp)
@@ -30,16 +40,14 @@
     @.. y_tmp = y                                        # evaluate iteration
     for j in 1:stages
         b[j] == 0.0 ? continue : nothing
-        dy_stage = view(dy,:,j)
-        @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. y_tmp = y_tmp + b[j]*dy[:,j]
     end
     # TODO: just make a function
     if !(sensitivity isa NoSensitivity)
         @.. S_tmp = S
         for j in 1:stages
             b[j] == 0.0 ? continue : nothing
-            dS_stage = view(dS,:,:,j)
-            @.. S_tmp = S_tmp + b[j]*dS_stage
+            @.. S_tmp = S_tmp + b[j]*dS[:,:,j]
         end
     end
     return nothing
@@ -52,9 +60,27 @@ end
                      sensitivity::SensitivityMethod,
                      ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
 
-    @unpack c, A_T, b, stages, explicit_stage, fesal = method
-    @unpack epsilon, p_norm, max_iterations = root_finder
-    @unpack dy, y, y_tmp, f, f_tmp, J, res, S, S_tmp, dS, lambda_LR, x0 = update_cache
+    c = method.c
+    A_T = method.A_T
+    b = method.b
+    stages = method.stages
+    explicit_stage = method.explicit_stage
+
+    epsilon = root_finder.epsilon
+    p_norm = root_finder.p_norm
+    max_iterations = root_finder.max_iterations
+
+    dy = update_cache.dy
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    J = update_cache.J
+    res = update_cache.res
+    S = update_cache.S
+    S_tmp = update_cache.S_tmp
+    dS = update_cache.dS
+    lambda_LR = update_cache.lambda_LR
+    x0 = update_cache.x0
 
     # have while loop stashed but couldn't figure out why it was allocating
     #= while loop: can try something like
@@ -91,8 +117,7 @@ end
             @.. y_tmp = y
              for j in 1:i-1
                 A_T[j,i] == 0.0 ? continue : nothing
-                dy_stage = view(dy,:,j)
-                @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
+                @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
             end
             ode_wrap_y!(f_tmp, t_tmp, y_tmp)
             @.. dy[:,i] = dt[1] * f_tmp
@@ -105,22 +130,20 @@ end
                 @.. y_tmp = y
                 for j in 1:i
                     A_T[j,i] == 0.0 ? continue : nothing
-                    dy_stage = view(dy,:,j)
-                    @.. y_tmp = y_tmp + A_T[j,i]*dy_stage
+                    @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
                 end
                 ode_wrap_y!(f_tmp, t_tmp, y_tmp)
 
                 # compute residual error of root equation
                 # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
-                dy_stage = view(dy,:,i)
-                @.. res = dy_stage - dt[1]*f_tmp
+                @.. res = dy[:,i] - dt[1]*f_tmp
 
                 # check for convergence (after at least one iteration)
                 if n > 1
                     # compute norms and tolerance
                     # note: LinearAlgebra.norm is slow on mac (so use AppleAccelerate)
                     e_norm = norm(res, p_norm)
-                    dy_norm = norm(dy_stage, p_norm)
+                    dy_norm = norm(view(dy,:,i), p_norm)
                     tol = epsilon * dy_norm
 
                     if e_norm <= tol
@@ -145,7 +168,7 @@ end
                     root_jacobian!(J, A_T[i,i], dt[1])
                 end
 
-                root_iteration!(root_finder, dy_stage, res, J)
+                root_iteration!(root_finder, dy, i, res, J)
             end
         end
 
@@ -157,16 +180,14 @@ end
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
-        dy_stage = view(dy,:,j)
-        @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. y_tmp = y_tmp + b[j]*dy[:,j]
     end
     # TODO: just make a function
     if !(sensitivity isa NoSensitivity)
         @.. S_tmp = S
         for j in 1:stages
             b[j] == 0.0 ? continue : nothing
-            dS_stage = view(dS,:,:,j)
-            @.. S_tmp = S_tmp + b[j]*dS_stage
+            @.. S_tmp = S_tmp + b[j]*dS[:,:,j]
         end
     end
 
