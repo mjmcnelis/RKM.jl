@@ -22,6 +22,7 @@ options = Dict(
     # :root_finder => FixedPoint(),
 
     :eigenmax => NoEigenMax(),
+    # :eigenmax => LinearEigenMax(),
     # :eigenmax => KrylovEigenMax(; krylovdim = 1), # TODO: limit krylovdim to ny
 
     :sensitivity => NoSensitivity(),

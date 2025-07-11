@@ -39,20 +39,22 @@ get_stats(sol)
 
 # analyze jacobian spectrum
 # TODO: interpolation should follow same arguments as get_eigenvalues
-#=
-@time t, lambda = get_eigenvalues(sol, dy_dt!, options, p; dt_dense = 1e-2)
-plot(t, real.(lambda))
-_, lambda_LR = get_eigenmax(sol)
-plot!(sol.t, real.(lambda_LR), line = :dash) |> display
-=#
+@unpack method, eigenmax = options
+if method.iteration isa RKM.Implicit && !(eigenmax isa NoEigenMax)
+    @time t, lambda = get_eigenvalues(sol, dy_dt!, options, p; dt_dense = 1e-2)
+    plot(t, real.(lambda))
+    _, lambda_LR = get_eigenmax(sol)
+    plot!(sol.t, real.(lambda_LR), line = :dash) |> display
+end
 
 # interpolation
-# @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
-#=
-plot(t_dense, y_dense; color = [:red :blue], linewidth = 2, legend = :outertopright);
-plot!(t_dense, hcat(y_exact.(t_dense; N = 2)...)';
-      color = :black, linewidth = 2, line = :dash)
-=#
+@unpack interpolator = options
+if !(interpolator isa NoInterpolation)
+    @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
+    # plot(t_dense, y_dense; color = [:red :blue], linewidth = 2, legend = :outertopright);
+    # plot!(t_dense, hcat(y_exact.(t_dense; N = 2)...)';
+    #     color = :black, linewidth = 2, line = :dash)
+end
 
 GC.gc()
 println("\ndone")

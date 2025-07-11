@@ -16,16 +16,15 @@
     y = update_cache.y
     y_tmp = update_cache.y_tmp
     f_tmp = update_cache.f_tmp
-    S = update_cache.S
-    S_tmp = update_cache.S_tmp
-    dS = update_cache.dS
 
     for i in 2:stages                                    # evaluate remaining stages
         t_tmp = t[1] + c[i]*dt[1]                        # assumes first stage pre-evaluated
         @.. y_tmp = y
         # TODO: need a better dy cache for performance
         for j in 1:i-1
-            A_T[j,i] == 0.0 ? continue : nothing
+            if iszero(A_T[j,i])
+                continue
+            end
             @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
         end
         # TODO: skip if intermediate update not needed in next row(s)?
@@ -39,14 +38,22 @@
     end
     @.. y_tmp = y                                        # evaluate iteration
     for j in 1:stages
-        b[j] == 0.0 ? continue : nothing
+        if iszero(b[j])
+            continue
+        end
         @.. y_tmp = y_tmp + b[j]*dy[:,j]
     end
     # TODO: just make a function
     if !(sensitivity isa NoSensitivity)
+        S = update_cache.S
+        S_tmp = update_cache.S_tmp
+        dS = update_cache.dS
+
         @.. S_tmp = S
         for j in 1:stages
-            b[j] == 0.0 ? continue : nothing
+            if iszero(b[j])
+                continue
+            end
             @.. S_tmp = S_tmp + b[j]*dS[:,:,j]
         end
     end
@@ -76,9 +83,6 @@ end
     f_tmp = update_cache.f_tmp
     J = update_cache.J
     res = update_cache.res
-    S = update_cache.S
-    S_tmp = update_cache.S_tmp
-    dS = update_cache.dS
     lambda_LR = update_cache.lambda_LR
     x0 = update_cache.x0
 
@@ -116,7 +120,9 @@ end
         if explicit_stage[i]
             @.. y_tmp = y
              for j in 1:i-1
-                A_T[j,i] == 0.0 ? continue : nothing
+                if iszero(A_T[j,i])
+                    continue
+                end
                 @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
             end
             ode_wrap_y!(f_tmp, t_tmp, y_tmp)
@@ -129,7 +135,9 @@ end
                 # evaluate current correction and ODE
                 @.. y_tmp = y
                 for j in 1:i
-                    A_T[j,i] == 0.0 ? continue : nothing
+                    if iszero(A_T[j,i])
+                        continue
+                    end
                     @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
                 end
                 ode_wrap_y!(f_tmp, t_tmp, y_tmp)
@@ -180,13 +188,22 @@ end
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
+        if iszero(b[j])
+            continue
+        end
         @.. y_tmp = y_tmp + b[j]*dy[:,j]
     end
     # TODO: just make a function
     if !(sensitivity isa NoSensitivity)
+        S = update_cache.S
+        S_tmp = update_cache.S_tmp
+        dS = update_cache.dS
+
         @.. S_tmp = S
         for j in 1:stages
-            b[j] == 0.0 ? continue : nothing
+            if iszero(b[j])
+                continue
+            end
             @.. S_tmp = S_tmp + b[j]*dS[:,:,j]
         end
     end

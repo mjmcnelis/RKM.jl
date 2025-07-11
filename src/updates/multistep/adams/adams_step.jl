@@ -9,8 +9,7 @@
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
-        dy_stage = view(dy_LM,:,j)
-        @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. y_tmp = y_tmp + b[j]*dy_LM[:,j]
     end
     return nothing
 end
@@ -33,8 +32,7 @@ end
     @.. y_tmp = y
     # note: comment for loop if want to compare to BackwardEuler1, ImplicitTrapezoid21
     for j in 1:stages
-        dy_stage = view(dy_LM,:,j)
-        @.. y_tmp = y_tmp + b_pred[j]*dy_stage
+        @.. y_tmp = y_tmp + b_pred[j]*dy_LM[:,j]
     end
     ode_wrap!(f_tmp, t_tmp, y_tmp)
     @.. dy_LM[:,1] = dt * f_tmp
@@ -43,19 +41,17 @@ end
         # compute current correction and evaluate ODE (i.e CE)
         @.. y_tmp = y
         for j in 1:stages
-            dy_stage = view(dy_LM,:,j)
-            @.. y_tmp = y_tmp + b[j]*dy_stage
+            @.. y_tmp = y_tmp + b[j]*dy_LM[:,j]
         end
         ode_wrap!(f_tmp, t_tmp, y_tmp)
 
         # compute residual error of root equation
         # dy - dt.f(t_tmp, y_tmp + b.dy) = 0
-        dy_stage = view(dy_LM,:,1)
-        @.. res = dy_stage - dt*f_tmp
+        @.. res = dy_LM[:,1] - dt*f_tmp
 
         # compute norms and tolerance
         e_norm  = norm(res, p_norm)           # compute norms
-        dy_norm = norm(dy_stage, p_norm)
+        dy_norm = norm(view(dy_LM,:,1), p_norm)
         tol = epsilon * dy_norm
 
         # check for root convergence
@@ -88,8 +84,7 @@ end
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
-        dy_stage = view(dy_LM,:,j)
-        @.. y_tmp = y_tmp + b[j]*dy_stage
+        @.. y_tmp = y_tmp + b[j]*dy_LM[:,j]
     end
     return nothing
 end

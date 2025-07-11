@@ -79,8 +79,10 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         # initialize eigenvalue/eigenvector
         @.. y_tmp = y
-        compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
-                                ode_wrap_y!, y_tmp, f_tmp)
+        if iteration isa Implicit
+            compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
+                                    ode_wrap_y!, y_tmp, f_tmp)
+        end
     end
 
     # sizehint solution

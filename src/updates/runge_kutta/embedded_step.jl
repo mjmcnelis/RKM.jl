@@ -85,8 +85,7 @@ end
     @unpack stages, b_hat = method
     @.. y_tmp = y                                       # evaluate iteration
     for j in 1:stages
-        dy_stage = view(dy,:,j)
-        @.. y_tmp = y_tmp + b_hat[j]*dy_stage
+        @.. y_tmp = y_tmp + b_hat[j]*dy[:,j]
     end
     return nothing
 end

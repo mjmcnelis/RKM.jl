@@ -41,15 +41,17 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
 
     @.. S_tmp = S
     for j in 1:stage_idx-1
-        A_T[j,stage_idx] == 0.0 ? continue : nothing
-        dS_stage = view(dS,:,:,j)
-        @.. S_tmp = S_tmp + A_T[j,stage_idx]*dS_stage
+        if iszero(A_T[j,stage_idx])
+            continue
+        end
+        @.. S_tmp = S_tmp + A_T[j,stage_idx]*dS[:,:,j]
     end
 
     # set wrapper variables
     set_wrapper!(ode_wrap_y!, t_tmp)
     set_wrapper!(ode_wrap_p!, t_tmp, y_tmp)
 
+    # TODO: seems harder to undo view here
     # evaluate explicit term dS = dt*(J*S_tmp + df/dp)
     dS_stage = view(dS, :, :, stage_idx)
 
@@ -63,7 +65,7 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
     evaluate_jacobian!(param_jacobian, S_tmp, ode_wrap_p!, p, f_tmp)
 
     # dS <- dt*(J*S_tmp + df/dp)
-    @.. dS_stage = dt*(dS_stage + S_tmp)
+    @.. dS[:,:,stage_idx] = dt*(dS[:,:,stage_idx] + S_tmp)
 
     return nothing
 end
@@ -97,6 +99,7 @@ function implicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
     for k in diagind(J)
         J[k] = J[k] + 1.0
     end
+    # TODO: seems harder to undo view here
     dS_stage = view(dS, :, :, stage_idx)
 
     # note: use LinearAlgebra (LinearSolve doesn't support matrix-matrix equations AX = B)

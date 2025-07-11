@@ -25,7 +25,7 @@ function get_eigenvalues(sol::Solution{T}, dy_dt!::Function, options::SolverOpti
     sizehint!(lambda, nt*ny)
 
     for n in 1:nt
-        y_tmp .= view(y, n, :)
+        @.. y_tmp = y[n,:]
 
         # assume finite diff for now
         finite_difference_jacobian!(J, ode_wrap!, y_tmp, cache)

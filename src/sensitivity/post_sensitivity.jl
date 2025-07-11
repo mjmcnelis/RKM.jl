@@ -40,7 +40,7 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
     # Backward Euler
     for n in 1:nt-1
         # note: n+1 is specific to Backward Euler
-        y_tmp .= view(y, n+1, :)            # can't do FastBroadcast here
+        @.. y_tmp = y[n+1,:]
         # set wrappers
         set_wrapper!(ode_wrap_y!, t[n+1])
         set_wrapper!(ode_wrap_p!, t[n+1], y_tmp)
@@ -107,7 +107,7 @@ function psa_green_function(sol::Solution, options::SolverOptions,
     # Backward Euler
     for n in 1:nt-1
         # note: n+1 is specific to Backward Euler
-        y_tmp .= view(y, n+1, :)
+        @.. y_tmp = y[n+1,:]
         ode_wrap_y!.t[1] = t[n+1]
 
         # compute Jacobian
