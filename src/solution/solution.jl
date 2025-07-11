@@ -74,31 +74,28 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
 end
 
 function clear_solution!(sol::Solution)
-    @unpack t, y, f, dy, S, lambda_LR, time_steps_taken, FE, JE, rejection_rate,
-            runtime, solution_size, sensitivity_size, config_memory,
-            excess_memory, dimensions, coefficients = sol
-    empty!(t)
-    empty!(y)
-    empty!(f)
-    empty!(dy)
-    empty!(S)
-    empty!(lambda_LR)
-    sizehint!(t, 0)
-    sizehint!(y, 0)
-    sizehint!(f, 0)
-    sizehint!(dy, 0)
-    sizehint!(S, 0)
-    time_steps_taken .= 0
-    FE .= 0
-    JE .= 0
-    rejection_rate .= 0.0
-    runtime .= 0.0
-    solution_size .= 0
-    sensitivity_size .= 0
-    config_memory .= 0
-    excess_memory .= 0
-    dimensions .= 0
-    coefficients .= 0
+    empty!(sol.t)
+    empty!(sol.y)
+    empty!(sol.f)
+    empty!(sol.dy)
+    empty!(sol.S)
+    empty!(sol.lambda_LR)
+    sizehint!(sol.t, 0)
+    sizehint!(sol.y, 0)
+    sizehint!(sol.f, 0)
+    sizehint!(sol.dy, 0)
+    sizehint!(sol.S, 0)
+    sol.time_steps_taken .= 0
+    sol.FE .= 0
+    sol.JE .= 0
+    sol.rejection_rate .= 0.0
+    sol.runtime .= 0.0
+    sol.solution_size .= 0
+    sol.sensitivity_size .= 0
+    sol.config_memory .= 0
+    sol.excess_memory .= 0
+    sol.dimensions .= 0
+    sol.coefficients .= 0
     return nothing
 end
 
@@ -113,11 +110,12 @@ is stored in linear column format as `y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`. The s
 vector is then reshaped as `y = [1.0 2.0 3.0; 4.0 5.0 6.0]`.
 """
 function get_solution(sol::Solution)
-    @unpack t, y, dimensions = sol
+    t = sol.t
+    y = sol.y
     if isempty(y)
         error("State variables y = $y are empty, set save_solution = true")
     end
-    ny = dimensions[1]
+    ny = sol.dimensions[1]
     nt = length(t)
     # TODO: replace nt if use deleteat for PDEs
     y_reshape = reshape(y, ny, nt) |> transpose
@@ -125,32 +123,35 @@ function get_solution(sol::Solution)
 end
 
 function get_time_derivative(sol::Solution)
-    @unpack t, f, dimensions = sol
+    t = sol.t
+    f = sol.f
     if isempty(f)
         error("Time derivatives f = $f are empty, set save_solution = true \
                and save_time_derivative = true")
     end
-    ny = dimensions[1]
+    ny = sol.dimensions[1]
     nt = length(t)
     f_reshape = reshape(f, ny, nt) |> transpose
     return t, f_reshape
 end
 
 function get_sensitivity(sol::Solution)
-    @unpack t, S, dimensions, coefficients = sol
+    t = sol.t
+    S = sol.S
     if isempty(S)
         error("Sensitivity coefficients S = $S are empty, set save_solution = true \
                and sensitivity != NoSensitivity()")
     end
-    ny = dimensions[1]
-    np = coefficients[1]
+    ny = sol.dimensions[1]
+    np = sol.coefficients[1]
     nt = length(t)
     S_reshape = reshape(S, ny*np, nt) |> transpose
     return t, S_reshape
 end
 
 function get_eigenmax(sol::Solution)
-    @unpack t, lambda_LR = sol
+    t = sol.t
+    lambda_LR = sol.lambda_LR
     if isempty(lambda_LR)
         # TODO: say what options to change
         error("Max eigenvalues lambda_LR = $lambda_LR are empty")
@@ -159,6 +160,5 @@ function get_eigenmax(sol::Solution)
 end
 
 function get_dimensions(sol::Solution)
-    @unpack t, dimensions, coefficients = sol
-    return (; nt = length(t), ny = dimensions[1], np = coefficients[1])
+    return (; nt = length(sol.t), ny = sol.dimensions[1], np = sol.coefficients[1])
 end

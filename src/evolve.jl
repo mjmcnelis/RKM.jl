@@ -17,9 +17,19 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         clear_solution!(sol)
 
         # get solver options
-        @unpack method, adaptive, timer, state_jacobian, root_finder, eigenmax,
-                sensitivity, interpolator, save_solution, save_time_derivative,
-                show_progress, benchmark_subroutines, precision = options
+        adaptive = options.adaptive
+        method = options.method
+        timer = options.timer
+        state_jacobian = options.state_jacobian
+        root_finder = options.root_finder
+        eigenmax = options.eigenmax
+        sensitivity = options.sensitivity
+        interpolator = options.interpolator
+        save_solution = options.save_solution
+        save_time_derivative = options.save_time_derivative
+        show_progress = options.show_progress
+        benchmark_subroutines = options.benchmark_subroutines
+        precision = options.precision
 
         reset_timer!(timer)
 
@@ -52,13 +62,22 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
                                    coefficients, sensitivity, state_jacobian, eigenmax)
 
-        @unpack y, y_tmp, f, f_tmp, dy, J, res, S, S_tmp, lambda_LR, x0 = update_cache
+        y = update_cache.y
+        y_tmp = update_cache.y_tmp
+        f = update_cache.f
+        f_tmp = update_cache.f_tmp
+        J = update_cache.J
+        res = update_cache.res
+        S = update_cache.S
+        S_tmp = update_cache.S_tmp
+        lambda_LR = update_cache.lambda_LR
+        x0 = update_cache.x0
 
         # create ODE wrappers
         ode_wrap_y! = ODEWrapperState([t0], p, abstract_params, dy_dt!)#, method)
         ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!)#, method)
 
-        @unpack iteration = method
+        iteration = method.iteration
         if iteration isa Implicit || !(sensitivity isa NoSensitivity)
             state_jacobian = reconstruct_jacobian(state_jacobian, ode_wrap_y!, f_tmp, y)
         end
@@ -87,7 +106,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
     # sizehint solution
     if save_solution
-        @unpack stages = method
+        stages = method.stages
         sizehint_solution!(adaptive, interpolator, sol, t0, tf, dt0, sensitivity,
                            save_time_derivative, stages, iteration, eigenmax)
     end

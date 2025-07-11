@@ -7,7 +7,8 @@ function get_eigenvalues(sol::Solution{T}, dy_dt!::Function, options::SolverOpti
     @info "Computing eigenvalues of the state jacobian"
     # TODO: prefer suppressing interpolation @info here
     t, y = interpolate_solution(options, sol; dt_dense)
-    @unpack precision = options
+
+    precision = options.precision
 
     nt = length(t)
     ny = sol.dimensions[1]

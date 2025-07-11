@@ -3,7 +3,10 @@ function interpolate_solution(interpolator::CubicHermite, sol::Solution,
                               method::ODEMethod, precision::Type{T};
                               dt_dense::Float64) where T <: AbstractFloat
 
-    @unpack t, y, f, dimensions = sol
+    t = sol.t
+    y = sol.y
+    f = sol.f
+    dimensions = sol.dimensions
 
     if isempty(y)
         error("Original solution set is empty, set save_solution = true")

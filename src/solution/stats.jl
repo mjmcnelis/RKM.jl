@@ -50,7 +50,8 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, root_finder,
     @unpack f, y, J, res = update_cache
     @unpack linear_cache = root_finder
 
-    @unpack nt, ny, np = get_dimensions(sol)
+    nt = length(sol.t)
+    ny = sol.dimensions[1]
 
     n_samples = round(Int64, nt/10)
     t_idxs = round.(Int64, LinRange(2, nt, n_samples))

@@ -5,6 +5,8 @@ using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 include("$RKM_root/validation/ode/logistic/parameters.jl")
 
+show_plot = false
+
 # TODO: do asserts between adaptive, method in parameters outer-constructor
 options = SolverOptions(options)
 
@@ -42,9 +44,11 @@ get_stats(sol)
 @unpack method, eigenmax = options
 if method.iteration isa RKM.Implicit && !(eigenmax isa NoEigenMax)
     @time t, lambda = get_eigenvalues(sol, dy_dt!, options, p; dt_dense = 1e-2)
-    plot(t, real.(lambda))
     _, lambda_LR = get_eigenmax(sol)
-    plot!(sol.t, real.(lambda_LR), line = :dash) |> display
+    if show_plot
+        plot(t, real.(lambda))
+        plot!(sol.t, real.(lambda_LR), line = :dash) |> display
+    end
 end
 
 # interpolation

@@ -1,18 +1,18 @@
 """
-    plot_ode(sol::Solution, method::ODEMethod, plot::Function;
+    plot_ode(sol::Solution, options::SolverOptions, plot::Function;
              logx = false, logy = false, show_time_step = false)
 
 Plots the ODE solution `y(t)` from `sol` with the function `plot` (usually `Plots.plot`).
 
 Note: pass `plot` as a function to reduce RKM's precompilation time.
 """
-function plot_ode(sol::Solution, method::ODEMethod, plot::Function;
+function plot_ode(sol::Solution, options::SolverOptions, plot::Function;
                   logx = false, logy = false, show_time_step = false)
 
     # TODO: put some more functionality (panel?)
     t, y = get_solution(sol)
 
-    @unpack code_name = method
+    code_name = options.method.code_name
 
     x_args = logx ? (; xaxis = :log) : (;)
     y_args = logy ? (; yaxis = :log) : (;)

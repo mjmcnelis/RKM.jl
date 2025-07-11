@@ -71,12 +71,21 @@ function SmoothLimiter(; safety = 0.8, low = 0.2, high = 5.0,
 end
 
 function limit_time_step(limiter::PiecewiseLimiter, rescale::T) where T <: AbstractFloat
-    @unpack safety, low, high = limiter
+    safety = limiter.safety
+    low = limiter.low
+    high = limiter.high
+
     return min(high, max(low, safety*rescale))
 end
 
 function limit_time_step(limiter::SmoothLimiter, rescale::T) where T <: AbstractFloat
-    @unpack a, b, c, d, safety, low, high = limiter
+    a = limiter.a
+    b = limiter.b
+    c = limiter.c
+    d = limiter.d
+    safety = limiter.safety
+    low = limiter.low
+    high = limiter.high
 
     x = T(safety)*rescale
 

@@ -42,26 +42,27 @@ Resets the `timer` fields to the values given by the `TimeLimit` outer construct
 Required parameters: `timer`
 """
 function reset_timer!(timer::TimeLimit)
-    @unpack time_sys, runtime, runtime_prev, display_values, total_steps = timer
     t_epoch = time()
-    time_sys .= t_epoch
-    runtime[1] = "00:00:00"
-    runtime_prev[1] = 0
-    display_values[1] = false
-    total_steps[1] = 0
+    timer.time_sys .= t_epoch
+    timer.runtime[1] = "00:00:00"
+    timer.runtime_prev[1] = 0
+    timer.display_values[1] = false
+    timer.total_steps[1] = 0
     return nothing
 end
 
 # TODO: make docstring
 function set_current_system_time!(timer::TimeLimit)
-    @unpack time_sys = timer
-    time_sys[2] = time()
+    timer.time_sys[2] = time()
     return nothing
 end
 
 # TODO: make docstring
 function set_runtime_display!(timer::TimeLimit)
-    @unpack time_sys, runtime, runtime_prev, display_values = timer
+    time_sys = timer.time_sys
+    runtime = timer.runtime
+    runtime_prev = timer.runtime_prev
+    display_values = timer.display_values
 
     dt_sys = floor(Int64, time_sys[2] - time_sys[1])
 
@@ -90,7 +91,9 @@ Required parameters: `t`, `dt`, `tf`, `timer`, `show_progress`
 """
 function continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
                          timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
-    @unpack wtime_min, time_sys, total_steps = timer
+    wtime_min = timer.wtime_min
+    time_sys = timer.time_sys
+    total_steps = timer.total_steps
 
     # note: check timer every 10 time steps
     if !isinf(wtime_min) && total_steps[1] % 10 == 0

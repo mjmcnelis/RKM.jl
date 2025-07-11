@@ -38,8 +38,7 @@ end
 function reconstruct_root_finder(root_finder::Newton, res::Vector{T},
              J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}) where T <: AbstractFloat
 
-    @unpack linear_cache = root_finder
-    linear_method = linear_cache.alg
+    linear_method = root_finder.linear_cache.alg
 
     linear_cache = init(LinearProblem(J, res), linear_method;
                         alias = LinearAliasSpecifier(; alias_A = true, alias_b = true),)
@@ -50,7 +49,9 @@ end
 
 function root_iteration!(root_finder::FixedPoint, dy::Matrix{T}, i::Int64,
                          res::Vector{T}, args...) where T <: AbstractFloat
+
     @.. dy[:,i] -= res
+
     return nothing
 end
 
@@ -58,7 +59,8 @@ function root_iteration!(root_finder::Newton, dy::Matrix{T}, i::Int64, res::Vect
                          J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
                         ) where T <: AbstractFloat
 
-    @unpack linear_cache = root_finder
+    linear_cache = root_finder.linear_cache
+
     # pass Jacobian and residual error to linear cache
     linear_cache.A = J
     linear_cache.b = res

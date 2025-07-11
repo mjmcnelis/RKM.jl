@@ -37,13 +37,22 @@ function SolverOptions(dict::Dict)
 end
 
 function lookup_options(options::SolverOptions)
-    @unpack adaptive, method, timer, state_jaconian, root_finder, eigenmax,
-            sensitivity, interpolator, save_solution, save_time_derivative,
-            show_progress, benchmark_subroutines, precision = options
+    adaptive = options.adaptive
+    method = options.method
+    timer = options.timer
+    state_jacobian = options.state_jacobian
+    root_finder = options.root_finder
+    eigenmax = options.eigenmax
+    sensitivity = options.sensitivity
+    interpolator = options.interpolator
+    save_solution = options.save_solution
+    save_time_derivative = options.save_time_derivative
+    show_progress = options.show_progress
+    benchmark_subroutines = options.benchmark_subroutines
+    precision = options.precision
     return nothing
 end
 
 function Solution(options::SolverOptions)
-    @unpack precision = options
-    return Solution(precision)
+    return Solution(options.precision)
 end

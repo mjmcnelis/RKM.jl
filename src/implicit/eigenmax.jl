@@ -62,7 +62,10 @@ function compute_max_eigenvalue!(eigenmax::KrylovEigenMax, lambda_LR::Vector{Com
 
     evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
 
-    @unpack tol, maxiter, krylovdim, verbosity = eigenmax
+    tol = eigenmax.tol
+    maxiter = eigenmax.maxiter
+    krylovdim = eigenmax.krylovdim
+    verbosity = eigenmax.verbosity
 
     lambda, x, status = eigsolve(J, x0, 1, :LR; tol, maxiter, krylovdim, verbosity)
     idx = argmax(real.(lambda))

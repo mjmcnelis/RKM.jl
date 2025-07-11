@@ -1,6 +1,12 @@
 
 function reconstruct_butcher(method::RungeKutta)
-    @unpack stages, c, A_T, b, b_hat = method
+
+    stages = method.stages
+    c = method.c
+    A_T = method.A_T
+    b = method.b
+    b_hat = method.b_hat
+
     precision = typeof(c[1])
 
     ncol = stages + 1

@@ -85,7 +85,12 @@ function check_adaptive_parameters(adaptive::Fixed)
 end
 
 function check_adaptive_parameters(adaptive::AdaptiveTimeStep)
-    @unpack epsilon, alpha, delta, p_norm, max_attempts = adaptive
+
+    epsilon = adaptive.epsilon
+    alpha = adaptive.alpha
+    delta = adaptive.delta
+    p_norm = adaptive.p_norm
+    max_attempts = adaptive.max_attempts
 
     @assert epsilon >= 0.0 "epsilon = $epsilon cannot be negative"
     @assert alpha >= 0.0 "alpha = $alpha cannot be negative"
@@ -127,8 +132,12 @@ function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
 end
 
 function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
-    @unpack benchmark_diffeq, pid, limiter = adaptive
-    @unpack order = method
+
+    benchmark_diffeq = adaptive.benchmark_diffeq
+    pid = adaptive.pid
+    limiter = adaptive.limiter
+
+    order = method.order
 
     @set! adaptive.total_attempts = MVector{1,Int64}(0)
     @set! adaptive.initialized_controller = MVector{1,Bool}(false)
@@ -163,10 +172,13 @@ function reconstruct_adaptive(adaptive::AdaptiveTimeStep, method::ODEMethod)
 end
 
 function compute_step_rejection_rate(adaptive::AdaptiveTimeStep, timer::TimeLimit)
+
     if hasproperty(adaptive, :total_attempts)
-        @unpack total_steps = timer
-        @unpack total_attempts = adaptive
+        total_steps = timer.total_steps
+        total_attempts = adaptive.total_attempts
+
         return 100.0 * (1.0 - total_steps[1]/total_attempts[1])
+    else
+        return 0.0
     end
-    return 0.0
 end

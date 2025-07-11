@@ -2,11 +2,9 @@
 function initialize_controller!(update_cache::UpdateCache, e_norm::T,
                                 tol::T, dt::T) where T <: AbstractFloat
 
-    @unpack e_prev, tol_prev, dt_prev = update_cache
-
-    e_prev .= e_norm
-    tol_prev .= tol
-    dt_prev .= dt
+    @.. update_cache.e_prev = e_norm
+    @.. update_cache.tol_prev = tol
+    @.. update_cache.dt_prev = dt
 
     return nothing
 end
@@ -14,9 +12,17 @@ end
 function rescale_time_step(adaptive::ATS, update_cache::UpdateCache, tol::T,
                            e_norm::T) where {ATS <: AdaptiveTimeStep, T <: AbstractFloat}
 
-    @unpack e_prev, tol_prev, dt_prev = update_cache
-    @unpack pid = adaptive
-    @unpack beta1, beta2, beta3, alpha2, alpha3 = pid
+    e_prev = update_cache.e_prev
+    tol_prev = update_cache.tol_prev
+    dt_prev = update_cache.dt_prev
+
+    pid = adaptive.pid
+
+    beta1 = pid.beta1
+    beta2 = pid.beta2
+    beta3 = pid.beta3
+    alpha2 = pid.alpha2
+    alpha3 = pid.alpha3
 
     rescale = (tol/e_norm)^beta1 * (tol_prev[1]/e_prev[1])^beta2 *
               (tol_prev[2]/e_prev[2])^beta3 * (dt_prev[2]/dt_prev[1])^alpha2 *
@@ -28,7 +34,9 @@ end
 function set_previous_control_vars!(update_cache::UpdateCache, e_norm::T,
                                     tol::T, dt::T) where T <: AbstractFloat
 
-    @unpack e_prev, tol_prev, dt_prev = update_cache
+    e_prev = update_cache.e_prev
+    tol_prev = update_cache.tol_prev
+    dt_prev = update_cache.dt_prev
 
     e_prev[2]   = e_prev[1]
     e_prev[1]   = e_norm

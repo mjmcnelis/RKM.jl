@@ -27,7 +27,8 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
                      sensitivity::SensitivityMethod, state_jacobian::JacobianMethod,
                      eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
-    @unpack iteration, stages = method
+    iteration = method.iteration
+    stages = method.stages
 
     no_sensitivity = sensitivity isa NoSensitivity
 
@@ -40,7 +41,7 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     nl = eigenmax isa NoEigenMax ? 0 : 1                        # eigenvalue
 
     if method isa LinearMultistep
-        @unpack start_method = method
+        start_method = method.start_method
         dy = zeros(precision, ny, start_method.stages)
         dy_LM = zeros(precision, ny, stages)
     else

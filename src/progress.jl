@@ -12,7 +12,10 @@ function monitor_progress(progress::Progress, checkpoints::Vector{T}, t::Vector{
                           timer::TimeLimit, dt::Vector{T}) where T <: AbstractFloat
 
     set_runtime_display!(timer)
-    @unpack runtime, display_values, total_steps = timer
+
+    runtime = timer.runtime
+    display_values = timer.display_values
+    total_steps = timer.total_steps
 
     generate_showvalues(runtime, total_steps, t, dt) = () -> [
         (:runtime, runtime[1]),

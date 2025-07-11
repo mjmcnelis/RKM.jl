@@ -44,7 +44,6 @@ include("implicit/nansafe/nansafe_utils.jl")
 include("sensitivity/jacobian_vector.jl")
 include("sensitivity/sensitivity.jl")
 include("solution/solution.jl")
-include("plots.jl")
 include("cache.jl")
 include("adaptive/controller.jl")
 include("post_process/interpolation/interpolator_types.jl")
@@ -91,6 +90,7 @@ include("updates/multistep/adams/adams_step.jl")
 include("updates/multistep/adams/fixed_step.jl")
 
 include("options.jl")
+include("plots.jl")
 include("evolve.jl")
 include("solution/output.jl")
 include("post_process/interpolation/interpolation.jl")
@@ -156,7 +156,7 @@ export NoInterpolation, CubicHermite, ContinuousFormula
 export NoSensitivity, DecoupledDirect
 # Post-process
 export get_solution, get_time_derivative, get_sensitivity, get_eigenmax,
-       get_eigenvalues, interpolate_solution, post_sensitivity_analysis
+       get_eigenvalues, get_dimensions, interpolate_solution, post_sensitivity_analysis
 # Plots
 export plot_ode, make_code_name
 # Utilities

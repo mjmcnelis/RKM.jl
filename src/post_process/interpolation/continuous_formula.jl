@@ -3,13 +3,18 @@
                                       method::ODEMethod, precision::Type{T};
                                       dt_dense::Float64) where T <: AbstractFloat
 
-    @unpack t, y, dy, dimensions = sol
+    t = sol.t
+    y = sol.y
+    dy = sol.dy
+    dimensions = sol.dimensions
 
     if isempty(y)
         error("Original solution set is empty, set save_solution = true")
     end
 
-    @unpack ω, stages, reconstructor = method
+    ω = method.ω
+    stages = method.stages
+    reconstructor = method.reconstructor
 
     if isempty(ω)
         error("$reconstructor has no coefficients for ContinuousFormula \
