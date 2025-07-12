@@ -7,24 +7,34 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
              # note: next argument was f but renamed it to y_prev here
              args...) where T <: AbstractFloat
 
-    @unpack iteration = method
-    @unpack limiter = adaptive
-    @unpack y, y_tmp, f_tmp, dy = update_cache
+    iteration = method.iteration
+    order = method.order
+
+    epsilon = adaptive.epsilon
+    p_norm = adaptive.p_norm
+    limiter = adaptive.limiter
+
+    low = limiter.low
+    high = limiter.high
+    dt_min = limiter.dt_min
+    dt_max = limiter.dt_max
+
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    dy = update_cache.dy
+
     y_prev = update_cache.f
 
     ode_wrap!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
 
     # TEMP: fixed time step for first update until estimate first time step w/ doubling
     if ode_wrap!.FE[1] > 1
-        @unpack epsilon, p_norm = adaptive
-        @unpack low, high, dt_min, dt_max = limiter
-
-        order = method.order[1]                         # order of scheme
-
         # for high did 1/order, but epsilon 2/x?
         # don't remember my reasoning for that
-        high    ^= 1.0 / order                          # rescale high based on order
-        epsilon ^= 2.0 / (1.0 + order)
+        # TODO: don't I already rescale these parameters now?
+        high    ^= 1.0 / order[1]                           # rescale high based on order
+        epsilon ^= 2.0 / (1.0 + order[1])
 
         # TODO: check if this is allocating (don't set new time step)
         # note: seems like it's allocating even for fixed time step

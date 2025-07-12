@@ -16,7 +16,9 @@ end
 function reconstruct_sensitivity(sensitivity::DecoupledDirect,
                                  ode_wrap_p!::ODEWrapperParam,
                                  f::Vector{T}, p::Vector{Float64}) where T <: AbstractFloat
-    @unpack param_jacobian, jacobian_vector = sensitivity
+
+    param_jacobian = sensitivity.param_jacobian
+    jacobian_vector = sensitivity.jacobian_vector
 
     param_jacobian = reconstruct_jacobian(param_jacobian, ode_wrap_p!, f, p)
     jacobian_vector = reconstruct_jacobian_vector(jacobian_vector, f)
@@ -34,10 +36,17 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
                                      dt, update_cache, ode_wrap_y!, ode_wrap_p!,
                                      method)
 
-    @unpack y_tmp, f_tmp, J, S, S_tmp, dS = update_cache
-    @unpack param_jacobian, jacobian_vector = sensitivity
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    J = update_cache.J
+    S = update_cache.S
+    S_tmp = update_cache.S_tmp
+    dS = update_cache.dS
 
-    @unpack A_T = method
+    param_jacobian = sensitivity.param_jacobian
+    jacobian_vector = sensitivity.jacobian_vector
+
+    A_T = method.A_T
 
     @.. S_tmp = S
     for j in 1:stage_idx-1
@@ -60,7 +69,7 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
                                    state_jacobian, J, S_tmp, y_tmp, f_tmp)
 
     # compute parameter-Jacobian: S_tmp <- df/dp
-    @unpack p = ode_wrap_y!
+    p = ode_wrap_y!.p
     # TODO: would it help to store result in a sparse Jp?
     evaluate_jacobian!(param_jacobian, S_tmp, ode_wrap_p!, p, f_tmp)
 
@@ -82,10 +91,13 @@ function implicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
                                 dt, update_cache, ode_wrap_y!, ode_wrap_p!,
                                 method)
 
-    @unpack y_tmp, f_tmp, J, dS = update_cache
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    J = update_cache.J
+    dS = update_cache.dS
 
     # compute Jacobian df/dy if not already done in explicit sensitivity
-    @unpack jacobian_vector = sensitivity
+    jacobian_vector = sensitivity.jacobian_vector
     if !(jacobian_vector isa NaiveJacobianVector)
         evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
     end

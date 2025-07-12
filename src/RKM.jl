@@ -19,7 +19,6 @@ import SparseDiffTools: matrix_colors, forwarddiff_color_jacobian!, ForwardColor
                         auto_jacvec!, DeivVecTag#, num_jacvec!
 import StaticArrays: SVector, SMatrix, MVector
 import StatsBase: mean
-import UnPack: @unpack
 
 # tmp for testing type stablity
 import InteractiveUtils: @code_warntype, @code_typed

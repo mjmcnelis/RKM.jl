@@ -3,8 +3,12 @@
                      t::T, dt::T, ode_wrap!::ODEWrapperState,
                      update_cache::RKMCache, args...) where T <: AbstractFloat
 
-    @unpack b, stages = method
-    @unpack dy_LM, y, y_tmp = update_cache
+    b = method.b
+    stages = method.stages
+
+    dy_LM = update_cache.dy_LM
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
 
     # evaluate update
     @.. y_tmp = y
@@ -20,9 +24,20 @@ end
                      state_jacobian::JacobianMethod, root_finder::RootFinderMethod,
                      eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
-    @unpack b, b_pred, stages = method
-    @unpack epsilon, p_norm, max_iterations = root_finder
-    @unpack dy_LM, y, y_tmp, f_tmp, J, res = update_cache
+    b = method.b
+    b_pred = method.b_pred
+    stages = method.stages
+
+    epsilon = root_finder.epsilon
+    p_norm = root_finder.p_norm
+    max_iterations = root_finder.max_iterations
+
+    dy_LM = update_cache.dy_LM
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    J = update_cache.J
+    res = update_cache.res
 
     # set implicit time in wrapper
     t_tmp = t + dt

@@ -6,8 +6,16 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
-    @unpack stages, iteration, order, start_counter = method
-    @unpack dy, dy_LM, y, y_tmp, f = update_cache
+    stages = method.stages
+    iteration = method.iteration
+    order = method.order
+    start_counter = method.start_counter
+
+    dy = update_cache.dy
+    dy_LM = update_cache.dy_LM
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f = update_cache.f
 
     # evaluate ODE at current state/time (i.e E)
     ode_wrap_y!(f, t[1], y)
@@ -24,7 +32,7 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
     # end
 
     if start_counter[1] < order-1
-        @unpack start_method = method
+        start_method = method.start_method
         start_iteration = start_method.iteration
 
         runge_kutta_step!(start_method, start_iteration, t, dt, ode_wrap_y!,
@@ -52,8 +60,12 @@ function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
              update_cache::RKMCache, linear_cache,
              state_jacobian::JacobianMethod) where T <: AbstractFloat
 
-    @unpack stages, iteration = method
-    @unpack dy, y, y_tmp = update_cache
+    stages = method.stages
+    iteration = method.iteration
+
+    dy = update_cache.dy
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
 
     # initialize previous states (trivial)
     # TODO: check if this works (moved FE to ode_wrap!)

@@ -7,11 +7,30 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
-    @unpack epsilon, alpha, delta, p_norm, max_attempts,
-            total_attempts, limiter, initialized_controller = adaptive
-    @unpack iteration, explicit_stage, fesal = method
-    @unpack dt_min, dt_max = limiter
-    @unpack dy, y, y_tmp, f, f_tmp, y1, y2, res = update_cache
+    iteration = method.iteration
+    explicit_stage = method.explicit_stage
+    fesal = method.fesal
+
+    epsilon = adaptive.epsilon
+    alpha = adaptive.alpha
+    delta = adaptive.delta
+    p_norm = adaptive.p_norm
+    max_attempts = adaptive.max_attempts
+    total_attempts = adaptive.total_attempts
+    limiter = adaptive.limiter
+    initialized_controller = adaptive.initialized_controller
+
+    dt_min = limiter.dt_min
+    dt_max = limiter.dt_max
+
+    dy = update_cache.dy
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f = update_cache.f
+    f_tmp = update_cache.f_tmp
+    y1 = update_cache.y1
+    y2 = update_cache.y2
+    res = update_cache.res
 
     dt[1] = dt[2]                                       # initialize time step
     rescale = T(1.0)                                    # default time step rescaling
@@ -82,10 +101,14 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
 end
 
 @muladd function embedded_step!(method, y, dy, y_tmp)
-    @unpack stages, b_hat = method
+
+    stages = method.stages
+    b_hat = method.b_hat
+
     @.. y_tmp = y                                       # evaluate iteration
     for j in 1:stages
         @.. y_tmp = y_tmp + b_hat[j]*dy[:,j]
     end
+
     return nothing
 end

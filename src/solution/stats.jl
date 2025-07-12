@@ -8,12 +8,23 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveTi
     # TODO: simplify this
     JE_p = 0
     if !(sensitivity isa NoSensitivity)
-        @unpack param_jacobian = sensitivity
+        param_jacobian = sensitivity.param_jacobian
         JE_p = param_jacobian.evaluations[1]
     end
 
-    @unpack t, y, f, dy, S, time_steps_taken, JE, rejection_rate, runtime,
-            solution_size, sensitivity_size, config_memory, excess_memory = sol
+    t = sol.t
+    y = sol.y
+    f = sol.f
+    dy = sol.dy
+    S = sol.S
+    time_steps_taken = sol.time_steps_taken
+    JE = sol.JE
+    rejection_rate = sol.rejection_rate
+    runtime = sol.runtime
+    solution_size = sol.solution_size
+    sensitivity_size = sol.sensitivity_size
+    config_memory = sol.config_memory
+    excess_memory = sol.excess_memory
 
     time_steps_taken .= timer.total_steps
     # TODO: missing param-jacobian evaluations
@@ -31,24 +42,27 @@ function compute_stats!(sol::Solution, save_solution::Bool, adaptive::AdaptiveTi
 end
 
 function get_stats(sol::Solution)
-    @unpack t, time_steps_taken, rejection_rate, FE, JE, runtime,
-            solution_size, sensitivity_size, config_memory, excess_memory = sol
-    println("time steps taken     = $(time_steps_taken[1])")
-    println("time points saved    = $(length(t))")
-    println("step rejection rate  = $(round(rejection_rate[1], sigdigits = 4)) %")
-    println("function evaluations = $(FE[1])")
-    println("jacobian evaluations = $(JE[1])")
-    println("evolution runtime    = $(round(runtime[1], sigdigits = 4)) seconds")
-    println("solution size        = $(format_bytes(solution_size[1]))")
-    println("sensitivity size     = $(format_bytes(sensitivity_size[1]))")
-    println("config memory        = $(format_bytes(config_memory[1]))")
-    println("excess memory        = $(format_bytes(excess_memory[1]))")
+    println("time steps taken     = $(sol.time_steps_taken[1])")
+    println("time points saved    = $(length(sol.t))")
+    println("step rejection rate  = $(round(sol.rejection_rate[1], sigdigits = 4)) %")
+    println("function evaluations = $(sol.FE[1])")
+    println("jacobian evaluations = $(sol.JE[1])")
+    println("evolution runtime    = $(round(sol.runtime[1], sigdigits = 4)) seconds")
+    println("solution size        = $(format_bytes(sol.solution_size[1]))")
+    println("sensitivity size     = $(format_bytes(sol.sensitivity_size[1]))")
+    println("config memory        = $(format_bytes(sol.config_memory[1]))")
+    println("excess memory        = $(format_bytes(sol.excess_memory[1]))")
 end
 
 function get_subroutine_runtimes(sol, ode_wrap!, update_cache, root_finder,
                                  state_jacobian, save_time)
-    @unpack f, y, J, res = update_cache
-    @unpack linear_cache = root_finder
+
+    f = update_cache.f
+    y = update_cache.y
+    J = update_cache.J
+    res = update_cache.res
+
+    linear_cache = root_finder.linear_cache
 
     nt = length(sol.t)
     ny = sol.dimensions[1]

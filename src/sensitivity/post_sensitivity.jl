@@ -6,8 +6,10 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
                                    # TODO: make SensitivityMethod struct
                                    jacobian_method = FiniteJacobian()
                                   ) where {T <: AbstractFloat}
+
     t, y = get_solution(sol)
-    @unpack precision = options
+
+    precision = options.precision
 
     nt = length(t)
     ny = sol.dimensions[1]
@@ -86,8 +88,10 @@ end
 function psa_green_function(sol::Solution, options::SolverOptions,
                             dy_dt!::Function, p::Vector{T};
                             abstract_params = nothing) where {T <: AbstractFloat}
+
     t, y = get_solution(sol)
-    @unpack precision = options
+
+    precision = options.precision
 
     nt = length(t)
     ny = sol.dimensions[1]
@@ -118,5 +122,6 @@ function psa_green_function(sol::Solution, options::SolverOptions,
         append!(z0, z0_tmp)
     end
     z0 = reshape(z0, ny^2, nt) |> transpose
+
     return z0
 end

@@ -7,11 +7,24 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
              sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
              interpolator::Interpolator) where T <: AbstractFloat
 
-    @unpack epsilon, alpha, delta, p_norm, max_attempts,
-            total_attempts, limiter, initialized_controller = adaptive
-    @unpack explicit_stage = method
-    @unpack dt_min, dt_max = limiter
-    @unpack y, y_tmp, f, f_tmp, y1, y2, res = update_cache
+    epsilon = adaptive.epsilon
+    alpha = adaptive.alpha
+    delta = adaptive.delta
+    p_norm = adaptive.p_norm
+    max_attempts = adaptive.max_attempts
+    total_attempts = adaptive.total_attempts
+    limiter = adaptive.limiter
+    initialized_controller = adaptive.initialized_controller
+
+    dt_min = limiter.dt_min
+    dt_max = limiter.dt_max
+
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f_tmp = update_cache.f_tmp
+    y1 = update_cache.y1
+    y2 = update_cache.y2
+    res = update_cache.res
 
     order = method.order[1]                             # order of scheme
 
@@ -78,8 +91,17 @@ end
 function double_step!(method, t, dt, ode_wrap_y!, update_cache, state_jacobian,
                       root_finder, eigenmax, sensitivity, ode_wrap_p!)
 
-    @unpack explicit_stage, fesal, iteration = method
-    @unpack dy, y, y_tmp, f, f_tmp, y1, y2 = update_cache
+    explicit_stage = method.explicit_stage
+    fesal = method.fesal
+    iteration = method.iteration
+
+    dy = update_cache.dy
+    y = update_cache.y
+    y_tmp = update_cache.y_tmp
+    f = update_cache.f
+    f_tmp = update_cache.f_tmp
+    y1 = update_cache.y1
+    y2 = update_cache.y2
 
     t_start = t[1]
     dt_start = dt[1]

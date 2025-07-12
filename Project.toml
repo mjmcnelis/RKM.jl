@@ -21,7 +21,6 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseDiffTools = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [weakdeps]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
@@ -47,7 +46,6 @@ Setfield = "1"
 SparseDiffTools = "2"
 StaticArrays = "1"
 StatsBase = "0.34"
-UnPack = "1"
 
 [extras]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"

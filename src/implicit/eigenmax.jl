@@ -23,7 +23,7 @@ function compute_max_eigenvalue!(::NoEigenMax, args...)
 end
 
 # note: t is tmp
-# TODO: pass update_cache and @unpack lambda_LR, x0, J, y_tmp, f_tmp
+# TODO: pass update_cache and unpack lambda_LR, x0, J, y_tmp, f_tmp
 #       (but may still need to pass (lambda_LR, x0) or (lambda_LR_tmp, x0_tmp), etc)
 function compute_max_eigenvalue!(eigenmax::LinearEigenMax, lambda_LR::Vector{ComplexF64},
                                  x0::Vector{ComplexF64},

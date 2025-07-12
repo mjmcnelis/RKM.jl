@@ -11,6 +11,8 @@ src/evolve_simple.jl
 append_example.jl
 append_large_vectors.jl
 validation/ode/logistic/df_example.jl
+continuous_coefficients.jl
+sense_benchmark.jl
 
 # testing extensions
 ext/RKMFeaginExt.jl
@@ -18,3 +20,9 @@ ext/RKMInteractiveUtilsExt.jl
 
 # testing sensitivity
 green_expand.jl
+
+# not sure whether to push yet
+CLAUDE.md
+
+# unrelated
+coffee_yield.jl
