@@ -6,7 +6,7 @@
 - `SolverOptions` for storing the ODE solver options
 - `TimeRange` for specifying the time evolution interval
 - `TimeLimit` for setting a timer for the solver routine
-- Runge--Kutta methods (see [Runge--Kutta](methods/runge_kutta/runge_kutta.html))
+- Runge--Kutta methods (see [Runge--Kutta](methods/runge_kutta/runge_kutta.md))
 - Adaptive time step options (see ...make a page...)
 
 ## Dependencies
@@ -17,3 +17,22 @@
 ## External modules
 - [`DoubleFloats.jl`](https://github.com/JuliaMath/DoubleFloats.jl): `Double64` for runs that require quadruple-float precision
 - [`BenchmarkTools.jl`](https://github.com/JuliaCI/BenchmarkTools.jl): `@benchmark`, `@btime` and `mean` for benchmarking solver runtime and memory usage
+
+
+```@autodocs
+Modules = [RKM]
+Pages   = ["src/solution/sizehint.jl",
+           "src/evolve.jl",
+           "src/timer.jl",
+           "src/implicit/nansafe/nansafe_jacobian.jl",
+           "src/options.jl",
+           "src/plots.jl",
+           "src/methods/utils.jl",
+           "src/methods/multistep/adams/adams_bashforth.jl",
+           "src/methods/multistep/adams/adams_moulton.jl",
+           "src/methods/multistep/differentiation_formula/backward_differentiation_formula.jl",
+           "src/methods/multistep/differentiation_formula/numerical_differentiation_formula.jl",
+           "src/progress.jl",
+           "src/methods/properties/fesal.jl",
+          ]
+```

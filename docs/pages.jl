@@ -19,5 +19,6 @@ pages = [
                                               "adaptive/algorithms/finite_diff.md"
                                              ],
                             #  "Stepsize control" => ["adaptive/basic_control.md"]
-                            ]
+                            ],
+    "Solution output" => ["solution/solution.md"],
 ]
