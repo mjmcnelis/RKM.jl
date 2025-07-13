@@ -1,5 +1,5 @@
 
-# Solution output
+# Solution data
 
 After solving the ODE, you can plot the time series data stored in the `Solution` struct `sol`.
 The following sections are based on the overdamped harmonic oscillator:
@@ -78,7 +78,7 @@ options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
 
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
-*Note: using the solver option `interpolator = CubicHermite()` will also output the time derivatives.*
+*Note: using the solver option* `interpolator = CubicHermite()` *will also output the time derivatives.*
 
 The time derivative data is stored in `sol.f` as a linear column (same as `sol.y`). You can plot them by doing
 
@@ -93,9 +93,40 @@ plot(t, f; xlabel = "t", ylabel = "f", label = ["dx/dt" "dv/dt"])
 
 ## Sensitivity coefficients
 
+If you used the solver option `sensitivity = DecoupledDirect()`, you can plot the first-order sensitivity coefficients $\vec{S}_{j} = {\partial\vec{y}/\partial p_j}$.
+
+```julia
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                          sensitivity = DecoupledDirect(),);
+
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+```
+
+The sensitivity coefficients are stored in `sol.S` as a linear column. After reshaping it, you get
+
+```julia
+julia> t, S = get_sensitivity(sol);
+julia> S
+1002×4 transpose(::Matrix{Float64}) with eltype Float64:
+ 0.0          0.0          0.0         0.0
+ ⋮
+ 4.58122e-6  -4.12263e-6  -9.16244e-5  8.24527e-5
+```
+
+The first two columns are the state variables' sensitivity to the first parameter $γ$ (the last two columns are the sensitivity w.r.t. the second parameter $ω$).
+
+```julia
+plot(t, S; xlabel = "t", ylabel = "S", label = ["dx/dγ" "dv/dγ" "dx/dω" "dv/dω"])
+```
+
+```@raw html
+<img src="S_plot.png" width="600">
+```
+
 ## API Reference
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["src/solution/solution.jl"]
+Pages   = ["src/solution/solution.jl",
+           "src/solution/sizehint.jl"]
 ```

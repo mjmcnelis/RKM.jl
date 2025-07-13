@@ -21,8 +21,7 @@
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["src/solution/sizehint.jl",
-           "src/evolve.jl",
+Pages   = ["src/evolve.jl",
            "src/timer.jl",
            "src/implicit/nansafe/nansafe_jacobian.jl",
            "src/options.jl",
@@ -33,6 +32,5 @@ Pages   = ["src/solution/sizehint.jl",
            "src/methods/multistep/differentiation_formula/backward_differentiation_formula.jl",
            "src/methods/multistep/differentiation_formula/numerical_differentiation_formula.jl",
            "src/progress.jl",
-           "src/methods/properties/fesal.jl",
-          ]
+           "src/methods/properties/fesal.jl"]
 ```
