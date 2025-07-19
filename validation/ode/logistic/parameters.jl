@@ -12,6 +12,8 @@ options = Dict(
     #                         pid = PIControl(), limiter = SmoothLimiter(),),
     # :adaptive => Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
     #                         pid = PIControl(), limiter = SmoothLimiter(),),
+    # :adaptive => CentralDiff(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,
+    #                            p_norm = 2.0, limiter = SmoothLimiter()),
 
     # :timer => TimeLimit(; wtime_min = 0),
 

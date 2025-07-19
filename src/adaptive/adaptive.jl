@@ -2,28 +2,22 @@
 abstract type AdaptiveTimeStep end
 
 struct Fixed <: AdaptiveTimeStep end
-#=
-struct CentralDiff <: AdaptiveTimeStep
+
+@kwdef struct CentralDiff{LM} <: AdaptiveTimeStep where LM <: LimiterMethod
     """Relative error tolerance"""
-    epsilon::Float64
+    epsilon::Float64 = 1e-6
     """Absolute error tolerance"""
-    alpha::Float64
+    alpha::Float64 = 1e-6
     """Incremental error tolerance"""
-    delta::Float64
+    delta::Float64 = 1e-6
     """Integer used to compute L--norms"""
-    p_norm::Float64
+    p_norm::Float64 = 2.0
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
-    benchmark_diffeq::Bool
+    benchmark_diffeq::Bool = false
+    """Limiter method for time step controller"""
+    limiter::LM = PiecewiseLimiter()
 end
 
-function CentralDiff(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,
-                       p_norm = 2.0, benchmark_diffeq = false)
-
-    check_adaptive_parameters_1(; epsilon, alpha, delta, p_norm)
-
-    return CentralDiff(epsilon, alpha, delta, p_norm, benchmark_diffeq)
-end
-=#
 """
 $(TYPEDEF)
 
@@ -128,6 +122,10 @@ function rescale_tolerance(::Embedded, order::SVector{P,T}) where {P, T <: Abstr
 end
 
 function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)
+    return adaptive
+end
+
+function reconstruct_adaptive(adaptive::CentralDiff, method::ODEMethod)
     return adaptive
 end
 

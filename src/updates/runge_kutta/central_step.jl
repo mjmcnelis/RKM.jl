@@ -1,11 +1,11 @@
 
-# TODO: not really working that well right now, debug later (also out of date)
+# TODO: not really working that well right now, debug later
 function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
-             t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
-             update_cache::RKMCache,
-             # TODO: may want to do kwargs for different caches used in adaptive methods
-             # note: next argument was f but renamed it to y_prev here
-             args...) where T <: AbstractFloat
+                               t::Vector{T}, dt::Vector{T},
+                               config::RKMConfig) where T <: AbstractFloat
+
+    update_cache = config.update_cache
+    ode_wrap_y! = config.ode_wrap_y!
 
     iteration = method.iteration
     order = method.order
@@ -24,22 +24,23 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
     f_tmp = update_cache.f_tmp
     dy = update_cache.dy
 
-    y_prev = update_cache.f
+    # note: use y1 to set y_prev
+    y_prev = update_cache.y1
 
-    ode_wrap!(f_tmp, t[1], y)                              # evaluate first stage at (t,y)
+    ode_wrap_y!(f_tmp, t[1], y)                             # evaluate first stage at (t,y)
 
     # TEMP: fixed time step for first update until estimate first time step w/ doubling
-    if ode_wrap!.FE[1] > 1
+    if ode_wrap_y!.FE[1] > 2
         # for high did 1/order, but epsilon 2/x?
         # don't remember my reasoning for that
         # TODO: don't I already rescale these parameters now?
-        high    ^= 1.0 / order[1]                           # rescale high based on order
+        high    ^= 1.0 / order[1]                       # rescale high based on order
         epsilon ^= 2.0 / (1.0 + order[1])
 
         # TODO: check if this is allocating (don't set new time step)
         # note: seems like it's allocating even for fixed time step
 
-        # @.. y_tmp = y + dt[1]*f_tmp                     # compute y_star (stored in y_tmp)
+        # @.. y_tmp = y + dt[1]*f_tmp                   # compute y_star (stored in y_tmp)
 
         # approximate C w/ central differences (stored in y_tmp)
         # @.. y_tmp = y_tmp - 2.0*y + y_prev
@@ -57,7 +58,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
         f_norm = norm(f_tmp, p_norm)
 
         # TODO: solve more complicated algebraic equation from VAH paper
-        if C_norm == 0.0                                # compute new time step in dt[2]
+        if iszero(C_norm)                               # compute new time step in dt[2]
             dt[2] = high*dt[1]
         else
             if C_norm*y_norm > 2.0*epsilon*f_norm^2
@@ -69,13 +70,11 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
         dt[2] = min(high*dt[1], max(low*dt[1], dt[2]))  # control growth rate
         dt[2] = min(dt_max, max(dt_min, dt[2]))         # impose min/max bounds
     end
-    # evaluate first stage iteration w/ new time step (i.e. dt[2])
-    @.. dy[:,1] = dt[2] * f_tmp
-    runge_kutta_step!(method, iteration, t[1], dt[2], ode_wrap!, update_cache, args...)
-
     dt[1] = dt[2]                                       # store current time step
+    @.. dy[:,1] = dt[1] * f_tmp
+    runge_kutta_step!(method, iteration, t, dt, config)
+
     @.. y_prev = y                                      # store current solution
-    @.. y = y_tmp                                       # get iteration
 
     return nothing
 end
