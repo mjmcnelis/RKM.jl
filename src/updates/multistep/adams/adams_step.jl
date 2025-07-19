@@ -1,7 +1,9 @@
 
-@muladd function adams_step!(method::Adams, ::Explicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState,
-                     update_cache::RKMCache, args...) where T <: AbstractFloat
+@muladd function adams_step!(method::Adams, iteration::Explicit,
+                             t::Vector{T}, dt::Vector{T},
+                             config::RKMConfig) where T <: AbstractFloat
+
+    update_cache = config.update_cache
 
     b = method.b
     stages = method.stages
@@ -18,14 +20,16 @@
     return nothing
 end
 
-@muladd function adams_step!(method::Adams, ::SingleImplicit,
-                     t::T, dt::T, ode_wrap!::ODEWrapperState,
-                     update_cache::RKMCache, linear_cache,
-                     state_jacobian::JacobianMethod, root_finder::RootFinderMethod,
-                     eigenmax::EigenMaxMethod) where T <: AbstractFloat
+@muladd function adams_step!(method::Adams, iteration::SingleImplicit,
+                             t::Vector{T}, dt::Vector{T},
+                             config::RKMConfig) where T <: AbstractFloat
+
+    ode_wrap! = config.ode_wrap_y!
+    update_cache = config.update_cache
+    state_jacobian = config.state_jacobian
+    root_finder = config.root_finder
 
     b = method.b
-    b_pred = method.b_pred
     stages = method.stages
 
     epsilon = root_finder.epsilon
@@ -39,18 +43,12 @@ end
     J = update_cache.J
     res = update_cache.res
 
-    # set implicit time in wrapper
-    t_tmp = t + dt
+    # set intermediate time in wrapper
+    t_tmp = t[1] + dt[1]
     set_wrapper!(ode_wrap!, t_tmp)
 
-    # compute predictor and evaluate ODE (i.e. PE)
-    @.. y_tmp = y
-    # note: comment for loop if want to compare to BackwardEuler1, ImplicitTrapezoid21
-    for j in 1:stages
-        @.. y_tmp = y_tmp + b_pred[j]*dy_LM[:,j]
-    end
-    ode_wrap!(f_tmp, t_tmp, y_tmp)
-    @.. dy_LM[:,1] = dt * f_tmp
+    # trivial predictor
+    @.. dy_LM[:,1] = 0.0
 
     for n in 1:max_iterations+1
         # compute current correction and evaluate ODE (i.e CE)
@@ -62,44 +60,41 @@ end
 
         # compute residual error of root equation
         # dy - dt.f(t_tmp, y_tmp + b.dy) = 0
-        @.. res = dy_LM[:,1] - dt*f_tmp
+        @.. res = dy_LM[:,1] - dt[1]*f_tmp
 
-        # compute norms and tolerance
-        e_norm  = norm(res, p_norm)           # compute norms
-        dy_norm = norm(view(dy_LM,:,1), p_norm)
-        tol = epsilon * dy_norm
+        # check for convergence (after at least one iteration)
+        if n > 1
+            # compute norms and tolerance
+            # note: LinearAlgebra.norm is slow on mac (so use AppleAccelerate)
+            e_norm  = norm(res, p_norm)
+            dy_norm = norm(view(dy_LM,:,1), p_norm)
+            tol = epsilon * dy_norm
 
-        # check for root convergence
-        if e_norm < tol
-            break
-        elseif n == max_iterations + 1
+            if e_norm <= tol
+                break
+            end
+        end
+
+        if n == max_iterations + 1
             # println("failed to converge after $(n-1) iteration(s)")
             break
         end
 
-        if root_finder isa FixedPoint
-            @.. dy_LM[:,1] -= res
-        elseif root_finder isa Newton
+        if root_finder isa Newton
             # evaluate current Jacobian
             evaluate_jacobian!(state_jacobian, J, ode_wrap!, y_tmp, f_tmp)
             # J <- I - b.dt.J
-            @.. J *= (-b[1]*dt)
-            for k in diagind(J)
-                J[k] = J[k] + 1.0
-            end
-
-            # pass Jacobian and residual error to linear cache
-            linear_cache.A = J
-            linear_cache.b = res
-            # solve and apply Newton iteration
-            solve!(linear_cache)
-            @.. dy_LM[:,1] -= linear_cache.u
+            root_jacobian!(J, b[1], dt[1])
         end
+
+        root_iteration!(root_finder, dy_LM, 1, res, J)
     end
+
     # evaluate update
     @.. y_tmp = y
     for j in 1:stages
         @.. y_tmp = y_tmp + b[j]*dy_LM[:,j]
     end
+
     return nothing
 end

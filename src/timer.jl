@@ -93,10 +93,8 @@ function continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
                          timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
     wtime_min = timer.wtime_min
     time_sys = timer.time_sys
-    total_steps = timer.total_steps
 
-    # note: check timer every 10 time steps
-    if !isinf(wtime_min) && total_steps[1] % 10 == 0
+    if !isinf(wtime_min)
         if time() > time_sys[1] + 60*wtime_min
             # note: hack seems to work, but need to maintain # blank lines
             if show_progress

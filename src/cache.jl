@@ -1,7 +1,5 @@
 
-abstract type RKMCache end
-
-struct UpdateCache{T <: AbstractFloat} <: RKMCache
+struct UpdateCache{T <: AbstractFloat}
     dy::Matrix{T}
     dy_LM::Matrix{T}
     y::Vector{T}

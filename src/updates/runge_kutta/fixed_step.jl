@@ -1,10 +1,12 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
-             t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-             update_cache::RKMCache, state_jacobian::JacobianMethod,
-             root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-             sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
-             interpolator::Interpolator) where T <: AbstractFloat
+                               t::Vector{T}, dt::Vector{T},
+                               config::RKMConfig) where T <: AbstractFloat
+
+    ode_wrap_y! = config.ode_wrap_y!
+    update_cache = config.update_cache
+    sensitivity = config.sensitivity
+    interpolator = config.interpolator
 
     iteration = method.iteration
     explicit_stage = method.explicit_stage
@@ -25,13 +27,10 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Fixed,
     if explicit_stage[1]
         stage_idx = 1
         @.. y_tmp = y
-        explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t[1],
-                                    dt[1], update_cache, ode_wrap_y!, ode_wrap_p!,
-                                    method)
+        explicit_sensitivity_stage!(sensitivity, stage_idx, t[1], dt[1], config, method)
     end
 
-    runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache,
-                      state_jacobian, root_finder, eigenmax, sensitivity, ode_wrap_p!)
+    runge_kutta_step!(method, iteration, t, dt, config)
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
     if (explicit_stage[1] || interpolator isa CubicHermite) && !fesal

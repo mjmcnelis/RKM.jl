@@ -28,13 +28,17 @@ function reconstruct_sensitivity(sensitivity::DecoupledDirect,
     return sensitivity
 end
 
-function explicit_sensitivity_stage!(::NoSensitivity, args...)
+function explicit_sensitivity_stage!(sensitivity::NoSensitivity, args...)
     return nothing
 end
 
-function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_tmp,
-                                     dt, update_cache, ode_wrap_y!, ode_wrap_p!,
-                                     method)
+function explicit_sensitivity_stage!(sensitivity::DecoupledDirect, stage_idx,
+                                     t_tmp, dt, config, method)
+
+    state_jacobian = config.state_jacobian
+    update_cache = config.update_cache
+    ode_wrap_y! = config.ode_wrap_y!
+    ode_wrap_p! = config.ode_wrap_p!
 
     y_tmp = update_cache.y_tmp
     f_tmp = update_cache.f_tmp
@@ -79,17 +83,18 @@ function explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_t
     return nothing
 end
 
-function implicit_sensitivity_stage!(::NoSensitivity, args...)
+function implicit_sensitivity_stage!(sensitivity::NoSensitivity, args...)
     return nothing
 end
 
-function implicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_tmp,
-                                     dt, update_cache, ode_wrap_y!, ode_wrap_p!, A,
-                                     method)
+function implicit_sensitivity_stage!(sensitivity::DecoupledDirect, stage_idx,
+                                     t_tmp, dt, config, A, method)
 
-    explicit_sensitivity_stage!(sensitivity, stage_idx, state_jacobian, t_tmp,
-                                dt, update_cache, ode_wrap_y!, ode_wrap_p!,
-                                method)
+    explicit_sensitivity_stage!(sensitivity, stage_idx, t_tmp, dt, config, method)
+
+    update_cache = config.update_cache
+    ode_wrap_y! = config.ode_wrap_y!
+    state_jacobian = config.state_jacobian
 
     y_tmp = update_cache.y_tmp
     f_tmp = update_cache.f_tmp

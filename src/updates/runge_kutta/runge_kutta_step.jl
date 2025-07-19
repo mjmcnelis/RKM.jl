@@ -1,11 +1,12 @@
 # benchmark.jl note: don't see as much benefit to @muladd as @..
 # benchmark.jl note: @.. doesn't help much when switch to MVector
-@muladd function runge_kutta_step!(method::RungeKutta, ::Explicit,
-                     t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-                     update_cache::RKMCache, state_jacobian::JacobianMethod,
-                     root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-                     sensitivity::SensitivityMethod,
-                     ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
+@muladd function runge_kutta_step!(method::RungeKutta, iteration::Explicit,
+                                   t::Vector{T}, dt::Vector{T},
+                                   config::RKMConfig) where T <: AbstractFloat
+
+    ode_wrap_y! = config.ode_wrap_y!
+    update_cache = config.update_cache
+    sensitivity = config.sensitivity
 
     c = method.c
     A_T = method.A_T
@@ -32,9 +33,7 @@
         @.. dy[:,i] = dt[1] * f_tmp
 
         # for sensitivity
-        explicit_sensitivity_stage!(sensitivity, i, state_jacobian, t_tmp, dt[1],
-                                    update_cache, ode_wrap_y!, ode_wrap_p!,
-                                    method)
+        explicit_sensitivity_stage!(sensitivity, i, t_tmp, dt[1], config, method)
     end
     @.. y_tmp = y                                        # evaluate iteration
     for j in 1:stages
@@ -60,12 +59,16 @@
     return nothing
 end
 
-@muladd function runge_kutta_step!(method::RungeKutta, ::DiagonalImplicit,
-                     t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-                     update_cache::RKMCache, state_jacobian::JacobianMethod,
-                     root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-                     sensitivity::SensitivityMethod,
-                     ode_wrap_p!::ODEWrapperParam) where T <: AbstractFloat
+@muladd function runge_kutta_step!(method::RungeKutta, iteration::DiagonalImplicit,
+                                   t::Vector{T}, dt::Vector{T},
+                                   config::RKMConfig) where T <: AbstractFloat
+
+    ode_wrap_y! = config.ode_wrap_y!
+    update_cache = config.update_cache
+    state_jacobian = config.state_jacobian
+    root_finder = config.root_finder
+    eigenmax = config.eigenmax
+    sensitivity = config.sensitivity
 
     c = method.c
     A_T = method.A_T
@@ -181,9 +184,7 @@ end
         end
 
         # for sensitivity
-        implicit_sensitivity_stage!(sensitivity, i, state_jacobian, t_tmp, dt[1],
-                                    update_cache, ode_wrap_y!, ode_wrap_p!,
-                                    A_T[i,i], method)
+        implicit_sensitivity_stage!(sensitivity, i, t_tmp, dt[1], config, A_T[i,i], method)
     end
     # evaluate update
     @.. y_tmp = y

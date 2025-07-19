@@ -28,6 +28,7 @@ abstract type ODEMethod end
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
+include("config.jl")
 include("timer.jl")
 include("progress.jl")
 include("wrapper.jl")

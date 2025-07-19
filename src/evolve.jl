@@ -111,6 +111,9 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
                            save_time_derivative, stages, iteration, eigenmax)
     end
 
+    config = RKMConfig(ode_wrap_y!, update_cache, state_jacobian, root_finder,
+                       eigenmax, sensitivity, ode_wrap_p!, interpolator)
+
     loop_stats = @timed begin
         # save initial condition
         if save_solution
@@ -139,9 +142,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             end
             adjust_final_time_steps!(t, dt, tf)
 
-            evolve_one_time_step!(method, adaptive, t, dt, ode_wrap_y!, update_cache,
-                                  state_jacobian, root_finder, eigenmax, sensitivity,
-                                  ode_wrap_p!, interpolator)
+            evolve_one_time_step!(method, adaptive, t, dt, config)
             t[1] += dt[1]
             timer.total_steps[1] += 1
 

@@ -1,10 +1,10 @@
 
 function evolve_one_time_step!(method::Adams, adaptive::Fixed,
-             t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-             update_cache::RKMCache, linear_cache, state_jacobian::JacobianMethod,
-             root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-             sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
-             interpolator::Interpolator) where T <: AbstractFloat
+                               t::Vector{T}, dt::Vector{T},
+                               config::RKMConfig) where T <: AbstractFloat
+
+    ode_wrap_y! = config.ode_wrap_y!
+    update_cache = config.update_cache
 
     stages = method.stages
     iteration = method.iteration
@@ -35,15 +35,11 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
         start_method = method.start_method
         start_iteration = start_method.iteration
 
-        runge_kutta_step!(start_method, start_iteration, t, dt, ode_wrap_y!,
-                          update_cache, linear_cache, state_jacobian, root_finder,
-                          eigenmax, sensitivity, ode_wrap_p!)
+        runge_kutta_step!(start_method, start_iteration, t, dt, config)
 
         start_counter[1] += 1
     else
-        adams_step!(method, iteration, t[1], dt[1], ode_wrap_y!, update_cache,
-                    linear_cache, state_jacobian, root_finder, eigenmax)
-
+        adams_step!(method, iteration, t, dt, config)
     end
 
     # shift stages (except first one)
@@ -54,10 +50,9 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
     return nothing
 end
 
-
 function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
              t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
-             update_cache::RKMCache, linear_cache,
+             update_cache::UpdateCache, linear_cache,
              state_jacobian::JacobianMethod) where T <: AbstractFloat
 
     stages = method.stages

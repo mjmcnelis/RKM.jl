@@ -1,11 +1,11 @@
 
 function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
-             t::Vector{T}, dt::Vector{T}, ode_wrap_y!::ODEWrapperState,
-             update_cache::RKMCache, state_jacobian::JacobianMethod,
-             root_finder::RootFinderMethod, eigenmax::EigenMaxMethod,
-             # note: sensitivity not implemented for embedded step yet
-             sensitivity::SensitivityMethod, ode_wrap_p!::ODEWrapperParam,
-             interpolator::Interpolator) where T <: AbstractFloat
+                               t::Vector{T}, dt::Vector{T},
+                               config::RKMConfig) where T <: AbstractFloat
+
+    ode_wrap_y! = config.ode_wrap_y!
+    update_cache = config.update_cache
+    interpolator = config.interpolator
 
     iteration = method.iteration
     explicit_stage = method.explicit_stage
@@ -42,8 +42,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         if explicit_stage[1]
             @.. dy[:,1] = dt[1] * f
         end
-        runge_kutta_step!(method, iteration, t, dt, ode_wrap_y!, update_cache, state_jacobian,
-                          root_finder, eigenmax, sensitivity, ode_wrap_p!)
+        runge_kutta_step!(method, iteration, t, dt, config)
         @.. y1 = y_tmp                                  # primary iteration
 
         embedded_step!(method, y, dy, y_tmp)
