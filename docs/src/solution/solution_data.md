@@ -22,7 +22,7 @@ tf = 10.0
 dt0 = 1e-2
 
 ω = 10.0          # frequency
-γ = ω^2 + 1.0     # damping coefficient
+γ = 101.0         # damping coefficient
 p = [γ, ω]
 
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),);
@@ -71,7 +71,7 @@ plot(t, y; xlabel = "t", ylabel = "y", label = ["x" "v"])
 
 ## Time derivatives
 
-You can set the solver option  `save_time_derivative = true` to save the first-order time derivatives $\vec{f} = d\vec{y}/dt$.
+You can save the first-order time derivatives $\vec{f} = d\vec{y}/dt$ by setting the solver option  `save_time_derivative = true`.
 ```julia
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
                           save_time_derivative = true,);
