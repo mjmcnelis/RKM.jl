@@ -25,7 +25,7 @@ scatter(t, y; xlabel = "t", ylabel = "y", label = ["x" "v"], color = [:red :blue
 <img src="scatter_plot.png" width="600">
 ```
 
-The solution should contain state variable and time derivative data, which are needed for cubic Hermite interpolation. Now we can call `interpolate_solution` to interpolate the data uniformly (the keyword argument `dt_dense` changes the temporal spacing).
+The solution should contain state variable and time derivative data for the cubic Hermite routine. Now we can call `interpolate_solution` to interpolate the data uniformly (the keyword argument `dt_dense` changes the temporal spacing).
 
 ```julia
 t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-4);

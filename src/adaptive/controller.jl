@@ -2,9 +2,9 @@
 function initialize_controller!(update_cache::UpdateCache, e_norm::T,
                                 tol::T, dt::T) where T <: AbstractFloat
 
-    @.. update_cache.e_prev = e_norm
-    @.. update_cache.tol_prev = tol
-    @.. update_cache.dt_prev = dt
+    update_cache.e_prev .= e_norm
+    update_cache.tol_prev .= tol
+    update_cache.dt_prev .= dt
 
     return nothing
 end

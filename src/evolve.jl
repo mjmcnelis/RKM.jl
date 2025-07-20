@@ -119,7 +119,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         if save_solution
             # TODO: this output function still allocates
             # initial_output!(sol, update_cache, t, options)
-            append!(sol.t, t[1])
+            push!(sol.t, t[1])
             append!(sol.y, y)
             if save_time_derivative || interpolator isa CubicHermite
                 append!(sol.f, f)

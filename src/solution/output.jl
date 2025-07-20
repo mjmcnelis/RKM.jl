@@ -6,7 +6,7 @@ function _output_solution!(sol::Solution{T}, update_cache::UpdateCache{T}, t::Ve
     interpolator = options.interpolator
     sensitivity = options.sensitivity
 
-    append!(sol.t, t[1])
+    push!(sol.t, t[1])
     append!(sol.y, update_cache.y_tmp)
     if save_time_derivative || interpolator isa CubicHermite
         append!(sol.f, update_cache.f_tmp)
