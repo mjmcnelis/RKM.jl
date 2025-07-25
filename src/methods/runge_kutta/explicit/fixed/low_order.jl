@@ -11,15 +11,14 @@ function Euler1(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1
     ) |> transpose
 
-    # polynomial coefficients for continuous output
-    # are empty so just use Hermite interpolation
-    ω = SMatrix{0,0,Float64,0}()
+    ω = SMatrix{1, 1, precision, 1}(
+        1
+    ) |> transpose
 
     iteration = Explicit()
     reconstructor = Euler1
 
-    # return RungeKutta(name, butcher, #=ω,=# iteration, reconstructor)
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -36,10 +35,16 @@ function Heun2(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1, 0,
         1, 1//2, 1//2
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -1//2,
+        0, 1//2,
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Heun2
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -54,10 +59,16 @@ function Midpoint2(precision::Type{T} = Float64) where T <: AbstractFloat
         1//2, 1//2, 0,
         1, 0, 1
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -1,
+        0, 1,
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Midpoint2
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -74,37 +85,16 @@ function Ralston2(precision::Type{T} = Float64) where T <: AbstractFloat
         2//3, 2//3, 0,
         1, 1//4, 3//4
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -3//4,
+        0, 3//4,
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Ralston2
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
-end
-
-"""
-    Generic2(precision::Type{T} = Float64;
-             alpha::Union{Int, Rational}) where T <: AbstractFloat
-
-A generic second-order Runge-Kutta method.
-
-Required parameters: `alpha`
-"""
-function Generic2(precision::Type{T} = Float64;
-                  alpha::Union{Int, Rational}) where T <: AbstractFloat
-    @assert alpha != 0 "choose alpha != 0"
-    a = alpha
-
-    # note: reconstruction doesn't work right now (maybe I can make an exception?)
-    #       or I could try alpha = rationalize(method.c[2])
-    name = :Generic_2
-    butcher = SMatrix{3, 3, precision, 9}(
-        0, 0, 0,
-        a, a, 0,
-        1, 1-1//2a, 1//2a
-    ) |> transpose
-    iteration = Explicit()
-    reconstructor = Generic2
-
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -120,10 +110,17 @@ function Heun3(precision::Type{T} = Float64) where T <: AbstractFloat
         2//3, 0, 2//3, 0,
         1, 1//4, 0, 3//4
     ) |> transpose
+
+    ω = SMatrix{3, 3, precision, 9}(
+        1, -9//4, 3//2,
+        0, 3, -3,
+        0, -3//4, 3//2
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Heun3
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -141,10 +138,17 @@ function Ralston3(precision::Type{T} = Float64) where T <: AbstractFloat
         3//4, 0, 3//4, 0,
         1, 2//9, 1//3, 4//9
     ) |> transpose
+
+    ω = SMatrix{3, 3, precision, 9}(
+        1, -5//3, 8//9,
+        0, 3, -8//3,
+        0, -4//3, 16//9
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Ralston3
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -205,31 +209,6 @@ function SpiteriRuuth3(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
     iteration = Explicit()
     reconstructor = SpiteriRuuth3
-
-    return RungeKutta(name, butcher, iteration, reconstructor)
-end
-
-"""
-    Generic3(precision::Type{T} = Float64;
-             alpha::Union{Int, Rational}) where T <: AbstractFloat
-
-A generic third-order Runge-Kutta method.
-
-Required parameters: `alpha`
-"""
-function Generic3(precision::Type{T} = Float64;
-                  alpha::Union{Int, Rational}) where T <: AbstractFloat
-    @assert !(alpha in [0, 2//3, 1]) "choose alpha ∉ [0, 2//3, 1]"
-    a = alpha
-
-    butcher = SMatrix{4, 4, precision, 16}(
-        0, 0, 0, 0,
-        a, a, 0, 0,
-        1, 1+(1-a)//(a*(3a-2)), -(1-a)//(a*(3a-2)), 0,
-        1, 1//2-1//6a, 1//(6a*(1-a)), (2-3a)//6(1-a)
-    ) |> transpose
-    iteration = Explicit()
-    reconstructor = Generic3
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end

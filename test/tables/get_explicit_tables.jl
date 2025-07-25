@@ -7,13 +7,11 @@ function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: Abstra
         Heun2(; precision),
         Midpoint2(; precision),
         Ralston2(; precision),
-        Generic2(; alpha = 1, precision),
         Heun3(; precision),
         Ralston3(; precision),
         RungeKutta3(; precision),
         ShuOsher3(; precision),
         SpiteriRuuth3(; precision),
-        Generic3(; alpha = 1//2, precision),
 
         RungeKutta4(; precision),
         ThreeEightsRule4(; precision),
