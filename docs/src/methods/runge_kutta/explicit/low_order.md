@@ -19,7 +19,7 @@ The following standard methods are compatible with `Fixed()`, `Doubling()` and `
 
 The following embedded methods are compatible with all adaptive time step options:
 
-- `Fehlberg12()`: Fehlberg's first(second)-order method
+- `Fehlberg21()`: Fehlberg's second(first)-order method
 - `HeunEuler21()`: Heun-Euler second(first)-order method
 - `BogackiShampine32()`: Bogacki and Shampine's third(second)-order method
 

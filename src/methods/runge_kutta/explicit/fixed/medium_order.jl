@@ -17,6 +17,7 @@ function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
 
     # polynomial coefficients for continuous output
     # TODO: any properties other than sum(ω, dims = 2) = b to check?
+    # there are the moment equations, C0/C1 checks, SSP property?
     ω = SMatrix{3, 4, precision, 12}(
         1, -3//2, 2//3,
         0, 1, -2//3,
@@ -44,10 +45,18 @@ function ThreeEightsRule4(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1, -1, 1, 0,
         1, 1//8, 3//8, 3//8, 1//8
     ) |> transpose
+
+    ω = SMatrix{3, 4, precision, 12}(
+        7//8, -9//4, 3//2,
+        3//8, 3, -3,
+        -3//8, -3//4, 3//2,
+        1//8, 0, 0
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = ThreeEightsRule4
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -68,10 +77,19 @@ function Ralston4(precision::Type{T} = Float64) where T <: AbstractFloat
         1, (-3365+2094s5)/6040, (-975-3046s5)/2552, (467040+203968s5)/240845, 0,
         1, (263+24s5)/1812, (125-1000s5)/3828, 1024(3346+1623s5)/5924787, (30-4s5)/123
     ) |> transpose
+
+    # note: negative b2 restricts interpolant to 2nd order C0, not SSP
+    ω = SMatrix{2, 4, precision, 8}(
+        1, -(1 - (263+24s5)/1812),
+        0, (125-1000s5)/3828,
+        0, 1024(3346+1623s5)/5924787,
+        0, (30-4s5)/123
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Ralston4
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -96,10 +114,25 @@ function Ketcheson4(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1//15, 1//15, 1//15, 1//15, 1//15, 1//6, 1//6, 1//6, 1//6, 0,
         1, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10
     ) |> transpose
+
+    # note: only 2nd-order C0 interpolant preserves SSP
+    ω = SMatrix{2, 10, precision, 20}(
+        1, -9//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Ketcheson4
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """

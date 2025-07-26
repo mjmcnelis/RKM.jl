@@ -128,7 +128,7 @@ export Euler1, Heun2, Midpoint2, Ralston2, Heun3, Ralston3, Kutta3,
        ShuOsher3, SpiteriRuuth3, RungeKutta4, ThreeEightsRule4, Ralston4,
        Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
 # Embedded explicit Runge-Kutta
-export Fehlberg12, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, DormandPrince54,
+export Fehlberg21, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, DormandPrince54,
        BogackiShampine54, Tsitouras54, Verner56, Verner65, Fehlberg78, DormandPrince87,
        Feagin108, Feagin1210, Feagin1412
 # Standard implicit Runge-Kutta

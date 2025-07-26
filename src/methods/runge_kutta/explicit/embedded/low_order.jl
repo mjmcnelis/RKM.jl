@@ -1,23 +1,30 @@
 """
-    Fehlberg12(precision::Type{T} = Float64) where T <: AbstractFloat
+    Fehlberg21(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Fehlberg's first(second)-order method.
+Fehlberg's second(first)-order method.
 
 https://ntrs.nasa.gov/citations/19690021375
 """
-function Fehlberg12(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Fehlberg_1_2
+function Fehlberg21(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Fehlberg_2_1
     butcher = SMatrix{4, 5, precision, 20}(
         0, 0, 0, 0,
         1//2, 1//2, 0, 0,
         1, 1//256, 255//256, 0,
-        1, 1//256, 255//256, 0,
-        1, 1//512, 255//256, 1//512
+        1, 1//512, 255//256, 1//512,
+        1, 1//256, 255//256, 0
     ) |> transpose
-    iteration = Explicit()
-    reconstructor = Fehlberg12
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    ω = SMatrix{2, 3, precision, 6}(
+        1, -511//512,
+        0, 255//256,
+        0, 1//512,
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = Fehlberg21
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -33,10 +40,16 @@ function HeunEuler21(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1//2, 1//2,
         1, 1, 0
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -1//2,
+        0, 1//2,
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = HeunEuler21
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -56,8 +69,17 @@ function BogackiShampine32(precision::Type{T} = Float64) where T <: AbstractFloa
         1, 2//9, 1//3, 4//9, 0,
         1, 7//24, 1//4, 1//3, 1//8
     ) |> transpose
+
+    # note: 3rd order C1 interpolant makes use of FSAL property
+    ω = SMatrix{3, 4, precision, 12}(
+        1, -4//3, 5//9,
+        0, 1, -2//3,
+        0, 4//3, -8//9,
+        0, -1, 1
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = BogackiShampine32
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end

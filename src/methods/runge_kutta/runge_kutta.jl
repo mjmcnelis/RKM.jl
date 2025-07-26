@@ -112,7 +112,7 @@ function list_explicit_runge_kutta_methods()
 
     println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
     """
-    \tLow order (1-3)       | Fehlberg12, HeunEuler21, BogackiShampine32
+    \tLow order (1-3)       | Fehlberg21, HeunEuler21, BogackiShampine32
     \t-------------------------------------------------------------------------------
     \tMedium order (4-6)    | Fehlberg45, CashKarp54, DormandPrince54,
     \t                      | BogackiShampine54, Tsitouras54, Verner56, Verner65
