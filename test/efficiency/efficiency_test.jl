@@ -18,7 +18,7 @@ y0 = exp(t0)/(1.0 + exp(t0)) - C
 methods = OrderedDict(
     Doubling() => [
                    Heun2(), Midpoint2(), Ralston2(),
-                   Heun3(), Ralston3(), RungeKutta3(), ShuOsher3(), SpiteriRuuth3(),
+                   Heun3(), Ralston3(), Kutta3(), ShuOsher3(), SpiteriRuuth3(),
                    RungeKutta4(), ThreeEightsRule4(), Ralston4(), Ketcheson4(),
                    Butcher5(),
                    Butcher6(),

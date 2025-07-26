@@ -9,7 +9,7 @@ function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: Abstra
         Ralston2(; precision),
         Heun3(; precision),
         Ralston3(; precision),
-        RungeKutta3(; precision),
+        Kutta3(; precision),
         ShuOsher3(; precision),
         SpiteriRuuth3(; precision),
 

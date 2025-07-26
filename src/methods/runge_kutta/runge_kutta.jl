@@ -102,7 +102,7 @@ function list_explicit_runge_kutta_methods()
     println("Standard (compatible with adaptive = Fixed(), Doubling()):\n")
     """
     \tLow order (1-3)    | Euler1, Heun2, Midpoint2, Ralston2, Heun3,
-    \t                   | Ralston3, RungeKutta3, ShuOsher3, SpiteriRuuth3
+    \t                   | Ralston3, Kutta3, ShuOsher3, SpiteriRuuth3
     \t-------------------------------------------------------------------------------
     \tMedium order (4-6) | RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4,
     \t                   | Butcher5, Butcher6

@@ -11,7 +11,7 @@ The following standard methods are compatible with `Fixed()`, `Doubling()` and `
 - `Ralston2()`: Ralston's second-order method
 - `Heun3()`: Heun's third-order method
 - `Ralston3()`: Ralston's third-order
-- `RungeKutta3()`: Kutta's third-order method
+- `Kutta3()`: Kutta's third-order method
 - `ShuOsher3()`: Shu and Osher's third-order SSP method
 - `SpiteriRuuth3()`: Spiteri and Ruuth's third-order SSP method
 

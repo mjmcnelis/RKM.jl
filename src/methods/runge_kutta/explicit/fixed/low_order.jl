@@ -152,22 +152,29 @@ function Ralston3(precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
-    RungeKutta3(precision::Type{T} = Float64) where T <: AbstractFloat
+    Kutta3(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Kutta's third-order method.
 """
-function RungeKutta3(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Runge_Kutta_3
+function Kutta3(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Kutta_3
     butcher = SMatrix{4, 4, precision, 16}(
         0, 0, 0, 0,
         1//2, 1//2, 0, 0,
-        3//4, 0, 3//4, 0,
-        1, 2//9, 1//3, 4//9
+        1, -1, 2, 0,
+        1, 1//6, 2//3, 1//6
     ) |> transpose
-    iteration = Explicit()
-    reconstructor = RungeKutta3
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    ω = SMatrix{3, 3, precision, 9}(
+        1, -3//2, 2//3,
+        0, 2, -4//3,
+        0, -1//2, 2//3
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = Kutta3
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -185,10 +192,18 @@ function ShuOsher3(precision::Type{T} = Float64) where T <: AbstractFloat
         1//2, 1//4, 1//4, 0,
         1, 1//6, 1//6, 2//3
     ) |> transpose
+
+    # note: only 2nd-order C0 interpolant preserves SSP
+    ω = SMatrix{2, 3, precision, 6}(
+        1, -5//6,
+        0, 1//6,
+        0, 2//3,
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = ShuOsher3
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -207,8 +222,17 @@ function SpiteriRuuth3(precision::Type{T} = Float64) where T <: AbstractFloat
         1//2, 1//6, 1//6, 1//6, 0,
         1, 1//6, 1//6, 1//6, 1//2
     ) |> transpose
+
+    # note: only 2nd-order C0 interpolant preserves SSP
+    ω = SMatrix{2, 4, precision, 8}(
+        1, -5//6,
+        0, 1//6,
+        0, 1//6,
+        0, 1//2,
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = SpiteriRuuth3
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end

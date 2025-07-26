@@ -124,7 +124,7 @@ export Iteration, Explicit, DiagonalImplicit, FullImplicit
 # List of Runge-Kutta methods
 export list_explicit_runge_kutta_methods, list_implicit_runge_kutta_methods
 # Standard explicit Runge-Kutta
-export Euler1, Heun2, Midpoint2, Ralston2, Heun3, Ralston3, RungeKutta3,
+export Euler1, Heun2, Midpoint2, Ralston2, Heun3, Ralston3, Kutta3,
        ShuOsher3, SpiteriRuuth3, RungeKutta4, ThreeEightsRule4, Ralston4,
        Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
 # Embedded explicit Runge-Kutta
