@@ -21,11 +21,12 @@
                (use CubicHermite instead)")
     end
 
-    # order of continuous formula
+    order, C1 = continuous_output_properties(method)
+    @info "Generating order-$order C$C1 continuous output for $reconstructor"
+
+    # order of continuous polynomial
     q = size(ω, 2)
     q_vect = 1:q |> SVector{q, Int64}
-
-    @info "Generating order-$q continuous output for $reconstructor"
 
     # get dimensions
     nt = length(t)
@@ -83,4 +84,44 @@
     y_dense = reshape(y_dense, ny, nt_dense) |> transpose
 
     return t_dense, y_dense
+end
+
+function continuous_output_properties(method; atol = 1e-13)
+    # note: Tsitouras54 has the worst tolerance ~ 1e-13 so far
+    ω = method.ω
+    b = method.b
+    c = method.c
+    fesal = method.fesal
+
+    stages, deg = size(ω)
+
+    b1 = ω * ones(deg)                      # b(θ = 1)
+    bprime1 = ω * [1.0*i for i in 1:deg]    # db/dθ(θ = 1)
+
+    bprime = zeros(stages)
+    bprime[end] = 1.0
+
+    C0 = all(abs.(b1 .- b) .< atol)
+    C1 = all(abs.(bprime1 .- bprime) .< atol) && fesal
+
+    if C0 && C1
+        C = 1
+    elseif C0
+        C = 0
+    else
+        @warn "Continuous output is not C0 continuous (check ω coefficients)"
+    end
+
+    order = 0
+    for q in 1:deg
+        v = zeros(1, deg)
+        v[q] = 1.0/q
+        Mq = all((sum(transpose(c.^order)*ω, dims = 1) .- v) .< atol)
+        if !Mq
+            break
+        end
+        order += 1
+    end
+
+    return order, C
 end

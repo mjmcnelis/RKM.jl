@@ -151,10 +151,21 @@ function Butcher5(precision::Type{T} = Float64) where T <: AbstractFloat
         1, -3//7, 2//7, 12//7, -12//7, 8//7, 0,
         1, 7//90, 0, 32//90, 12//90, 32//90, 7//90
     ) |> transpose
+
+    # 4th order C0 interpolant
+    ω = SMatrix{4, 6, precision, 24}(
+        1, -323//90, 16//3, -8//3,
+        0, 16//3, -40//3, 8,
+        0, 16//45, 0, 0,
+        0, -38//15, 32//3, -8,
+        0, 16//45, -8//3, 8//3,
+        0, 7//90, 0, 0
+    ) |> transpose
+
     iteration = Explicit()
     reconstructor = Butcher5
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
