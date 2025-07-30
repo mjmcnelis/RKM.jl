@@ -5,6 +5,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
 
     ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache
+    interpolator = config.interpolator
 
     epsilon = adaptive.epsilon
     alpha = adaptive.alpha
@@ -37,7 +38,14 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         double_step!(method, t, dt, config)
 
         @.. res = (y2 - y1) / (2.0^order - 1.0)     # estimate local truncation error
-        @.. y2 = y2 + res                           # Richardson extrapolation
+
+        # note: skip Richardson extrapolation if use ContinuousFormula for
+        #       interpolation (instead you use full time step)
+        if !(interpolator isa ContinuousFormula)
+            @.. y2 = y2 + res
+        else
+            @.. y2 = y1
+        end
 
         # note: have modified norm function for DoubleFloat
         e_norm = norm(res, p_norm)                  # compute norms
@@ -106,13 +114,6 @@ function double_step!(method, t, dt, config)
     t_start = t[1]
     dt_start = dt[1]
 
-    # update full time step
-    if explicit_stage[1]
-        @.. dy[:,1] = dt[1] * f
-    end
-    runge_kutta_step!(method, iteration, t, dt, config)
-    @.. y1 = y_tmp
-
     # update two half time steps
     dt[1] /= 2.0
     #   first half step
@@ -142,5 +143,13 @@ function double_step!(method, t, dt, config)
     # undo changes to t, dt after double step finished
     t[1] = t_start
     dt[1] = dt_start
+
+    # update full time step
+    if explicit_stage[1]
+        @.. dy[:,1] = dt[1] * f
+    end
+    runge_kutta_step!(method, iteration, t, dt, config)
+    @.. y1 = y_tmp
+
     return nothing
 end

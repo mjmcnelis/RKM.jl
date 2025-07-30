@@ -136,9 +136,9 @@ export BackwardEuler1, TrapezoidRuleBDF2, ImplicitMidpoint2,
        QinZhang2, KraaijevangerSpijker2, PareschiRusso2, PareschiRusso3, Crouzeix3,
        RadauIA3, RadauIIA3, DIRKL3, Norsett4, RaduaIA5
 # Embedded implicit Runge-Kutta
-export ImplicitTrapezoid21, LobattoIIIB21, LobattoIIIC21, GaussLegendre42, LobattoIIIA42,
-       LobattoIIIB42, LobattoIIIC42, LobattoIIICS42, LobattoIIID42, RaduaIIA52,
-       GaussLegendre64
+export ImplicitTrapezoid21, TrapezoidRuleBDF21, LobattoIIIB21, LobattoIIIC21,
+       GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIICS42,
+       LobattoIIID42, RaduaIIA52, GaussLegendre64
 # Linear multistep
 export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
        NumericalDifferentiationFormula
