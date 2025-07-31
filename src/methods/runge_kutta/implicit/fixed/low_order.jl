@@ -37,11 +37,10 @@ function TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloa
         1, 1/(2(2-g)), 1/(2(2-g)), g/2
     ) |> transpose
 
-    # looks okay (not C1 though)
     ω = SMatrix{2, 3, precision, 6}(
-        1 - (1-g)/(4(2-g)),        (3-g)/(4(2-g)) - 1,
-        1/(4(2-g)),                1/(4(2-g)),
-        -g/(4(2-g)),               1/2 - g/(4(2-g))
+        (3-g)/2, -(1-g/4),
+        -1//2, (1-g/4),
+        g/2, 0,
     ) |> transpose
 
     iteration = DiagonalImplicit()
