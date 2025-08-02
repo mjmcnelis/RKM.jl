@@ -13,6 +13,26 @@ If you do not plan to interpolate the solution, use the default value `interpola
 All ODE methods can use cubic Hermite interpolation to generate dense output. Here, we continue with the overdamped oscillator example and set the solver option `interpolator = CubicHermite()`. The solver will output the time derivatives, which is stored in `sol.f`.
 
 ```julia
+using RKM
+using Plots; plotly()
+
+function dy_dt!(f, y, t; p, kwargs...)
+    γ = p[1]
+    ω = p[2]
+    f[1] = y[2]
+    f[2] = -γ*y[2] - ω^2*y[1]
+    return nothing
+end
+
+y0 = [1.0, -1.0]  # [position, velocity]
+t0 = 0.0
+tf = 10.0
+dt0 = 1e-2
+
+ω = 10.0          # frequency
+γ = 101.0         # damping coefficient
+p = [γ, ω]
+
 options = SolverOptions(; method = TrapezoidRuleBDF21(),
                           adaptive = Embedded(; alpha = 1e-3),
                           interpolator = CubicHermite(),);

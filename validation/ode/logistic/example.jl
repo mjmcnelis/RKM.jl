@@ -54,10 +54,13 @@ end
 # interpolation
 @unpack interpolator = options
 if !(interpolator isa NoInterpolation)
-    @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-5)
-    # plot(t_dense, y_dense; color = [:red :blue], linewidth = 2, legend = :outertopright);
-    # plot!(t_dense, hcat(y_exact.(t_dense; N = 2)...)';
-    #     color = :black, linewidth = 2, line = :dash)
+    @time t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-4)
+    if show_plot
+        t, y = get_solution(sol)
+        scatter(t, y; color = [:red :blue], ms = 3,
+                size = (900,600), legend = :outertopright)
+        plot!(t_dense, y_dense; color = [:red :blue], linewidth = 2) |> display
+    end
 end
 
 GC.gc()

@@ -11,10 +11,16 @@ function ImplicitTrapezoid21(precision::Type{T} = Float64) where T <: AbstractFl
         1, 1//2, 1//2,
         1, 1, 0
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -1//2,
+        0, 1//2,
+    ) |> transpose
+
     iteration = DiagonalImplicit()
     reconstructor = ImplicitTrapezoid21
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """

@@ -9,10 +9,15 @@ function BackwardEuler1(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 1,
         1, 1
     ) |> transpose
+
+    ω = SMatrix{1, 1, precision, 1}(
+        1
+    ) |> transpose
+
     iteration = DiagonalImplicit()
     reconstructor = BackwardEuler1
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -60,10 +65,29 @@ function ImplicitMidpoint2(precision::Type{T} = Float64) where T <: AbstractFloa
         1//2, 1//2,
         1, 1
     ) |> transpose
+
+    ω = SMatrix{1, 1, precision, 1}(
+        1
+    ) |> transpose
+
+    # alternative that is order-2 C0 continuous output
+    #=
+    butcher = SMatrix{3, 3, precision, 9}(
+        0, 0, 0,
+        1//2, 0, 1//2,
+        1, 0, 1
+    ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -1,
+        0, 1,
+    ) |> transpose
+    =#
+
     iteration = DiagonalImplicit()
     reconstructor = ImplicitMidpoint2
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -78,10 +102,16 @@ function QinZhang2(precision::Type{T} = Float64) where T <: AbstractFloat
         3//4, 1//2, 1//4,
         1, 1//2, 1//2
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        3//2, -1,
+        -1//2, 1,
+    ) |> transpose
+
     iteration = DiagonalImplicit()
     reconstructor = QinZhang2
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -117,10 +147,16 @@ function PareschiRusso2(precision::Type{T} = Float64) where T <: AbstractFloat
         1-g, 1-2g, g,
         1, 1//2, 1//2
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        (g-1)/(2g-1), 1/(2(2g-1)),
+        g/(2g-1), -1/(2(2g-1)),
+    ) |> transpose
+
     iteration = DiagonalImplicit()
     reconstructor = PareschiRusso2
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
@@ -161,10 +197,16 @@ function Crouzeix3(precision::Type{T} = Float64) where T <: AbstractFloat
         1//2-s3/6, -s3/3, 1//2+s3/6,
         1, 1//2, 1//2
     ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1//2-s3/2, s3/2,
+        1//2+s3/2, -s3/2
+    ) |> transpose
+
     iteration = DiagonalImplicit()
     reconstructor = Crouzeix3
 
-    return RungeKutta(name, butcher, iteration, reconstructor)
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """

@@ -109,7 +109,7 @@ function continuous_output_properties(method; atol = 1e-13)
     elseif C0
         C = 0
     else
-        @warn "Continuous output is not C0 continuous (check ω coefficients)"
+        error("Continuous output is not C0 continuous (check ω coefficients)")
     end
 
     order = 0
