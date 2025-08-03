@@ -29,8 +29,8 @@ t0 = 0.0
 tf = 10.0
 dt0 = 1e-2
 
-ω = 10.0          # frequency
 γ = 101.0         # damping coefficient
+ω = 10.0          # frequency
 p = [γ, ω]
 
 options = SolverOptions(; method = TrapezoidRuleBDF21(),
@@ -48,7 +48,7 @@ scatter(t, y; xlabel = "t", ylabel = "y", label = ["x" "v"], color = [:red :blue
 ```
 
 ```@raw html
-<img src="scatter_plot.png" width="600">
+<img src="images/scatter_plot.png" width="600">
 ```
 
 Next, we call `interpolate_solution` to interpolate the data uniformly (the keyword argument `dt_dense` controls the temporal spacing).
@@ -61,7 +61,7 @@ plot!(t_dense, y_dense; label = ["x (dense)" "v (dense)"], color = [:red :blue])
 The interpolated solution is $C^1$ continuous and third-order accurate (i.e. it has a local error of $\mathcal{O}(\Delta t_n^4)$ between the raw time intervals $[t_n, t_{n+1}]$).
 
 ```@raw html
-<img src="hermite_plot.png" width="600">
+<img src="images/hermite_plot.png" width="600">
 ```
 
 ## Continuous formula
@@ -92,7 +92,7 @@ plot!(t_dense, y_dense; label = ["x (dense)" "v (dense)"], color = [:red :blue])
 ```
 
 ```@raw html
-<img src="continuous_plot.png" width="600">
+<img src="images/continuous_plot.png" width="600">
 ```
 
 ### Compatibility with step-doubling
@@ -114,7 +114,7 @@ plot!(t_dense, y_dense; label = ["x (dense)" "v (dense)"], color = [:red :blue])
 ```
 
 ```@raw html
-<img src="continuous_plot_2.png" width="600">
+<img src="images/continuous_plot_2.png" width="600">
 ```
 
 We recommend using the continuous formula with an embedded Runge-Kutta method instead.

@@ -4,6 +4,14 @@
 After solving the ODE, you can plot the time series data stored in the `Solution` struct `sol`.
 The following sections are based on the overdamped harmonic oscillator:
 
+```math
+\begin{align*}
+\frac{dx}{dt} &= v \\
+\frac{dv}{dt} &= -\gamma v - \omega^2 x
+\end{align*}
+```
+where $x$ and $v$ are the position and velocity, and $\gamma$ and $\omega$ are the damping coefficient and frequency.
+
 ```julia
 using RKM
 using Plots; plotly()
@@ -21,8 +29,8 @@ t0 = 0.0
 tf = 10.0
 dt0 = 1e-2
 
-ω = 10.0          # frequency
 γ = 101.0         # damping coefficient
+ω = 10.0          # frequency
 p = [γ, ω]
 
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),);
@@ -66,7 +74,7 @@ plot(t, y; xlabel = "t", ylabel = "y", label = ["x" "v"])
 ```
 
 ```@raw html
-<img src="y_plot.png" width="600">
+<img src="images/y_plot.png" width="600">
 ```
 
 ## Time derivatives
@@ -88,7 +96,7 @@ plot(t, f; xlabel = "t", ylabel = "f", label = ["dx/dt" "dv/dt"])
 ```
 
 ```@raw html
-<img src="f_plot.png" width="600">
+<img src="images/f_plot.png" width="600">
 ```
 
 ## Sensitivity coefficients
@@ -120,7 +128,7 @@ plot(t, S; xlabel = "t", ylabel = "S", label = ["dx/dγ" "dv/dγ" "dx/dω" "dv/d
 ```
 
 ```@raw html
-<img src="S_plot.png" width="600">
+<img src="images/S_plot.png" width="600">
 ```
 
 ## API Reference
