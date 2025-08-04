@@ -1,4 +1,6 @@
 
+maybe this should be a separate section...
+
 # Solver statistics
 
 After running the ODE solver, you can print out statistics with the function `get_stats`:

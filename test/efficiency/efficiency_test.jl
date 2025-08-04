@@ -25,8 +25,8 @@ methods = OrderedDict(
                    Curtis8(), Shanks8(), ShanksPseudo8(),
                 ],
     Embedded() => [
-                   HeunEuler21(),
-                   BogackiShampine32(),
+                   Heun2(),
+                   BogackiShampine3(),
                    Fehlberg45(),
                    CashKarp54(), DormandPrince54(), BogackiShampine54(), Tsitouras54(), Verner56(),
                    Verner65(),

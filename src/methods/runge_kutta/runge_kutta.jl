@@ -6,10 +6,10 @@ Stores the Butcher tableau and properties of a given Runge-Kutta method.
 # Fields
 $(TYPEDFIELDS)
 """
-struct RungeKutta{T, S, S2, R, Q, RQ, P, I, F} <: ODEMethod where {T <: AbstractFloat,
-                                                                   S, S2, R, Q, RQ, P,
-                                                                   I <: Iteration,
-                                                                   F <: Function}
+struct RungeKutta{T, S, S2, E, SE,
+                  R, Q, RQ, P, I, F} <: ODEMethod where {T <: AbstractFloat,
+                                                         S, S2, E, SE, R, Q, RQ, P,
+                                                         I <: Iteration, F <: Function}
     """Name of the Runge-Kutta method"""
     name::Symbol
     """Intermediate time update coefficient of each stage in the Butcher tableau"""
@@ -19,7 +19,7 @@ struct RungeKutta{T, S, S2, R, Q, RQ, P, I, F} <: ODEMethod where {T <: Abstract
     """Primary state update coefficients of the Butcher tableau"""
     b::SVector{S, T}
     """Embedded state update coefficients (if any) of the Butcher tableau"""
-    b_hat::SVector{S, T}            # TODO: generalize b_hat
+    b_hat::SMatrix{E, S, T, SE}
     """Polynomial coefficients used for continuous output"""
     ω::SMatrix{R, Q, T, RQ}
     """Number of stages in the Runge-Kutta method"""
@@ -37,9 +37,6 @@ struct RungeKutta{T, S, S2, R, Q, RQ, P, I, F} <: ODEMethod where {T <: Abstract
     """Function used to reconstruct Runge-Kutta method"""
     reconstructor::F
 end
-
-# TODO: implement option to use Euler or generic 2nd order
-#       should I just replace the embedded row and rename label?
 
 """
     RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM},
@@ -59,17 +56,16 @@ function RungeKutta(name::Symbol, butcher::SMatrix{N, M, T, NM},
                     ω::SMatrix{R, Q, T, RQ} = SMatrix{0,0,T,0}()
                    ) where {T <: AbstractFloat, N, M, NM, R, Q, RQ}
 
-
     nrow, ncol = size(butcher)
     stages = ncol - 1                               # number of stages
     p = nrow - ncol + 1                             # number of primary/embedded updates
 
     # split butcher tableau
-    c   = butcher[1:ncol-1, 1] |> SVector{stages, T}
+    c = butcher[1:ncol-1, 1] |> SVector{stages, T}
     A_T = butcher[1:ncol-1, 2:ncol] |> transpose |> SMatrix{stages, stages, T, stages^2}
-    b   = butcher[ncol, 2:ncol] |> SVector{stages, T}
-    # TODO: generalize b_hat to multiple embedded pairs
-    b_hat = butcher[nrow, 2:ncol] |> SVector{stages, T}
+    b = butcher[ncol, 2:ncol] |> SVector{stages, T}
+    b_hat = butcher[ncol+1:end, 2:ncol] |> SMatrix{p-1, stages, T, (p-1)*stages}
+
     # TODO: do I really need to pipeline it like this? if I don't,
     #       then ω appears as Core.Const(...) in @code_warntype
     ω = Matrix(ω) |> SMatrix{R, Q, T, RQ}
@@ -112,7 +108,7 @@ function list_explicit_runge_kutta_methods()
 
     println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
     """
-    \tLow order (1-3)       | Fehlberg21, HeunEuler21, BogackiShampine32
+    \tLow order (1-3)       | Fehlberg2, Heun2, BogackiShampine3
     \t-------------------------------------------------------------------------------
     \tMedium order (4-6)    | Fehlberg45, CashKarp54, DormandPrince54,
     \t                      | BogackiShampine54, Tsitouras54, Verner56, Verner65

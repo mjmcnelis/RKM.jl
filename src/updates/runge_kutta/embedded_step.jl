@@ -106,7 +106,8 @@ end
 
     @.. y_tmp = y                                       # evaluate iteration
     for j in 1:stages
-        @.. y_tmp = y_tmp + b_hat[j]*dy[:,j]
+        # note: only using first embedded pair right now
+        @.. y_tmp = y_tmp + b_hat[1,j]*dy[:,j]
     end
 
     return nothing

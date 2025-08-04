@@ -1,8 +1,7 @@
-# TODO: include stability region table/calculator?
 """
     Euler1(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Euler's first-order method.
+Euler's explicit first-order method.
 """
 function Euler1(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Euler_1
@@ -29,16 +28,19 @@ Heun's second-order method.
 Note: strong stability preserving (SSP)
 """
 function Heun2(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Heun_2
-    butcher = SMatrix{3, 3, precision, 9}(
+    # TODO: don't use name for reconstruction anymore
+    #       so should set order = [2.0, 1.0] directly
+    name = :Heun_2_1
+    butcher = SMatrix{3, 4, precision, 12}(
         0, 0, 0,
         1, 1, 0,
-        1, 1//2, 1//2
+        1, 1//2, 1//2,
+        1, 1, 0
     ) |> transpose
 
     ω = SMatrix{2, 2, precision, 4}(
         1, -1//2,
-        0, 1//2,
+        0, 1//2
     ) |> transpose
 
     iteration = Explicit()
@@ -53,16 +55,17 @@ end
 Second-order midpoint rule.
 """
 function Midpoint2(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Midpoint_2
-    butcher = SMatrix{3, 3, precision, 9}(
+    name = :Midpoint_2_1
+    butcher = SMatrix{3, 4, precision, 12}(
         0, 0, 0,
         1//2, 1//2, 0,
-        1, 0, 1
+        1, 0, 1,
+        1, 1, 0
     ) |> transpose
 
     ω = SMatrix{2, 2, precision, 4}(
         1, -1,
-        0, 1,
+        0, 1
     ) |> transpose
 
     iteration = Explicit()
@@ -79,20 +82,50 @@ Ralston's second-order method.
 https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
 """
 function Ralston2(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Ralston_2
-    butcher = SMatrix{3, 3, precision, 9}(
+    name = :Ralston_2_1
+    butcher = SMatrix{3, 4, precision, 12}(
         0, 0, 0,
         2//3, 2//3, 0,
-        1, 1//4, 3//4
+        1, 1//4, 3//4,
+        1, 1, 0
     ) |> transpose
 
     ω = SMatrix{2, 2, precision, 4}(
         1, -3//4,
-        0, 3//4,
+        0, 3//4
     ) |> transpose
 
     iteration = Explicit()
     reconstructor = Ralston2
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    Fehlberg2(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Fehlberg's second-order method.
+
+https://ntrs.nasa.gov/citations/19690021375
+"""
+function Fehlberg2(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Fehlberg_2_1
+    butcher = SMatrix{4, 5, precision, 20}(
+        0, 0, 0, 0,
+        1//2, 1//2, 0, 0,
+        1, 1//256, 255//256, 0,
+        1, 1//512, 255//256, 1//512,
+        1, 1//256, 255//256, 0
+    ) |> transpose
+
+    ω = SMatrix{2, 3, precision, 6}(
+        1, -511//512,
+        0, 255//256,
+        0, 1//512,
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = Fehlberg2
 
     return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
@@ -103,12 +136,14 @@ end
 Heun's third-order method.
 """
 function Heun3(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Heun_3
-    butcher = SMatrix{4, 4, precision, 16}(
+    name = :Heun_3_2_1
+    butcher = SMatrix{4, 6, precision, 24}(
         0, 0, 0, 0,
         1//3, 1//3, 0, 0,
         2//3, 0, 2//3, 0,
-        1, 1//4, 0, 3//4
+        1, 1//4, 0, 3//4,
+        1, 0, 1//2, 1//2,
+        1, 1, 0, 0
     ) |> transpose
 
     ω = SMatrix{3, 3, precision, 9}(
@@ -131,12 +166,14 @@ Ralston's third-order method.
 https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
 """
 function Ralston3(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Ralston_3
-    butcher = SMatrix{4, 4, precision, 16}(
+    name = :Ralston_3_2_1
+    butcher = SMatrix{4, 6, precision, 24}(
         0, 0, 0, 0,
         1//2, 1//2, 0, 0,
         3//4, 0, 3//4, 0,
-        1, 2//9, 1//3, 4//9
+        1, 2//9, 1//3, 4//9,
+        1, 1//3, 0, 2//3,
+        1, 1, 0, 0
     ) |> transpose
 
     ω = SMatrix{3, 3, precision, 9}(
@@ -157,12 +194,14 @@ end
 Kutta's third-order method.
 """
 function Kutta3(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Kutta_3
-    butcher = SMatrix{4, 4, precision, 16}(
+    name = :Kutta_3_2_1
+    butcher = SMatrix{4, 6, precision, 24}(
         0, 0, 0, 0,
         1//2, 1//2, 0, 0,
         1, -1, 2, 0,
-        1, 1//6, 2//3, 1//6
+        1, 1//6, 2//3, 1//6,
+        1, 1//4, 1//2, 1//4,
+        1, 1, 0, 0
     ) |> transpose
 
     ω = SMatrix{3, 3, precision, 9}(
@@ -178,6 +217,39 @@ function Kutta3(precision::Type{T} = Float64) where T <: AbstractFloat
 end
 
 """
+    BogackiShampine3(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Bogacki and Shampine's third-order method.
+
+https://www.sciencedirect.com/science/article/pii/0893965989900797
+"""
+function BogackiShampine3(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Bogacki_Shampine_3_2_1
+    butcher = SMatrix{5, 7, precision, 35}(
+        0, 0, 0, 0, 0,
+        1//2, 1//2, 0, 0, 0,
+        3//4, 0, 3//4, 0, 0,
+        1, 2//9, 1//3, 4//9, 0,
+        1, 2//9, 1//3, 4//9, 0,
+        1, 7//24, 1//4, 1//3, 1//8,
+        1, 1, 0, 0, 0
+    ) |> transpose
+
+    # note: 3rd order C1 interpolant makes use of FSAL property
+    ω = SMatrix{3, 4, precision, 12}(
+        1, -4//3, 5//9,
+        0, 1, -2//3,
+        0, 4//3, -8//9,
+        0, -1, 1
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = BogackiShampine3
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
     ShuOsher3(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Shu and Osher's third-order SSP method.
@@ -185,12 +257,14 @@ Shu and Osher's third-order SSP method.
 https://www.sciencedirect.com/science/article/pii/0021999188901775
 """
 function ShuOsher3(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Shu_Osher_3
-    butcher = SMatrix{4, 4, precision, 16}(
+    name = :Shu_Osher_3_2_1
+    butcher = SMatrix{4, 6, precision, 24}(
         0, 0, 0, 0,
         1, 1, 0, 0,
         1//2, 1//4, 1//4, 0,
-        1, 1//6, 1//6, 2//3
+        1, 1//6, 1//6, 2//3,
+        1, 4//9, 4//9, 1//9,
+        1, 1, 0, 0
     ) |> transpose
 
     # note: only 2nd-order C0 interpolant preserves SSP
@@ -214,13 +288,15 @@ Spiteri and Ruuth's third-order SSP method.
 https://epubs.siam.org/doi/10.1137/S0036142902419284
 """
 function SpiteriRuuth3(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Spiteri_Ruuth_3
-    butcher = SMatrix{5, 5, precision, 25}(
+    name = :Spiteri_Ruuth_3_2_1
+    butcher = SMatrix{5, 7, precision, 35}(
         0, 0, 0, 0, 0,
         1//2, 1//2, 0, 0, 0,
         1, 1//2, 1//2, 0, 0,
         1//2, 1//6, 1//6, 1//6, 0,
-        1, 1//6, 1//6, 1//6, 1//2
+        1, 1//6, 1//6, 1//6, 1//2,
+        1, 1//3, 1//6, 1//3, 1//6,
+        1, 1, 0, 0, 0,
     ) |> transpose
 
     # note: only 2nd-order C0 interpolant preserves SSP

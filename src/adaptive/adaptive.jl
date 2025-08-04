@@ -106,7 +106,9 @@ function get_local_order(::Doubling, order::SVector{P,T}) where {P, T <: Abstrac
 end
 
 function get_local_order(::Embedded, order::SVector{P,T}) where {P, T <: AbstractFloat}
-    return minimum(order) + 1.0
+    # TODO: should be more dynamic, depend on largest error pair
+    #       for now just assume first embedded pair
+    return order[2] + 1.0
 end
 
 # function rescale_tolerance(::CentralDiff, order::SVector{P,T}) where {P,T <: AbstractFloat}
@@ -118,7 +120,9 @@ function rescale_tolerance(::Doubling, order::SVector{P,T}) where {P, T <: Abstr
 end
 
 function rescale_tolerance(::Embedded, order::SVector{P,T}) where {P, T <: AbstractFloat}
-    return minimum(order) / maximum(order)
+    # TODO: should be more dynamic, depend on largest error pair
+    #       for now just assume first embedded pair
+    return order[2] / order[1]
 end
 
 function reconstruct_adaptive(adaptive::Fixed, method::ODEMethod)

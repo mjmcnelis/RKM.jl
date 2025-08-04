@@ -25,9 +25,9 @@ function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: Abstra
         ShanksPseudo8(; precision),
 
         # embedded
-        Fehlberg21(; precision),
-        HeunEuler21(; precision),
-        BogackiShampine32(; precision),
+        Fehlberg2(; precision),
+        Heun2(; precision),
+        BogackiShampine3(; precision),
 
         Fehlberg45(; precision),
         CashKarp54(; precision),

@@ -6,7 +6,7 @@ import DoubleFloats: Double64
 @info "Starting allocation test..."
 
 precision_vect = [Float64, Double64]
-method_vect = [HeunEuler21()]
+method_vect = [Heun2()]
 adaptive_vect = [Fixed(), Doubling(), Embedded()]
 limiter_vect = [PiecewiseLimiter(), SmoothLimiter()]
 pid_vect = [BasicControl(), PIControl(), H312Control(),

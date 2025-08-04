@@ -60,10 +60,9 @@ include("methods/properties/explicit_stage.jl")
 # Runge-Kutta tables
 include("methods/runge_kutta/runge_kutta.jl")
 # include("methods/runge_kutta/debug_table.jl") # uses @test, @test_broken
-include("methods/runge_kutta/explicit/fixed/low_order.jl")
+include("methods/runge_kutta/explicit/low_order.jl")
 include("methods/runge_kutta/explicit/fixed/medium_order.jl")
 include("methods/runge_kutta/explicit/fixed/high_order.jl")
-include("methods/runge_kutta/explicit/embedded/low_order.jl")
 include("methods/runge_kutta/explicit/embedded/medium_order.jl")
 include("methods/runge_kutta/explicit/embedded/high_order.jl")
 include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
@@ -123,12 +122,12 @@ export RungeKutta, LinearMultistep
 export Iteration, Explicit, DiagonalImplicit, FullImplicit
 # List of Runge-Kutta methods
 export list_explicit_runge_kutta_methods, list_implicit_runge_kutta_methods
-# Standard explicit Runge-Kutta
-export Euler1, Heun2, Midpoint2, Ralston2, Heun3, Ralston3, Kutta3,
-       ShuOsher3, SpiteriRuuth3, RungeKutta4, ThreeEightsRule4, Ralston4,
-       Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
+# Explicit Runge-Kutta
+export Euler1, Heun2, Midpoint2, Ralston2, Fehlberg2, Heun3, Ralston3, Kutta3,
+       BogackiShampine3, ShuOsher3, SpiteriRuuth3, RungeKutta4, ThreeEightsRule4,
+       Ralston4, Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
 # Embedded explicit Runge-Kutta
-export Fehlberg21, HeunEuler21, BogackiShampine32, Fehlberg45, CashKarp54, DormandPrince54,
+export Fehlberg45, CashKarp54, DormandPrince54,
        BogackiShampine54, Tsitouras54, Verner56, Verner65, Fehlberg78, DormandPrince87,
        Feagin108, Feagin1210, Feagin1412
 # Standard implicit Runge-Kutta
