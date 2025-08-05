@@ -10,7 +10,7 @@ t0 = -5.0
 y0 = exp(-t0^2/2.0) + 1.0     # note: shift by +1 to ignore abstol
 
 adaptive = Embedded(; epsilon = 1e-15, low = 0.1, high = 5.0, safety = 0.9)
-method = DormandPrince54()
+method = DormandPrince5()
 t_range = TimeRange(; t0, tf = 5, dt0 = 1e-4)
 timer = TimeLimit()
 options = SolverOptions(; adaptive, method, t_range, timer)

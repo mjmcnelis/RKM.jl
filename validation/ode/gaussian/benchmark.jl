@@ -41,7 +41,7 @@ for epsilon in epsilon_vect
     GC.gc()
     # RKM
     ps = SolverOptions(; adaptive = Embedded(; epsilon, low, high, safety),
-                      method = DormandPrince54(), t_range = TimeRange(; t0, tf, dt0))
+                      method = DormandPrince5(), t_range = TimeRange(; t0, tf, dt0))
 
     rkm = @benchmark evolve_ode($y0, dy_dt!; options = $ps, show_progress = false)
     push!(time_rkm, mean(rkm).time/1e9)

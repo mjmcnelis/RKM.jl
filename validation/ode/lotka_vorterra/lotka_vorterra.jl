@@ -11,7 +11,7 @@ dt0 = 1e-4
 epsilon = 1e-8
 
 # RKM
-method = DormandPrince54()
+method = DormandPrince5()
 options = SolverOptions(; method,
                         #   adaptive = Embedded(; epsilon),
                           adaptive = Fixed(),

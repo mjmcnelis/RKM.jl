@@ -29,13 +29,13 @@ function get_runge_kutta_explicit_tables(; precision::Type{T}) where T <: Abstra
         Heun2(; precision),
         BogackiShampine3(; precision),
 
-        Fehlberg45(; precision),
-        CashKarp54(; precision),
-        DormandPrince54(; precision),
-        BogackiShampine54(; precision),
-        Tsitouras54(; precision),
-        Verner56(; precision),
-        Verner65(; precision),
+        Fehlberg5(; precision),
+        CashKarp5(; precision),
+        DormandPrince5(; precision),
+        BogackiShampine5(; precision),
+        Tsitouras5(; precision),
+        Verner5(; precision),
+        Verner6(; precision),
 
         Fehlberg78(; precision),
 

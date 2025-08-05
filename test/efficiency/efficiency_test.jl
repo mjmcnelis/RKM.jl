@@ -27,9 +27,9 @@ methods = OrderedDict(
     Embedded() => [
                    Heun2(),
                    BogackiShampine3(),
-                   Fehlberg45(),
-                   CashKarp54(), DormandPrince54(), BogackiShampine54(), Tsitouras54(), Verner56(),
-                   Verner65(),
+                   Fehlberg5(),
+                   CashKarp5(), DormandPrince5(), BogackiShampine5(), Tsitouras5(), Verner5(),
+                   Verner6(),
                    Fehlberg78(),
                    DormandPrince87(),
                    Feagin108(),

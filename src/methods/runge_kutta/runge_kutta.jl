@@ -110,8 +110,8 @@ function list_explicit_runge_kutta_methods()
     """
     \tLow order (1-3)       | Fehlberg2, Heun2, BogackiShampine3
     \t-------------------------------------------------------------------------------
-    \tMedium order (4-6)    | Fehlberg45, CashKarp54, DormandPrince54,
-    \t                      | BogackiShampine54, Tsitouras54, Verner56, Verner65
+    \tMedium order (4-6)    | Fehlberg5, CashKarp5, DormandPrince5,
+    \t                      | BogackiShampine5, Tsitouras5, Verner5, Verner6
     \t-------------------------------------------------------------------------------
     \tHigh order (7-9)      | Fehlberg78, DormandPrince87
     \t-------------------------------------------------------------------------------

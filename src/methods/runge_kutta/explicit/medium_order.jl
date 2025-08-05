@@ -1,12 +1,183 @@
 """
-    Fehlberg45(precision::Type{T} = Float64) where T <: AbstractFloat
+    RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Fehlberg's fourth(fifth)-order method.
+Classic fourth-order Runge-Kutta method.
+"""
+function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Runge_Kutta_4_1
+    butcher = SMatrix{5, 6, precision, 30}(
+        0, 0, 0, 0, 0,
+        1//2, 1//2, 0, 0, 0,
+        1//2, 0, 1//2, 0, 0,
+        1, 0, 0, 1, 0,
+        1, 1//6, 1//3, 1//3, 1//6,
+        1, 1, 0, 0, 0
+    ) |> transpose
+
+    # polynomial coefficients for continuous output
+    # TODO: any properties other than sum(ω, dims = 2) = b to check?
+    # there are the moment equations, C0/C1 checks, SSP property?
+    ω = SMatrix{3, 4, precision, 12}(
+        1, -3//2, 2//3,
+        0, 1, -2//3,
+        0, 1, -2//3,
+        0, -1//2, 2//3
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = RungeKutta4
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    ThreeEightsRule4(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Fourth-order 3/8 rule.
+"""
+function ThreeEightsRule4(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Three_Eights_Rule_4_1
+    butcher = SMatrix{5, 6, precision, 30}(
+        0, 0, 0, 0, 0,
+        1//3, 1//3, 0, 0, 0,
+        2//3, -1//3, 1, 0, 0,
+        1, 1, -1, 1, 0,
+        1, 1//8, 3//8, 3//8, 1//8,
+        1, 0, 0, 0, 0
+    ) |> transpose
+
+    ω = SMatrix{3, 4, precision, 12}(
+        7//8, -9//4, 3//2,
+        3//8, 3, -3,
+        -3//8, -3//4, 3//2,
+        1//8, 0, 0
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = ThreeEightsRule4
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    Ralston4(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Ralston's fourth-order method.
+
+https://www.ams.org/journals/mcom/1962-16-080/S0025-5718-1962-0150954-0/S0025-5718-1962-0150954-0.pdf
+"""
+function Ralston4(precision::Type{T} = Float64) where T <: AbstractFloat
+    s5 = sqrt(BigFloat(5))       # sqrt(5)
+
+    name = :Ralston_4_1
+    butcher = SMatrix{5, 6, precision, 30}(
+        0, 0, 0, 0, 0,
+        2//5, 2//5, 0, 0, 0,
+        7//8-3s5/16, (-2889+1428s5)/1024, (3785-1620s5)/1024, 0, 0,
+        1, (-3365+2094s5)/6040, (-975-3046s5)/2552, (467040+203968s5)/240845, 0,
+        1, (263+24s5)/1812, (125-1000s5)/3828, 1024(3346+1623s5)/5924787, (30-4s5)/123,
+        1, 1, 0, 0, 0
+    ) |> transpose
+
+    # note: negative b2 restricts interpolant to 2nd order C0, not SSP
+    ω = SMatrix{2, 4, precision, 8}(
+        1, -(1 - (263+24s5)/1812),
+        0, (125-1000s5)/3828,
+        0, 1024(3346+1623s5)/5924787,
+        0, (30-4s5)/123
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = Ralston4
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    Ketcheson4(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Ketcheson's fourth-order SSP method.
+
+https://epubs.siam.org/doi/10.1137/07070485X
+"""
+function Ketcheson4(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Ketcheson_4
+    butcher = SMatrix{11, 11, precision, 121}(
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1//6, 1//6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1//3, 1//6, 1//6, 0, 0, 0, 0, 0, 0, 0, 0,
+        1//2, 1//6, 1//6, 1//6, 0, 0, 0, 0, 0, 0, 0,
+        2//3, 1//6, 1//6, 1//6, 1//6, 0, 0, 0, 0, 0, 0,
+        1//3, 1//15, 1//15, 1//15, 1//15, 1//15, 0, 0, 0, 0, 0,
+        1//2, 1//15, 1//15, 1//15, 1//15, 1//15, 1//6, 0, 0, 0, 0,
+        2//3, 1//15, 1//15, 1//15, 1//15, 1//15, 1//6, 1//6, 0, 0, 0,
+        5//6, 1//15, 1//15, 1//15, 1//15, 1//15, 1//6, 1//6, 1//6, 0, 0,
+        1, 1//15, 1//15, 1//15, 1//15, 1//15, 1//6, 1//6, 1//6, 1//6, 0,
+        1, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10, 1//10
+    ) |> transpose
+
+    # note: only 2nd-order C0 interpolant preserves SSP
+    ω = SMatrix{2, 10, precision, 20}(
+        1, -9//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10,
+        0, 1//10
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = Ketcheson4
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    Butcher5(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Butcher's fifth-order method.
+"""
+function Butcher5(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Butcher_5
+    butcher = SMatrix{7, 7, precision, 49}(
+        0, 0, 0, 0, 0, 0, 0,
+        1//4, 1//4, 0, 0, 0, 0, 0,
+        1//4, 1//8, 1//8, 0, 0, 0, 0,
+        1//2, 0, -1//2, 1, 0, 0, 0,
+        3//4, 3//16, 0, 0, 9//16, 0, 0,
+        1, -3//7, 2//7, 12//7, -12//7, 8//7, 0,
+        1, 7//90, 0, 32//90, 12//90, 32//90, 7//90
+    ) |> transpose
+
+    # 4th order C0 interpolant
+    ω = SMatrix{4, 6, precision, 24}(
+        1, -323//90, 16//3, -8//3,
+        0, 16//3, -40//3, 8,
+        0, 16//45, 0, 0,
+        0, -38//15, 32//3, -8,
+        0, 16//45, -8//3, 8//3,
+        0, 7//90, 0, 0
+    ) |> transpose
+
+    iteration = Explicit()
+    reconstructor = Butcher5
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    Fehlberg5(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Fehlberg's fifth-order method.
 
 https://ntrs.nasa.gov/citations/19690021375
 """
-function Fehlberg45(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Fehlberg_4_5
+function Fehlberg5(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Fehlberg_5_4
     butcher = SMatrix{7, 8, precision, 56}(
         0, 0, 0, 0, 0, 0, 0,
         1//4, 1//4, 0, 0, 0, 0, 0,
@@ -14,25 +185,25 @@ function Fehlberg45(precision::Type{T} = Float64) where T <: AbstractFloat
         12//13, 1932//2197, -7200//2197, 7296//2197, 0, 0, 0,
         1, 439//216, -8, 3680//513, -845//4104, 0, 0,
         1//2, -8//27, 2, -3544//2565, 1859//4104, -11//40, 0,
-        1, 25//216, 0, 1408//2565, 2197//4104, -1//5, 0,
-        1, 16//135, 0, 6656//12825, 28561//56430, -9//50, 2//55
+        1, 16//135, 0, 6656//12825, 28561//56430, -9//50, 2//55,
+        1, 25//216, 0, 1408//2565, 2197//4104, -1//5, 0
     ) |> transpose
     iteration = Explicit()
-    reconstructor = Fehlberg45
+    reconstructor = Fehlberg5
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """
-    CashKarp54(precision::Type{T} = Float64) where T <: AbstractFloat
+    CashKarp5(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Cash and Karp's fifth(fourth)-order method.
+Cash and Karp's fifth-order method.
 
 http://www.elegio.it/mc2/rk/doc/p201-cash-karp.pdf
 """
-function CashKarp54(precision::Type{T} = Float64) where T <: AbstractFloat
-    name = :Cash_Karp_5_4
-    butcher = SMatrix{7, 8, precision, 56}(
+function CashKarp5(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Cash_Karp_5_4_3_2_1
+    butcher = SMatrix{7, 11, precision, 77}(
         0, 0, 0, 0, 0, 0, 0,
         1//5, 1//5, 0, 0, 0, 0, 0,
         3//10, 3//40, 9//40, 0, 0, 0, 0,
@@ -40,23 +211,26 @@ function CashKarp54(precision::Type{T} = Float64) where T <: AbstractFloat
         1, -11//54, 5//2, -70//27, 35//27, 0, 0,
         7//8, 1631//55296, 175//512, 575//13824, 44275//110592, 253//4096, 0,
         1, 37//378, 0, 250//621, 125//594, 0, 512//1771,
-        1, 2825//27648, 0, 18575//48384, 13525//55296, 277//14336, 1//4
+        1, 2825//27648, 0, 18575//48384, 13525//55296, 277//14336, 1//4,
+        1, 19//54, 0, -10//27, 55//54, 0, 0,
+        1, -3//2, 5//2, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0
     ) |> transpose
     iteration = Explicit()
-    reconstructor = CashKarp54
+    reconstructor = CashKarp5
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """
-    DormandPrince54(precision::Type{T} = Float64) where T <: AbstractFloat
+    DormandPrince5(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Dormand and Prince's fifth(fourth)-order method.
+Dormand and Prince's fifth-order method.
 
 https://www.sciencedirect.com/science/article/pii/0771050X80900133?via%3Dihub
 https://www.sciencedirect.com/science/article/pii/0898122186900258
 """
-function DormandPrince54(precision::Type{T} = Float64) where T <: AbstractFloat
+function DormandPrince5(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Dormand_Prince_5_4
     butcher = SMatrix{8, 9, precision, 72}(
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -82,17 +256,17 @@ function DormandPrince54(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
 
     iteration = Explicit()
-    reconstructor = DormandPrince54
+    reconstructor = DormandPrince5
 
     return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
-    BogackiShampine54(precision::Type{T} = Float64) where T <: AbstractFloat
+    BogackiShampine5(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Bogacki and Shampine's fifth(fourth)-order method.
+Bogacki and Shampine's fifth-order method.
 """
-function BogackiShampine54(precision::Type{T} = Float64) where T <: AbstractFloat
+function BogackiShampine5(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Bogacki_Shampine_5_4
     butcher = SMatrix{8, 9, precision, 72}(
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -106,19 +280,19 @@ function BogackiShampine54(precision::Type{T} = Float64) where T <: AbstractFloa
         1, 6059//80640, 0, 8559189//30983680, 26411//124800, -927//89600, 443//1197, 7267//94080
     ) |> transpose
     iteration = Explicit()
-    reconstructor = BogackiShampine54
+    reconstructor = BogackiShampine5
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """
-    Tsitouras54(precision::Type{T} = Float64) where T <: AbstractFloat
+    Tsitouras5(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Tsitouras' fifth(fourth)-order method.
+Tsitouras' fifth-order method.
 
 https://www.sciencedirect.com/science/article/pii/S0898122111004706
 """
-function Tsitouras54(precision::Type{T} = Float64) where T <: AbstractFloat
+function Tsitouras5(precision::Type{T} = Float64) where T <: AbstractFloat
     # TODO: not sure why other tilde pair (commented row) sums to (0.97, paper)
     #       or (0, OrdinaryDiffEq) instead of 1
     name = :Tsitouras_5_4
@@ -147,20 +321,43 @@ function Tsitouras54(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
 
     iteration = Explicit()
-    reconstructor = Tsitouras54
+    reconstructor = Tsitouras5
 
     # return RungeKutta(name, butcher, ω, iteration, reconstructor)
     return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
 """
-    Verner56(precision::Type{T} = Float64) where T <: AbstractFloat
+    Butcher6(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Verner's fifth(sixth)-order method (1978).
+Butcher's sixth-order method.
+"""
+function Butcher6(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Butcher_6
+    butcher = SMatrix{8, 8, precision, 64}(
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1//2, 1//2, 0, 0, 0, 0, 0, 0,
+        2//3, 2//9, 4//9, 0, 0, 0, 0, 0,
+        1//3, 7//36, 2//9, -1//12, 0, 0, 0, 0,
+        5//6, -35//144, -55//36, 35//48, 15//8, 0, 0, 0,
+        1//6, -1//360, -11//36, -1//8, 1//2, 1//10, 0, 0,
+        1, -41//260, 22//13, 43//156, -118//39, 32//195, 80//39, 0,
+        1, 13//200, 0, 11//40, 11//40, 4//25, 4//25, 13//200
+    ) |> transpose
+    iteration = Explicit()
+    reconstructor = Butcher6
+
+    return RungeKutta(name, butcher, iteration, reconstructor)
+end
+
+"""
+    Verner5(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Verner's fifth-order method (1978).
 
 https://www.jstor.org/stable/2156853
 """
-function Verner56(precision::Type{T} = Float64) where T <: AbstractFloat
+function Verner5(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Verner_5_6
     butcher = SMatrix{9, 10, precision, 90}(
         0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -175,19 +372,19 @@ function Verner56(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 57//640, 0, -16//65, 1377//2240, 121//320, 0, 891//8320, 2//35
     ) |> transpose
     iteration = Explicit()
-    reconstructor = Verner56
+    reconstructor = Verner5
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """
-    Verner65(precision::Type{T} = Float64) where T <: AbstractFloat
+    Verner6(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Verner's sixth(fifth)-order method.
+Verner's sixth-order method.
 
 https://link.springer.com/book/10.1007/978-3-540-78862-1
 """
-function Verner65(precision::Type{T} = Float64) where T <: AbstractFloat
+function Verner6(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Verner_6_5
     butcher = SMatrix{9, 10, precision, 90}(
         0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -202,7 +399,7 @@ function Verner65(precision::Type{T} = Float64) where T <: AbstractFloat
         1, 13//160, 0, 2375//5984, 5//16, 12//85, 3//44, 0, 0
     ) |> transpose
     iteration = Explicit()
-    reconstructor = Verner65
+    reconstructor = Verner6
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end

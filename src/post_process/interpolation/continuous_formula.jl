@@ -87,7 +87,7 @@
 end
 
 function continuous_output_properties(method; atol = 1e-13)
-    # note: Tsitouras54 has the worst tolerance ~ 1e-13 so far
+    # note: Tsitouras5 has the worst tolerance ~ 1e-13 so far
     ω = method.ω
     b = method.b
     c = method.c
