@@ -64,9 +64,8 @@ include("methods/runge_kutta/explicit/low_order.jl")
 include("methods/runge_kutta/explicit/medium_order.jl")
 include("methods/runge_kutta/explicit/high_order.jl")
 include("methods/runge_kutta/explicit/very_high_order.jl")
-include("methods/runge_kutta/implicit/fixed/low_order.jl")
+include("methods/runge_kutta/implicit/low_order.jl")
 include("methods/runge_kutta/implicit/fixed/medium_order.jl")
-include("methods/runge_kutta/implicit/embedded/low_order.jl")
 include("methods/runge_kutta/implicit/embedded/medium_order.jl")
 # Multistep tables
 include("methods/multistep/linear_multistep.jl")
@@ -120,20 +119,24 @@ export RungeKutta, LinearMultistep
 export Iteration, Explicit, DiagonalImplicit, FullImplicit
 # List of Runge-Kutta methods
 export list_explicit_runge_kutta_methods, list_implicit_runge_kutta_methods
-# Explicit Runge-Kutta
+# Explicit Runge-Kutta (low order)
 export Euler1, Heun2, Midpoint2, Ralston2, Fehlberg2, Heun3, Ralston3, Kutta3,
-       BogackiShampine3, ShuOsher3, SpiteriRuuth3, RungeKutta4, ThreeEightsRule4,
-       Ralston4, Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
-# Embedded explicit Runge-Kutta
-export Fehlberg5, CashKarp5, DormandPrince5, BogackiShampine5, Tsitouras5, Verner5,
-       Verner6, Fehlberg7, DormandPrince8, Feagin10, Feagin12, Feagin14
-# Standard implicit Runge-Kutta
-export BackwardEuler1, TrapezoidRuleBDF2, ImplicitMidpoint2,
-       QinZhang2, KraaijevangerSpijker2, PareschiRusso2, PareschiRusso3, Crouzeix3,
-       RadauIA3, RadauIIA3, DIRKL3, Norsett4, RaduaIA5
+       BogackiShampine3, ShuOsher3, SpiteriRuuth3
+# Explicit Runge-Kutta (medium order)
+export RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4, Butcher5, Fehlberg5, CashKarp5,
+       DormandPrince5, BogackiShampine5, Tsitouras5, Verner5, Butcher6, Verner6
+# Explicit Runge-Kutta (high order)
+export Fehlberg7, DormandPrince8, Curtis8, Shanks8, ShanksPseudo8
+# Explicit Runge-Kutta (very high order)
+export Feagin10, Feagin12, Feagin14
+# Implicit Runge-Kutta (low order)
+export BackwardEuler1, TrapezoidRuleBDF2, ImplicitTrapezoid2, ImplicitMidpoint2,
+       QinZhang2, KraaijevangerSpijker2, PareschiRusso2, LobattoIIIB2, LobattoIIIC2,
+       PareschiRusso3, Crouzeix3, RadauIA3, RadauIIA3, DIRKL3
+# Implicit Runge-Kutta (medium order)
+export Norsett4, RaduaIA5
 # Embedded implicit Runge-Kutta
-export ImplicitTrapezoid21, TrapezoidRuleBDF21, LobattoIIIB21, LobattoIIIC21,
-       GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIICS42,
+export GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIICS42,
        LobattoIIID42, RaduaIIA52, GaussLegendre64
 # Linear multistep
 export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,

@@ -33,7 +33,7 @@ dt0 = 1e-2
 ω = 10.0          # frequency
 p = [γ, ω]
 
-options = SolverOptions(; method = TrapezoidRuleBDF21(),
+options = SolverOptions(; method = TrapezoidRuleBDF2(),
                           adaptive = Embedded(; alpha = 1e-3),
                           interpolator = CubicHermite(),);
 
@@ -69,7 +69,7 @@ The interpolated solution is $C^1$ continuous and third-order accurate (i.e. it 
 If the ODE method has a continuous formula that uses intermediate stages, you can set `interpolator = ContinuousFormula()`. After solving the ODE, the intermediate stage data will be stored in `sol.dy`.
 
 ```julia
-options = SolverOptions(; method = TrapezoidRuleBDF21(),
+options = SolverOptions(; method = TrapezoidRuleBDF2(),
                           adaptive = Embedded(; alpha = 1e-3),
                           interpolator = ContinuousFormula(),);
 
@@ -80,7 +80,7 @@ Then call `interpolate_solution` to use the continuous formula. The function als
 
 ```julia
 julia> t_dense, y_dense = interpolate_solution(options, sol; dt_dense = 1e-4);
-[ Info: Generating order-2 C0 continuous output for TrapezoidRuleBDF21
+[ Info: Generating order-2 C0 continuous output for TrapezoidRuleBDF2
 ```
 
 The TRBDF2 continuous formula is less accurate and smooth than cubic Hermite interpolation, but it qualitatively produces the same curves:

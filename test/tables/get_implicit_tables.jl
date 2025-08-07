@@ -17,8 +17,8 @@ function get_runge_kutta_diagonal_implicit_tables(; precision::Type{<:AbstractFl
         Norsett4(; precision),
 
         # embedded
-        ImplicitTrapezoid21(; precision),
-        LobattoIIIB21(; precision),
+        ImplicitTrapezoid2(; precision),
+        LobattoIIIB2(; precision),
 
         LobattoIIICS42(; precision),
     ]
@@ -28,7 +28,7 @@ end
 function get_runge_kutta_full_implicit_tables(; precision::Type{<:AbstractFloat})
     # FIRK FESAL methods
     # method = RadauIIA3()      # not ES
-    # method = LobattoIIIC21()  # not ES
+    # method = LobattoIIIC2()  # not ES
     # method = LobattoIIIC42()  # not ES
     # method = RadauIIA52()     # not ES
     # method = LobattoIIIA42()  # is ES
@@ -39,7 +39,7 @@ function get_runge_kutta_full_implicit_tables(; precision::Type{<:AbstractFloat}
         RaduaIA5(; precision),
 
         #embedded
-        LobattoIIIC21(; precision),
+        LobattoIIIC2(; precision),
 
         GaussLegendre42(; precision),
         LobattoIIIA42(; precision),

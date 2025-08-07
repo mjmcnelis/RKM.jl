@@ -34,12 +34,13 @@ function TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloa
     s2 = sqrt(BigFloat(2))   # sqrt(2)
     g = 2 - s2               # gamma
 
-    name = :Trapezoid_Rule_B_D_F_2
-    butcher = SMatrix{4, 4, precision, 16}(
+    name = :Trapezoid_Rule_B_D_F_2_1
+    butcher = SMatrix{4, 5, precision, 20}(
         0, 0, 0, 0,
         g, g/2, g/2, 0,
         1, 1/(2(2-g)), 1/(2(2-g)), g/2,
-        1, 1/(2(2-g)), 1/(2(2-g)), g/2
+        1, 1/(2(2-g)), 1/(2(2-g)), g/2,
+        1, 1, 0, 0
     ) |> transpose
 
     ω = SMatrix{2, 3, precision, 6}(
@@ -50,6 +51,31 @@ function TrapezoidRuleBDF2(precision::Type{T} = Float64) where T <: AbstractFloa
 
     iteration = DiagonalImplicit()
     reconstructor = TrapezoidRuleBDF2
+
+    return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+"""
+    ImplicitTrapezoid2(precision::Type{T} = Float64) where T <: AbstractFloat
+
+Second-order implicit trapezoid rule (A-stable).
+"""
+function ImplicitTrapezoid2(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Implicit_Trapezoid_2_1
+    butcher = SMatrix{3, 4, precision, 12}(
+        0, 0, 0,
+        1, 1//2, 1//2,
+        1, 1//2, 1//2,
+        1, 1, 0
+    ) |> transpose
+
+    ω = SMatrix{2, 2, precision, 4}(
+        1, -1//2,
+        0, 1//2,
+    ) |> transpose
+
+    iteration = DiagonalImplicit()
+    reconstructor = ImplicitTrapezoid2
 
     return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
@@ -157,6 +183,35 @@ function PareschiRusso2(precision::Type{T} = Float64) where T <: AbstractFloat
     reconstructor = PareschiRusso2
 
     return RungeKutta(name, butcher, iteration, reconstructor; ω)
+end
+
+function LobattoIIIB2(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Lobatto_I_I_I_B_2_1
+    # TODO: embedded method is broken?
+    butcher = SMatrix{3, 4, precision, 12}(
+        1//2, 1//2, 0,
+        1//2, 1//2, 0,
+        1, 1//2, 1//2,
+        1, 1, 0
+    ) |> transpose
+    iteration = DiagonalImplicit()
+    reconstructor = LobattoIIIB2
+
+    return RungeKutta(name, butcher, iteration, reconstructor)
+end
+
+function LobattoIIIC2(precision::Type{T} = Float64) where T <: AbstractFloat
+    name = :Lobatto_I_I_I_C_2_1
+    butcher = SMatrix{3, 4, precision, 12}(
+        0, 1//2, -1//2,
+        1, 1//2, 1//2,
+        1, 1//2, 1//2,
+        1, 1, 0
+    ) |> transpose
+    iteration = FullImplicit()
+    reconstructor = LobattoIIIC2
+
+    return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """

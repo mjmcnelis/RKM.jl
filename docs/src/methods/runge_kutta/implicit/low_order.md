@@ -18,20 +18,9 @@ time-stepping.
 - `RadauIIA3()`: Radau IA3 third-order method
 - `DIRKL3()`: a third-order L-stable diagonal implicit method (name unknown)
 
-## Embedded
-
-The following embedded methods are compatible with all adaptive time step options:
-
-- `Fehlberg2()`: Fehlberg's second-order method
-- `Heun2()`: Heun-Euler second-order method
-- `BogackiShampine3()`: Bogacki and Shampine's third-order method
-
-*Note: SSP stands for strong stability preserving*
-
 ## API Reference
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/implicit/fixed/low_order.jl",
-           "methods/runge_kutta/implicit/embedded/low_order.jl"]
+Pages   = ["methods/runge_kutta/implicit/low_order.jl"]
 ```

@@ -20,6 +20,5 @@ The following embedded methods are compatible with all adaptive time step option
 
 ```@autodocs
 Modules = [RKM]
-Pages   = ["methods/runge_kutta/explicit/fixed/high_order.jl",
-           "methods/runge_kutta/explicit/embedded/high_order.jl"]
+Pages   = ["methods/runge_kutta/explicit/high_order.jl"]
 ```
