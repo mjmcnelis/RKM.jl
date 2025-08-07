@@ -62,9 +62,8 @@ include("methods/runge_kutta/runge_kutta.jl")
 # include("methods/runge_kutta/debug_table.jl") # uses @test, @test_broken
 include("methods/runge_kutta/explicit/low_order.jl")
 include("methods/runge_kutta/explicit/medium_order.jl")
-include("methods/runge_kutta/explicit/fixed/high_order.jl")
-include("methods/runge_kutta/explicit/embedded/high_order.jl")
-include("methods/runge_kutta/explicit/embedded/very_high_order.jl")
+include("methods/runge_kutta/explicit/high_order.jl")
+include("methods/runge_kutta/explicit/very_high_order.jl")
 include("methods/runge_kutta/implicit/fixed/low_order.jl")
 include("methods/runge_kutta/implicit/fixed/medium_order.jl")
 include("methods/runge_kutta/implicit/embedded/low_order.jl")
@@ -127,7 +126,7 @@ export Euler1, Heun2, Midpoint2, Ralston2, Fehlberg2, Heun3, Ralston3, Kutta3,
        Ralston4, Ketcheson4, Butcher5, Butcher6, Curtis8, Shanks8, ShanksPseudo8
 # Embedded explicit Runge-Kutta
 export Fehlberg5, CashKarp5, DormandPrince5, BogackiShampine5, Tsitouras5, Verner5,
-       Verner6, Fehlberg78, DormandPrince87, Feagin108, Feagin1210, Feagin1412
+       Verner6, Fehlberg7, DormandPrince8, Feagin10, Feagin12, Feagin14
 # Standard implicit Runge-Kutta
 export BackwardEuler1, TrapezoidRuleBDF2, ImplicitMidpoint2,
        QinZhang2, KraaijevangerSpijker2, PareschiRusso2, PareschiRusso3, Crouzeix3,

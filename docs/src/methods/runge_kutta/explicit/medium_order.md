@@ -16,13 +16,13 @@ The following standard methods are compatible with `Fixed()`, `Doubling()` and `
 
 The following embedded methods are compatible with all adaptive time step options:
 
-- `Fehlberg45()`: Fehlberg's fourth(fifth)-order method
-- `CashKarp54()`: Cash and Karp's fifth(fourth)-order method
-- `DormandPrince54()`: Dormand and Prince's fifth(fourth)-order method
-- `BogackiShampine54()`: Bogacki and Shampine's fifth(fourth)-order method
-- `Tsitouras54()`: Bogacki and Shampine's fifth(fourth)-order method
-- `Verner56()`: Verner's fifth(sixth)-order method
-- `Verner65()`: Verner's sixth(fifth)-order method
+- `Fehlberg5()`: Fehlberg's fifth-order method
+- `CashKarp5()`: Cash and Karp's fifth-order method
+- `DormandPrince5()`: Dormand and Prince's fifth-order method
+- `BogackiShampine5()`: Bogacki and Shampine's fifth-order method
+- `Tsitouras5()`: Bogacki and Shampine's fifth-order method
+- `Verner5()`: Verner's fifth-order method
+- `Verner6()`: Verner's sixth-order method
 
 *Note: SSP stands for strong stability preserving*
 

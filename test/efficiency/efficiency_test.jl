@@ -30,15 +30,15 @@ methods = OrderedDict(
                    Fehlberg5(),
                    CashKarp5(), DormandPrince5(), BogackiShampine5(), Tsitouras5(), Verner5(),
                    Verner6(),
-                   Fehlberg78(),
-                   DormandPrince87(),
-                   Feagin108(),
-                   Feagin1210(),
-                   Feagin1412(),
+                   Fehlberg7(),
+                   DormandPrince8(),
+                   Feagin10(),
+                   Feagin12(),
+                   Feagin14(),
                 ],
 )
 epsilon_vect = 10.0.^LinRange(-4, -28, 25)
-# farthest I got with Feagin1412
+# farthest I got with Feagin14
 # epsilon_vect = 10.0.^LinRange(-4, -80, 77)
 
 @time plt = efficiency_curve(y0, y_exact, dy_dt!; precision, methods,

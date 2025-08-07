@@ -1,12 +1,12 @@
 
 """
-    Feagin108(precision::Type{T} = Float64) where T <: AbstractFloat
+    Feagin10(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Feagin's tenth(eighth)-order method.
+Feagin's tenth-order method.
 
 http://www.peterstone.name/Maplepgs/RKcoeff.html
 """
-function Feagin108(precision::Type{T} = Float64) where T <: AbstractFloat
+function Feagin10(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Feagin_10_8
     butcher = SMatrix{19, 18, precision, 342}(
        [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
@@ -31,20 +31,20 @@ function Feagin108(precision::Type{T} = Float64) where T <: AbstractFloat
        ]
     )
     iteration = Explicit()
-    reconstructor = Feagin108
+    reconstructor = Feagin10
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """
-    Feagin1210(precision::Type{T} = Float64) where T <: AbstractFloat
+    Feagin12(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Feagin's tenth(eighth)-order method.
+Feagin's twelfth-order method.
 
 http://www.peterstone.name/Maplepgs/Maple/nmthds/RKcoeff/Runge_Kutta_schemes/RK12/RKcoeff12a_1.pdf
 https://github.com/drons/nbody/blob/6e90a2ee2fe21d3df60acaacbb9ecedb685e97cd/nbody/nbody_solver_rkfeagin12.cpp
 """
-function Feagin1210(precision::Type{T} = Float64) where T <: AbstractFloat
+function Feagin12(precision::Type{T} = Float64) where T <: AbstractFloat
     s15 = sqrt(BigFloat(15))
 
     name = :Feagin_12_10
@@ -79,20 +79,20 @@ function Feagin1210(precision::Type{T} = Float64) where T <: AbstractFloat
        ]
     )
     iteration = Explicit()
-    reconstructor = Feagin1210
+    reconstructor = Feagin12
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
 """
-    Feagin1412(precision::Type{T} = Float64) where T <: AbstractFloat
+    Feagin14(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Feagin's fourteenth(twelfth)-order method.
+Feagin's fourteenth-order method.
 
 http://www.peterstone.name/Maplepgs/Maple/nmthds/RKcoeff/Runge_Kutta_schemes/RK14/RKcoeff14a_1.pdf
 https://github.com/drons/nbody/blob/6e90a2ee2fe21d3df60acaacbb9ecedb685e97cd/nbody/nbody_solver_rkfeagin14.cpp
 """
-function Feagin1412(precision::Type{T} = Float64) where T <: AbstractFloat
+function Feagin14(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Feagin_14_12
 
     butcher_1 = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
@@ -136,10 +136,10 @@ function Feagin1412(precision::Type{T} = Float64) where T <: AbstractFloat
     #=b_hat=#  1 1//56 439//64000 3//256 0 9//512 0 3//128 15//512 0 9//256 21//512 3//64 0 27//512 15//256 33//512 0 big".1053521135717530196914960328878781622276730830805238840416702908213176249782427570033" big".1705613462417521823821203385538740858875554878027908047375010369442754416180982144816" big".2062293973293519407835264857011048947419142862595424540779715293772640762608018856579" big".2062293973293519407835264857011048947419142862595424540779715293772640762608018856579" big".1705613462417521823821203385538740858875554878027908047375010369442754416180982144816" big".1053521135717530196914960328878781622276730830805238840416702908213176249782427570033" -33//512 -15//256 -27//512 -3//64 -21//512 -9//256 -15//512 -3//128 -9//512 -3//256 -439//64000 1//56
     ]
 
-    butcher = vcat(butcher_1, butcher_2) .|> precision |> SMatrix{37, 36, precision, 1332}
+    butcher = vcat(butcher_1, butcher_2) .|> precision# |> SMatrix{37, 36, precision, 1332}
 
     iteration = Explicit()
-    reconstructor = Feagin1412
+    reconstructor = Feagin14
 
     return RungeKutta(name, butcher, iteration, reconstructor)
 end

@@ -113,9 +113,9 @@ function list_explicit_runge_kutta_methods()
     \tMedium order (4-6)    | Fehlberg5, CashKarp5, DormandPrince5,
     \t                      | BogackiShampine5, Tsitouras5, Verner5, Verner6
     \t-------------------------------------------------------------------------------
-    \tHigh order (7-9)      | Fehlberg78, DormandPrince87
+    \tHigh order (7-9)      | Fehlberg7, DormandPrince8
     \t-------------------------------------------------------------------------------
-    \tVery high order (10+) | Feagin108, Feagin1210, Feagin1412
+    \tVery high order (10+) | Feagin10, Feagin12, Feagin14
     """ |> println
 end
 

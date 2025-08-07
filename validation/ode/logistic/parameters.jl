@@ -1,15 +1,15 @@
 
 options = Dict(
-    :method => Verner6(),
+    :method => RungeKutta4(),
     # :method => BackwardEuler1(),
     # :method => TrapezoidRuleBDF2(),  # 400.32 k allocations: 35.115 MiB w/ Fixed()
     # :method => AdamsBashforth(; order = 2),
     # :method => AdamsMoulton(; order = 2),
     # :method => Heun2(),
 
-    # :adaptive => Fixed(),
-    :adaptive => Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
-                            pid = PIControl(), limiter = SmoothLimiter(),),
+    :adaptive => Fixed(),
+    # :adaptive => Embedded(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
+    #                         pid = PIControl(), limiter = SmoothLimiter(),),
     # :adaptive => Doubling(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6, p_norm = 2.0,
     #                         pid = PIControl(), limiter = SmoothLimiter(),),
     # :adaptive => CentralDiff(; epsilon = 1e-6, alpha = 1e-6, delta = 1e-6,

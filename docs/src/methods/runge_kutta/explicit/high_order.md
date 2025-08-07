@@ -13,8 +13,8 @@ The following standard methods are compatible with `Fixed()`, `Doubling()` and `
 
 The following embedded methods are compatible with all adaptive time step options:
 
-- `Fehlberg78()`: Fehlberg's seventh(eighth)-order method
-- `DormandPrince87()`: Dormand and Prince's eighth(seventh)-order method
+- `Fehlberg7()`: Fehlberg's seventh-order method
+- `DormandPrince8()`: Dormand and Prince's eighth-order method
 
 ## API Reference
 
