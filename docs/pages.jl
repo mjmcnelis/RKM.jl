@@ -22,5 +22,6 @@ pages = [
                             ],
     "Post-process solution" => ["Solution data" => "solution/solution_data.md",
                                 "Dense output" => "solution/dense_output.md",
-                                "Solver statistics" => "solution/statistics.md"],
+                                ],
+    "Solver statistics" => "statistics.md"
 ]

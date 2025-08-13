@@ -62,8 +62,6 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, root_finder,
     J = update_cache.J
     res = update_cache.res
 
-    linear_cache = root_finder.linear_cache
-
     nt = length(sol.t)
     ny = sol.dimensions[1]
 
@@ -89,6 +87,8 @@ function get_subroutine_runtimes(sol, ode_wrap!, update_cache, root_finder,
 
         # note: linear solve estimate assumes Backward Euler
         if !isempty(J) && !isempty(res) && root_finder isa Newton
+            linear_cache = root_finder.linear_cache
+
             y_prev = view(sol.y, 1+(n-2)*ny:(n-1)*ny)
             dt = sol.t[n] - sol.t[n-1]
             @.. res = y - y_prev - dt*f
