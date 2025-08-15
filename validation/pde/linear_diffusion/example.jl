@@ -35,7 +35,7 @@ options = SolverOptions(
               adaptive = Fixed(),
               # TODO: finitediff w/ sparsity doesn't seem to be working
             #   state_jacobian = FiniteJacobian(; sparsity),
-              state_jacobian = ForwardColorJacobian(; sparsity),
+              state_jacobian = ForwardJacobian(; sparsity),
               root_finder = Newton(; linear_method = KLUFactorization(),),
               benchmark_subroutines = true,
               # TODO: this doesn't work

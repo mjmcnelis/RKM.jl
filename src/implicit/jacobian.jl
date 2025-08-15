@@ -8,13 +8,8 @@ abstract type JacobianMethod end
     evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
 end
 
-@kwdef struct ForwardJacobian{JC} <: JacobianMethod where JC <: JacobianConfig
-    cache::JC = JacobianConfig(nothing, [0.0], [0.0])
-    evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
-end
-
-@kwdef struct ForwardColorJacobian{JC, T} <: JacobianMethod where {JC <: ForwardColorJacCache,
-                                                                   T <: AbstractFloat}
+@kwdef struct ForwardJacobian{JC, T} <: JacobianMethod where {JC <: ForwardColorJacCache,
+                                                              T <: AbstractFloat}
     cache::JC = ForwardColorJacCache(nothing, [0.0])
     sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
     evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
@@ -48,20 +43,6 @@ function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W,
                                                                   T2 <: AbstractFloat}
 
     evaluations = jacobian_method.evaluations
-
-    evaluations[1] = 0
-    cache = JacobianConfig(ode_wrap!, f, x)
-    @set! jacobian_method.cache = cache
-
-    return jacobian_method
-end
-
-function reconstruct_jacobian(jacobian_method::ForwardColorJacobian, ode_wrap!::W,
-                              f::Vector{T}, x::Vector{T2}) where {W <: Wrapper,
-                                                                  T <: AbstractFloat,
-                                                                  T2 <: AbstractFloat}
-
-    evaluations = jacobian_method.evaluations
     sparsity = jacobian_method.sparsity
 
     evaluations[1] = 0
@@ -89,18 +70,6 @@ function evaluate_jacobian!(jacobian_method::FiniteJacobian,
 end
 
 function evaluate_jacobian!(jacobian_method::ForwardJacobian,
-                            J, ode_wrap!, x, f)
-
-    cache = jacobian_method.cache
-    evaluations = jacobian_method.evaluations
-
-    jacobian!(J, ode_wrap!, f, x, cache)
-    evaluations[1] += 1
-
-    return nothing
-end
-
-function evaluate_jacobian!(jacobian_method::ForwardColorJacobian,
                             J, ode_wrap!, x, args...)
 
     cache = jacobian_method.cache

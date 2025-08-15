@@ -105,9 +105,9 @@ export NoEigenMax, LinearEigenMax, KrylovEigenMax
 # Root finder methods
 export FixedPoint, Newton
 # Jacobian evaluation methods
-export ForwardJacobian, ForwardColorJacobian, FiniteJacobian
+export FiniteJacobian, ForwardJacobian
 # Jacobian-vector evaluation methods
-export NaiveJacobianVector, ForwardJacobianVector, FiniteJacobianVector
+export NaiveJacobianVector, FiniteJacobianVector, ForwardJacobianVector
 # Jacobian sparsity pattern
 export nansafe_state_jacobian, nansafe_param_jacobian, test_nansafe,
        max_nan, min_nan, maximum_nan, minimum_nan
