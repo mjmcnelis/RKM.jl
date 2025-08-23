@@ -1,9 +1,15 @@
 """
+$(TYPEDEF)
+
 Sets a timer for the ODE solver.
+
+$(TYPEDFIELDS)
 """
 struct TimeLimit
-    """Wall time (minutes)"""
-    wtime_min::Float64
+    """Max number of minutes"""
+    wtime_minutes::Float64
+    """Number of steps between each runtime check"""
+    step_interval::Int64
     """Initial and current system time since epoch (seconds)"""
     time_sys::MVector{2,Float64}
     """Runtime in HH:MM:SS format"""
@@ -17,12 +23,14 @@ struct TimeLimit
 end
 
 """
-    function TimeLimit(; wtime_min::Real = 60)
+    function TimeLimit(; wtime_minutes::Real = Inf, step_interval::Int64 = 1)
 
-Outer constructor for `TimeLimit`.
+Outer constructor for `TimeLimit` where you can set the max number of minutes `wtime_minutes`
+and the number of steps between each runtime check `step_interval`.
 """
-function TimeLimit(; wtime_min::Real = 60)
-    @assert wtime_min >= 0 "wtime_min = $wtime_min is not greater than or equal to 0"
+function TimeLimit(; wtime_minutes::Real = Inf, step_interval::Int64 = 1)
+    @assert wtime_minutes >= 0 "wtime_minutes = $wtime_minutes cannot be negative"
+    @assert step_interval > 0 "step_interval = $step_interval must be positive"
     t_epoch = time()
     time_sys = MVector{2,Float64}(t_epoch, t_epoch)
     runtime = String["00:00:00"]
@@ -30,8 +38,8 @@ function TimeLimit(; wtime_min::Real = 60)
     display_values = MVector{1,Bool}(false)
     total_steps = MVector{1,Int64}(0)
 
-    return TimeLimit(wtime_min, time_sys, runtime, runtime_prev,
-                     display_values, total_steps)
+    return TimeLimit(wtime_minutes, step_interval, time_sys, runtime,
+                     runtime_prev, display_values, total_steps)
 end
 
 """
@@ -81,21 +89,23 @@ function set_runtime_display!(timer::TimeLimit)
 end
 
 """
-    continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
-                    timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
+    stop_solver(t::Vector{T}, dt::Vector{T}, tf::T,
+                timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
 
-Checks whether to continue running the ODE solver. The solver stops if the simulation
-finishes, the runtime exceeds the limit set by `timer` or the time step is too small.
+Checks whether to stop running the ODE solver. The solver stops if the simulation finishes,
+the runtime exceeds the limit set by `timer` or the time step is too small.
 
 Required parameters: `t`, `dt`, `tf`, `timer`, `show_progress`
 """
-function continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
-                         timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
-    wtime_min = timer.wtime_min
+function stop_solver(t::Vector{T}, dt::Vector{T}, tf::T,
+                     timer::TimeLimit, show_progress::Bool) where T <: AbstractFloat
+    wtime_minutes = timer.wtime_minutes
     time_sys = timer.time_sys
+    total_steps = timer.total_steps
+    step_interval = timer.step_interval
 
-    if !isinf(wtime_min)
-        if time() > time_sys[1] + 60*wtime_min
+    if !isinf(wtime_minutes) && total_steps[1] % step_interval == 0
+        if time() > time_sys[1] + 60*wtime_minutes
             # note: hack seems to work, but need to maintain # blank lines
             if show_progress
                 println("\n\n\n\n")
@@ -106,13 +116,13 @@ function continue_solver(t::Vector{T}, dt::Vector{T}, tf::T,
             #       logger::Union{Nothing, Base.CoreLogging.AbstractLogger} (red)
             #       err::Any (red)
             # doesn't seem to hurt performance, would rather warn than print
-            @warn "Exceeded time limit of $wtime_min minutes (stopping evolve_ode!...)\n"
-            return false
+            @warn "Exceeded time limit of $wtime_minutes minutes (stopping solver...)\n"
+            return true
         end
     end
     if t[1] + dt[1] == t[1]
-        @warn "Time step dt = $(dt[1]) is too small (stopping evolve_ode!...)"
-        return false
+        @warn "Time step dt = $(dt[1]) is too small (stopping solver...)"
+        return true
     end
-    return t[1] < tf
+    return t[1] >= tf
 end
