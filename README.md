@@ -181,7 +181,7 @@ Here, we show the number of time steps saved and the number of times `dy_dt!` wa
 We can set a timer and display a progress bar by passing `timer` and `show_progress` to the solver options:
 ```julia
 options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
-                          timer = TimeLimit(; wtime_min = 1), # 1 minute
+                          timer = TimeLimit(; wtime_minutes = 1), # 1 minute
                           show_progress = true)
 dt0_small = 4e-8  # trigger timer
 ```

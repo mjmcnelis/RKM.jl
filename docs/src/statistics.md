@@ -122,7 +122,7 @@ save solution        | 0.0001892
   0.299631 seconds (5.20 k allocations: 313.091 MiB, 3.01% gc time)
 ```
 
-We can see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). This suggests that we should try using a sparse linear solver to reduce the runtime. Following section **(X)**, we generate a sparsity pattern with the function `nansafe_state_jacobian`.
+We can see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). Therefore, we should try using a sparse linear solver to reduce the runtime. Following section **(X)**, we generate a sparsity pattern with the function `nansafe_state_jacobian`.
 
 *Note: this assumes that you already set* `NANSAFE_MODE_ENABLED = true` *in* `ForwardDiff`.
 

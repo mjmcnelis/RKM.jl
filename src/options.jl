@@ -7,7 +7,7 @@ SolverOptions for the ODE solver.
     """Adaptive time step method"""
     adaptive::AdaptiveTimeStep
     """Timer for ODE solver"""
-    timer::TimeLimit = TimeLimit(; wtime_min = Inf)
+    timer::TimeLimit = TimeLimit()
     """State Jacobian method for implicit ODE solvers or sensitivity analysis"""
     state_jacobian::JacobianMethod = FiniteJacobian()
     """Root finder for implicit ODE solvers"""

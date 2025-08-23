@@ -7,7 +7,7 @@
 
 Applies `sizehint!` to the time `t` and state variables `y` in the solution `sol`.
 The time derivative `f`, intermediate stages `dy`, sensitivity coefficients `S`
-and max eigenvalue `lamnda_LR` are also size-hinted if they are being outputted.
+and max eigenvalue `lambda_LR` are also size-hinted if they are being outputted.
 
 Required parameters: `adaptive`, `interpolator`, `sol`, `t0`, `tf`, `dt`, `sensitivity`,
                      `save_time_derivative`, `stages`, `iteration`, `eigenmax`

@@ -22,7 +22,6 @@
 ```@autodocs
 Modules = [RKM]
 Pages   = ["src/evolve.jl",
-           "src/timer.jl",
            "src/implicit/nansafe/nansafe_jacobian.jl",
            "src/options.jl",
            "src/plots.jl",
@@ -31,6 +30,5 @@ Pages   = ["src/evolve.jl",
            "src/methods/multistep/adams/adams_moulton.jl",
            "src/methods/multistep/differentiation_formula/backward_differentiation_formula.jl",
            "src/methods/multistep/differentiation_formula/numerical_differentiation_formula.jl",
-           "src/progress.jl",
            "src/methods/properties/fesal.jl"]
 ```
