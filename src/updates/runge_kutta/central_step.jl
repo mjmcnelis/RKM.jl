@@ -30,7 +30,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::CentralDiff,
     ode_wrap_y!(f_tmp, t[1], y)                             # evaluate first stage at (t,y)
 
     # TEMP: fixed time step for first update until estimate first time step w/ doubling
-    if ode_wrap_y!.FE[1] > 2
+    if ode_wrap_y!.evaluations[1] > 2
         # for high did 1/order, but epsilon 2/x?
         # don't remember my reasoning for that
         # TODO: don't I already rescale these parameters now?

@@ -49,8 +49,8 @@ options = Dict(
     :show_progress => false,
     # :show_progress => true,
 
-    :benchmark_subroutines => false,
-    # :benchmark_subroutines => true,
+    :benchmarks => false,
+    # :benchmarks => true,
 
     :precision => Float64
     # :precision => Double64    # sensitivity doesn't work for Double64 rn

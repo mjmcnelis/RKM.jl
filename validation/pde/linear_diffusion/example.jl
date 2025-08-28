@@ -3,7 +3,7 @@ using AppleAccelerate
 using Plots; plotly()
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/pde/linear_diffusion/equations.jl") : nothing
 
-show_plot = true            # plot solution
+show_plot = false            # plot solution
 benchmark_diffeq = false    # compare to OrdinaryDiffEq
 
 a = 0.25                    # diffusion constant
@@ -37,7 +37,7 @@ options = SolverOptions(
             #   state_jacobian = FiniteJacobian(; sparsity),
               state_jacobian = ForwardJacobian(; sparsity),
               root_finder = Newton(; linear_method = KLUFactorization(),),
-              benchmark_subroutines = true,
+              benchmarks = true,
               # TODO: this doesn't work
             #   precision = Double64
           )

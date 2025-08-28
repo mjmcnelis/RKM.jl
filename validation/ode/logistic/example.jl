@@ -12,9 +12,9 @@ options = SolverOptions(options)
 
 t0 = -10.0
 tf = 10.0
-dt0 = 1e-7
+dt0 = 1e-4
 
-N = 1
+N = 2
 p = [0.5 - 0.25*(i-1.0)/(N-1.0+eps(1.0)) for i in 1:N]
 y0 = Float64[]
 for i = eachindex(p)

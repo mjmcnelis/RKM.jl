@@ -28,7 +28,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         save_solution = options.save_solution
         save_time_derivative = options.save_time_derivative
         show_progress = options.show_progress
-        benchmark_subroutines = options.benchmark_subroutines
+        benchmarks = options.benchmarks
         precision = options.precision
 
         reset_timer!(timer)
@@ -74,15 +74,17 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         x0 = update_cache.x0
 
         # create ODE wrappers
-        ode_wrap_y! = ODEWrapperState([t0], p, abstract_params, dy_dt!)#, method)
-        ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!)#, method)
+        ode_wrap_y! = ODEWrapperState([t0], p, abstract_params,
+                                      dy_dt!, benchmarks)
+        ode_wrap_p! = ODEWrapperParam([t0], y_tmp, abstract_params, dy_dt!)
 
         iteration = method.iteration
         if iteration isa Implicit || !(sensitivity isa NoSensitivity)
-            state_jacobian = reconstruct_jacobian(state_jacobian, ode_wrap_y!, f_tmp, y)
+            state_jacobian = reconstruct_jacobian(state_jacobian, ode_wrap_y!,
+                                                  f_tmp, y, benchmarks)
         end
 
-        root_finder = reconstruct_root_finder(root_finder, res, J)
+        root_finder = reconstruct_root_finder(root_finder, res, J, benchmarks)
         sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp, p)
 
         # for progress meter
@@ -162,14 +164,13 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
     end
 
     # TODO: move to compute_stats!
-    sol.FE[1] = ode_wrap_y!.FE[1] + ode_wrap_p!.FE[1]
+    sol.FE[1] = ode_wrap_y!.evaluations[1] + ode_wrap_p!.evaluations[1]
 
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,
                    state_jacobian, sensitivity, loop_stats, config_bytes)
 
-    if benchmark_subroutines && save_solution
-        get_subroutine_runtimes(sol, ode_wrap_y!, update_cache, root_finder,
-                                state_jacobian, save_time[1])
+    if benchmarks && save_solution
+        get_subroutine_runtimes(ode_wrap_y!, state_jacobian, root_finder, save_time)
     end
 
     return nothing

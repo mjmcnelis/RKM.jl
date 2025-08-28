@@ -16,6 +16,10 @@ struct Newton{LC} <: RootFinderMethod where LC <: LinearCache
     p_norm::Float64
     max_iterations::Int64
     # TODO: track how many iterations were performed each step
+    #       may want to have option to bins statistics
+    evaluations::MVector{1,Int64}   # note: counter only for runtime sampling
+    benchmarks::Bool
+    subroutine_time::MVector{1,Float64}
 end
 
 function Newton(; linear_method::AF = LUFactorization(),
@@ -27,8 +31,13 @@ function Newton(; linear_method::AF = LUFactorization(),
     res = zeros(0)
     linear_cache = init(LinearProblem(J, res), linear_method,
                         alias = LinearAliasSpecifier(; alias_A = true, alias_b = true))
+    # dummy defaults
+    evaluations = MVector{1,Int64}(0)
+    benchmarks = false
+    subroutine_time = MVector{1,Float64}(0.0)
 
-    return Newton(linear_cache, epsilon, p_norm, max_iterations)
+    return Newton(linear_cache, epsilon, p_norm, max_iterations,
+                  evaluations, benchmarks, subroutine_time)
 end
 
 function reconstruct_root_finder(root_finder::FixedPoint, args...)
@@ -36,13 +45,21 @@ function reconstruct_root_finder(root_finder::FixedPoint, args...)
 end
 
 function reconstruct_root_finder(root_finder::Newton, res::Vector{T},
-             J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}) where T <: AbstractFloat
+                                 J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
+                                 benchmarks::Bool) where T <: AbstractFloat
+
+    evaluations = root_finder.evaluations
+    subroutine_time = root_finder.subroutine_time
+
+    evaluations[1] = 0
+    subroutine_time[1] = 0.0
 
     linear_method = root_finder.linear_cache.alg
-
     linear_cache = init(LinearProblem(J, res), linear_method;
                         alias = LinearAliasSpecifier(; alias_A = true, alias_b = true),)
+
     @set! root_finder.linear_cache = linear_cache
+    @set! root_finder.benchmarks = benchmarks
 
     return root_finder
 end
@@ -60,11 +77,22 @@ function root_iteration!(root_finder::Newton, dy::Matrix{T}, i::Int64, res::Vect
                         ) where T <: AbstractFloat
 
     linear_cache = root_finder.linear_cache
+    evaluations = root_finder.evaluations
+    benchmarks = root_finder.benchmarks
+    subroutine_time = root_finder.subroutine_time
 
     # pass Jacobian and residual error to linear cache
     linear_cache.A = J
     linear_cache.b = res
-    solve!(linear_cache)
+
+    if benchmarks && evaluations[1] % 10 == 0
+        stats = @timed solve!(linear_cache)
+        subroutine_time[1] += 10.0*stats.time
+    else
+        solve!(linear_cache)
+    end
+    evaluations[1] += 1
+
     @.. dy[:,i] -= linear_cache.u
 
     return nothing

@@ -98,11 +98,11 @@ In this example, all of the excess memory results from the second scenario.
 
 ## Subroutine runtimes
 
-You can get runtime estimates for several core routines if you set the solver option `benchmark_subroutines = true`.
+You can get runtime estimates for several core routines if you set the solver option `benchmarks = true`.
 
 ```julia
 options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
-                          benchmark_subroutines = true,);
+                          benchmarks = true,);
 
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
@@ -114,12 +114,12 @@ julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 
   Subroutine times (seconds)
 ---------------------------------
-function evaluations | 0.06058
-jacobian evaluations | 0.04526
-linear solve         | 0.2056
-save solution        | 0.0001892
+function evaluations | 0.0007712
+jacobian evaluations | 0.04587
+linear solve         | 0.2286
+save solution        | 0.0002191
 
-  0.299631 seconds (5.20 k allocations: 313.091 MiB, 3.01% gc time)
+  0.281249 seconds (4.75 k allocations: 284.816 MiB, 4.82% gc time)
 ```
 
 We can see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). Therefore, we should try using a sparse linear solver to reduce the runtime. Following section **(X)**, we generate a sparsity pattern with the function `nansafe_state_jacobian`.
@@ -149,7 +149,7 @@ using LinearSolve
 options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
                           state_jacobian = FiniteJacobian(; sparsity),
                           root_finder = Newton(; linear_method = KLUFactorization(),),
-                          benchmark_subroutines = true,);
+                          benchmarks = true,);
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```

@@ -25,7 +25,7 @@ SolverOptions for the ODE solver.
     """Determines whether or not the progress meter is displayed"""
     show_progress::Bool = false
     """Estimate runtime of core subroutines (e.g. function evaluations)"""
-    benchmark_subroutines::Bool = false
+    benchmarks::Bool = false
     """Numerical precision of the solver and solution"""
     precision::Type{T} = Float64
 end
@@ -48,7 +48,7 @@ function lookup_options(options::SolverOptions)
     save_solution = options.save_solution
     save_time_derivative = options.save_time_derivative
     show_progress = options.show_progress
-    benchmark_subroutines = options.benchmark_subroutines
+    benchmarks = options.benchmarks
     precision = options.precision
     return nothing
 end

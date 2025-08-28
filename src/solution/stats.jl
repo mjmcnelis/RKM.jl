@@ -54,74 +54,28 @@ function get_stats(sol::Solution)
     println("excess memory        = $(format_bytes(sol.excess_memory[1]))")
 end
 
-function get_subroutine_runtimes(sol, ode_wrap!, update_cache, root_finder,
-                                 state_jacobian, save_time)
+function get_subroutine_runtimes(ode_wrap!, state_jacobian, root_finder, save_time)
 
-    f = update_cache.f
-    y = update_cache.y
-    J = update_cache.J
-    res = update_cache.res
+    FE_time = ode_wrap!.subroutine_time
+    JE_time = state_jacobian.subroutine_time
 
-    nt = length(sol.t)
-    ny = sol.dimensions[1]
-
-    n_samples = round(Int64, nt/10)
-    t_idxs = round.(Int64, LinRange(2, nt, n_samples))
-
-    FE_time = 0.0           # functional evaluation time
-    JE_time = 0.0           # jacobian evaluation time
-    LS_time = 0.0           # linear solve time
-
-    for n in t_idxs
-        t = sol.t[n]
-        y .= view(sol.y, 1+(n-1)*ny:n*ny)
-
-        FE_stat = @timed ode_wrap!(f, t, y)
-        FE_time += FE_stat.time
-
-        if !isempty(J)
-            set_wrapper!(ode_wrap!, t)
-            JE_stat = @timed evaluate_jacobian!(state_jacobian, J, ode_wrap!, y, f)
-            JE_time += JE_stat.time
-        end
-
-        # note: linear solve estimate assumes Backward Euler
-        if !isempty(J) && !isempty(res) && root_finder isa Newton
-            linear_cache = root_finder.linear_cache
-
-            y_prev = view(sol.y, 1+(n-2)*ny:(n-1)*ny)
-            dt = sol.t[n] - sol.t[n-1]
-            @.. res = y - y_prev - dt*f
-
-            LS_stat = @timed begin
-                if J isa SparseMatrixCSC                # J <- I - dt.J
-                    @.. J.nzval *= (-dt)
-                else
-                    @.. J *= (-dt)
-                end
-                for k in diagind(J)
-                    J[k] += 1.0
-                end
-                linear_cache.A = J
-                linear_cache.b = res
-                solve!(linear_cache)
-            end
-            LS_time += LS_stat.time
-        end
+    if root_finder isa Newton
+        LS_time = root_finder.subroutine_time
+    else
+        LS_time = [0.0]
     end
-
-    FE_time *= sol.FE[1] / length(t_idxs)   # TODO: subtract FEs from jacobian
-    JE_time *= sol.JE[1] / length(t_idxs)
-    LS_time *= sol.JE[1] / length(t_idxs)
 
     println("")
     println("  Subroutine times (seconds)  ")
     println("---------------------------------")
-    println("function evaluations | $(round(FE_time, sigdigits = 4))")
-    println("jacobian evaluations | $(round(JE_time, sigdigits = 4))")
-    println("linear solve         | $(round(LS_time, sigdigits = 4))")
-    println("save solution        | $(round(save_time, sigdigits = 4))")
+    println("function evaluations | $(round(FE_time[1], sigdigits = 4))")
+    println("jacobian evaluations | $(round(JE_time[1], sigdigits = 4))")
+    println("linear solve         | $(round(LS_time[1], sigdigits = 4))")
+    println("save solution        | $(round(save_time[1], sigdigits = 4))")
     println("")
+
+    # total_time = round(FE_time[1] + JE_time[1] + LS_time[1] + save_time[1], sigdigits = 4)
+    # @show total_time
 
     return nothing
 end

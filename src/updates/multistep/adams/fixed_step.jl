@@ -25,7 +25,7 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
 
     # initialize previous stages (trivial)
     # TODO: check if this works (moved FE to ode_wrap!)
-    # if ode_wrap!.FE[1] == 1
+    # if ode_wrap!.evaluations[1] == 1
     #     for j in 2:stages
     #         @.. dy_LM[:,j] = dt[1] * f
     #     end
@@ -64,7 +64,7 @@ function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
 
     # initialize previous states (trivial)
     # TODO: check if this works (moved FE to ode_wrap!)
-    if ode_wrap!.FE[1] == 1
+    if ode_wrap!.evaluations[1] == 1
         for j in 2:stages
             @.. dy[:,j] = y
         end

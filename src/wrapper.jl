@@ -6,15 +6,17 @@ struct ODEWrapperState{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
     p::Vector{Float64}
     abstract_params::P
     dy_dt!::F
-    FE::MVector{1,Int64}
-    # JE::Vector{Int64}
+    evaluations::MVector{1,Int64}
+    benchmarks::Bool
+    subroutine_time::MVector{1,Float64}
 end
 
-function ODEWrapperState(t, p, abstract_params, dy_dt!)#, method)
-    FE = MVector{1,Int64}(0)
-    # TODO: not sure why I couldn't do MVector
-    # JE = zeros(Int64, method.stages)
-    return ODEWrapperState(t, p, abstract_params, dy_dt!, FE)#, JE)
+function ODEWrapperState(t, p, abstract_params, dy_dt!, benchmarks)
+    evaluations = MVector{1,Int64}(0)
+    subroutine_time = MVector{1,Float64}(0.0)
+
+    return ODEWrapperState(t, p, abstract_params, dy_dt!, evaluations,
+                           benchmarks, subroutine_time)
 end
 
 # note: t is a vector in first method but float in the other
@@ -25,10 +27,17 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
                                       y::Vector{T}) where T <: AbstractFloat
     p = ode_wrap!.p
     abstract_params = ode_wrap!.abstract_params
-    FE = ode_wrap!.FE
+    evaluations = ode_wrap!.evaluations
+    benchmarks = ode_wrap!.benchmarks
+    subroutine_time = ode_wrap!.subroutine_time
 
-    FE[1] += 1
-    ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
+    if benchmarks && evaluations[1] % 10 == 0
+        stats = @timed ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
+        subroutine_time[1] += 10.0*stats.time
+    else
+        ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
+    end
+    evaluations[1] += 1
 
     return nothing
 end
@@ -38,9 +47,11 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{R}, y::Vector{R}) where R <: Rea
     t = ode_wrap!.t
     p = ode_wrap!.p
     abstract_params = ode_wrap!.abstract_params
-    FE = ode_wrap!.FE
+    evaluations = ode_wrap!.evaluations
 
-    FE[1] += 1
+    # could do evaluations_J[1] += 1 here
+    # TMP comment out b/c it interferes with subroutine_time accumulation
+    # evaluations[1] += 1
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)
 
     return nothing
@@ -51,14 +62,13 @@ struct ODEWrapperParam{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
     y::Vector{T}    # new vector or reuse one?
     abstract_params::P
     dy_dt!::F
-    FE::MVector{1,Int64}
-    # JE::Vector{Int64}
+    evaluations::MVector{1,Int64}
 end
 
-function ODEWrapperParam(t, y, abstract_params, dy_dt!)#, method)
-    FE = MVector{1,Int64}(0)
-    # JE = zeros(Int64, method.stages)
-    return ODEWrapperParam(t, y, abstract_params, dy_dt!, FE)#, JE)
+function ODEWrapperParam(t, y, abstract_params, dy_dt!)
+    evaluations = MVector{1,Int64}(0)
+
+    return ODEWrapperParam(t, y, abstract_params, dy_dt!, evaluations)
 end
 
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, p)
@@ -67,10 +77,10 @@ function (ode_wrap!::ODEWrapperParam)(f::Vector{R}, p::Vector{R}) where R <: Rea
     y = ode_wrap!.y
     t = ode_wrap!.t
     abstract_params = ode_wrap!.abstract_params
-    FE = ode_wrap!.FE
+    evaluations = ode_wrap!.evaluations
 
-    FE[1] += 1
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)
+    evaluations[1] += 1
 
     return nothing
 end
