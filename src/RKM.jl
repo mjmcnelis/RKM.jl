@@ -11,6 +11,7 @@ import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigva
 import LinearSolve: init, solve!, LinearProblem, LinearCache, LinearAliasSpecifier,
                     LUFactorization, AbstractFactorization#, SciMLLinearSolveAlgorithm
 import MuladdMacro: @muladd
+import Preferences: @load_preference
 import Printf: @sprintf
 import ProgressMeter: Progress, update!
 import Setfield: @set!
@@ -28,6 +29,10 @@ abstract type ODEMethod end
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
+# number of steps between sampling subroutine times if benchmarks = true
+export SAMPLE_INTERVAL
+
+include("constants.jl")
 include("config.jl")
 include("timer.jl")
 include("progress.jl")

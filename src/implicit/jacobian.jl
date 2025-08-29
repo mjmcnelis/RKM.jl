@@ -76,9 +76,9 @@ function evaluate_jacobian!(jacobian_method::FiniteJacobian,
     benchmarks = jacobian_method.benchmarks
     subroutine_time = jacobian_method.subroutine_time
 
-    if benchmarks && evaluations[1] % 10 == 0
+    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed finite_difference_jacobian!(J, ode_wrap!, x, cache)
-        subroutine_time[1] += 10.0*stats.time
+        subroutine_time[1] += SAMPLE_INTERVAL*stats.time
     else
         finite_difference_jacobian!(J, ode_wrap!, x, cache)
     end
@@ -96,9 +96,9 @@ function evaluate_jacobian!(jacobian_method::ForwardJacobian,
     benchmarks = jacobian_method.benchmarks
     subroutime_time = jacobian_method.subroutine_time
 
-    if benchmarks && evaluations[1] % 10 == 0
+    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed forwarddiff_color_jacobian!(J, ode_wrap!, x, cache)
-        subroutime_time[1] += 10.0*stats.time
+        subroutime_time[1] += SAMPLE_INTERVAL*stats.time
     else
         forwarddiff_color_jacobian!(J, ode_wrap!, x, cache)
     end

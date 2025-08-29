@@ -85,9 +85,9 @@ function root_iteration!(root_finder::Newton, dy::Matrix{T}, i::Int64, res::Vect
     linear_cache.A = J
     linear_cache.b = res
 
-    if benchmarks && evaluations[1] % 10 == 0
+    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed solve!(linear_cache)
-        subroutine_time[1] += 10.0*stats.time
+        subroutine_time[1] += SAMPLE_INTERVAL*stats.time
     else
         solve!(linear_cache)
     end

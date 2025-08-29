@@ -31,9 +31,9 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
     benchmarks = ode_wrap!.benchmarks
     subroutine_time = ode_wrap!.subroutine_time
 
-    if benchmarks && evaluations[1] % 10 == 0
+    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
-        subroutine_time[1] += 10.0*stats.time
+        subroutine_time[1] += SAMPLE_INTERVAL*stats.time
     else
         ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
     end
