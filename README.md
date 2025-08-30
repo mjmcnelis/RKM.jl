@@ -168,7 +168,7 @@ jacobian evaluations = 0
 evolution runtime    = 0.02292 seconds
 solution size        = 3.052 MiB
 sensitivity size     = 0 bytes
-config memory        = 7.641 KiB
+configuration memory = 7.641 KiB
 excess memory        = 0 bytes
 ```
 Here, we show the number of time steps saved and the number of times `dy_dt!` was evaluated. We also list several performance metrics: the runtime, the solution size, the configuration memory, and the excess memory allocated during the time evolution loop. In this example, almost all of the allocated memory went towards storing the solution.

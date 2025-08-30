@@ -18,8 +18,10 @@ sense_benchmark.jl
 ext/RKMFeaginExt.jl
 ext/RKMInteractiveUtilsExt.jl
 
-# testing sensitivity
+# test features
 green_expand.jl
+butcher_interpolant.jl
+krylov.jl
 
 # not sure whether to push yet
 CLAUDE.md

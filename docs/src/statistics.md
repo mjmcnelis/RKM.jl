@@ -1,12 +1,12 @@
 
 ## Solver statistics
 
-After evolving an ODE system, you can print out runtime statistics to analyze the solver's performance. In this example, we solve the 1D diffusion equation with central differences:
+After evolving an ODE system, you can print out runtime statistics to analyze the solver's performance. In this example, we solve the 1D heat equation with central differences:
 
 ```math
     \frac{dT_i}{dt} = \frac{\alpha(T_{i+1} - 2T_i + T_{i-1})}{\Delta x^2}
 ```
-where $T_i$ is the temperature at grid point $i$, $\alpha$ is the thermal diffusivity and $\Delta x$ is the grid spacing.
+where $T_i$ is the temperature at grid point $i$, $\alpha$ is the thermal diffusivity and $\Delta x$ is the grid spacing. We will use the backward Euler method for the time integration.
 
 ```julia
 using RKM
@@ -42,11 +42,11 @@ sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 GC.gc() # garbage collection
 ```
 
-After recompiling, you can call the function `get_stats` to print the statistics.
+After recompiling, we call the function `get_stats` to print the statistics.
 
 ```julia
 julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
-  0.277305 seconds (4.68 k allocations: 284.812 MiB, 1.68% gc time)
+  0.283516 seconds (4.68 k allocations: 284.812 MiB, 3.15% gc time)
 
 julia> get_stats(sol)
 time steps taken     = 901
@@ -54,10 +54,10 @@ time points saved    = 902
 step rejection rate  = 0.0 %
 function evaluations = 183805
 jacobian evaluations = 901
-evolution runtime    = 0.2772 seconds
+evolution runtime    = 0.2758 seconds
 solution size        = 1.390 MiB
 sensitivity size     = 0 bytes
-config memory        = 344.336 KiB
+configuration memory = 344.398 KiB
 excess memory        = 283.061 MiB
 ```
 
@@ -82,27 +82,25 @@ Here we summarize each runtime statistic:
 - *Configuration memory*
     - the memory allocated to configure the solver before running the time evolution loop (mostly for intermediate caches).
 - *Excess memory*
-    - the amount of memory allocated during the time evolution loop (discounting solution storage).
+    - the amount of memory allocated during the time evolution loop (other than solution storage).
 
 ## Excess allocations
 
 We designed the solver to minimize excess allocations during the time evolution. However, there are a few scenarios where excess memory will register:
 
-- the ODE function `dy_dt!` provided by the user can allocate; this can provide insight on how to optimize it.
-
+- the user-defined ODE function `dy_dt!` can allocate.
 - in implicit solvers, the default Newton method allocates for each LU factorization of the state Jacobian.
-
 - if you use an adaptive time step, the solution data is resized during each step.
 
 In this example, all of the excess memory results from the second scenario.
 
-## Subroutine runtimes
+## Subroutine times
 
-You can get runtime estimates for several core routines if you set the solver option `benchmarks = true`.
+You can get runtime estimates for several core subroutines if you set the solver option `benchmarks = true`.
 
 ```julia
 options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
-                          benchmarks = true,);
+                          benchmarks = true);
 
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
@@ -114,17 +112,27 @@ julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 
   Subroutine times (seconds)
 ---------------------------------
-function evaluations | 0.0007712
-jacobian evaluations | 0.04587
-linear solve         | 0.2286
-save solution        | 0.0002191
+function evaluations | 0.0007858
+jacobian evaluations | 0.04612
+linear solve         | 0.2105
+save solution        | 0.0001904
 
-  0.281249 seconds (4.75 k allocations: 284.816 MiB, 4.82% gc time)
+  0.282419 seconds (4.75 k allocations: 284.816 MiB, 5.46% gc time)
 ```
 
-We can see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). Therefore, we should try using a sparse linear solver to reduce the runtime. Following section **(X)**, we generate a sparsity pattern with the function `nansafe_state_jacobian`.
+We have runtime estimates for the following subroutines:
+- *Function evaluations*
+    - the time it takes to evaluate the ODE function (outside of Jacobian evaluations).
+- *Jacobian evaluations*
+    - the time it takes to evaluate the state Jacobian.
+- *Linear solve*
+    - the time it takes to solve the linear system if you used an implicit solver with Newton's method.
+- *Save solution*
+    - the time it takes to store the solution.
 
-*Note: this assumes that you already set* `NANSAFE_MODE_ENABLED = true` *in* `ForwardDiff`.
+We can see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). Therefore, we should try using a sparse linear solver to reduce the runtime. First we generate a sparsity pattern via `nansafe_state_jacobian`
+
+*Note: we assume that you already set* `nansafe_mode = true` *in* `ForwardDiff`.
 
 ```julia
 julia> sparsity = nansafe_state_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
@@ -142,16 +150,32 @@ julia> sparsity = nansafe_state_jacobian(y0, t0, dy_dt!, p; chunk_size = 1)
 ⎢⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣦⡀⠀⎥
 ⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣦⎦
 ```
+and pass it to the `state_jacobian` option. Then we pair it with the sparse linear solver `KLUFactorization`.
 
 ```julia
-using LinearSolve
+using LinearSolve: KLUFactorization
 
 options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
                           state_jacobian = FiniteJacobian(; sparsity),
                           root_finder = Newton(; linear_method = KLUFactorization(),),
-                          benchmarks = true,);
+                          benchmarks = true);
 
-@time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
 
-Recompiling the solver yields
+After recompiling, we can see that the linear solve time has been greatly reduced.
+
+```
+julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+
+  Subroutine times (seconds)
+---------------------------------
+function evaluations | 0.0007525
+jacobian evaluations | 0.03084
+linear solve         | 0.006621
+save solution        | 0.000195
+
+  0.063520 seconds (8.61 k allocations: 7.760 MiB, 5.58% gc time)
+```
+
+*Note: you may need the* `AppleAccelerate` *package to reduce the Jacobian runtime.*

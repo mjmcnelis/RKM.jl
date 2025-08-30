@@ -50,7 +50,7 @@ function get_stats(sol::Solution)
     println("evolution runtime    = $(round(sol.runtime[1], sigdigits = 4)) seconds")
     println("solution size        = $(format_bytes(sol.solution_size[1]))")
     println("sensitivity size     = $(format_bytes(sol.sensitivity_size[1]))")
-    println("config memory        = $(format_bytes(sol.config_memory[1]))")
+    println("configuration memory = $(format_bytes(sol.config_memory[1]))")
     println("excess memory        = $(format_bytes(sol.excess_memory[1]))")
 end
 
