@@ -6,13 +6,13 @@ struct ODEWrapperState{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
     p::Vector{Float64}
     abstract_params::P
     dy_dt!::F
-    evaluations::MVector{1,Int64}
+    evaluations::MVector{2,Int64}
     benchmarks::Bool
     subroutine_time::MVector{1,Float64}
 end
 
 function ODEWrapperState(t, p, abstract_params, dy_dt!, benchmarks)
-    evaluations = MVector{1,Int64}(0)
+    evaluations = MVector{2,Int64}(0, 0)
     subroutine_time = MVector{1,Float64}(0.0)
 
     return ODEWrapperState(t, p, abstract_params, dy_dt!, evaluations,
@@ -49,10 +49,8 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{R}, y::Vector{R}) where R <: Rea
     abstract_params = ode_wrap!.abstract_params
     evaluations = ode_wrap!.evaluations
 
-    # could do evaluations_J[1] += 1 here
-    # TMP comment out b/c it interferes with subroutine_time accumulation
-    # evaluations[1] += 1
     ode_wrap!.dy_dt!(f, y, t[1]; p, abstract_params)
+    evaluations[2] += 1
 
     return nothing
 end

@@ -164,7 +164,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
     end
 
     # TODO: move to compute_stats!
-    sol.FE[1] = ode_wrap_y!.evaluations[1] + ode_wrap_p!.evaluations[1]
+    sol.stats.FE[1] = sum(ode_wrap_y!.evaluations) + ode_wrap_p!.evaluations[1]
 
     compute_stats!(sol, save_solution, adaptive, interpolator, timer,
                    state_jacobian, sensitivity, loop_stats, config_bytes)
