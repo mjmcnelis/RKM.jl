@@ -18,14 +18,14 @@ SolverOptions for the ODE solver.
     sensitivity::SensitivityMethod = NoSensitivity()
     """Interpolation method for dense output"""
     interpolator::Interpolator = NoInterpolation()
-    """Determines whether or not the solution is stored"""
+    """Store numerical solution (time and state variables)"""
     save_solution::Bool = true
-    """Determines whether or not to additionally output time derivatives"""
+    """Additionally output time derivatives"""
     save_time_derivative::Bool = false
-    """Determines whether or not the progress meter is displayed"""
+    """Display progress meter"""
     show_progress::Bool = false
     """Estimate runtime of core subroutines (e.g. function evaluations)"""
-    benchmarks::Bool = false
+    time_subroutine::Bool = false
     """Numerical precision of the solver and solution"""
     precision::Type{T} = Float64
 end
@@ -48,7 +48,7 @@ function lookup_options(options::SolverOptions)
     save_solution = options.save_solution
     save_time_derivative = options.save_time_derivative
     show_progress = options.show_progress
-    benchmarks = options.benchmarks
+    time_subroutine = options.time_subroutine
     precision = options.precision
     return nothing
 end

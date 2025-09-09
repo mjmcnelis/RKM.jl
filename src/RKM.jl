@@ -29,7 +29,7 @@ abstract type ODEMethod end
 RKM_root = dirname(dirname(@__FILE__))
 export RKM_root
 
-# number of steps between sampling subroutine times if benchmarks = true
+# number of steps between sampling subroutine times if time_subroutine = true
 export SAMPLE_INTERVAL
 
 include("constants.jl")
@@ -48,6 +48,7 @@ include("implicit/nansafe/nansafe_jacobian.jl")
 include("implicit/nansafe/nansafe_utils.jl")
 include("sensitivity/jacobian_vector.jl")
 include("sensitivity/sensitivity.jl")
+include("solution/runtimes.jl")
 include("solution/solution.jl")
 include("cache.jl")
 include("adaptive/controller.jl")
@@ -160,7 +161,8 @@ export NoInterpolation, CubicHermite, ContinuousFormula
 export NoSensitivity, DecoupledDirect
 # Post-process
 export get_solution, get_time_derivative, get_sensitivity, get_eigenmax,
-       get_eigenvalues, get_dimensions, interpolate_solution, post_sensitivity_analysis
+       get_eigenvalues, get_dimensions, get_subroutine_times,
+       interpolate_solution, post_sensitivity_analysis
 # Plots
 export plot_ode, make_code_name
 # Utilities

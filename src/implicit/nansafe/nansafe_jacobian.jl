@@ -35,8 +35,8 @@ function nansafe_state_jacobian(y0::Vector{T}, t0::T1, dy_dt!::Function,
 
     y = [NaN for i in 1:ny]
     f = similar(y0)
-    benchmarks = false
-    ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!, benchmarks)
+    time_subroutine = false
+    ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!, time_subroutine)
     cache = JacobianConfig(ode_wrap!, f, y, Chunk(chunk_size))
 
     jacobian!(J, ode_wrap!, f, y, cache)

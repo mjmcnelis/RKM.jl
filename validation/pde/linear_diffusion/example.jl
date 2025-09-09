@@ -37,13 +37,14 @@ options = SolverOptions(
             #   state_jacobian = FiniteJacobian(; sparsity),
               state_jacobian = ForwardJacobian(; sparsity),
               root_finder = Newton(; linear_method = KLUFactorization(),),
-              benchmarks = true,
+              time_subroutine = true,
               # TODO: this doesn't work
             #   precision = Double64
           )
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 get_stats(sol)
+get_subroutine_times(sol)
 
 GC.gc()
 

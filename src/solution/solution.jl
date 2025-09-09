@@ -25,8 +25,8 @@ struct Solution{T <: AbstractFloat}
     JE::MVector{1,Int64}
     """Step rejection rate (percentage)"""
     rejection_rate::MVector{1,Float64}
-    """Runtime of ODE solver (excludes configuration) [seconds]"""
-    runtime::MVector{1,Float64}
+      """Solver runtime breakdown"""
+    runtimes::SolverRuntimes
     """Memory used to store solution set (t,y) [bytes]"""
     solution_size::MVector{1,Int64}
     """Memory used to store sensitivity coefficients S [bytes]"""
@@ -59,7 +59,7 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     FE = MVector{1,Int64}(0)
     JE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
-    runtime = MVector{1,Float64}(0.0)
+    runtimes = SolverRuntimes()
     sensitivity_size = MVector{1,Int64}(0)
     solution_size = MVector{1,Int64}(0)
     config_memory = MVector{1,Int64}(0)
@@ -69,7 +69,7 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
 
     # never understood why do {precision}
     return Solution{precision}(t, y, f, dy, S, lambda_LR, time_steps_taken, FE, JE,
-                               rejection_rate, runtime, solution_size, sensitivity_size,
+                               rejection_rate, runtimes, solution_size, sensitivity_size,
                                config_memory, excess_memory, dimensions, coefficients)
 end
 
@@ -89,7 +89,10 @@ function clear_solution!(sol::Solution)
     sol.FE .= 0
     sol.JE .= 0
     sol.rejection_rate .= 0.0
-    sol.runtime .= 0.0
+
+    clear_runtimes!(sol.runtimes)
+
+    sol.time_steps_taken .= 0
     sol.solution_size .= 0
     sol.sensitivity_size .= 0
     sol.config_memory .= 0
@@ -161,4 +164,8 @@ end
 
 function get_dimensions(sol::Solution)
     return (; nt = length(sol.t), ny = sol.dimensions[1], np = sol.coefficients[1])
+end
+
+function get_subroutine_times(sol::Solution)
+    return get_subroutine_times(sol.runtimes)
 end

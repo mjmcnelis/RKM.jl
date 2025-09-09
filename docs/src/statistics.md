@@ -96,21 +96,21 @@ In this example, all of the excess memory results from the second scenario.
 
 ## Subroutine times
 
-You can get runtime estimates for several core subroutines if you set the solver option `benchmarks = true`.
+You can get runtime estimates for several core subroutines if you set the solver option `time_subroutine = true`.
 
 ```julia
 options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
-                          benchmarks = true);
+                          time_subroutine = true);
 
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
 
-After recompiling, we get
+After recompiling, we call the function `get_subroutine_times`
 
 ```julia
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+julia> get_subroutine_times(sol)
 
-  Subroutine times (seconds)
+Subroutine times (seconds)
 ---------------------------------
 function evaluations | 0.0007858
 jacobian evaluations | 0.04612
@@ -158,7 +158,7 @@ using LinearSolve: KLUFactorization
 options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
                           state_jacobian = FiniteJacobian(; sparsity),
                           root_finder = Newton(; linear_method = KLUFactorization(),),
-                          benchmarks = true);
+                          time_subroutine = true);
 
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
@@ -166,9 +166,9 @@ sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 After recompiling, we can see that the linear solve time has been greatly reduced.
 
 ```
-julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
+julia> get_subroutine_times(sol)
 
-  Subroutine times (seconds)
+Subroutine times (seconds)
 ---------------------------------
 function evaluations | 0.0007525
 jacobian evaluations | 0.03084

@@ -25,14 +25,12 @@ function output_solution!(sol::Solution{T}, save_time::Vector{Float64},
                           options::SolverOptions{T},
                           timer::TimeLimit) where T <: AbstractFloat
 
-    benchmarks = options.benchmarks
+    time_subroutine = options.time_subroutine
     total_steps = timer.total_steps
 
-    if benchmarks && total_steps[1] % 10 == 0
-        save_stat = @timed begin
-            _output_solution!(sol, update_cache, t, options)
-        end
-        save_time[1] += 10*save_stat.time
+    if time_subroutine && total_steps[1] % SAMPLE_INTERVAL == 0
+        stats = @timed _output_solution!(sol, update_cache, t, options)
+        save_time[1] += SAMPLE_INTERVAL*stats.time
     else
         _output_solution!(sol, update_cache, t, options)
     end

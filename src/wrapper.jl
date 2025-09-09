@@ -7,16 +7,16 @@ struct ODEWrapperState{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Funct
     abstract_params::P
     dy_dt!::F
     evaluations::MVector{2,Int64}
-    benchmarks::Bool
-    subroutine_time::MVector{1,Float64}
+    time_subroutine::Bool
+    runtime::MVector{1,Float64}
 end
 
-function ODEWrapperState(t, p, abstract_params, dy_dt!, benchmarks)
+function ODEWrapperState(t, p, abstract_params, dy_dt!, time_subroutine)
     evaluations = MVector{2,Int64}(0, 0)
-    subroutine_time = MVector{1,Float64}(0.0)
+    runtime = MVector{1,Float64}(0.0)
 
     return ODEWrapperState(t, p, abstract_params, dy_dt!, evaluations,
-                           benchmarks, subroutine_time)
+                           time_subroutine, runtime)
 end
 
 # note: t is a vector in first method but float in the other
@@ -28,12 +28,12 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
     p = ode_wrap!.p
     abstract_params = ode_wrap!.abstract_params
     evaluations = ode_wrap!.evaluations
-    benchmarks = ode_wrap!.benchmarks
-    subroutine_time = ode_wrap!.subroutine_time
+    time_subroutine = ode_wrap!.time_subroutine
+    runtime = ode_wrap!.runtime
 
-    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
+    if time_subroutine && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
-        subroutine_time[1] += SAMPLE_INTERVAL*stats.time
+        runtime[1] += SAMPLE_INTERVAL*stats.time
     else
         ode_wrap!.dy_dt!(f, y, t; p, abstract_params)
     end

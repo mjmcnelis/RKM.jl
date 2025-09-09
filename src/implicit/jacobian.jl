@@ -8,8 +8,8 @@ abstract type JacobianMethod end
     cache::JC = JacobianCache([0.0])
     sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
     evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
-    benchmarks::Bool = false
-    subroutine_time::MVector{1,Float64} = MVector{1,Float64}(0.0)
+    time_subroutine::Bool = false
+    runtime::MVector{1,Float64} = MVector{1,Float64}(0.0)
 end
 
 @kwdef struct ForwardJacobian{JC, T} <: JacobianMethod where {JC <: ForwardColorJacCache,
@@ -17,20 +17,20 @@ end
     cache::JC = ForwardColorJacCache(nothing, [0.0])
     sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
     evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
-    benchmarks::Bool = false
-    subroutine_time::MVector{1,Float64} = MVector{1,Float64}(0)
+    time_subroutine::Bool = false
+    runtime::MVector{1,Float64} = MVector{1,Float64}(0)
 end
 
 function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W, f::Vector{T},
-                              x::Vector{T2}, benchmarks::Bool) where {W <: Wrapper,
-                                                                      T <: AbstractFloat,
-                                                                      T2 <: AbstractFloat}
+                              x::Vector{T2}, time_subroutine::Bool) where {W <: Wrapper,
+                                                                           T <: AbstractFloat,
+                                                                           T2 <: AbstractFloat}
     sparsity = jacobian_method.sparsity
     evaluations = jacobian_method.evaluations
-    subroutine_time = jacobian_method.subroutine_time
+    runtime = jacobian_method.runtime
 
     evaluations[1] = 0
-    subroutine_time[1] = 0.0
+    runtime[1] = 0.0
 
     if size(sparsity) == (length(f), length(x))
         colorvec = matrix_colors(sparsity)
@@ -40,21 +40,21 @@ function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W, f::
         cache = JacobianCache(x, f)
     end
     @set! jacobian_method.cache = cache
-    @set! jacobian_method.benchmarks = benchmarks
+    @set! jacobian_method.time_subroutine = time_subroutine
 
     return jacobian_method
 end
 
 function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W, f::Vector{T},
-                              x::Vector{T2}, benchmarks::Bool) where {W <: Wrapper,
-                                                                      T <: AbstractFloat,
-                                                                      T2 <: AbstractFloat}
+                              x::Vector{T2}, time_subroutine::Bool) where {W <: Wrapper,
+                                                                           T <: AbstractFloat,
+                                                                           T2 <: AbstractFloat}
     sparsity = jacobian_method.sparsity
     evaluations = jacobian_method.evaluations
-    subroutine_time = jacobian_method.subroutine_time
+    runtime = jacobian_method.runtime
 
     evaluations[1] = 0
-    subroutine_time[1] = 0.0
+    runtime[1] = 0.0
 
     if size(sparsity) == (length(f), length(x))
         colorvec = matrix_colors(sparsity)
@@ -63,7 +63,7 @@ function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W, f:
         cache = ForwardColorJacCache(ode_wrap!, x)
     end
     @set! jacobian_method.cache = cache
-    @set! jacobian_method.benchmarks = benchmarks
+    @set! jacobian_method.time_subroutine = time_subroutine
 
     return jacobian_method
 end
@@ -73,12 +73,12 @@ function evaluate_jacobian!(jacobian_method::FiniteJacobian,
 
     cache = jacobian_method.cache
     evaluations = jacobian_method.evaluations
-    benchmarks = jacobian_method.benchmarks
-    subroutine_time = jacobian_method.subroutine_time
+    time_subroutine = jacobian_method.time_subroutine
+    runtime = jacobian_method.runtime
 
-    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
+    if time_subroutine && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed finite_difference_jacobian!(J, ode_wrap!, x, cache)
-        subroutine_time[1] += SAMPLE_INTERVAL*stats.time
+        runtime[1] += SAMPLE_INTERVAL*stats.time
     else
         finite_difference_jacobian!(J, ode_wrap!, x, cache)
     end
@@ -93,12 +93,12 @@ function evaluate_jacobian!(jacobian_method::ForwardJacobian,
     cache = jacobian_method.cache
     evaluations = jacobian_method.evaluations
 
-    benchmarks = jacobian_method.benchmarks
-    subroutime_time = jacobian_method.subroutine_time
+    time_subroutine = jacobian_method.time_subroutine
+    runtime = jacobian_method.runtime
 
-    if benchmarks && evaluations[1] % SAMPLE_INTERVAL == 0
+    if time_subroutine && evaluations[1] % SAMPLE_INTERVAL == 0
         stats = @timed forwarddiff_color_jacobian!(J, ode_wrap!, x, cache)
-        subroutime_time[1] += SAMPLE_INTERVAL*stats.time
+        runtime[1] += SAMPLE_INTERVAL*stats.time
     else
         forwarddiff_color_jacobian!(J, ode_wrap!, x, cache)
     end
