@@ -65,12 +65,27 @@ function compute_runtimes!(runtimes::SolverRuntimes, config::RKMConfig,
 end
 
 function get_subroutine_times(runtimes::SolverRuntimes)
+    if iszero(runtimes.FE_time[1])
+        println("")
+        @warn "No subroutine times available (set time_subroutine = true)"
+
+        FE_time = "N/A"
+        JE_time = "N/A"
+        LS_time = "N/A"
+        save_time = "N/A"
+    else
+        FE_time = round(runtimes.FE_time[1], sigdigits = 4)
+        JE_time = round(runtimes.JE_time[1], sigdigits = 4)
+        LS_time = round(runtimes.LS_time[1], sigdigits = 4)
+        save_time = round(runtimes.save_time[1], sigdigits = 4)
+    end
+
     println("")
     println("Subroutine times (seconds)")
     println("---------------------------------")
-    println("function evaluations | $(round(runtimes.FE_time[1], sigdigits = 4))")
-    println("jacobian evaluations | $(round(runtimes.JE_time[1], sigdigits = 4))")
-    println("linear solve         | $(round(runtimes.LS_time[1], sigdigits = 4))")
-    println("save solution        | $(round(runtimes.save_time[1], sigdigits = 4))")
+    println("function evaluations | $FE_time")
+    println("jacobian evaluations | $JE_time")
+    println("linear solve         | $LS_time")
+    println("save solution        | $save_time")
     return nothing
 end

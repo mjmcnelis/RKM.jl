@@ -91,6 +91,7 @@ We designed the solver to minimize excess allocations during the time evolution.
 - the user-defined ODE function `dy_dt!` can allocate.
 - in implicit solvers, the default Newton method allocates for each LU factorization of the state Jacobian.
 - if you use an adaptive time step, the solution data is resized during each step.
+- you display the progress bar by setting `show_progress = true`.
 
 In this example, all of the excess memory results from the second scenario.
 
@@ -116,8 +117,6 @@ function evaluations | 0.0007858
 jacobian evaluations | 0.04612
 linear solve         | 0.2105
 save solution        | 0.0001904
-
-  0.282419 seconds (4.75 k allocations: 284.816 MiB, 5.46% gc time)
 ```
 
 We have runtime estimates for the following subroutines:
@@ -130,7 +129,7 @@ We have runtime estimates for the following subroutines:
 - *Save solution*
     - the time it takes to store the solution.
 
-We can see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). Therefore, we should try using a sparse linear solver to reduce the runtime. First we generate a sparsity pattern via `nansafe_state_jacobian`
+We see that most of the computational time is spent solving linear systems for the Newton iterations (linear solve times are $\mathcal{O}(n_y^3)$ since the Jacobian matrix is dense by default). Therefore, we should try using a sparse linear solver to reduce the runtime. First we generate a sparsity pattern via `nansafe_state_jacobian`
 
 *Note: we assume that you already set* `nansafe_mode = true` *in* `ForwardDiff`.
 
@@ -163,7 +162,7 @@ options = SolverOptions(; method = BackwardEuler1(), adaptive = Fixed(),
 sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
 ```
 
-After recompiling, we can see that the linear solve time has been greatly reduced.
+After recompiling, we see that the linear solve time has been greatly reduced.
 
 ```
 julia> get_subroutine_times(sol)
@@ -174,8 +173,6 @@ function evaluations | 0.0007525
 jacobian evaluations | 0.03084
 linear solve         | 0.006621
 save solution        | 0.000195
-
-  0.063520 seconds (8.61 k allocations: 7.760 MiB, 5.58% gc time)
 ```
 
 *Note: you may need the* `AppleAccelerate` *package to reduce the Jacobian runtime.*

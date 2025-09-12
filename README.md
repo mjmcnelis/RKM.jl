@@ -194,7 +194,7 @@ julia> sol = evolve_ode(y0, t0, tf, dt0_small, dy_dt!, options, p);
              t: 6.544494206390023
             dt: 4.0e-8
 ┌ Warning: Exceeded time limit of 1.0 minutes (stopping evolve_ode!...)
-└ @ RKM ~/Desktop/RKM.jl/src/timer.jl:108
+└ @ RKM ~/Documents/RKM.jl/src/timer.jl:108
 ```
 Some variables are displayed in real-time to determine how fast (or slow) the solver is progressing.
 </details>

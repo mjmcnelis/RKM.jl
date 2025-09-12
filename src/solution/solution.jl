@@ -102,6 +102,31 @@ function clear_solution!(sol::Solution)
     return nothing
 end
 
+function Base.show(io::IO, sol::Solution)
+    t, y = get_solution(sol)
+
+    println("")
+    println("t = ", repr(t, context = :limit => true), "\n")
+    println("y = ", repr(y, context = :limit => true), "\n")
+    if !isempty(sol.f)
+        _, f = get_time_derivative(sol)
+        println("f = ", repr(f, context = :limit => true), "\n")
+    end
+    if !isempty(sol.S)
+        _, S = get_sensitivity(sol)
+        println("S = ", repr(S, context = :limit => true), "\n")
+    end
+    if !isempty(sol.lambda_LR)
+        _, lambda_LR = get_eigenmax(sol)
+        println("lambda_LR = ", repr(lambda_LR, context = :limit => true), "\n")
+    end
+
+    get_stats(sol)
+    get_subroutine_times(sol)
+
+    return nothing
+end
+
 """
     get_solution(sol::Solution)
 
