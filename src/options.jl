@@ -53,6 +53,13 @@ function lookup_options(options::SolverOptions)
     return nothing
 end
 
+"""
+    Solution(options::SolverOptions)
+
+Outer constructor for `Solution`.
+
+Required parameters: `options`
+"""
 function Solution(options::SolverOptions)
     return Solution(options.precision)
 end

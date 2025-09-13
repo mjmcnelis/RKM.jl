@@ -55,6 +55,38 @@ timer = TimeLimit(; wtime_minutes = 1, step_interval = 10)
 
 ## Progress bar
 
+You can track the solver's progress in real time by setting the solver option `show_progress = true`.
+
+```julia
+options = SolverOptions(; method = RungeKutta4(), adaptive = Fixed(),
+                          timer = TimeLimit(; wtime_minutes = 1),
+                          show_progress = true);
+```
+
+When you rerun the solver, it will display a progress bar showing the time span percentage completed.
+
+```julia
+julia> sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options);
+  Progress:  62%|████████████████████████████▌                 |  ETA: 0:00:37 ( 0.97  s/it)
+       runtime: 00:01:00
+   total_steps: 1245
+             t: 2.449999999999823
+            dt: 0.01
+┌ Warning: Exceeded time limit of 1.0 minutes (stopping solver...)
+└ @ RKM ~/Documents/RKM.jl/src/timer.jl:119
+```
+
+In addition to the progress bar, we display several internal variables in real time:
+
+- `runtime`: the current runtime
+- `total_steps`: the number of time steps taken
+- `t`: the ODE time variable
+- `dt`: the time step used by the solver
+
+You can track how long the solver has been running and how fast (or slow) it is progressing.
+
+The progress bar and internal variables usually refresh every second of real time. However, the refresh rate will be slower if your ODE function takes longer than one second to compute.
+
 ```@autodocs
 Modules = [RKM]
 Pages   = ["src/timer.jl",
