@@ -1,6 +1,6 @@
 module RKM
 
-import Base: @kwdef, rationalize, format_bytes
+import Base: @kwdef, rationalize, format_bytes, summarysize
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import FastBroadcast: @..
 import FiniteDiff: finite_difference_jacobian!, JacobianCache

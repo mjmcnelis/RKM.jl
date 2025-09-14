@@ -21,10 +21,10 @@ end
     runtime::MVector{1,Float64} = MVector{1,Float64}(0)
 end
 
-function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W, f::Vector{T},
-                              x::Vector{T2}, time_subroutine::Bool) where {W <: Wrapper,
-                                                                           T <: AbstractFloat,
-                                                                           T2 <: AbstractFloat}
+function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W,
+                              f::Vector{T}, x::Vector{T},
+                              time_subroutine::Bool) where {W <: Wrapper,
+                                                            T <: AbstractFloat}
     sparsity = jacobian_method.sparsity
     evaluations = jacobian_method.evaluations
     runtime = jacobian_method.runtime
@@ -36,7 +36,6 @@ function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W, f::
         colorvec = matrix_colors(sparsity)
         cache = JacobianCache(x, f; colorvec, sparsity)
     else
-        # TODO: T = Double64, T2 = Float64 doesn't work here
         cache = JacobianCache(x, f)
     end
     @set! jacobian_method.cache = cache
@@ -45,10 +44,10 @@ function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W, f::
     return jacobian_method
 end
 
-function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W, f::Vector{T},
-                              x::Vector{T2}, time_subroutine::Bool) where {W <: Wrapper,
-                                                                           T <: AbstractFloat,
-                                                                           T2 <: AbstractFloat}
+function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W,
+                              f::Vector{T}, x::Vector{T},
+                              time_subroutine::Bool) where {W <: Wrapper,
+                                                            T <: AbstractFloat}
     sparsity = jacobian_method.sparsity
     evaluations = jacobian_method.evaluations
     runtime = jacobian_method.runtime

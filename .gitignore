@@ -26,5 +26,8 @@ krylov.jl
 # not sure whether to push yet
 CLAUDE.md
 
+# documentation
+doc_notes.jl
+
 # unrelated
 coffee_yield.jl

@@ -15,12 +15,14 @@ end
 
 function reconstruct_sensitivity(sensitivity::DecoupledDirect,
                                  ode_wrap_p!::ODEWrapperParam,
-                                 f::Vector{T}, p::Vector{Float64}) where T <: AbstractFloat
+                                 f::Vector{T}, p::Vector{T},
+                                 time_subroutine::Bool) where T <: AbstractFloat
 
     param_jacobian = sensitivity.param_jacobian
     jacobian_vector = sensitivity.jacobian_vector
 
-    param_jacobian = reconstruct_jacobian(param_jacobian, ode_wrap_p!, f, p)
+    param_jacobian = reconstruct_jacobian(param_jacobian, ode_wrap_p!,
+                                          f, p, time_subroutine)
     jacobian_vector = reconstruct_jacobian_vector(jacobian_vector, f)
 
     @set! sensitivity.param_jacobian = param_jacobian

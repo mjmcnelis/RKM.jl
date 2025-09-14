@@ -3,7 +3,7 @@ abstract type Wrapper end
 
 struct ODEWrapperState{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
     t::Vector{T}
-    p::Vector{Float64}
+    p::Vector{T}
     abstract_params::P
     dy_dt!::F
     evaluations::MVector{2,Int64}
@@ -70,7 +70,6 @@ function ODEWrapperParam(t, y, abstract_params, dy_dt!)
 end
 
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, p)
-# TODO: does not work for R = DoubleFloat unless convert p
 function (ode_wrap!::ODEWrapperParam)(f::Vector{R}, p::Vector{R}) where R <: Real
     y = ode_wrap!.y
     t = ode_wrap!.t

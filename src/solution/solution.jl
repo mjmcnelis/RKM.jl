@@ -18,7 +18,7 @@ struct Solution{T <: AbstractFloat}
     """Eigenvalue of state Jacobian with largest real part"""
     lambda_LR::Vector{ComplexF64}
     """Number of time steps taken"""
-    time_steps_taken::MVector{1,Int64}
+    total_steps::MVector{1,Int64}
     """Number of function evaluations"""
     FE::MVector{1,Int64}
     """Number of Jacobian evaluations"""
@@ -55,7 +55,7 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     dy = Vector{precision}()
     S = Vector{precision}()
     lambda_LR = Vector{ComplexF64}()
-    time_steps_taken = MVector{1,Int64}(0)
+    total_steps = MVector{1,Int64}(0)
     FE = MVector{1,Int64}(0)
     JE = MVector{1,Int64}(0)
     rejection_rate = MVector{1,Float64}(0.0)
@@ -67,10 +67,9 @@ function Solution(precision::Type{T}) where T <: AbstractFloat
     dimensions = MVector{1,Int64}(0)
     coefficients = MVector{1,Int64}(0)
 
-    # never understood why do {precision}
-    return Solution{precision}(t, y, f, dy, S, lambda_LR, time_steps_taken, FE, JE,
-                               rejection_rate, runtimes, solution_size, sensitivity_size,
-                               config_memory, excess_memory, dimensions, coefficients)
+    return Solution(t, y, f, dy, S, lambda_LR, total_steps, FE, JE, rejection_rate,
+                    runtimes, solution_size, sensitivity_size, config_memory,
+                    excess_memory, dimensions, coefficients)
 end
 
 function clear_solution!(sol::Solution)
@@ -85,20 +84,21 @@ function clear_solution!(sol::Solution)
     sizehint!(sol.f, 0)
     sizehint!(sol.dy, 0)
     sizehint!(sol.S, 0)
-    sol.time_steps_taken .= 0
-    sol.FE .= 0
-    sol.JE .= 0
-    sol.rejection_rate .= 0.0
+    sol.total_steps[1] = 0
+    sol.FE[1] = 0
+    sol.JE[1] = 0
+    sol.rejection_rate[1] = 0.0
 
     clear_runtimes!(sol.runtimes)
 
-    sol.time_steps_taken .= 0
-    sol.solution_size .= 0
-    sol.sensitivity_size .= 0
-    sol.config_memory .= 0
-    sol.excess_memory .= 0
-    sol.dimensions .= 0
-    sol.coefficients .= 0
+    sol.total_steps[1] = 0
+    sol.solution_size[1] = 0
+    sol.sensitivity_size[1] = 0
+    sol.config_memory[1] = 0
+    sol.excess_memory[1] = 0
+    sol.dimensions[1] = 0
+    sol.coefficients[1] = 0
+
     return nothing
 end
 

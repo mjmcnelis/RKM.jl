@@ -160,7 +160,7 @@ julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
   0.023003 seconds (149 allocations: 3.060 MiB)
 
 julia> get_stats(sol)
-time steps taken     = 200001
+total steps          = 200001
 time points saved    = 200002
 step rejection rate  = 0.0 %
 function evaluations = 800005

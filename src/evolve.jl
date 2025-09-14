@@ -48,8 +48,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         t  = [t0]
         dt = [dt0, dt0]
 
-        # reconstruct: method, adaptive, state_jacobian, sensitivity
-        # can these be done in SolverOptions constructor?
+        # change parameter type
+        p = p .|> precision
 
         # reconstruction
         method = reconstruct_method(method, precision)
@@ -85,7 +85,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         end
 
         root_finder = reconstruct_root_finder(root_finder, res, J, time_subroutine)
-        sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp, p)
+        sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp,
+                                              p, time_subroutine)
 
         # for progress meter
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
@@ -168,8 +169,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
     compute_runtimes!(sol.runtimes, config, loop_stats, save_time)
 
-    compute_stats!(sol, save_solution, adaptive, interpolator, timer,
-                   state_jacobian, sensitivity, loop_stats, config_bytes)
+    compute_stats!(sol, save_solution, adaptive, timer, state_jacobian,
+                   sensitivity, loop_stats, config_bytes)
 
     return nothing
 end
@@ -179,7 +180,7 @@ end
                dy_dt!::Function, options::SolverOptions{T1},
                p::Vector{Float64} = Float64[];
                abstract_params = nothing) where {T <: AbstractFloat,
-                                                    T1 <: AbstractFloat}
+                                                 T1 <: AbstractFloat}
 
 Required parameters: `y0`, `t0`, `tf`, `dt0`, `dy_dt!`, `options`
 """

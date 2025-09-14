@@ -49,7 +49,7 @@ julia> @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p);
   0.283516 seconds (4.68 k allocations: 284.812 MiB, 3.15% gc time)
 
 julia> get_stats(sol)
-time steps taken     = 901
+total steps          = 901
 time points saved    = 902
 step rejection rate  = 0.0 %
 function evaluations = 183805
@@ -63,7 +63,7 @@ excess memory        = 283.061 MiB
 
 Here we summarize each runtime statistic:
 
-- *Time steps taken*
+- *Total steps*
     - the number of steps the solver advanced with during the time evolution.
 - *Time points saved*
     - the number of solution points saved if you chose to output them (i.e. `save_solution = true`)
