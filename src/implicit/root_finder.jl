@@ -55,6 +55,8 @@ function reconstruct_root_finder(root_finder::Newton, res::Vector{T},
     runtime[1] = 0.0
 
     linear_method = root_finder.linear_cache.alg
+    warn_linear_solver(J, linear_method)
+
     linear_cache = init(LinearProblem(J, res), linear_method;
                         alias = LinearAliasSpecifier(; alias_A = true, alias_b = true),)
 
@@ -62,6 +64,28 @@ function reconstruct_root_finder(root_finder::Newton, res::Vector{T},
     @set! root_finder.time_subroutine = time_subroutine
 
     return root_finder
+end
+
+function warn_linear_solver(J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
+                            linear_method::AF) where {T <: AbstractFloat,
+                                                      AF <: AbstractFactorization}
+
+    if J isa Matrix && linear_method isa AbstractSparseFactorization
+        @warn "Jacobian matrix is dense and may not be compatible with \
+               the sparse linear solver $(typeof(linear_method)), either \
+               pass a sparsity pattern or use a dense linear solver"
+    end
+    if T != Float64
+        if J isa SparseMatrixCSC && linear_method isa AbstractSparseFactorization
+            @warn "Sparse linear solver $(typeof(linear_method)) may not \
+                   have support for precision = $T, use Float64 instead"
+        else
+            @warn "Linear solver $(typeof(linear_method)) may not be \
+                   optimized for precision = $T, use Float64 instead"
+        end
+    end
+
+    return nothing
 end
 
 function root_iteration!(root_finder::FixedPoint, dy::Matrix{T}, i::Int64,

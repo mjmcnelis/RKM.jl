@@ -83,8 +83,9 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             state_jacobian = reconstruct_jacobian(state_jacobian, ode_wrap_y!,
                                                   f_tmp, y, time_subroutine)
         end
-
-        root_finder = reconstruct_root_finder(root_finder, res, J, time_subroutine)
+        if iteration isa Implicit
+            root_finder = reconstruct_root_finder(root_finder, res, J, time_subroutine)
+        end
         sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp,
                                               p, time_subroutine)
 

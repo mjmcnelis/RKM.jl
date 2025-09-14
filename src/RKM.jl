@@ -9,7 +9,8 @@ import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
 import KrylovKit: eigsolve
 import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals
 import LinearSolve: init, solve!, LinearProblem, LinearCache, LinearAliasSpecifier,
-                    LUFactorization, AbstractFactorization#, SciMLLinearSolveAlgorithm
+                    LUFactorization, AbstractFactorization, AbstractSparseFactorization#,
+                    #SciMLLinearSolveAlgorithm
 import MuladdMacro: @muladd
 import Preferences: @load_preference
 import Printf: @sprintf
