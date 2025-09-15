@@ -1,5 +1,5 @@
 
-function RKM.norm(v::Array{DoubleFloat{T}, N}, p::Real = 2.0) where {N, T<:IEEEFloat}
+function norm(v::Array{DoubleFloat{T}, N}, p::Real = 2.0) where {N, T<:IEEEFloat}
     isempty(v) && return zero(DoubleFloat{T})
 
     if isinf(p)

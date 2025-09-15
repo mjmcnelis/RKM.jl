@@ -2,6 +2,7 @@ module RKM
 
 import Base: @kwdef, rationalize, format_bytes, summarysize
 import DocStringExtensions: TYPEDEF, TYPEDFIELDS
+import DoubleFloats: DoubleFloat, IEEEFloat
 import FastBroadcast: @..
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
@@ -32,6 +33,10 @@ export RKM_root
 
 # number of steps between sampling subroutine times if time_subroutine = true
 export SAMPLE_INTERVAL
+
+function __init__()
+    include("$RKM_root/src/tmp/double_floats/norm.jl")
+end
 
 include("constants.jl")
 include("config.jl")

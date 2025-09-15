@@ -53,6 +53,6 @@ options = Dict(
     # :time_subroutine => true,
 
     :precision => Float64
-    # :precision => Double64    # sensitivity doesn't work for Double64 rn
+    # :precision => Double64
     # :precision => BigFloat
 );

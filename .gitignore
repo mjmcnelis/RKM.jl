@@ -14,10 +14,6 @@ validation/ode/logistic/df_example.jl
 continuous_coefficients.jl
 sense_benchmark.jl
 
-# testing extensions
-ext/RKMFeaginExt.jl
-ext/RKMInteractiveUtilsExt.jl
-
 # test features
 green_expand.jl
 butcher_interpolant.jl
