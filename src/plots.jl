@@ -9,7 +9,6 @@ Note: pass `plot` as a function to reduce RKM's precompilation time.
 function plot_ode(sol::Solution, options::SolverOptions, plot::Function;
                   logx = false, logy = false, show_time_step = false)
 
-    # TODO: put some more functionality (panel?)
     t, y = get_solution(sol)
 
     code_name = options.method.code_name

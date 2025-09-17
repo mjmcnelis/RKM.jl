@@ -1,39 +1,23 @@
 
 abstract type LimiterMethod end
 
-function check_limiter_parameters(; safety, low, high, dt_min, dt_max)
-    @assert 0.0 < low < 1.0 "low = $low is out of bounds (0, 1)"
-    @assert 1.0 < high <= Inf "high = $high is out of bounds (1, Inf]"
-    @assert 0.0 < safety < 1.0 "safety = $safety is out of bounds (0, 1)"
-    @assert safety*high > 1.0 "safety*high = $(safety*high) is not greater than 1"
-    @assert dt_min > 0 && dt_max > 0 "dt_min, dt_max = ($dt_min, $dt_max) are not positive"
-    @assert dt_max > dt_min "dt_max = $dt_max is less than dt_min = $dt_min"
-    return nothing
-end
-
-# TODO: make piecewise and smooth limiter methods
-# eventually these would also impose bounds by dt_min, dt_max
-# if I re-evaluate rescale based on dt_min <= dt <= dt_max,
-# would floating precision errors be a problem?
-
-struct PiecewiseLimiter <: LimiterMethod
+@kwdef struct PiecewiseLimiter <: LimiterMethod
     """Safety factor to scale down estimate for predicted time step"""
-    safety::Float64
+    safety::Float64 = 0.8
     """Lower bound on the time step's rate of change"""
-    low::Float64
+    low::Float64 = 0.2
     """Upper bound on the time step's rate of change"""
-    high::Float64
+    high::Float64 = 5.0
     """Minimum time step"""
-    dt_min::Float64
+    dt_min::Float64 = eps(1.0)
     """Maximum time step"""
-    dt_max::Float64
-end
+    dt_max::Float64 = Inf
 
-function PiecewiseLimiter(; safety = 0.8, low = 0.2, high = 5.0,
-                            dt_min = eps(1.0), dt_max = Inf)
-    check_limiter_parameters(; safety, low, high, dt_min, dt_max)
-
-    return PiecewiseLimiter(safety, low, high, dt_min, dt_max)
+    function PiecewiseLimiter(safety, low, high, dt_min, dt_max)
+        st = new(safety, low, high, dt_min, dt_max)
+        check_limiter(st)
+        return st
+    end
 end
 
 struct SmoothLimiter <: LimiterMethod
@@ -51,12 +35,16 @@ struct SmoothLimiter <: LimiterMethod
     dt_min::Float64
     """Maximum time step"""
     dt_max::Float64
+
+    function SmoothLimiter(a, b, c, d, safety, low, high, dt_min, dt_max)
+        st = new(a, b, c, d, safety, low, high, dt_min, dt_max)
+        check_limiter(st)
+        return st
+    end
 end
 
 function SmoothLimiter(; safety = 0.8, low = 0.2, high = 5.0,
                          dt_min = eps(1.0), dt_max = Inf)
-    check_limiter_parameters(; safety, low, high, dt_min, dt_max)
-
     # TODO: can fall back to 1 + (1-low)*tanh(log(x)/(1-low)) for large values of low
     if low > 0.6275
         @warn "Smooth limiter function is not monotonic for low = $low > 0.6275"
@@ -68,6 +56,24 @@ function SmoothLimiter(; safety = 0.8, low = 0.2, high = 5.0,
     c = 0.5 * (1.0 - d*(1.0 - exp(-1.0/low)))
 
     return SmoothLimiter(a, b, c, d, safety, low, high, dt_min, dt_max)
+end
+
+function check_limiter(limiter::LM) where LM <: LimiterMethod
+    safety = limiter.safety
+    low = limiter.low
+    high = limiter.high
+    dt_min = limiter.dt_min
+    dt_max = limiter.dt_max
+
+    @assert 0.0 < low < 1.0 "low = $low is out of bounds (0, 1)"
+    @assert 1.0 < high <= Inf "high = $high is out of bounds (1, Inf]"
+    @assert 0.0 < safety < 1.0 "safety = $safety is out of bounds (0, 1)"
+    # note: need following assert b/c I set rescale = high when error = 0
+    @assert safety*high > 1.0 "safety*high = $(safety*high) is not greater than 1"
+    @assert dt_min > 0 && dt_max > 0 "dt_min, dt_max = ($dt_min, $dt_max) are not positive"
+    @assert dt_max > dt_min "dt_max = $dt_max is less than dt_min = $dt_min"
+
+    return nothing
 end
 
 function limit_time_step(limiter::PiecewiseLimiter, rescale::T) where T <: AbstractFloat

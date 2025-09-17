@@ -120,8 +120,6 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
     loop_stats = @timed begin
         # save initial condition
         if save_solution
-            # TODO: this output function still allocates
-            # initial_output!(sol, update_cache, t, options)
             push!(sol.t, t[1])
             append!(sol.y, y)
             if save_time_derivative || interpolator isa CubicHermite
@@ -164,13 +162,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         end
     end
 
-    # TODO: move to compute_stats! pass config
-    sol.FE[1] = sum(ode_wrap_y!.evaluations) + ode_wrap_p!.evaluations[1]
-
     compute_runtimes!(sol.runtimes, config, loop_stats, save_time)
-
-    compute_stats!(sol, save_solution, adaptive, timer, state_jacobian,
-                   sensitivity, loop_stats, config_bytes)
+    compute_stats!(sol, save_solution, adaptive, timer, config, loop_stats, config_bytes)
 
     return nothing
 end

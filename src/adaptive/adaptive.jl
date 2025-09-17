@@ -44,7 +44,7 @@ $(TYPEDFIELDS)
     p_norm::Float64 = 2.0
     """Maximum number of attempts to compute time step per update"""
     max_attempts::Int64 = 10
-    """Total number of attempts in evolution loop""" # TODO: move to update cache or solver
+    """Total number of attempts in evolution loop"""
     total_attempts::MVector{1,Int64} = MVector{1,Int64}(0)
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool = false
@@ -78,7 +78,7 @@ end
     p_norm::Float64 = 2.0
     """Maximum number of attempts to compute time step per update"""
     max_attempts::Int64 = 10
-    """Total number of attempts in evolution loop""" # TODO: move to update cache or solver
+    """Total number of attempts in evolution loop"""
     total_attempts::MVector{1,Int64} = MVector{1,Int64}(0)
     """Skip rescaling tolerance parameters if benchmark against OrdinaryDiffEq"""
     benchmark_diffeq::Bool = false
@@ -185,13 +185,6 @@ function reconstruct_adaptive(adaptive::AdaptiveTimeStep,
         @set! adaptive.delta ^= repower_high
         @set! limiter.high ^= repower_high
         @set! adaptive.limiter = limiter
-
-        # TODO: add message
-        # reminder: reason I need this is b/c I default rescale = high when error = 0
-        # @code_warntype red %88 = Base.AssertionError("limiter.safety * limiter.high > 1.0")::Any
-        if !(adaptive isa CentralDiff)
-            @assert limiter.safety * limiter.high > 1.0
-        end
     end
 
     if !(adaptive isa CentralDiff)

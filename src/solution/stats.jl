@@ -1,15 +1,12 @@
 
 function compute_stats!(sol::Solution{T}, save_solution::Bool, adaptive::AdaptiveTimeStep,
-                        timer::TimeLimit, state_jacobian::JacobianMethod,
-                        sensitivity::SensitivityMethod, loop_stats::NamedTuple,
+                        timer::TimeLimit, config::RKMConfig, loop_stats::NamedTuple,
                         config_bytes::Int64) where T <: AbstractFloat
 
-    JE_y = state_jacobian.evaluations[1]
-    if sensitivity isa NoSensitivity
-        JE_p = 0
-    else
-        JE_p = sensitivity.param_jacobian.evaluations[1]
-    end
+    ode_wrap_y! = config.ode_wrap_y!
+    ode_wrap_p! = config.ode_wrap_p!
+    state_jacobian = config.state_jacobian
+    sensitivity = config.sensitivity
 
     t = sol.t
     y = sol.y
@@ -17,6 +14,7 @@ function compute_stats!(sol::Solution{T}, save_solution::Bool, adaptive::Adaptiv
     dy = sol.dy
     S = sol.S
     total_steps = sol.total_steps
+    FE = sol.FE
     JE = sol.JE
     rejection_rate = sol.rejection_rate
     solution_size = sol.solution_size
@@ -25,7 +23,17 @@ function compute_stats!(sol::Solution{T}, save_solution::Bool, adaptive::Adaptiv
     excess_memory = sol.excess_memory
 
     total_steps[1] = timer.total_steps[1]
-    JE[1] = JE_y[1] + JE_p[1] # TODO: maybe wrap into function
+    FE[1] = sum(ode_wrap_y!.evaluations) + ode_wrap_p!.evaluations[1]
+
+    # TODO: maybe wrap into function
+    JE_y = state_jacobian.evaluations[1]
+    if sensitivity isa NoSensitivity
+        JE_p = 0
+    else
+        JE_p = sensitivity.param_jacobian.evaluations[1]
+    end
+    JE[1] = JE_y[1] + JE_p[1]
+
     rejection_rate[1] = compute_step_rejection_rate(adaptive, timer)
     solution_size[1] = sum(x -> sizeof(x), (t, y, f, dy))
     sensitivity_size[1] = sizeof(S)

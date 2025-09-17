@@ -59,13 +59,27 @@ function reset_timer!(timer::TimeLimit)
     return nothing
 end
 
-# TODO: make docstring
+"""
+    set_current_system_time!(timer::TimeLimit)
+
+Updates the current system time in the field `time_sys` (2nd element).
+
+Required parameters: `timer`
+"""
 function set_current_system_time!(timer::TimeLimit)
     timer.time_sys[2] = time()
     return nothing
 end
 
-# TODO: make docstring
+"""
+    set_runtime_display!(timer::TimeLimit)
+
+Updates the `runtime` field if at least one second of real time has passed
+since the last update. The `display_values` field is also switched on
+to refresh values displayed on the progress bar.
+
+Required parameters: `timer`
+"""
 function set_runtime_display!(timer::TimeLimit)
     time_sys = timer.time_sys
     runtime = timer.runtime
