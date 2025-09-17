@@ -6,13 +6,16 @@ abstract type RootFinderMethod end
     p_norm::Float64 = 2.0
     max_iterations::Int64 = 10
     # TODO: track how many iterations were performed each step
+
+    function FixedPoint(epsilon, p_norm, max_iterations)
+        @assert p_norm >= 1 "p_norm = $p_norm is not valid"
+        return new(epsilon, p_norm, max_iterations)
+    end
 end
 
 struct Newton{LC} <: RootFinderMethod where LC <: LinearCache
     linear_cache::LC
-    # TODO: reuse adaptive epsilon or 100x smaller?
     epsilon::Float64
-    # TODO: make outer constructor to check p_norm value
     p_norm::Float64
     max_iterations::Int64
     # TODO: track how many iterations were performed each step
@@ -26,7 +29,9 @@ function Newton(; linear_method::AF = LUFactorization(),
                   epsilon::Float64 = 1e-8, p_norm::Float64 = 2.0,
                   max_iterations::Int64 = 10) where AF <: AbstractFactorization
 
-    # configure linear cache (see src/common.jl in LinearSolve.jl)
+    @assert p_norm >= 1 "p_norm = $p_norm is not valid"
+
+    # configure dummy linear cache (see src/common.jl in LinearSolve.jl)
     J = zeros(0, 0)
     res = zeros(0)
     linear_cache = init(LinearProblem(J, res), linear_method,

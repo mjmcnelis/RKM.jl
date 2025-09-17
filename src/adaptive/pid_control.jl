@@ -48,6 +48,5 @@ function H211bPredictiveControl(; b = 4.0)
     beta1 = 1/b
     beta2 = 1/b
     alpha2 = 1/b
-    # TODO: use alpha1 and alpha2 instead of predictive = true
     return PIDControlBeta(; beta1, beta2, beta3 = 0.0, alpha2, alpha3 = 0.0)
 end

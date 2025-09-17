@@ -54,9 +54,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         # reconstruction
         method = reconstruct_method(method, precision)
 
-        # TODO: put this before method reconstruction?
-        #       or maybe unpack and pass local order
-        adaptive = reconstruct_adaptive(adaptive, method)
+        order = method.order
+        adaptive = reconstruct_adaptive(adaptive, order)
 
         # configure cache
         update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
@@ -165,7 +164,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         end
     end
 
-    # TODO: move to compute_stats!
+    # TODO: move to compute_stats! pass config
     sol.FE[1] = sum(ode_wrap_y!.evaluations) + ode_wrap_p!.evaluations[1]
 
     compute_runtimes!(sol.runtimes, config, loop_stats, save_time)

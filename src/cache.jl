@@ -36,7 +36,6 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     np = no_sensitivity ? 0 : coefficients                      # parameters
     nJ = (iteration isa Explicit && no_sensitivity) ? 0 : ny    # Jacobian
     nm = adaptive isa Fixed ? 0 : ny                            # primary/embedded
-    # TODO: okay use res for both root solver and stepsize control?
     ne = iteration isa Explicit && adaptive isa Fixed ? 0 : ny  # residual error (res)
     nl = eigenmax isa NoEigenMax ? 0 : 1                        # eigenvalue
 
@@ -52,12 +51,13 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     y_tmp = zeros(precision, ny)
     f_tmp = zeros(precision, ny)
     f = zeros(precision, ny)
-    # TODO: may be better to split jacobian methods into sparse and non-sparse
+
     if size(sparsity) == (ny, ny)
         J = sparsity .|> precision
     else
         J = zeros(precision, nJ, nJ)
     end
+
     y1 = zeros(precision, nm)
     y2 = zeros(precision, nm)
     res = zeros(precision, ne)
