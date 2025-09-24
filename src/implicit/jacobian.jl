@@ -1,24 +1,75 @@
 
 abstract type JacobianMethod end
 
-# TODO: may be better to use outer constructor (user only passes sparsity)
-#       reconstruct method uses constructor
-@kwdef struct FiniteJacobian{JC, T} <: JacobianMethod where {JC <: JacobianCache,
-                                                             T <: AbstractFloat}
-    cache::JC = JacobianCache([0.0])
-    sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
-    evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
-    time_subroutine::Bool = false
-    runtime::MVector{1,Float64} = MVector{1,Float64}(0.0)
+struct FiniteJacobian{JC} <: JacobianMethod where JC <: JacobianCache
+    sparsity::SparseMatrixCSC{Float64,Int64}
+    cache::JC
+    evaluations::MVector{1,Int64}
+    time_subroutine::Bool
+    runtime::MVector{1,Float64}
 end
 
-@kwdef struct ForwardJacobian{JC, T} <: JacobianMethod where {JC <: ForwardColorJacCache,
-                                                              T <: AbstractFloat}
-    cache::JC = ForwardColorJacCache(nothing, [0.0])
-    sparsity::SparseMatrixCSC{T,Int64} = SparseMatrixCSC(Float64[;;])
-    evaluations::MVector{1,Int64} = MVector{1,Int64}(0)
-    time_subroutine::Bool = false
-    runtime::MVector{1,Float64} = MVector{1,Float64}(0)
+"""
+    FiniteJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
+
+Outer constructor for `FiniteJacobian`, where you can set a `sparsity` pattern
+for the Jacobian matrix.
+"""
+function FiniteJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
+
+    cache = JacobianCache([0.0])
+    evaluations = MVector{1,Int64}(0)
+    time_subroutine = false
+    runtime = MVector{1,Float64}(0)
+
+    return FiniteJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
+end
+
+struct ForwardJacobian{JC} <: JacobianMethod where JC <: ForwardColorJacCache
+    sparsity::SparseMatrixCSC{Float64,Int64}
+    cache::JC
+    evaluations::MVector{1,Int64}
+    time_subroutine::Bool
+    runtime::MVector{1,Float64}
+end
+
+"""
+    ForwardJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
+
+Outer constructor for `ForwardJacobian`, where you can set a `sparsity` pattern
+for the Jacobian matrix.
+"""
+function ForwardJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
+
+    cache = ForwardColorJacCache(nothing, [0.0])
+    evaluations = MVector{1,Int64}(0)
+    time_subroutine = false
+    runtime = MVector{1,Float64}(0)
+
+    return ForwardJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
+end
+
+function Base.show(io::IO, jacobian_method::JM) where JM <: JacobianMethod
+
+    println("$(JM.name.name)")
+    println("---------------------")
+    print("sparsity = ")
+    display(jacobian_method.sparsity)
+    println("cache = $(typeof(jacobian_method.cache))")
+
+    if iszero(jacobian_method.evaluations)
+        println("evaluations = N/A")
+    else
+        println("evaluations = $(jacobian_method.evaluations)")
+    end
+
+    if iszero(jacobian_method.runtime)
+        println("runtime = N/A")
+    else
+        println("runtime = $(jacobian_method.runtime)")
+    end
+
+    return nothing
 end
 
 function reconstruct_jacobian(jacobian_method::FiniteJacobian, ode_wrap!::W,

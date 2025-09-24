@@ -150,7 +150,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             # note: missing dy evaluation at final time (not critical but awkward)
             if save_solution
                 output_solution!(sol, save_time, update_cache, t, options, timer)
-                # TODO: move to output_solution
+                # TODO: move to output_solution (9/16/25 was not able to...)
                 if iteration isa Implicit && !(eigenmax isa NoEigenMax)
                     append!(sol.lambda_LR, lambda_LR)
                 end

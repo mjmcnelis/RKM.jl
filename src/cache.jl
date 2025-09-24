@@ -69,7 +69,7 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     lambda_LR = zeros(ComplexF64, nl)
 
     if eigenmax isa KrylovEigenMax
-        # TODO: should imaginary part be random or zero?
+        # TODO: should imaginary part be random or zero? 9/20/25 maybe add option
         # x0 = rand(ComplexF64, ny)
         x0 = ComplexF64.(rand(ny))
     else

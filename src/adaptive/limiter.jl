@@ -45,10 +45,6 @@ end
 
 function SmoothLimiter(; safety = 0.8, low = 0.2, high = 5.0,
                          dt_min = eps(1.0), dt_max = Inf)
-    # TODO: can fall back to 1 + (1-low)*tanh(log(x)/(1-low)) for large values of low
-    if low > 0.6275
-        @warn "Smooth limiter function is not monotonic for low = $low > 0.6275"
-    end
 
     d = (low - 0.5) / (low - 0.5 - exp(-1.0/low)*(low + 0.5))
     a = low * (1.0 - d)
@@ -98,10 +94,11 @@ function limit_time_step(limiter::SmoothLimiter, rescale::T) where T <: Abstract
     if x < 0.0
         return T(low)
     elseif 0.0 <= x <= 1.0
-        return a + b*x + c*x^2 + d*low*exp(-x/low)
-
-        # alternative for low > 0.6275
-        # return 1.0 + (1.0 - low)*tanh(log(x + eps(x))/(1.0 - low))
+        if low > 0.6275
+            return 1.0 + (1.0 - low)*tanh(log(x + eps(x))/(1.0 - low))
+        else
+            return a + b*x + c*x^2 + d*low*exp(-x/low)
+        end
     else
         return 1.0 + (high - 1.0)*tanh((x - 1.0)/(high - 1.0))
     end
