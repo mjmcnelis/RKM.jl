@@ -165,6 +165,10 @@ function reconstruct_adaptive(adaptive::Fixed,
     return adaptive
 end
 
+function reconstruct_adaptive(adaptive::Fixed, order::Int64)
+    return adaptive
+end
+
 function reconstruct_adaptive(adaptive::AdaptiveTimeStep,
                               order::SVector{P,T}) where {P, T <: AbstractFloat}
 

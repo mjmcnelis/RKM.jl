@@ -1,7 +1,8 @@
 
 abstract type LinearMultistep <: ODEMethod end
 
-struct Adams{T, S, RK} <: LinearMultistep where {T <: AbstractFloat, S, RK}
+struct Adams{T, S, RK, F} <: LinearMultistep where {T <: AbstractFloat, S,
+                                                    RK, F <: Function}
     name::Symbol
     b::SVector{S,T}
     b_pred::SVector{S,T}
@@ -11,10 +12,12 @@ struct Adams{T, S, RK} <: LinearMultistep where {T <: AbstractFloat, S, RK}
     start_counter::MVector{1,Int64}
     iteration::Iteration
     code_name::String
+    reconstructor::F
 end
 
 function Adams(; name::Symbol, order::Int64, table::Matrix{T},
-                 table_pred::Matrix{T}, start_method::RungeKutta) where T <: AbstractFloat
+                 table_pred::Matrix{T}, start_method::RungeKutta,
+                 reconstructor::Function) where T <: AbstractFloat
 
     code_name = make_code_name(name)
     stages = order
@@ -32,7 +35,7 @@ function Adams(; name::Symbol, order::Int64, table::Matrix{T},
 
     # TODO: replace stages with steps
     return Adams(name, b, b_pred, stages, order, start_method,
-                 start_counter, iteration, code_name)
+                 start_counter, iteration, code_name, reconstructor)
 end
 
 struct DifferentiationFormula{T, S} <: LinearMultistep where {T <: AbstractFloat, S}

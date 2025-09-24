@@ -22,8 +22,11 @@ function AdamsBashforth(; order::Int64, precision::Type{T} = Float64,
 
     table_pred = Array{precision}(undef, 0, 0) # empty predictor coefficients
 
+    reconstructor = AdamsBashforth
+
     return Adams(; name = Symbol("Adams_Bashforth_$(order)"),
-                   order, table, table_pred, start_method)
+                   order, table, table_pred, start_method,
+                   reconstructor)
 end
 
 #=
