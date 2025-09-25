@@ -23,6 +23,7 @@
 Modules = [RKM]
 Pages   = ["src/evolve.jl",
            "src/implicit/nansafe/nansafe_jacobian.jl",
+           "src/implicit/jacobian.jl",
            "src/options.jl",
            "src/plots.jl",
            "src/methods/utils.jl",

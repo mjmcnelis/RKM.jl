@@ -28,7 +28,6 @@
             end
             @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
         end
-        # TODO: skip if intermediate update not needed in next row(s)?
         ode_wrap_y!(f_tmp, t_tmp, y_tmp)
         @.. dy[:,i] = dt[1] * f_tmp
 
@@ -42,20 +41,9 @@
         end
         @.. y_tmp = y_tmp + b[j]*dy[:,j]
     end
-    # TODO: just make a function
-    if !(sensitivity isa NoSensitivity)
-        S = update_cache.S
-        S_tmp = update_cache.S_tmp
-        dS = update_cache.dS
 
-        @.. S_tmp = S
-        for j in 1:stages
-            if iszero(b[j])
-                continue
-            end
-            @.. S_tmp = S_tmp + b[j]*dS[:,:,j]
-        end
-    end
+    sensitivity_update!(sensitivity, update_cache, method)
+
     return nothing
 end
 
@@ -194,20 +182,8 @@ end
         end
         @.. y_tmp = y_tmp + b[j]*dy[:,j]
     end
-    # TODO: just make a function
-    if !(sensitivity isa NoSensitivity)
-        S = update_cache.S
-        S_tmp = update_cache.S_tmp
-        dS = update_cache.dS
 
-        @.. S_tmp = S
-        for j in 1:stages
-            if iszero(b[j])
-                continue
-            end
-            @.. S_tmp = S_tmp + b[j]*dS[:,:,j]
-        end
-    end
+    sensitivity_update!(sensitivity, update_cache, method)
 
     # estimate max eigenvalue of jacobian
     compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
