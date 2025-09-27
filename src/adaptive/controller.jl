@@ -9,14 +9,12 @@ function initialize_controller!(update_cache::UpdateCache, e_norm::T,
     return nothing
 end
 
-function rescale_time_step(adaptive::ATS, update_cache::UpdateCache, tol::T,
-                           e_norm::T) where {ATS <: AdaptiveTimeStep, T <: AbstractFloat}
+function rescale_time_step(pid::PIDControlBeta, update_cache::UpdateCache, tol::T,
+                           e_norm::T) where T <: AbstractFloat
 
     e_prev = update_cache.e_prev
     tol_prev = update_cache.tol_prev
     dt_prev = update_cache.dt_prev
-
-    pid = adaptive.pid
 
     beta1 = pid.beta1
     beta2 = pid.beta2

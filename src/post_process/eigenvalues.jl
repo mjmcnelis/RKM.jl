@@ -1,5 +1,4 @@
 
-# TODO: should store max eigenvalue time series if computing it
 function get_eigenvalues(sol::Solution{T}, dy_dt!::Function, options::SolverOptions{T},
                          p::Vector{Float64} = Float64[]; abstract_params = nothing,
                          dt_dense::Float64) where T <: AbstractFloat

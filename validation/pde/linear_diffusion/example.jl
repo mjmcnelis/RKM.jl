@@ -33,7 +33,7 @@ display(sparsity)
 options = SolverOptions(
               method = BackwardEuler1(),
               adaptive = Fixed(),
-              # TODO: finitediff w/ sparsity doesn't seem to be working
+              # TODO: finite-diff + sparsity doesn't seem fast (unless use AppleAccelerate)
             #   state_jacobian = FiniteJacobian(; sparsity),
               state_jacobian = ForwardJacobian(; sparsity),
               root_finder = Newton(; linear_method = KLUFactorization(),),

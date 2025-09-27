@@ -15,8 +15,6 @@ function RungeKutta4(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
 
     # polynomial coefficients for continuous output
-    # TODO: any properties other than sum(ω, dims = 2) = b to check?
-    # there are the moment equations, C0/C1 checks, SSP property?
     ω = SMatrix{3, 4, precision, 12}(
         1, -3//2, 2//3,
         0, 1, -2//3,

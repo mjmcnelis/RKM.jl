@@ -25,7 +25,6 @@ dt0 = 1e-2
 γ = ω^2 + 1.0       # ODE eigenvalues are λ = (-ω², -1), making it very stiff
 p = [γ, ω]
 
-# TODO: need to interpolate solution
 options = SolverOptions(; adaptive = Fixed(),
                           method = TrapezoidRuleBDF2(),
                         #   method = Ketcheson4(), # barely stable for ω = 10.0^(3/2)

@@ -17,6 +17,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     p_norm = adaptive.p_norm
     max_attempts = adaptive.max_attempts
     total_attempts = adaptive.total_attempts
+    pid = adaptive.pid
     limiter = adaptive.limiter
     initialized_controller = adaptive.initialized_controller
 
@@ -66,8 +67,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
         if e_norm == 0.0                                # compute scaling factor for dt
             rescale = T(limiter.high)
         else
-            # TODO: pass pid instead of adaptive
-            rescale = rescale_time_step(adaptive, update_cache, tol, e_norm)
+            rescale = rescale_time_step(pid, update_cache, tol, e_norm)
             rescale = limit_time_step(limiter, rescale)
             # TODO: need to track rescale in the controller
             #       both for accepted and rejected step

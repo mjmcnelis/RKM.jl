@@ -20,7 +20,6 @@ t0 = 0.0
 tf = 2.0/δ
 dt0 = δ
 
-# TODO: need to interpolate solution
 options = SolverOptions(; method = TrapezoidRuleBDF2(),
                           adaptive = Doubling(; epsilon = 1e-7, alpha = 1e-7, delta = 1e-7),
                           state_jacobian = ForwardJacobian(),
