@@ -66,7 +66,6 @@ function explicit_sensitivity_stage!(sensitivity::DecoupledDirect, stage_idx,
     set_wrapper!(ode_wrap_y!, t_tmp)
     set_wrapper!(ode_wrap_p!, t_tmp, y_tmp)
 
-    # TODO: seems harder to undo view here
     # evaluate explicit term dS = dt*(J*S_tmp + df/dp)
     dS_stage = view(dS, :, :, stage_idx)
 
@@ -118,7 +117,6 @@ function implicit_sensitivity_stage!(sensitivity::DecoupledDirect, stage_idx,
     for k in diagind(J)
         J[k] = J[k] + 1.0
     end
-    # TODO: seems harder to undo view here
     dS_stage = view(dS, :, :, stage_idx)
 
     # note: use LinearAlgebra (LinearSolve doesn't support matrix-matrix equations AX = B)

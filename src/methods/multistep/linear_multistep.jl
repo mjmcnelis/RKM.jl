@@ -30,7 +30,6 @@ function Adams(; name::Symbol, order::Int64, table::Matrix{T},
     end
     start_counter = MVector{1,Int64}(0)
 
-    # TODO: replace stages with steps
     return Adams(name, b, b_pred, stages, order, start_method,
                  start_counter, iteration, code_name)
 end

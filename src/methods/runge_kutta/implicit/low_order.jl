@@ -218,10 +218,11 @@ end
     PareschiRusso3(precision::Type{T} = Float64) where T <: AbstractFloat
 
 Pareschi and Russo's third-order method.
+
+https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
 """
 function PareschiRusso3(precision::Type{T} = Float64) where T <: AbstractFloat
-    # TODO: maybe use generic formula from
-    #       https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+
     s2 = sqrt(BigFloat(2))   # sqrt(2)
     g = 1 - 1/s2             # gamma, other options were 1/4 (Qin-Zhang), 1+1/sqrt(2)
 

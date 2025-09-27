@@ -28,7 +28,6 @@ function sizehint_solution!(adaptive::Fixed, interpolator::Interpolator, sol::So
         sizehint!(sol.f, ny*nt)
     end
     if interpolator isa ContinuousFormula
-        # TODO: change back to nt if decide to output dy at final time
         sizehint!(sol.dy, ny*(nt-1)*stages)
     end
     if !(sensitivity isa NoSensitivity)

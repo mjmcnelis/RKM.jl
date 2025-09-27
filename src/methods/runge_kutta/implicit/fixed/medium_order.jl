@@ -1,5 +1,10 @@
+"""
+    Norsett4(precision::Type{T} = Float64)
 
-# TODO: see roots https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+Norsett's fourth-order method.
+
+https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+"""
 function Norsett4(precision::Type{T} = Float64) where T <: AbstractFloat
     # note: used BigFloat to reduce float error propagation before .|> precision line
     s = sqrt(BigFloat(3))       # sqrt(3)

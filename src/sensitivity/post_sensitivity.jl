@@ -1,11 +1,7 @@
 
 # just make a playground function that outputs something
-# worry about organization, efficiency later
-function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
-                                   dy_dt!::Function, p::Vector{T};
-                                   # TODO: make SensitivityMethod struct
-                                   jacobian_method = FiniteJacobian()
-                                  ) where {T <: AbstractFloat}
+function post_sensitivity_analysis(sol::Solution, options::SolverOptions, dy_dt!::Function,
+                                   p::Vector{T}) where {T <: AbstractFloat}
 
     t, y = get_solution(sol)
 
@@ -35,7 +31,6 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
     ode_wrap_p! = ODEWrapperParam([t0], y0, abstract_params, dy_dt!)
 
     # store as linear column, then reshape as nt x (ny*np) matrix
-    # TODO: add sol.S (obj and objS)
     yp = zeros(precision, ny*np)
     sizehint!(yp, nt*ny*np)
 
@@ -53,7 +48,6 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
 
         dt = t[n+1] - t[n]
 
-        # TODO: add broadcast
         A = 1.0                 # stage coefficient (BackwardEuler)
         @.. J *= (-A*dt)        # J <- I - A.dt.J
         for k in diagind(J)
@@ -65,7 +59,6 @@ function post_sensitivity_analysis(sol::Solution, options::SolverOptions,
         @.. S_tmp += S          # looks like stage calc order is reverse
 
         # any benefit in transposing the sensitivity ODE?
-        # TODO: try using LinearSolve
         F = lu!(J)
         ldiv!(F, S_tmp)
 

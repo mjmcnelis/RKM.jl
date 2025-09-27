@@ -25,7 +25,6 @@ function compute_stats!(sol::Solution{T}, save_solution::Bool, adaptive::Adaptiv
     total_steps[1] = timer.total_steps[1]
     FE[1] = sum(ode_wrap_y!.evaluations) + ode_wrap_p!.evaluations[1]
 
-    # TODO: maybe wrap into function
     JE_y = state_jacobian.evaluations[1]
     if sensitivity isa NoSensitivity
         JE_p = 0

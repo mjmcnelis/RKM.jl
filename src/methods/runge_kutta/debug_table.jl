@@ -61,14 +61,3 @@ function debug_table(method::RungeKutta; tol_fact_iter = 1.86, tol_fact_stage = 
     end
     nothing
 end
-
-function debug_iteration(method::RungeKutta, iteration::Type{I}) where I <: Iteration
-    # TODO: test macro returns a message if failed
-    prop = getproperty(method, :iteration)
-
-    if !(prop isa iteration)
-        @error "$(method.name) iteration = $(typeof(prop)) but should be $iteration"
-        @test false
-    end
-    nothing
-end

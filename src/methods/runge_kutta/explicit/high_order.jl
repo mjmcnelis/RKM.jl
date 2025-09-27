@@ -7,7 +7,6 @@ Fehlberg's seventh-order method.
 https://ntrs.nasa.gov/citations/19680027281
 """
 function Fehlberg7(precision::Type{T} = Float64) where T <: AbstractFloat
-    # TODO: have option to swap b <--> bhat (local extrapolation)
     name = :Fehlberg_7_8
     butcher = SMatrix{14, 15, precision, 210}(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

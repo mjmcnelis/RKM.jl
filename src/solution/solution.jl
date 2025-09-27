@@ -181,8 +181,8 @@ function get_eigenmax(sol::Solution)
     t = sol.t
     lambda_LR = sol.lambda_LR
     if isempty(lambda_LR)
-        # TODO: say what options to change
-        error("Max eigenvalues lambda_LR = $lambda_LR are empty")
+        error("Max eigenvalues lambda_LR = $lambda_LR are empty \
+               (set eigenmax != NoEigenMax())")
     end
     return t, lambda_LR
 end

@@ -37,7 +37,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
 
         double_step!(method, t, dt, config)
 
-        @.. res = (y2 - y1) / (2.0^order - 1.0)     # estimate local truncation error
+        @.. res = (y2 - y1) / (2.0^order - 1.0)         # estimate local truncation error
 
         # note: skip Richardson extrapolation if use ContinuousFormula for
         #       interpolation (instead you use full time step)
@@ -48,7 +48,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
         end
 
         # note: have modified norm function for DoubleFloat
-        e_norm = norm(res, p_norm)                  # compute norms
+        e_norm = norm(res, p_norm)                      # compute norms
         y_norm = norm(y2, p_norm)
         Δy = y1
         @.. Δy = y2 - y

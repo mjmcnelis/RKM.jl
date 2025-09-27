@@ -9,7 +9,6 @@ struct NaiveJacobianVector <: JacobianVectorMethod end
     cache_2::Vector{T} = [0.0]
 end
 
-# TODO: consider renaming this to AutoJacVec
 @kwdef struct ForwardJacobianVector{D1, D2} <: JacobianVectorMethod where {
                                                      D1 <: Dual{DeivVecTag},
                                                      D2 <: Dual{DeivVecTag}}
@@ -60,7 +59,6 @@ function evaluate_jacobian_sensitivity!(jacobian_vector::FiniteJacobianVector,
 
     p = ode_wrap!.p
 
-    # TODO: type-dispatch Jv subroutine
     for j in eachindex(p)
         Jv = view(JS, :, j)
         v = view(S, :, j)

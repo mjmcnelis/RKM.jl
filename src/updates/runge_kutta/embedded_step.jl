@@ -43,19 +43,17 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
             @.. dy[:,1] = dt[1] * f
         end
         runge_kutta_step!(method, iteration, t, dt, config)
-        @.. y1 = y_tmp                                  # primary iteration
+        @.. y2 = y_tmp                                  # primary iteration
 
         embedded_step!(method, y, dy, y_tmp)
-        @.. y2 = y_tmp                                  # embedded iteration
+        @.. y1 = y_tmp                                  # embedded iteration
 
         @.. res = y2 - y1                               # local error of embedded pair
 
         e_norm = norm(res, p_norm)                      # compute norms
-        y_norm = norm(y1, p_norm)
-        # TODO: need to use Δy = y2 since it's secondary method
-        #       but should make labeling consistent w/ doubling
-        Δy = y2
-        @.. Δy = y1 - y
+        y_norm = norm(y2, p_norm)
+        Δy = y1
+        @.. Δy = y2 - y
         Δy_norm = norm(Δy, p_norm)
 
         # compute tolerance
@@ -89,7 +87,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
     total_attempts[1] += attempts
     initialized_controller[1] = true
 
-    @.. y_tmp = y1                                      # get iteration
+    @.. y_tmp = y2                                      # get iteration
 
     # evaluate ODE at next time step and store in f_tmp (skip if method is FESAL)
     if (explicit_stage[1] || interpolator isa CubicHermite) && !fesal
