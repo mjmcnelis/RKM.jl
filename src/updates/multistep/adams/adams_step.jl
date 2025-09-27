@@ -71,12 +71,14 @@ end
             tol = epsilon * dy_norm
 
             if e_norm <= tol
+                root_finder.iteration_bins[n-1] += 1
                 break
             end
         end
 
         if n == max_iterations + 1
             # println("failed to converge after $(n-1) iteration(s)")
+            root_finder.convergence_failures[1] += 1
             break
         end
 

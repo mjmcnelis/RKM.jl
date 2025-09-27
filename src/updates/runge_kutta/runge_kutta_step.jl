@@ -146,6 +146,7 @@ end
                     tol = epsilon * dy_norm
 
                     if e_norm <= tol
+                        root_finder.iteration_bins[n-1] += 1
                         break
                     end
                 end
@@ -153,7 +154,7 @@ end
                 if n == max_iterations + 1
                     # println("failed to converge after $(n-1) iterations")
                     # note: allow f_tmp to store dy_dt! of last iteration for FESAL methods
-                    # TODO: count convergence failures in stats
+                    root_finder.convergence_failures[1] += 1
                     break
                 end
 

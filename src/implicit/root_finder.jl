@@ -1,16 +1,24 @@
 
 abstract type RootFinderMethod end
 
-@kwdef struct FixedPoint <: RootFinderMethod
-    epsilon::Float64 = 1e-8
-    p_norm::Float64 = 2.0
-    max_iterations::Int64 = 10
-    # TODO: track how many iterations were performed each step
+struct FixedPoint <: RootFinderMethod
+    epsilon::Float64
+    p_norm::Float64
+    max_iterations::Int64
+    iteration_bins::Vector{Int64}
+    convergence_failures::MVector{1,Int64}
+end
 
-    function FixedPoint(epsilon, p_norm, max_iterations)
-        @assert p_norm >= 1 "p_norm = $p_norm is not valid"
-        return new(epsilon, p_norm, max_iterations)
-    end
+function FixedPoint(; epsilon::Float64 = 1e-8, p_norm::Float64 = 2.0,
+                      max_iterations::Int64 = 10)
+
+    @assert p_norm >= 1 "p_norm = $p_norm is not valid"
+
+    iteration_bins = zeros(Int64, max_iterations)
+    convergence_failures = MVector{1,Int64}(0)
+
+    return FixedPoint(epsilon, p_norm, max_iterations,
+                      iteration_bins, convergence_failures)
 end
 
 struct Newton{LC} <: RootFinderMethod where LC <: LinearCache
@@ -18,8 +26,8 @@ struct Newton{LC} <: RootFinderMethod where LC <: LinearCache
     epsilon::Float64
     p_norm::Float64
     max_iterations::Int64
-    # TODO: track how many iterations were performed each step
-    #       may want to have option to bins statistics
+    iteration_bins::Vector{Int64}
+    convergence_failures::MVector{1,Int64}
     evaluations::MVector{1,Int64}   # note: counter only for runtime sampling
     time_subroutine::Bool
     runtime::MVector{1,Float64}
@@ -36,16 +44,27 @@ function Newton(; linear_method::AF = LUFactorization(),
     res = zeros(0)
     linear_cache = init(LinearProblem(J, res), linear_method,
                         alias = LinearAliasSpecifier(; alias_A = true, alias_b = true))
-    # dummy defaults
+
+    iteration_bins = zeros(Int64, max_iterations)
+    convergence_failures = MVector{1,Int64}(0)
     evaluations = MVector{1,Int64}(0)
-    time_subroutine = false
+    time_subroutine = false # dummy default
     runtime = MVector{1,Float64}(0.0)
 
-    return Newton(linear_cache, epsilon, p_norm, max_iterations,
-                  evaluations, time_subroutine, runtime)
+    return Newton(linear_cache, epsilon, p_norm, max_iterations, iteration_bins,
+                  convergence_failures, evaluations, time_subroutine, runtime)
 end
 
-function reconstruct_root_finder(root_finder::FixedPoint, args...)
+function reconstruct_root_finder(root_finder::FixedPoint, res::Vector{T},
+                                 J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
+                                 time_subroutine::Bool) where T <: AbstractFloat
+
+    iteration_bins = root_finder.iteration_bins
+    convergence_failures = root_finder.convergence_failures
+
+    iteration_bins .= 0
+    convergence_failures[1] = 0
+
     return root_finder
 end
 
@@ -53,9 +72,13 @@ function reconstruct_root_finder(root_finder::Newton, res::Vector{T},
                                  J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
                                  time_subroutine::Bool) where T <: AbstractFloat
 
+    iteration_bins = root_finder.iteration_bins
+    convergence_failures = root_finder.convergence_failures
     evaluations = root_finder.evaluations
     runtime = root_finder.runtime
 
+    iteration_bins .= 0
+    convergence_failures[1] = 0
     evaluations[1] = 0
     runtime[1] = 0.0
 
