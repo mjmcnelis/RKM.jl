@@ -93,7 +93,7 @@ function num_jacvec_tmp!(Jv, ode_wrap!, y, v, f, cache_1, cache_2;
                          epsilon = sqrt(eps(1.0)), alpha = epsilon)
     v_norm = sqrt(sum(abs2, v))
 
-    if v_norm == 0.0
+    if iszero(v_norm)
         @.. Jv = 0.0
     else
         lambda = max(alpha, epsilon*abs(dot(y, v))/v_norm)

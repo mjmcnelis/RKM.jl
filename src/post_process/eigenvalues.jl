@@ -4,7 +4,7 @@ function get_eigenvalues(sol::Solution{T}, dy_dt!::Function, options::SolverOpti
                          dt_dense::Float64) where T <: AbstractFloat
 
     @info "Computing eigenvalues of the state jacobian"
-    # TODO: prefer suppressing interpolation @info here
+
     t, y = interpolate_solution(options, sol; dt_dense)
 
     precision = options.precision

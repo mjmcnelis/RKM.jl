@@ -115,7 +115,7 @@ function check_adaptive(adaptive::AdaptiveTimeStep)
     @assert alpha >= 0.0 "alpha = $alpha cannot be negative"
     @assert delta >= 0.0 "delta = $delta cannot be negative"
     msg = "one of the tolerance parameters (epsilon, alpha, delta) must be positive"
-    @assert !all(x -> x == 0.0, [epsilon, alpha, delta]) msg
+    @assert !all(x -> iszero(x), [epsilon, alpha, delta]) msg
     @assert p_norm >= 1 "p_norm = $p_norm is not valid"
 
     if hasproperty(adaptive, :max_attempts)

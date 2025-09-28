@@ -15,6 +15,7 @@ struct LinearEigenMax <: EigenMaxMethod end
     maxiter::Int64 = 10
     krylovdim::Int64 = 100 # check that <= ny
     verbosity::Int64 = 1
+    random_imaginary::Bool = false
 end
 
 # put methods here

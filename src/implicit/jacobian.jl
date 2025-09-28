@@ -57,7 +57,7 @@ function Base.show(io::IO, jacobian_method::JM) where JM <: JacobianMethod
     display(jacobian_method.sparsity)
     println("cache = $(typeof(jacobian_method.cache))")
 
-    if iszero(jacobian_method.evaluations)
+    if jacobian_method.evaluations == 0
         println("evaluations = N/A")
     else
         println("evaluations = $(jacobian_method.evaluations)")

@@ -64,7 +64,7 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Embedded,
             initialize_controller!(update_cache, e_norm, tol, dt[1])
         end
 
-        if e_norm == 0.0                                # compute scaling factor for dt
+        if iszero(e_norm)                               # compute scaling factor for dt
             rescale = T(limiter.high)
         else
             rescale = rescale_time_step(pid, update_cache, tol, e_norm)
