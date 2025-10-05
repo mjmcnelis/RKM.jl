@@ -95,44 +95,31 @@ function Base.show(io::IO, RK::RungeKutta)
 end
 
 function list_explicit_runge_kutta_methods()
-    println("Standard (compatible with adaptive = Fixed(), Doubling()):\n")
     """
-    \tLow order (1-3)    | Euler1, Heun2, Midpoint2, Ralston2, Heun3,
-    \t                   | Ralston3, Kutta3, ShuOsher3, SpiteriRuuth3
-    \t-------------------------------------------------------------------------------
-    \tMedium order (4-6) | RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4,
-    \t                   | Butcher5, Butcher6
-    \t-------------------------------------------------------------------------------
-    \tHigh order (7-9)   | Curtis8, Shanks8, ShanksPseudo8
+    Low order (1-3)       | Euler1, Heun2, Midpoint2, Ralston2, Fehlberg2, Heun2, Heun3,
+                          | Ralston3, Kutta3, ShuOsher3, SpiteriRuuth3, BogackiShampine3
+    -------------------------------------------------------------------------------
+    Medium order (4-6)    | RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4, Butcher5,
+                          | Fehlberg5, CashKarp5, DormandPrince5, BogackiShampine5,
+                          | Tsitouras5, Verner5, Butcher6, Verner6
+    -------------------------------------------------------------------------------
+    High order (7-9)      | Fehlberg7, DormandPrince8, Curtis8, Shanks8, ShanksPseudo8
+    -------------------------------------------------------------------------------
+    Very high order (10+) | Feagin10, Feagin12, Feagin14
     """ |> println
 
-    println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
-    """
-    \tLow order (1-3)       | Fehlberg2, Heun2, BogackiShampine3
-    \t-------------------------------------------------------------------------------
-    \tMedium order (4-6)    | Fehlberg5, CashKarp5, DormandPrince5,
-    \t                      | BogackiShampine5, Tsitouras5, Verner5, Verner6
-    \t-------------------------------------------------------------------------------
-    \tHigh order (7-9)      | Fehlberg7, DormandPrince8
-    \t-------------------------------------------------------------------------------
-    \tVery high order (10+) | Feagin10, Feagin12, Feagin14
-    """ |> println
+    return nothing
 end
 
-function list_implicit_runge_kutta_methods()
-    println("Standard (compatible with adaptive = Fixed(), Doubling()):\n")
+function list_diagonal_implicit_runge_kutta_methods()
     """
-    \tLow order (1-3)    | BackwardEuler1, ImplicitMidpoint2, TrapezoidRuleBDF2,
-    \t                   | QinZhang2, KraaijevangerSpijker2, PareschiRusso2,
-    \t                   | PareschiRusso3, Crouzeix3, DIRKL3
-    \t-------------------------------------------------------------------------------
-    \tMedium order (4-6) | Norsett4
+    Low order (1-3)       | BackwardEuler1, TrapezoidRuleBDF2, ImplicitTrapezoid2,
+                          | ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2,
+                          | PareschiRusso2, LobattoIIIB2, PareschiRusso3, Crouzeix3,
+                          | DIRKL3
+    -------------------------------------------------------------------------------
+    Medium order (4-6)    | Norsett4, LobattoIIICS42
     """ |> println
 
-    println("\nEmbedded (compatible with adaptive = Fixed(), Embedded(), Doubling()):\n")
-    """
-    \tLow order (1-3)    | ImplicitTrapezoid2, LobattoIIIB2
-    \t-------------------------------------------------------------------------------
-    \tMedium order (4-6) | LobattoIIICS42
-    """ |> println
+    return nothing
 end

@@ -130,7 +130,7 @@ export RungeKutta, LinearMultistep
 # Properties
 export Iteration, Explicit, DiagonalImplicit, FullImplicit
 # List of Runge-Kutta methods
-export list_explicit_runge_kutta_methods, list_implicit_runge_kutta_methods
+export list_explicit_runge_kutta_methods, list_diagonal_implicit_runge_kutta_methods
 # Explicit Runge-Kutta (low order)
 export Euler1, Heun2, Midpoint2, Ralston2, Fehlberg2, Heun3, Ralston3, Kutta3,
        BogackiShampine3, ShuOsher3, SpiteriRuuth3

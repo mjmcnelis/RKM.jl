@@ -20,6 +20,7 @@ pages = [
                                              ],
                             #  "Stepsize control" => ["adaptive/basic_control.md"]
                             ],
+    "Solver options" => "solver_options.md",
     "Monitoring" => "monitor/monitor.md",
     "Post-process solution" => ["Solution data" => "solution/solution_data.md",
                                 "Dense output" => "solution/dense_output.md",

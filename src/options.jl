@@ -1,5 +1,9 @@
 """
-SolverOptions for the ODE solver.
+$(TYPEDEF)
+
+List of options for the ODE solver.
+
+$(TYPEDFIELDS)
 """
 @kwdef struct SolverOptions{T <: AbstractFloat}
     """ODE solver method"""

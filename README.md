@@ -98,7 +98,7 @@ Next, we have to set two of the solver options: the ODE method `method` and the 
 The solver supports a number of explicit and diagonal-implicit Runge-Kutta methods. You can list all of the available methods by calling
 ```julia
 list_explicit_runge_kutta_methods()
-list_implicit_runge_kutta_methods()
+list_diagonal_implicit_runge_kutta_methods()
 ```
 We can set the time step to be either fixed or adaptive. The latter is based on step doubling or embedded techinques.
 ```julia
