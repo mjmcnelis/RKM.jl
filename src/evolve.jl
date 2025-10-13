@@ -88,7 +88,7 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         sensitivity = reconstruct_sensitivity(sensitivity, ode_wrap_p!, f_tmp,
                                               p, time_subroutine)
 
-        # for progress meter
+        # for progress bar
         checkpoints = collect(LinRange(t0, tf, 101))[2:end]
         progress = Progress(100; desc = "  Progress: ", showspeed = true, color = :gray)
 

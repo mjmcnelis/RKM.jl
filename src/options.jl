@@ -26,7 +26,7 @@ $(TYPEDFIELDS)
     save_solution::Bool = true
     """Additionally output time derivatives"""
     save_time_derivative::Bool = false
-    """Display progress meter"""
+    """Display progress bar"""
     show_progress::Bool = false
     """Estimate runtime of core subroutines (e.g. function evaluations)"""
     time_subroutine::Bool = false

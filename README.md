@@ -30,7 +30,7 @@ Pkg.develop(path = raw"<your_path_dir>/RKM.jl")
 
 It is also recommended to install these packages in your base environment:
 ```julia
-] add DoubleFloats Plots
+] add Plots
 ```
 
 ## Example

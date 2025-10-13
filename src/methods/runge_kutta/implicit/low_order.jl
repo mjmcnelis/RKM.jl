@@ -265,11 +265,11 @@ function Crouzeix3(precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(name, butcher, iteration, reconstructor; ω)
 end
 
-"""
-    RadauIA3(precision::Type{T} = Float64) where T <: AbstractFloat
+# """
+#     RadauIA3(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Radau IA3 third-order method.
-"""
+# Radau IA3 third-order method.
+# """
 function RadauIA3(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Radau_I_A_3
     butcher = SMatrix{3, 3, precision, 9}(
@@ -283,11 +283,11 @@ function RadauIA3(precision::Type{T} = Float64) where T <: AbstractFloat
     return RungeKutta(name, butcher, iteration, reconstructor)
 end
 
-"""
-    RadauIIA3(precision::Type{T} = Float64) where T <: AbstractFloat
+# """
+#     RadauIIA3(precision::Type{T} = Float64) where T <: AbstractFloat
 
-Radau IIA3 third-order method.
-"""
+# Radau IIA3 third-order method.
+# """
 function RadauIIA3(precision::Type{T} = Float64) where T <: AbstractFloat
     name = :Radau_I_I_A_3
     butcher = SMatrix{3, 3, precision, 9}(

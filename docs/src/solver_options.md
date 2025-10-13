@@ -1,7 +1,7 @@
 
 # Solver options
 
-The ODE evolution function `evolve_ode` requires a set of solver options, which are stored in the struct `SolverOptions`. Here is an example set of all the available options:
+The ODE evolution function `evolve_ode` requires a set of solver options, which are stored in the struct `SolverOptions`. Here is an example set of all the options:
 
 ```julia
 options = SolverOptions(;
@@ -23,33 +23,66 @@ options = SolverOptions(;
 
 We provide an overview of each solver option:
 
-##### 1. `method`
-You must specify the ODE method used for the time evolution. The solver supports two classes of ODE methods: Runge--Kutta and linear multistep.
-    - `Euler1()`
-    - sgdgs
-```julia
-julia> list_explicit_runge_kutta_methods()
-Low order (1-3)       | Euler1, Heun2, Midpoint2, Ralston2, Fehlberg2, Heun2, Heun3,
-                      | Ralston3, Kutta3, ShuOsher3, SpiteriRuuth3, BogackiShampine3
--------------------------------------------------------------------------------
-Medium order (4-6)    | RungeKutta4, ThreeEightsRule4, Ralston4, Ketcheson4, Butcher5,
-                      | Fehlberg5, CashKarp5, DormandPrince5, BogackiShampine5,
-                      | Tsitouras5, Verner5, Butcher6, Verner6
--------------------------------------------------------------------------------
-High order (7-9)      | Fehlberg7, DormandPrince8, Curtis8, Shanks8, ShanksPseudo8
--------------------------------------------------------------------------------
-Very high order (10+) | Feagin10, Feagin12, Feagin14
+## `method`
 
-julia> list_diagonal_implicit_runge_kutta_methods()
-Low order (1-3)       | BackwardEuler1, TrapezoidRuleBDF2, ImplicitTrapezoid2,
-                      | ImplicitMidpoint2, QinZhang2, KraaijevangerSpijker2,
-                      | PareschiRusso2, LobattoIIIB2, PareschiRusso3, Crouzeix3,
-                      | DIRKL3
--------------------------------------------------------------------------------
-Medium order (4-6)    | Norsett4, LobattoIIICS42
+The ODE method used for the time evolution must be specified.
+
+The solver supports two classes of ODE methods: Runge--Kutta and linear multistep. The available Runge--Kutta methods are either explicit or diagonal-implicit (full-implicit methods are not supported yet). Two examples include the classic RK4 method (explicit)
+
+```julia
+method = RungeKutta4()
 ```
-##### 2. `adaptive`
-...
+
+and the TRBDF2 method (diagonal-implicit), which is robust for stiff ODE problems
+
+```julia
+method = TrapezoidRuleBDF2()
+```
+
+A full list of Runge--Kutta methods can be found in the pages [Explicit Runge-Kutta methods](methods/runge_kutta/explicit_runge_kutta.md) and [Implicit Runge-Kutta methods](methods/runge_kutta/implicit_runge_kutta.md).
+
+*Note: you do not have to pass a separate* `precision` *argument to the method's outer constructor (e.g.* `RungeKutta4(; precision = Float64)`*); the solver reconstructs the ODE method with the*
+`precision` *field set in the solver options.*
+
+!!! warning "TODO: mention multistep after reorg (e.g. AdamsBashforth2) and more support"
+
+## `adaptive`
+
+The method used to compute the adaptive time step must be specified.
+
+If you want the time step to be constant, set
+
+```julia
+adaptive = Fixed()
+```
+
+This fixes the time step to the initial value `dt0` passed to the `evolve_ode` function. Otherwise if you want an adaptive time step, you can choose either step doubling and embedded.
+
+```julia
+adaptive = Doubling()   # or Embedded()
+```
+
+All Runge--Kutta methods are compatible with step doubling, but it is only practical for methods with a low number of stages (1 or 2).
+
+## `save_solution`
+
+The solver stores the numerical solution if `save_solution = true` (defaulted to `true`).
+
+In practice, you will want to save the ODE solution, but setting `save_solution = false` can be useful in dry run testing.
+
+## `show_progress`
+
+The solver displays a progress bar if `show_progress = true` (defaulted to `false`).
+
+For more details, go to the [Progress bar](monitor/monitor.md#Progress-bar) section.
+
+## In-place evolution
+
+```julia
+sol = Solutirecision` to the on(options)
+evolve_ode!(sol, ...)
+```
+## API reference
 
 ```@autodocs
 Modules = [RKM]
