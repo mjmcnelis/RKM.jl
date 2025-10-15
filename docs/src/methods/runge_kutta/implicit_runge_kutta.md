@@ -4,6 +4,7 @@
 ### Low-order (1-3)
 
 - `BackwardEuler1()`
+- `TrapezoidRuleBDF2()`
 - `ImplicitTrapezoid2()`
 - `ImplicitMidpoint2()`
 - `QinZhang2()`

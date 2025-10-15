@@ -66,15 +66,42 @@ All Runge--Kutta methods are compatible with step doubling, but it is only pract
 
 ## `save_solution`
 
-The solver stores the numerical solution if `save_solution = true` (defaulted to `true`).
+The numerical ODE solution is stored if set to `true` (defaulted to `true`).
 
 In practice, you will want to save the ODE solution, but setting `save_solution = false` can be useful in dry run testing.
 
+## `save_time_derivative`
+
+The first-order time derivatives are also stored if set to `true` (defaulted to `false`).
+
+See the [Time derivatives](solution/solution_data.md#Time-derivatives) section for an example.
+
+*Note: no time derivative data can be saved if `save_solution = false`.*
+
 ## `show_progress`
 
-The solver displays a progress bar if `show_progress = true` (defaulted to `false`).
+A progress bar is displayed if set to `true` (defaulted to `false`).
 
 For more details, go to the [Progress bar](monitor/monitor.md#Progress-bar) section.
+
+## `time_subroutine`
+
+Core subroutines in the time evolution loop are timed if set to `true` (defaulted to `false`).
+
+For more details, go to the [Subroutine times](statistics.md#Subroutine-times) section.
+
+## `precision`
+
+The floating point type used in the solver (defaulted to `Float64`).
+
+You can increase the floating precision for ODE problems that require high numerical accuracy. The following arbitrary precision types are supported:
+
+- `Double64` from `DoubleFloats.jl` (31 digits)
+- `BigFloat` (76 digits, default)
+
+The float type used for the initial conditions `(t0, y0)` is independent of `precision`.
+
+For implicit ODE methods, we recommend using the default value `precision = Float64`.
 
 ## In-place evolution
 

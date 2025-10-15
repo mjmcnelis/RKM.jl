@@ -176,3 +176,12 @@ save solution        | 0.000195
 ```
 
 *Note: you may need the* `AppleAccelerate` *package to reduce the Jacobian runtime.*
+
+### Sample interval
+
+By default, subroutines are timed every 10 function calls. You can increase the constant variable `SAMPLE_INTERVAL` to reduce computational overhead (at the cost of fewer runtime statistics).
+
+```julia
+using Preferences
+set_preferences!(RKM, "sample_interval" => 100)
+```
