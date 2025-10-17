@@ -62,7 +62,7 @@ This fixes the time step to the initial value `dt0` passed to the `evolve_ode` f
 adaptive = Doubling()   # or Embedded()
 ```
 
-All Runge--Kutta methods are compatible with step doubling, but it is only practical for methods with a low number of stages (1 or 2).
+Step-doubling is compatible with all Runge--Kutta methods, but its effectiveness is limited to methods with a low number of stages (1 or 2).
 
 ## `save_solution`
 
@@ -94,12 +94,13 @@ For more details, go to the [Subroutine times](statistics.md#Subroutine-times) s
 
 The floating point type used in the solver (defaulted to `Float64`).
 
-You can increase the floating precision for ODE problems that require high numerical accuracy. The following arbitrary precision types are supported:
+You can increase the floating precision if your ODE problem requires high numerical accuracy. The following high-precision types are supported:
 
 - `Double64` from `DoubleFloats.jl` (31 digits)
+- `Float128` from `Quadmath.jl` (33 digits)
 - `BigFloat` (76 digits, default)
 
-The float type used for the initial conditions `(t0, y0)` is independent of `precision`.
+You are free to use a different floating type for the initial conditions `(t0, y0)`. They are later converted to `precision` during the solver's configuration.
 
 For implicit ODE methods, we recommend using the default value `precision = Float64`.
 

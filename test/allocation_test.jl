@@ -1,11 +1,12 @@
 using RKM, Test, Setfield
 # using Plots; plotly()
 import DoubleFloats: Double64
+import Quadmath: Float128
 !(@isdefined dy_dt!) ? include("$RKM_root/validation/ode/logistic/equations.jl") : nothing
 
 @info "Starting allocation test..."
 
-precision_vect = [Float64, Double64]
+precision_vect = [Float64, Double64, Float128]
 method_vect = [Heun2()]
 adaptive_vect = [Fixed(), Doubling(), Embedded()]
 limiter_vect = [PiecewiseLimiter(), SmoothLimiter()]
