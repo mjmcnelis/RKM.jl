@@ -21,6 +21,8 @@ for i = eachindex(p)
     push!(y0, exp(t0) / (1.0 + exp(t0)) - p[i])
 end
 
+y0 = Complex.(y0)
+
 # for sensitivity testing only
 # sparse_Jy = nansafe_state_jacobian(y0, t0, dy_dt!, p; chunk_size = 1);
 # sparse_Jp = nansafe_param_jacobian(y0, t0, dy_dt!, p; chunk_size = 1);

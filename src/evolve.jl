@@ -8,11 +8,12 @@
 
 Required parameters: `sol`, `y0`, `t0`, tf`, `dt0`, `dy_dt!`, `options`
 """
-function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
+function evolve_ode!(sol::Solution{T1}, y0::Vector{TCT}, t0::T, tf::Float64,
                      dt0::Float64, dy_dt!::Function, options::SolverOptions{T1},
                      p::Vector{Float64} = Float64[];
                      abstract_params = nothing) where {T <: AbstractFloat,
-                                                       T1 <: AbstractFloat}
+                                                       T1 <: AbstractFloat,
+                                                       TCT <: Union{T, Complex{T}}}
     config_bytes = @allocated begin
         clear_solution!(sol)
 
@@ -39,7 +40,11 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         sol.coefficients .= coefficients
 
         # initial conditions
-        y = y0 .|> precision
+        # @show y0 TCT
+        y = y0 .|> TCT#precision
+
+        # @show y
+        # q()
 
         t0 = rationalize(t0) |> precision
         tf = rationalize(tf) |> precision
@@ -177,11 +182,12 @@ end
 
 Required parameters: `y0`, `t0`, `tf`, `dt0`, `dy_dt!`, `options`
 """
-function evolve_ode(y0::Vector{T}, t0::T, tf::Float64, dt0::Float64,
+function evolve_ode(y0::Vector{TCT}, t0::T, tf::Float64, dt0::Float64,
                     dy_dt!::Function, options::SolverOptions{T1},
                     p::Vector{Float64} = Float64[];
                     abstract_params = nothing) where {T <: AbstractFloat,
-                                                      T1 <: AbstractFloat}
+                                                      T1 <: AbstractFloat,
+                                                      TCT <: Union{T, Complex{T}}}
     sol = Solution(options)
     evolve_ode!(sol, y0, t0, tf, dt0, dy_dt!, options, p; abstract_params)
     return sol

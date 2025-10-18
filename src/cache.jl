@@ -1,11 +1,16 @@
 
-struct UpdateCache{T <: AbstractFloat}
-    dy::Matrix{T}
+# struct UpdateCache{T <: AbstractFloat, TE <: Union{T, Complex{T}}}
+
+# const AFCAF{T} = Union{T, Complex{T}} where T <: AbstractFloat
+# struct UpdateCache{T <: AbstractFloat, TE <: AFCAF{T}}
+
+struct UpdateCache{T <: AbstractFloat, TCT <: Union{T, Complex{T}}}
+    dy::Matrix{TCT}
     dy_LM::Matrix{T}
-    y::Vector{T}
-    y_tmp::Vector{T}
-    f_tmp::Vector{T}
-    f::Vector{T}
+    y::Vector{TCT}
+    y_tmp::Vector{TCT}
+    f_tmp::Vector{TCT}
+    f::Vector{TCT}
     J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
     y1::Vector{T}
     y2::Vector{T}
@@ -13,17 +18,18 @@ struct UpdateCache{T <: AbstractFloat}
     S::Matrix{T}
     S_tmp::Matrix{T}
     dS::Array{T,3}
-    lambda_LR::Vector{ComplexF64}
+    lambda_LR::Vector{ComplexF64}   # TODO: use Complex{T}
     x0::Vector{ComplexF64}
     e_prev::Vector{T}
     tol_prev::Vector{T}
     dt_prev::Vector{T}
 end
 
-function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
+function UpdateCache(precision::Type{T}, y::Vector{TCT}, method::ODEMethod,
                      adaptive::AdaptiveTimeStep, dimensions::Int64, coefficients::Int64,
                      sensitivity::SensitivityMethod, state_jacobian::JacobianMethod,
-                     eigenmax::EigenMaxMethod) where T <: AbstractFloat
+                     eigenmax::EigenMaxMethod) where {T <: AbstractFloat,
+                                                      TCT <: Union{T, Complex{T}}}
 
     iteration = method.iteration
     stages = method.stages
@@ -41,16 +47,16 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
 
     if method isa LinearMultistep
         start_method = method.start_method
-        dy = zeros(precision, ny, start_method.stages)
-        dy_LM = zeros(precision, ny, stages)
+        dy = zeros(TCT, ny, start_method.stages)
+        dy_LM = zeros(TCT, ny, stages)
     else
-        dy = zeros(precision, ny, stages)
+        dy = zeros(TCT, ny, stages)
         dy_LM = Array{precision}(undef, 0, 0)
     end
 
-    y_tmp = zeros(precision, ny)
-    f_tmp = zeros(precision, ny)
-    f = zeros(precision, ny)
+    y_tmp = zeros(TCT, ny)
+    f_tmp = zeros(TCT, ny)
+    f = zeros(TCT, ny)
 
     if size(sparsity) == (ny, ny)
         J = sparsity .|> precision

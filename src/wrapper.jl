@@ -23,8 +23,9 @@ end
 #       is that a type instability conflict?
 
 # used by RKM routines: ode_wrap!(f, t, y)
-function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
-                                      y::Vector{T}) where T <: AbstractFloat
+function (ode_wrap!::ODEWrapperState)(f::Vector{TCT}, t::T,
+                                      y::Vector{TCT}) where {T <: AbstractFloat,
+                                                             TCT <: Union{T, Complex{T}}}
     p = ode_wrap!.p
     abstract_params = ode_wrap!.abstract_params
     evaluations = ode_wrap!.evaluations
@@ -43,7 +44,8 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
 end
 
 # used by FiniteDiff and ForwardDiff: ode_wrap!(f, y)
-function (ode_wrap!::ODEWrapperState)(f::Vector{R}, y::Vector{R}) where R <: Real
+function (ode_wrap!::ODEWrapperState)(f::Vector{RCR},
+                                      y::Vector{RCR}) where {RCR <: Union{Real, Complex{<:Real}}}
     t = ode_wrap!.t
     p = ode_wrap!.p
     abstract_params = ode_wrap!.abstract_params
@@ -55,9 +57,10 @@ function (ode_wrap!::ODEWrapperState)(f::Vector{R}, y::Vector{R}) where R <: Rea
     return nothing
 end
 
-struct ODEWrapperParam{T, P, F} <: Wrapper where {T <: AbstractFloat, F <: Function}
+struct ODEWrapperParam{T, P, F, TCT} <: Wrapper where {T <: AbstractFloat, F <: Function,
+                                                       TCT <: Union{T, Complex{T}}}
     t::Vector{T}
-    y::Vector{T}    # new vector or reuse one?
+    y::Vector{TCT}    # new vector or reuse one?
     abstract_params::P
     dy_dt!::F
     evaluations::MVector{1,Int64}
