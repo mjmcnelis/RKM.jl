@@ -19,7 +19,9 @@ function get_eigenvalues(sol::Solution{T}, dy_dt!::Function, options::SolverOpti
     J = zeros(precision, ny, ny)
     cache = JacobianCache(y0)
 
-    ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!)
+    # TODO: make time_subroutine kwarg?
+    time_subroutine = false
+    ode_wrap! = ODEWrapperState([t0], p, abstract_params, dy_dt!, time_subroutine)
 
     lambda = Vector{ComplexF64}()
     sizehint!(lambda, nt*ny)

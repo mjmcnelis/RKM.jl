@@ -13,10 +13,10 @@ options = SolverOptions(;
     eigenmax = NoEigenMax(),
     sensitivity = NoSensitivity(),
     interpolator = NoInterpolation(),
-    save_solution = true
-    save_time_derivative = false
-    show_progress = false
-    time_subroutine = false
+    save_solution = true,
+    save_time_derivative = false,
+    show_progress = false,
+    time_subroutine = false,
     precision = Float64
 )
 ```
@@ -100,16 +100,10 @@ You can increase the floating precision if your ODE problem requires high numeri
 - `Float128` from `Quadmath.jl` (33 digits)
 - `BigFloat` (76 digits, default)
 
-You are free to use a different floating type for the initial conditions `(t0, y0)`. They are later converted to `precision` during the solver's configuration.
+You are free to use a different floating type for the initial conditions `(t0, y0)`, but they will be converted to `precision` during the solver's configuration. Therefore, the numerical accuracy of the initial state is determined by the lesser floating type.
 
 For implicit ODE methods, we recommend using the default value `precision = Float64`.
 
-## In-place evolution
-
-```julia
-sol = Solutirecision` to the on(options)
-evolve_ode!(sol, ...)
-```
 ## API reference
 
 ```@autodocs

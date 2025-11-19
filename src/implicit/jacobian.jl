@@ -110,6 +110,7 @@ function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W,
         colorvec = matrix_colors(sparsity)
         cache = ForwardColorJacCache(ode_wrap!, x; colorvec, sparsity)
     else
+        # TODO: doesn't work if f and x have different dimensions
         cache = ForwardColorJacCache(ode_wrap!, x)
     end
     @set! jacobian_method.cache = cache
