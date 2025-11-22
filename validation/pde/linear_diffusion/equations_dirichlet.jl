@@ -1,7 +1,11 @@
 function dy_dt!(f, y, t; p, abstract_params)
-    # note: here dx is not a sensitivity parameter
-    a = p[1]
-    dx = abstract_params
+    if isnothing(abstract_params)
+        a, dx = p
+    else
+        # note: here dx is not a sensitivity parameter
+        a = p[1]
+        dx = abstract_params
+    end
     N = length(y)
     for i in 1:N
         # Dirichlet boundary conditions: y[0] = 0.0, y[N+1] = 0.0
