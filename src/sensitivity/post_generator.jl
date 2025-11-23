@@ -11,10 +11,15 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
     t0 = sol.t[1]
     (; nt, ny, np) = get_dimensions(sol)
 
+    # tmp hard-code indices
+    dn = 10                      # stride used for finite difference
+    skip = 100                   # skipping time points is a big advantage
+    t_idxs = 2dn+1:skip:nt-2dn
+
     # Green's function
     # note: exponential function error if A is sparse
     @info "cond(A) = $(cond(A))"
-    G(t, t0) = exp(A*(t - t0))
+    G(t, t0) = exp(A*(t - t0))      # or exp(-z)
     z(t, t0) = -A*(t - t0)
 
     # allocate arrays
@@ -40,30 +45,25 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
     # param_jacobian should be ForwardJacobian (otherwise expect noise)
     param_jacobian = sensitivity.param_jacobian
 
-    # sizehint later (length = ny * np * t_idxs)
     SG = Vector{precision}()
-
-    # tmp hard-code indices
-    dn = 10                      # stride used for finite difference
-    skip = 100                   # skipping time points is a big advantage
-    t_idxs = 2dn+1:skip:nt-2dn
+    sizehint!(SG, ny*np*length(t_idxs))
 
     for n in t_idxs
         t = sol.t[n]
-        G0 = G(t, t0)
-        z0 = z(t, t0)
+        #=@time=# G0 = G(t, t0)
+        #=@time=# z0 = z(t, t0)
 
         # can you reuse a matrix factorization if A is sparse?
-        F = lu(A)               # note: don't use lu! unless reset A
+        #=@time=# F = lu(A)               # note: don't use lu! unless reset A
 
         # assumes constant intervals
         dt = sol.t[n+dn] -  sol.t[n]
 
         # reset time derivatives (central differences)
-        @. dfdpdot1 = 0.0           # dfdp_p - dfdp_m
-        @. dfdpdot2 = 0.0           # dfdp_p - 2dfdp + dfdp_m
-        @. dfdpdot3 = 0.0           # dfdp_pp - 2dfdp_p + 2dfdp_m - dfdp_mm
-        @. dfdpdot4 = 0.0           # dfdp_pp - 4dfdp_p + 6dfdp - 4dfdp_m + dfdp_mm
+        @.. dfdpdot1 = 0.0          # dfdp_p - dfdp_m
+        @.. dfdpdot2 = 0.0          # dfdp_p - 2dfdp + dfdp_m
+        @.. dfdpdot3 = 0.0          # dfdp_pp - 2dfdp_p + 2dfdp_m - dfdp_mm
+        @.. dfdpdot4 = 0.0          # dfdp_pp - 4dfdp_p + 6dfdp - 4dfdp_m + dfdp_mm
 
         # evaluate dfdp at n-2dn
         t = sol.t[n-2dn]
@@ -71,8 +71,8 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
         set_wrapper!(ode_wrap_p!, t, y)
         evaluate_jacobian!(param_jacobian, dfdp, ode_wrap_p!, p, f)
         # iterate 3rd and 4th derivatives
-        @. dfdpdot3 -= dfdp
-        @. dfdpdot4 += dfdp
+        @.. dfdpdot3 -= dfdp
+        @.. dfdpdot4 += dfdp
 
         # evaluate dfdp at n-dn
         t = sol.t[n-dn]
@@ -80,10 +80,10 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
         set_wrapper!(ode_wrap_p!, t, y)
         evaluate_jacobian!(param_jacobian, dfdp, ode_wrap_p!, p, f)
         # iterate 1st - 4th derivatives
-        @. dfdpdot1 -= dfdp
-        @. dfdpdot2 += dfdp
-        @. dfdpdot3 += 2.0*dfdp
-        @. dfdpdot4 -= 4.0*dfdp
+        @.. dfdpdot1 -= dfdp
+        @.. dfdpdot2 += dfdp
+        @.. dfdpdot3 += 2.0*dfdp
+        @.. dfdpdot4 -= 4.0*dfdp
 
         # evaluate dfdp at n+dn
         t = sol.t[n+dn]
@@ -91,10 +91,10 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
         set_wrapper!(ode_wrap_p!, t, y)
         evaluate_jacobian!(param_jacobian, dfdp, ode_wrap_p!, p, f)
         # iterate 1st - 4th derivatives
-        @. dfdpdot1 += dfdp
-        @. dfdpdot2 += dfdp
-        @. dfdpdot3 -= 2.0*dfdp
-        @. dfdpdot4 -= 4.0*dfdp
+        @.. dfdpdot1 += dfdp
+        @.. dfdpdot2 += dfdp
+        @.. dfdpdot3 -= 2.0*dfdp
+        @.. dfdpdot4 -= 4.0*dfdp
 
         # evaluate dfdp at n+2n
         t = sol.t[n+2dn]
@@ -102,8 +102,8 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
         set_wrapper!(ode_wrap_p!, t, y)
         evaluate_jacobian!(param_jacobian, dfdp, ode_wrap_p!, p, f)
         # iterate 3rd and 4th derivatives
-        @. dfdpdot3 += dfdp
-        @. dfdpdot4 += dfdp
+        @.. dfdpdot3 += dfdp
+        @.. dfdpdot4 += dfdp
 
         # current (n)
         # note: compute current dfdp last so can reuse in S0
@@ -112,40 +112,40 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
         set_wrapper!(ode_wrap_p!, t, y)
         evaluate_jacobian!(param_jacobian, dfdp, ode_wrap_p!, p, f)
         # iterate 2nd and 4th time derivatives
-        @. dfdpdot2 -= 2.0*dfdp
-        @. dfdpdot4 += 6.0*dfdp
+        @.. dfdpdot2 -= 2.0*dfdp
+        @.. dfdpdot4 += 6.0*dfdp
 
         # denominators
-        @. dfdpdot1 /= (2.0*dt)
-        @. dfdpdot2 /= dt^2
-        @. dfdpdot3 /= (2.0*dt^3)
-        @. dfdpdot4 /= dt^4
+        @.. dfdpdot1 /= (2.0*dt)
+        @.. dfdpdot2 /= dt^2
+        @.. dfdpdot3 /= (2.0*dt^3)
+        @.. dfdpdot4 /= dt^4
 
         # note: S0 = dfdp, etc are just renaming of variables
         S0 = dfdp               # -A^{-1} dfdp
-        S0 .*= -1.0
+        @.. S0 *= -1.0
         ldiv!(F, S0)
 
         dS1 = dfdpdot1          # -A^{-2} dfdpdot1
-        dS1 .*= -1.0
+        @.. dS1 *= -1.0
         ldiv!(F, dS1)
         ldiv!(F, dS1)
 
         dS2 = dfdpdot2          # -A^{-3} dfdpdot2
-        dS2 .*= -1.0
+        @.. dS2 *= -1.0
         ldiv!(F, dS2)
         ldiv!(F, dS2)
         ldiv!(F, dS2)
 
         dS3 = dfdpdot3          # -A^{-4} dfdpdot3
-        dS3 .*= -1.0
+        @.. dS3 *= -1.0
         ldiv!(F, dS3)
         ldiv!(F, dS3)
         ldiv!(F, dS3)
         ldiv!(F, dS3)
 
         dS4 = dfdpdot4          # -A^{-5} dfdpdot4
-        dS4 .*= -1.0
+        @.. dS4 *= -1.0
         ldiv!(F, dS4)
         ldiv!(F, dS4)
         ldiv!(F, dS4)
@@ -189,9 +189,10 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
         # group dS terms to reduce linear solves?
 
         # current favorite b/c reduces projections
-        dydp .= 0.0
-        @. dydp += S0 + dS1 + dS2 + dS3 + dS4
-        dydp1 = -G0*(S0 + dS1 + dS2 + dS3 + dS4 +
+        @.. dydp = 0.0
+        @.. dydp += S0 + dS1 + dS2 + dS3 + dS4
+
+        #=@time=# dydp1 = -G0*(S0 + dS1 + dS2 + dS3 + dS4 +
                     z0*(dS1 + dS2 + dS3 + dS4 +
                         z0*((dS2 + dS3 + dS4)/2.0 +
                             z0*((dS3 + dS4)/6.0 +
@@ -200,9 +201,10 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T},
                             )
                         )
                     )
-        dydp .+= dydp1
+        @.. dydp += dydp1
 
         append!(SG, dydp)
+        # println("")
     end
 
     SG = reshape(SG, ny*np, length(t_idxs)) |> transpose
