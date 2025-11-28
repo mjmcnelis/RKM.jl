@@ -8,7 +8,7 @@ import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
 import KrylovKit: eigsolve
-import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals
+import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals, I, cond
 import LinearSolve: init, solve!, LinearProblem, LinearCache, LinearAliasSpecifier,
                     LUFactorization, AbstractFactorization, AbstractSparseFactorization#,
                     #SciMLLinearSolveAlgorithm
@@ -103,6 +103,7 @@ include("evolve.jl")
 include("solution/output.jl")
 include("post_process/interpolation/interpolation.jl")
 include("sensitivity/post_sensitivity.jl")
+include("sensitivity/post_generator.jl")
 include("post_process/eigenvalues.jl")
 
 # Adaptive methods
@@ -168,7 +169,8 @@ export NoSensitivity, DecoupledDirect
 # Post-process
 export get_solution, get_time_derivative, get_sensitivity, get_eigenmax,
        get_eigenvalues, get_dimensions, get_subroutine_times,
-       interpolate_solution, post_sensitivity_analysis
+       interpolate_solution, post_sensitivity_analysis,
+       post_generator
 # Plots
 export plot_ode, make_code_name
 # Utilities

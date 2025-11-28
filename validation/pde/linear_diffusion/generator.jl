@@ -45,7 +45,8 @@ options = SolverOptions(;
 _, y = get_solution(sol)
 _, S = get_sensitivity(sol)
 
-A = Matrix(sparsity)    # TODO: use state_jacobian w/ (t0, y0)
+A = sparsity    # TODO: use state_jacobian w/ (t0, y0)
+# A = Matrix(sparsity)
 @time SG, t_idxs = post_generator(sol, options, dy_dt!, A, p; abstract_params)
 
 plt = plot(sol.t, S, legend = :outertopright, size = (900,500),);
