@@ -7,7 +7,7 @@ import FastBroadcast: @..
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
-import KrylovKit: eigsolve
+import KrylovKit: eigsolve#, exponentiate
 import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals, I, cond
 import LinearSolve: init, solve!, LinearProblem, LinearCache, LinearAliasSpecifier,
                     LUFactorization, AbstractFactorization, AbstractSparseFactorization#,
@@ -118,7 +118,7 @@ export NoEigenMax, LinearEigenMax, KrylovEigenMax
 # Root finder methods
 export FixedPoint, Newton
 # Jacobian evaluation methods
-export FiniteJacobian, ForwardJacobian
+export FiniteJacobian, ForwardJacobian, ForwardColorJacobian
 # Jacobian-vector evaluation methods
 export NaiveJacobianVector, FiniteJacobianVector, ForwardJacobianVector
 # Jacobian sparsity pattern

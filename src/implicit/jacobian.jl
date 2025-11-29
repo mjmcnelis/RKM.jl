@@ -25,7 +25,30 @@ function FiniteJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
     return FiniteJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
 end
 
-struct ForwardJacobian{JC} <: JacobianMethod where JC <: ForwardColorJacCache
+struct ForwardJacobian{JC} <: JacobianMethod where JC <: JacobianConfig
+    cache::JC
+    evaluations::MVector{1,Int64}
+    time_subroutine::Bool
+    runtime::MVector{1,Float64}
+end
+
+"""
+    ForwardJacobian()
+
+Outer constructor for `ForwardJacobian`. You cannot pass a `sparsity` pattern
+for the Jacobian matrix.
+"""
+function ForwardJacobian()
+
+    cache = JacobianConfig(nothing, [0.0], [0.0])
+    evaluations = MVector{1,Int64}(0)
+    time_subroutine = false
+    runtime = MVector{1,Float64}(0)
+
+    return ForwardJacobian(cache, evaluations, time_subroutine, runtime)
+end
+
+struct ForwardColorJacobian{JC} <: JacobianMethod where JC <: ForwardColorJacCache
     sparsity::SparseMatrixCSC{Float64,Int64}
     cache::JC
     evaluations::MVector{1,Int64}
@@ -34,27 +57,29 @@ struct ForwardJacobian{JC} <: JacobianMethod where JC <: ForwardColorJacCache
 end
 
 """
-    ForwardJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
+    ForwardColorJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
 
-Outer constructor for `ForwardJacobian`, where you can set a `sparsity` pattern
+Outer constructor for `ForwardColorJacobian`, where you can set a `sparsity` pattern
 for the Jacobian matrix.
 """
-function ForwardJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
+function ForwardColorJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
 
     cache = ForwardColorJacCache(nothing, [0.0])
     evaluations = MVector{1,Int64}(0)
     time_subroutine = false
     runtime = MVector{1,Float64}(0)
 
-    return ForwardJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
+    return ForwardColorJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
 end
 
 function Base.show(io::IO, jacobian_method::JM) where JM <: JacobianMethod
 
     println("$(JM.name.name)")
     println("---------------------")
-    print("sparsity = ")
-    display(jacobian_method.sparsity)
+    if hasproperty(jacobian_method, :sparsity)
+        print("sparsity = ")
+        display(jacobian_method.sparsity)
+    end
     println("cache = $(typeof(jacobian_method.cache))")
 
     if jacobian_method.evaluations == 0
@@ -99,6 +124,24 @@ function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W,
                               f::Vector{T}, x::Vector{T},
                               time_subroutine::Bool) where {W <: Wrapper,
                                                             T <: AbstractFloat}
+    evaluations = jacobian_method.evaluations
+    runtime = jacobian_method.runtime
+
+    evaluations[1] = 0
+    runtime[1] = 0.0
+
+    cache = JacobianConfig(ode_wrap!, f, x)
+
+    @set! jacobian_method.cache = cache
+    @set! jacobian_method.time_subroutine = time_subroutine
+
+    return jacobian_method
+end
+
+function reconstruct_jacobian(jacobian_method::ForwardColorJacobian, ode_wrap!::W,
+                              f::Vector{T}, x::Vector{T},
+                              time_subroutine::Bool) where {W <: Wrapper,
+                                                            T <: AbstractFloat}
     sparsity = jacobian_method.sparsity
     evaluations = jacobian_method.evaluations
     runtime = jacobian_method.runtime
@@ -110,7 +153,7 @@ function reconstruct_jacobian(jacobian_method::ForwardJacobian, ode_wrap!::W,
         colorvec = matrix_colors(sparsity)
         cache = ForwardColorJacCache(ode_wrap!, x; colorvec, sparsity)
     else
-        # TODO: doesn't work if f and x have different dimensions
+        # note: doesn't work if f and x have different dimensions
         cache = ForwardColorJacCache(ode_wrap!, x)
     end
     @set! jacobian_method.cache = cache
@@ -139,6 +182,26 @@ function evaluate_jacobian!(jacobian_method::FiniteJacobian,
 end
 
 function evaluate_jacobian!(jacobian_method::ForwardJacobian,
+                            J, ode_wrap!, x, f)
+
+    cache = jacobian_method.cache
+    evaluations = jacobian_method.evaluations
+
+    time_subroutine = jacobian_method.time_subroutine
+    runtime = jacobian_method.runtime
+
+    if time_subroutine && evaluations[1] % SAMPLE_INTERVAL == 0
+        stats = @timed jacobian!(J, ode_wrap!, f, x, cache)
+        runtime[1] += SAMPLE_INTERVAL*stats.time
+    else
+        jacobian!(J, ode_wrap!, f, x, cache)
+    end
+    evaluations[1] += 1
+
+    return nothing
+end
+
+function evaluate_jacobian!(jacobian_method::ForwardColorJacobian,
                             J, ode_wrap!, x, args...)
 
     cache = jacobian_method.cache

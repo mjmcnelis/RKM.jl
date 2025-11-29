@@ -35,7 +35,7 @@ options = SolverOptions(
               adaptive = Fixed(),
               # TODO: finite-diff + sparsity doesn't seem fast (unless use AppleAccelerate)
             #   state_jacobian = FiniteJacobian(; sparsity),
-              state_jacobian = ForwardJacobian(; sparsity),
+              state_jacobian = ForwardColorJacobian(; sparsity),
               root_finder = Newton(; linear_method = KLUFactorization(),),
               time_subroutine = true
           )

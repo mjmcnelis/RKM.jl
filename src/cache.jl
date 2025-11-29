@@ -28,8 +28,6 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     iteration = method.iteration
     stages = method.stages
 
-    sparsity = state_jacobian.sparsity
-
     no_sensitivity = sensitivity isa NoSensitivity
 
     ny = dimensions                                             # state
@@ -52,8 +50,8 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     f_tmp = zeros(precision, ny)
     f = zeros(precision, ny)
 
-    if size(sparsity) == (ny, ny)
-        J = sparsity .|> precision
+    if hasproperty(state_jacobian, :sparsity) && size(state_jacobian.sparsity) == (ny, ny)
+        J = state_jacobian.sparsity .|> precision
     else
         J = zeros(precision, nJ, nJ)
     end

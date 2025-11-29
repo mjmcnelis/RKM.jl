@@ -24,8 +24,8 @@ end
 # for sensitivity testing only
 # sparse_Jy = nansafe_state_jacobian(y0, t0, dy_dt!, p; chunk_size = 1);
 # sparse_Jp = nansafe_param_jacobian(y0, t0, dy_dt!, p; chunk_size = 1);
-# @set! options.state_jacobian = ForwardJacobian(; sparsity = sparse_Jy)
-# @set! options.sensitivity.param_jacobian = ForwardJacobian(; sparsity = sparse_Jp)
+# @set! options.state_jacobian = ForwardColorJacobian(; sparsity = sparse_Jy)
+# @set! options.sensitivity.param_jacobian = ForwardColorJacobian(; sparsity = sparse_Jp)
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p)
 # in-place version
