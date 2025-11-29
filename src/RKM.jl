@@ -7,7 +7,7 @@ import FastBroadcast: @..
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
 import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
-import KrylovKit: eigsolve#, exponentiate
+import KrylovKit: eigsolve, exponentiate
 import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals, I, cond
 import LinearSolve: init, solve!, LinearProblem, LinearCache, LinearAliasSpecifier,
                     LUFactorization, AbstractFactorization, AbstractSparseFactorization#,

@@ -8,8 +8,15 @@ precision = Float64
 # precision = Double64
 
 a = 0.25                    # diffusion constant
+
+# 0.004267 seconds (8.81 k allocations: 4.499 MiB)
+
+# note: if try to go to larger matrices, the CFL can be bad
+# Nx = 1001
+# x = range(-100, 100, Nx)      # grid points
 Nx = 21
 x = range(-10, 10, Nx)      # grid points
+
 dx = x[2] - x[1]            # uniform spacing
 p = [a]                     # parameters
 abstract_params = dx        # non-sensitivity parameters
@@ -36,8 +43,10 @@ else
 end
 
 options = SolverOptions(;
-              method, adaptive = Fixed(),
-              state_jacobian = FiniteJacobian(),
+              method = method,
+              adaptive = Fixed(),
+              state_jacobian = ForwardColorJacobian(; sparsity),
+              root_finder = Newton(; linear_method = KLUFactorization(),),
               sensitivity = DecoupledDirect(; param_jacobian = ForwardJacobian(),),
               precision,)
 
@@ -50,6 +59,7 @@ A = sparsity    # TODO: use state_jacobian w/ (t0, y0)
 @time SG, t_idxs = post_generator(sol, options, dy_dt!, A, p; abstract_params)
 
 plt = plot(sol.t, S, legend = :outertopright, size = (900,500),);
+# plt = plot(sol.t[t_idxs], S[t_idxs,:], legend = :outertopright, size = (900,500),);
 plot!(sol.t[t_idxs], SG, label = "", color = :black, line = :dash);
 # display(plt)
 

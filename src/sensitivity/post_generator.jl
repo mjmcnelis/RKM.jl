@@ -9,6 +9,26 @@ function compute_z0!(z0::Matrix{T}, A::Matrix{T}, t::T, t0::T) where T <: Abstra
     return nothing
 end
 
+# TODO: add struct options to use ODE solver or Krylov (so can take out kwargs)
+function green_matrix_product!(GX::Matrix{T}, A::Union{Matrix{T}, SparseMatrixCSC{T,Int64}},
+                               X::Matrix{T}, t::T, t0::T; verbosity::Int64 = 1,
+                               krylovdim::Int64 = 30, tol::Float64 = 1e-12,
+                               maxiter::Int64 = 100) where T <: AbstractFloat
+    # X = ny x np matrix (constant)
+    # GX = ny x np matrix
+    # Gx = ny x 1 vector
+
+    # note: KrylovKit doesn't support matrix-matrix product exp(A*(t-t0))*X
+    ny, np = size(X)
+    for j in 1:np
+        x = view(X, :, j)
+        # this is a lot slower than I thought
+        Gx, info = exponentiate(A, t - t0, x; verbosity, krylovdim, tol, maxiter)
+        @.. GX[:,j] = Gx
+    end
+    return nothing
+end
+
 # first prototype (assumes constant Jacobian)
 function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Function,
                         A::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}, p::Vector{T};
@@ -30,15 +50,15 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
 
     # Green's function
     # note: exponential function error if A is sparse
-
     A_dense = Matrix(A)
     @info "cond(A) = $(cond(A_dense))"
-
     G(t, t0) = exp(A_dense*(t - t0))      # or exp(-z)
 
     # allocate arrays
     y = zeros(precision, ny)
     f = zeros(precision, ny)
+
+    GX = zeros(precision, ny, np)
     z0 = copy(A)
 
     dydp = zeros(precision, ny, np)
@@ -48,6 +68,7 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
      # what about ny x np*order?
     dfdpdot = zeros(precision, ny, np, order)
 
+    S_tmp = zeros(precision, ny, np)
     dSG = zeros(precision, ny, np)
 
     # should try to hug initial state better
@@ -73,17 +94,22 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
 
     denom_factor = [2.0, 1.0, 2.0, 1.0]
 
+    F = lu(A)
+
     for n in t_idxs
         t = sol.t[n]
-        #=@time=# G0 = G(t, t0)
         #=@time=# compute_z0!(z0, A, t, t0)
 
         # can you reuse a matrix factorization if A is sparse?
         # note: don't use lu! unless reset A
-        #=@time=# F = lu(A_dense)
+        #=@time=# if A isa SparseMatrixCSC
+            lu!(F, A)
+        else
+            F = lu(A)
+        end
 
         # assumes constant intervals
-        dt = sol.t[n+dn] -  sol.t[n]
+        dt = sol.t[n+dn] - sol.t[n]
 
         # reset time derivatives (central differences)
         @.. dfdpdot = 0.0
@@ -148,7 +174,8 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
         # note: S0 = dfdp, etc are just renaming of variables
         S0 = dfdp               # -A^{-1} dfdp
         @.. S0 *= -1.0
-        ldiv!(F, S0)
+        ldiv!(S_tmp, F, S0)
+        @.. S0 = S_tmp
 
         # non-allocating but takes a decent chunk of time
         # can do you them all at once initially?
@@ -156,7 +183,8 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
             dS = view(dfdpdot, :, :, q)    # -A^{-q+1} dfdpdotq
             @.. dS *= -1.0
             for _ in 1:q+1
-                ldiv!(F, dS)
+                ldiv!(S_tmp, F, dS)
+                @.. dS = S_tmp
             end
         end
 
@@ -191,6 +219,25 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
         # group dS terms to reduce linear solves?
 
         # current favorite b/c reduces projections
+        # this method is faster than naive G0 for large ny, but still very slow
+        @.. dydp = 0.0
+        #=@time=# dydp = -(S0 + dS1 + dS2 + dS3 + dS4 +
+                 z0*(dS1 + dS2 + dS3 + dS4 +
+                     z0*((dS2 + dS3 + dS4)/2.0 +
+                          z0*((dS3 + dS4)/6.0 +
+                              z0*dS4/24.0
+                             )
+                        )
+                    )
+                )
+        #=@time=# green_matrix_product!(GX, A, dydp, t, t0)
+        # reset dydp to GX
+        @.. dydp = GX
+        @.. dydp += S0 + dS1 + dS2 + dS3 + dS4
+
+        # note: direct calc for G0 is huge bottleneck for large systems
+#=
+        #=@time=# G0 = G(t, t0)
         @.. dydp = 0.0
         @.. dydp += S0 + dS1 + dS2 + dS3 + dS4
         #=@time=# dydp1 = -G0*(S0 + dS1 + dS2 + dS3 + dS4 +
@@ -203,7 +250,7 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
                         )
                     )
         @.. dydp += dydp1
-
+=#
         # note: integration by parts method not working (still a bug maybe?)
         # if !initialized
         #     @.. SCE0 = 0.0
