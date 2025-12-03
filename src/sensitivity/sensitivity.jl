@@ -23,7 +23,7 @@ function reconstruct_sensitivity(sensitivity::DecoupledDirect,
 
     param_jacobian = reconstruct_jacobian(param_jacobian, ode_wrap_p!,
                                           f, p, time_subroutine)
-    jacobian_vector = reconstruct_jacobian_vector(jacobian_vector, f)
+    jacobian_vector = reconstruct_jacobian_vector(jacobian_vector, f, time_subroutine)
 
     @set! sensitivity.param_jacobian = param_jacobian
     @set! sensitivity.jacobian_vector = jacobian_vector
@@ -69,9 +69,9 @@ function explicit_sensitivity_stage!(sensitivity::DecoupledDirect, stage_idx,
     # evaluate explicit term dS = dt*(J*S_tmp + df/dp)
     dS_stage = view(dS, :, :, stage_idx)
 
-    # compute Jacobian-sensitivity product: dS <- J*S_tmp
-    evaluate_jacobian_sensitivity!(jacobian_vector, dS_stage, ode_wrap_y!,
-                                   state_jacobian, J, S_tmp, y_tmp, f_tmp)
+    # compute Jacobian-vector product: dS <- J*S_tmp
+    evaluate_jacobian_vector!(jacobian_vector, dS_stage, ode_wrap_y!,
+                              state_jacobian, J, S_tmp, y_tmp, f_tmp)
 
     # compute parameter-Jacobian: S_tmp <- df/dp
     p = ode_wrap_y!.p

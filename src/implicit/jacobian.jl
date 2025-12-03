@@ -20,7 +20,7 @@ function FiniteJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
     cache = JacobianCache([0.0])
     evaluations = MVector{1,Int64}(0)
     time_subroutine = false
-    runtime = MVector{1,Float64}(0)
+    runtime = MVector{1,Float64}(0.0)
 
     return FiniteJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
 end
@@ -43,7 +43,7 @@ function ForwardJacobian()
     cache = JacobianConfig(nothing, [0.0], [0.0])
     evaluations = MVector{1,Int64}(0)
     time_subroutine = false
-    runtime = MVector{1,Float64}(0)
+    runtime = MVector{1,Float64}(0.0)
 
     return ForwardJacobian(cache, evaluations, time_subroutine, runtime)
 end
@@ -67,7 +67,7 @@ function ForwardColorJacobian(; sparsity = SparseMatrixCSC(Float64[;;]),)
     cache = ForwardColorJacCache(nothing, [0.0])
     evaluations = MVector{1,Int64}(0)
     time_subroutine = false
-    runtime = MVector{1,Float64}(0)
+    runtime = MVector{1,Float64}(0.0)
 
     return ForwardColorJacobian(sparsity, cache, evaluations, time_subroutine, runtime)
 end
