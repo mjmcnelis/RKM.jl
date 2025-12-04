@@ -48,11 +48,14 @@ options = SolverOptions(;
               state_jacobian = ForwardColorJacobian(; sparsity),
               root_finder = Newton(; linear_method = KLUFactorization(),),
               sensitivity = DecoupledDirect(; param_jacobian = ForwardJacobian(),),
+              time_subroutine = true,
               precision,)
 
 @time sol = evolve_ode(y0, t0, tf, dt0, dy_dt!, options, p; abstract_params)
 _, y = get_solution(sol)
 _, S = get_sensitivity(sol)
+
+# get_subroutine_times(sol)
 
 A = sparsity    # TODO: use state_jacobian w/ (t0, y0)
 # A = Matrix(sparsity)

@@ -96,9 +96,11 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
 
     F = lu(A)
 
+    t_prev = t0
+
     for n in t_idxs
         t = sol.t[n]
-        #=@time=# compute_z0!(z0, A, t, t0)
+        #=@time=# compute_z0!(z0, A, t, t_prev)
 
         # can you reuse a matrix factorization if A is sparse?
         # note: don't use lu! unless reset A
@@ -194,6 +196,12 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
         dS3 = view(dfdpdot, :, :, 3)
         dS4 = view(dfdpdot, :, :, 4)
 
+        # tmp until use order variable
+        # dS1 .= 0.0
+        # dS2 .= 0.0
+        # dS3 .= 0.0
+        # dS4 .= 0.0
+
         # is there a corresponding ODE for Gamma that I can project onto?
         # maybe its form is simpler to deal with
 
@@ -220,8 +228,10 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
 
         # current favorite b/c reduces projections
         # this method is faster than naive G0 for large ny, but still very slow
-        @.. dydp = 0.0
-        #=@time=# dydp = -(S0 + dS1 + dS2 + dS3 + dS4 +
+        # @.. dydp = 0.0
+
+        # it's more to do with the local error of the expansion as opposed to global
+        #=@time=# dydp_tmp = -(S0 + dS1 + dS2 + dS3 + dS4 +
                  z0*(dS1 + dS2 + dS3 + dS4 +
                      z0*((dS2 + dS3 + dS4)/2.0 +
                           z0*((dS3 + dS4)/6.0 +
@@ -230,7 +240,8 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
                         )
                     )
                 )
-        #=@time=# green_matrix_product!(GX, A, dydp, t, t0)
+        @.. dydp += dydp_tmp
+        #=@time=# green_matrix_product!(GX, A, dydp, t, t_prev)
         # reset dydp to GX
         @.. dydp = GX
         @.. dydp += S0 + dS1 + dS2 + dS3 + dS4
@@ -263,6 +274,8 @@ function post_generator(sol::Solution{T}, options::SolverOptions{T}, dy_dt!::Fun
 
         append!(SG, dydp)
         # println("")
+
+        t_prev = t
     end
 
     SG = reshape(SG, ny*np, length(t_idxs)) |> transpose
