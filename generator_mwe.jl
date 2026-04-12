@@ -1,5 +1,5 @@
 using Plots; plotly()
-using LinearAlgebra: I
+using LinearAlgebra: I, tr
 
 function f_calc(t)
     f = [0.5*t*exp(-t), exp(-t)]
@@ -47,7 +47,7 @@ function x_exact(t)
     return x
 end
 
-function matrix_generator_discrete(x0, t_vect)
+function scalar_generator(x0, t_vect; discrete = true, order = 1)
     nx = length(x0)
     nt = length(t_vect)
 
@@ -60,11 +60,57 @@ function matrix_generator_discrete(x0, t_vect)
     xG = [x0...]
 
     for n in t_idxs
-        t_prev = t_vect[n-1]
+        if discrete
+            t_prev = t_vect[n-1]
+            x_tmp .= x
+        else
+            t_prev = t0
+            x_tmp .= x0
+        end
         t = t_vect[n]
 
-        x_tmp .= x
         A = A_calc(t)
+        Ainv = Ainv_calc(t)
+        dAinvdt = dAinvdt_calc(t)
+        f = f_calc(t)
+        dfdt = dfdt_calc(t)
+        z0 = z0_calc(t, t_prev)
+
+        xG0 = f + exp(-z0)*(x_tmp - f)
+
+        dfdt_eff = (I - dAinvdt + 1/nx*tr(dAinvdt*A)*Ainv) \ dfdt
+        xG1 = (I - exp(-z0)*(I + 1/nx*tr(z0*Ainv)*A)) * Ainv * dfdt_eff
+
+        x .= xG0
+        order >= 1 ? x .+= xG1 : nothing
+        append!(xG, x)
+    end
+    xG = reshape(xG, nx, nt) |> transpose
+    return xG
+end
+
+function matrix_generator(x0, t_vect; discrete = true, order = 1)
+    nx = length(x0)
+    nt = length(t_vect)
+
+    t0 = t_vect[1]
+    t_idxs = 2:length(t_vect)
+    t_prev = t0
+
+    x = copy(x0)
+    x_tmp = copy(x0)
+    xG = [x0...]
+
+    for n in t_idxs
+        if discrete
+            t_prev = t_vect[n-1]
+            x_tmp .= x
+        else
+            t_prev = t0
+            x_tmp .= x0
+        end
+        t = t_vect[n]
+
         Ainv = Ainv_calc(t)
         dAinvdt = dAinvdt_calc(t)
         f = f_calc(t)
@@ -76,13 +122,12 @@ function matrix_generator_discrete(x0, t_vect)
         xG1 = (I - exp(-z0)*(I + z0))*Ainv*dfdt
         # note: this does help even though it's ignoring commutators
         xG2 = (I - exp(-z0)*(I + z0 + 0.5*z0^2))*Ainv*(dAinvdt*dfdt + Ainv*dfdt2)
-        x .= xG0 .+ xG1 .+ xG2
-
+        x .= xG0
+        order >= 1 ? x .+= xG1 : nothing
+        order >= 2 ? x .+= xG2 : nothing
         append!(xG, x)
     end
-
     xG = reshape(xG, nx, nt) |> transpose
-
     return xG
 end
 
@@ -92,7 +137,8 @@ tf = 5.0
 x0 = [0.0, 1.0]
 t_vect = t0:dt:tf
 
-xG = matrix_generator_discrete(x0, t_vect)
+xG = scalar_generator(x0, t_vect; discrete = true, order = 1)
+# xG = matrix_generator(x0, t_vect; discrete = true, order = 1)
 
 t_fine = t0:0.1:tf
 plt = plot(t_fine, x_exact(t_fine), color = [:black :gray], linewidth = 1.5);
