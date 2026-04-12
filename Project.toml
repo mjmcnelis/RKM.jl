@@ -4,9 +4,11 @@ authors = ["Mike McNelis"]
 version = "0.7.0-alpha"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
+ExponentialUtilities = "d4d017d3-3776-5f7e-afef-a10c40355c18"
 FastBroadcast = "7034ab61-46d4-4ed7-9d0f-46aef9175898"
 FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
@@ -25,9 +27,11 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+BenchmarkTools = "1.6.3"
 DocStringExtensions = "0.9"
 Documenter = "1"
 DoubleFloats = "1"
+ExponentialUtilities = "1.28.0"
 FastBroadcast = "0.2, 0.3"
 FiniteDiff = "2"
 ForwardDiff = "0.10, 1"

@@ -25,6 +25,8 @@ import StatsBase: mean
 
 # tmp for testing type stablity
 import InteractiveUtils: @code_warntype, @code_typed
+import BenchmarkTools: @btime
+import ExponentialUtilities: expv
 
 abstract type ODEMethod end
 
