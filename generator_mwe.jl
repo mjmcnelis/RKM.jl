@@ -166,6 +166,39 @@ function midpoint_rule(x0, t_vect; discrete = true)
     return x_list
 end
 
+function affine_midpoint(x0, t_vect)
+    nx = length(x0)
+    nt = length(t_vect)
+
+    t0 = t_vect[1]
+    t_idxs = 2:length(t_vect)
+    t_prev = t0
+
+    x = copy(x0)
+    x_tmp = copy(x0)
+    x_list = [x0...]
+
+    for n in t_idxs
+        x_tmp .= x
+        t_prev = t_vect[n-1]
+        t = t_vect[n]
+        dt = t - t_prev
+        t_mid = t_prev + dt/2.0
+
+        A = A_calc(t_mid)
+        Ainv = Ainv_calc(t_mid)
+        b = b_calc(t_mid)
+
+        x1 = exp(dt*A) * x_tmp
+        x2 = (exp(dt*A) - I) * Ainv * b
+
+        x .= x1 + x2
+        append!(x_list, x)
+    end
+    x_list = reshape(x_list, nx, nt) |> transpose
+    return x_list
+end
+
 function scalar_generator(x0, t_vect; discrete = true, order = 1)
     nx = length(x0)
     nt = length(t_vect)
@@ -273,12 +306,14 @@ x_RSL = riemann_sum_left(x0, t_vect)
 x_RSR = riemann_sum_right(x0, t_vect)
 x_TR = trapezoid_rule(x0, t_vect)
 x_MR = midpoint_rule(x0, t_vect)
+x_AM = affine_midpoint(x0, t_vect)
 # x = x_SG
 x = x_MG
 # x = x_RSL
 # x = x_RSR
 # x = x_TR
 # x = x_MR
+# x = x_AM
 
 t_fine = t0:0.01:tf
 plt = plot(t_fine, x_exact_calc(t_fine), color = [:black :gray], linewidth = 1.5);
@@ -293,6 +328,7 @@ println("    riemann sum left  = ", round(rmsd(x_RSL, x_exact); sigdigits))
 println("    riemann sum right = ", round(rmsd(x_RSR, x_exact); sigdigits))
 println("    trapezoid rule    = ", round(rmsd(x_TR, x_exact); sigdigits))
 println("    midpoint rule     = ", round(rmsd(x_MR, x_exact); sigdigits))
+println("    affine midpoint   = ", round(rmsd(x_AM, x_exact); sigdigits))
 
 # estimate order of accuracy by halving time step and recalculate RMSEs
 x0 = [0.0, 1.0]
@@ -305,12 +341,15 @@ x_RSL_2 = riemann_sum_left(x0, t_vect_2)
 x_RSR_2 = riemann_sum_right(x0, t_vect_2)
 x_TR_2 = trapezoid_rule(x0, t_vect_2)
 x_MR_2 = midpoint_rule(x0, t_vect_2)
+x_AM_2 = affine_midpoint(x0, t_vect_2)
 
 p_SG = log2(rmsd(x_SG, x_exact) / rmsd(x_SG_2, x_exact_2))
 p_MG = log2(rmsd(x_MG, x_exact) / rmsd(x_MG_2, x_exact_2))
 p_RSL = log2(rmsd(x_RSL, x_exact) / rmsd(x_RSL_2, x_exact_2))
+p_RSR = log2(rmsd(x_RSR, x_exact) / rmsd(x_RSR_2, x_exact_2))
 p_TR = log2(rmsd(x_TR, x_exact) / rmsd(x_TR_2, x_exact_2))
 p_MR = log2(rmsd(x_MR, x_exact) / rmsd(x_MR_2, x_exact_2))
+p_AM = log2(rmsd(x_AM, x_exact) / rmsd(x_AM_2, x_exact_2))
 
 println("\nOrder of accuracy:")
 println("    scalar generator  = ", round(p_SG; sigdigits))
@@ -319,4 +358,5 @@ println("    riemann sum left  = ", round(p_RSL; sigdigits))
 println("    riemann sum right = ", round(p_RSR; sigdigits))
 println("    trapezoid rule    = ", round(p_TR; sigdigits))
 println("    midpoint rule     = ", round(p_MR; sigdigits))
+println("    affine midpoint   = ", round(p_AM; sigdigits))
 println("\ndone")
