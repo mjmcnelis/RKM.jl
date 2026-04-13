@@ -1,7 +1,9 @@
 using Plots; plotly()
 using LinearAlgebra: I, tr
+using StatsBase: rmsd
+sigdigits = 4
 
-function x_exact(t)
+function x_exact_calc(t)
     x = zeros(length(t), 2)
     x[:,1] .= (t.^2 .- t .+ 1.0).*exp.(-t) - exp.(-2.0.*t)
     x[:,2] = (t .+ 1.0).*exp.(-t)
@@ -26,6 +28,103 @@ function z0_calc(t1, t2)
     return z0
 end
 
+function riemann_sum_left(x0, t_vect)
+    nx = length(x0)
+    nt = length(t_vect)
+
+    t0 = t_vect[1]
+    t_idxs = 2:length(t_vect)
+    t_prev = t0
+
+    x = copy(x0)
+    x_tmp = copy(x0)
+    xRL = [x0...]
+
+    for n in t_idxs
+        x_tmp .= x
+        t = t_vect[n]
+        t_prev = t_vect[n-1]
+        dt = t - t_prev
+
+        b0 = b_calc(t_prev)
+        z0 = z0_calc(t, t_prev)
+
+        # riemann sum left integration
+        x1 = exp(-z0) * x_tmp
+        x2 = dt * exp(-z0) * b0
+
+        x .= x1 + x2
+        append!(xRL, x)
+    end
+    xRL = reshape(xRL, nx, nt) |> transpose
+    return xRL
+end
+
+function riemann_sum_right(x0, t_vect)
+    nx = length(x0)
+    nt = length(t_vect)
+
+    t0 = t_vect[1]
+    t_idxs = 2:length(t_vect)
+    t_prev = t0
+
+    x = copy(x0)
+    x_tmp = copy(x0)
+    x_list = [x0...]
+
+    for n in t_idxs
+        x_tmp .= x
+        t = t_vect[n]
+        t_prev = t_vect[n-1]
+        dt = t - t_prev
+
+        b1 = b_calc(t)
+        z0 = z0_calc(t, t_prev)
+
+        # riemann sum right integration
+        x1 = exp(-z0) * x_tmp
+        x2 = dt * b1
+
+        x .= x1 + x2
+        append!(x_list, x)
+    end
+    x_list = reshape(x_list, nx, nt) |> transpose
+    return x_list
+end
+
+function trapezoid_rule(x0, t_vect)
+    nx = length(x0)
+    nt = length(t_vect)
+
+    t0 = t_vect[1]
+    t_idxs = 2:length(t_vect)
+    t_prev = t0
+
+    x = copy(x0)
+    x_tmp = copy(x0)
+    x_list = [x0...]
+
+    for n in t_idxs
+        x_tmp .= x
+        t = t_vect[n]
+        t_prev = t_vect[n-1]
+        dt = t - t_prev
+
+        b0 = b_calc(t_prev)
+        b1 = b_calc(t)
+        z0 = z0_calc(t, t_prev)
+
+        # trapezoid rule integration
+        x1 = exp(-z0) * x_tmp
+        x2 = 0.5 * dt * (exp(-z0)*b0 + b1)
+
+        x .= x1 + x2
+        append!(x_list, x)
+    end
+    x_list = reshape(x_list, nx, nt) |> transpose
+    return x_list
+end
+
 function midpoint_rule(x0, t_vect; discrete = true)
     nx = length(x0)
     nt = length(t_vect)
@@ -36,7 +135,7 @@ function midpoint_rule(x0, t_vect; discrete = true)
 
     x = copy(x0)
     x_tmp = copy(x0)
-    xM = [x0...]
+    x_list = [x0...]
 
     for n in t_idxs
         if discrete
@@ -61,10 +160,10 @@ function midpoint_rule(x0, t_vect; discrete = true)
         x2 = dt * exp(-z_mid) * b
 
         x .= x1 + x2
-        append!(xM, x)
+        append!(x_list, x)
     end
-    xM = reshape(xM, nx, nt) |> transpose
-    return xM
+    x_list = reshape(x_list, nx, nt) |> transpose
+    return x_list
 end
 
 function scalar_generator(x0, t_vect; discrete = true, order = 1)
@@ -77,7 +176,7 @@ function scalar_generator(x0, t_vect; discrete = true, order = 1)
 
     x = copy(x0)
     x_tmp = copy(x0)
-    xG = [x0...]
+    x_list = [x0...]
 
     for n in t_idxs
         if discrete
@@ -103,10 +202,10 @@ function scalar_generator(x0, t_vect; discrete = true, order = 1)
 
         x .= xG0
         order >= 1 ? x .+= xG1 : nothing
-        append!(xG, x)
+        append!(x_list, x)
     end
-    xG = reshape(xG, nx, nt) |> transpose
-    return xG
+    x_list = reshape(x_list, nx, nt) |> transpose
+    return x_list
 end
 
 function matrix_generator(x0, t_vect; discrete = true, order = 1)
@@ -119,7 +218,7 @@ function matrix_generator(x0, t_vect; discrete = true, order = 1)
 
     x = copy(x0)
     x_tmp = copy(x0)
-    xG = [x0...]
+    x_list = [x0...]
 
     for n in t_idxs
         if discrete
@@ -155,10 +254,10 @@ function matrix_generator(x0, t_vect; discrete = true, order = 1)
         x .= xG0
         order >= 1 ? x .+= xG1 : nothing
         order >= 2 ? x .+= xG2 : nothing
-        append!(xG, x)
+        append!(x_list, x)
     end
-    xG = reshape(xG, nx, nt) |> transpose
-    return xG
+    x_list = reshape(x_list, nx, nt) |> transpose
+    return x_list
 end
 
 dt = 0.5
@@ -166,30 +265,58 @@ t0 = 0.0
 tf = 5.0
 x0 = [0.0, 1.0]
 t_vect = t0:dt:tf
+x_exact = x_exact_calc(t_vect)
 
-# x_SG = scalar_generator(x0, t_vect; order = 1)
+x_SG = scalar_generator(x0, t_vect; order = 1)
 x_MG = matrix_generator(x0, t_vect; order = 1)
+x_RSL = riemann_sum_left(x0, t_vect)
+x_RSR = riemann_sum_right(x0, t_vect)
+x_TR = trapezoid_rule(x0, t_vect)
 x_MR = midpoint_rule(x0, t_vect)
 # x = x_SG
 x = x_MG
+# x = x_RSL
+# x = x_RSR
+# x = x_TR
 # x = x_MR
 
-t_fine = t0:0.1:tf
-plt = plot(t_fine, x_exact(t_fine), color = [:black :gray], linewidth = 1.5);
+t_fine = t0:0.01:tf
+plt = plot(t_fine, x_exact_calc(t_fine), color = [:black :gray], linewidth = 1.5);
 plot!(t_vect, x, color = [:red :blue], linewidth = 1.5, line = :dash)
 scatter!(t_vect, x, color = [:red :blue], markersize = [4,4])
 display(plt)
 
-sum(abs2, x_SG .- x_exact(t_vect)) |> display
-sum(abs2, x_MG .- x_exact(t_vect)) |> display
-sum(abs2, x_MR .- x_exact(t_vect)) |> display
+println("Root mean squared error:")
+println("    scalar generator  = ", round(rmsd(x_SG, x_exact); sigdigits))
+println("    matrix generator  = ", round(rmsd(x_MG, x_exact); sigdigits))
+println("    riemann sum left  = ", round(rmsd(x_RSL, x_exact); sigdigits))
+println("    riemann sum right = ", round(rmsd(x_RSR, x_exact); sigdigits))
+println("    trapezoid rule    = ", round(rmsd(x_TR, x_exact); sigdigits))
+println("    midpoint rule     = ", round(rmsd(x_MR, x_exact); sigdigits))
 
-# plt = plot(t_vect, x_SG .- x_exact(t_vect), color = [:red :blue],
-#            label = ["Δx_1 (sg)";; "Δx_2 (sg)"], linewidth = 1.5)
-# plot!(t_vect, x_MG .- x_exact(t_vect), color = [:red :blue],
-#       label = ["Δx_1 (mg)";; "Δx_2 (mg)"], linewidth = 1.5, line = :dash)
-# plot!(t_vect, x_MR .- x_exact(t_vect), color = [:red :blue],
-#       label = ["Δx_1 (mid)";; "Δx_2 (mid)"], linewidth = 1.5, line = :dot)
-# display(plt)
+# estimate order of accuracy by halving time step and recalculate RMSEs
+x0 = [0.0, 1.0]
+t_vect_2 = t0:(dt/2):tf
+x_exact_2 = x_exact_calc(t_vect_2)
 
+x_SG_2 = scalar_generator(x0, t_vect_2; order = 1)
+x_MG_2 = matrix_generator(x0, t_vect_2; order = 1)
+x_RSL_2 = riemann_sum_left(x0, t_vect_2)
+x_RSR_2 = riemann_sum_right(x0, t_vect_2)
+x_TR_2 = trapezoid_rule(x0, t_vect_2)
+x_MR_2 = midpoint_rule(x0, t_vect_2)
+
+p_SG = log2(rmsd(x_SG, x_exact) / rmsd(x_SG_2, x_exact_2))
+p_MG = log2(rmsd(x_MG, x_exact) / rmsd(x_MG_2, x_exact_2))
+p_RSL = log2(rmsd(x_RSL, x_exact) / rmsd(x_RSL_2, x_exact_2))
+p_TR = log2(rmsd(x_TR, x_exact) / rmsd(x_TR_2, x_exact_2))
+p_MR = log2(rmsd(x_MR, x_exact) / rmsd(x_MR_2, x_exact_2))
+
+println("\nOrder of accuracy:")
+println("    scalar generator  = ", round(p_SG; sigdigits))
+println("    matrix generator  = ", round(p_MG; sigdigits))
+println("    riemann sum left  = ", round(p_RSL; sigdigits))
+println("    riemann sum right = ", round(p_RSR; sigdigits))
+println("    trapezoid rule    = ", round(p_TR; sigdigits))
+println("    midpoint rule     = ", round(p_MR; sigdigits))
 println("\ndone")
