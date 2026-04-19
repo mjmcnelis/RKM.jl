@@ -16,48 +16,22 @@ dfdt_calc(t) = [0.5*(1.0 - t)*exp(-t), -exp(-t)]
 dfdt2_calc(t) = [0.5*(t - 2.0)*exp(-t), exp(-t)]
 A_calc(t) = [-2.0 t
              0.0  -1.0]
+dAdt_calc(t) = [0.0 1.0
+                0.0 0.0]
 Ainv_calc(t) = [-0.5 -0.5*t
                 0.0  -1.0]
 dAinvdt_calc(t) = [0.0 -0.5
                    0.0 0.0]
+dAinvdt2_calc(t) = [0.0 0.0
+                    0.0 0.0]
 
 function z0_calc(t1, t2)
     # note: first term of Magnus series
-    z0 = [2.0*(t1-t2) 0.5*(t2^2-t1^2)
-          0.0         t1-t2]
+    dt = t1 - t2
+    # so I need to go to 3rd order to get more accurate (tau-t) expansion
+    z0 = [2.0*dt 0.5*(t2^2-t1^2) - dt^3/12.0
+          0.0         dt]
     return z0
-end
-
-function riemann_sum_left(x0, t_vect)
-    nx = length(x0)
-    nt = length(t_vect)
-
-    t0 = t_vect[1]
-    t_idxs = 2:length(t_vect)
-    t_prev = t0
-
-    x = copy(x0)
-    x_tmp = copy(x0)
-    xRL = [x0...]
-
-    for n in t_idxs
-        x_tmp .= x
-        t = t_vect[n]
-        t_prev = t_vect[n-1]
-        dt = t - t_prev
-
-        b0 = b_calc(t_prev)
-        z0 = z0_calc(t, t_prev)
-
-        # riemann sum left integration
-        x1 = exp(-z0) * x_tmp
-        x2 = dt * exp(-z0) * b0
-
-        x .= x1 + x2
-        append!(xRL, x)
-    end
-    xRL = reshape(xRL, nx, nt) |> transpose
-    return xRL
 end
 
 function riemann_sum_right(x0, t_vect)
@@ -166,39 +140,6 @@ function midpoint_rule(x0, t_vect; discrete = true)
     return x_list
 end
 
-function affine_midpoint(x0, t_vect)
-    nx = length(x0)
-    nt = length(t_vect)
-
-    t0 = t_vect[1]
-    t_idxs = 2:length(t_vect)
-    t_prev = t0
-
-    x = copy(x0)
-    x_tmp = copy(x0)
-    x_list = [x0...]
-
-    for n in t_idxs
-        x_tmp .= x
-        t_prev = t_vect[n-1]
-        t = t_vect[n]
-        dt = t - t_prev
-        t_mid = t_prev + dt/2.0
-
-        A = A_calc(t_mid)
-        Ainv = Ainv_calc(t_mid)
-        b = b_calc(t_mid)
-
-        x1 = exp(dt*A) * x_tmp
-        x2 = (exp(dt*A) - I) * Ainv * b
-
-        x .= x1 + x2
-        append!(x_list, x)
-    end
-    x_list = reshape(x_list, nx, nt) |> transpose
-    return x_list
-end
-
 function scalar_generator(x0, t_vect; discrete = true, order = 1)
     nx = length(x0)
     nt = length(t_vect)
@@ -224,17 +165,40 @@ function scalar_generator(x0, t_vect; discrete = true, order = 1)
         A = A_calc(t)
         Ainv = Ainv_calc(t)
         dAinvdt = dAinvdt_calc(t)
+        dAinvdt2 = dAinvdt2_calc(t)
         f = f_calc(t)
         dfdt = dfdt_calc(t)
+        dfdt2 = dfdt2_calc(t)
         z0 = z0_calc(t, t_prev)
 
         xG0 = f + exp(-z0)*(x_tmp - f)
 
-        dfdt_eff = (I - dAinvdt + 1/nx*tr(dAinvdt*A)*Ainv) \ dfdt
-        xG1 = (I - exp(-z0)*(I + 1/nx*tr(z0*Ainv)*A)) * Ainv * dfdt_eff
+        # dfdt_eff = (I - dAinvdt + 1/nx*tr(dAinvdt*A)*Ainv) \ dfdt   # full recursion
+        # dfdt_eff = (I + dAinvdt - 1/nx*tr(dAinvdt*A)*Ainv) * dfdt # truncated correction
+        # xG1 = (I - exp(-z0)*(I + 1/nx*tr(z0*Ainv)*A)) * Ainv * dfdt_eff
+
+        # t-expansion is equivalent for this example
+        # 1/nx*tr(z0*Ainv) = -(t-t_prev), and tr(dAinvdt*A) = 0
+        # dfdt_eff = (I - dAinvdt) \ dfdt
+        # xG1 = (I - exp(-z0)*(I - (t-t_prev)*A)) * Ainv * dfdt_eff
+
+        # note: need 2nd Magnus series term to get 3rd order accuracy
+        D = (t-t_prev)*exp(-z0) + (I - exp(-z0))*Ainv
+        E = -0.5*(t-t_prev)^2*exp(-z0)
+        X = inv(I - dAinvdt)
+        Y = inv(I - dAinvdt2*X*Ainv - 2.0*dAinvdt)
+
+        C = (E + D*X*Ainv)*Y
+        B = (D + C*dAinvdt2)*X
+
+        # 2nd order expansion
+        xG1 = B * dfdt
+        xG2 = C * dfdt2
 
         x .= xG0
         order >= 1 ? x .+= xG1 : nothing
+        # order >= 2 ? x .+= xG2 : nothing
+        x .+= xG2
         append!(x_list, x)
     end
     x_list = reshape(x_list, nx, nt) |> transpose
@@ -264,6 +228,7 @@ function matrix_generator(x0, t_vect; discrete = true, order = 1)
         t = t_vect[n]
 
         A = A_calc(t)
+        dAdt = dAdt_calc(t)
         Ainv = Ainv_calc(t)
         dAinvdt = dAinvdt_calc(t)
         f = f_calc(t)
@@ -272,21 +237,23 @@ function matrix_generator(x0, t_vect; discrete = true, order = 1)
         z0 = z0_calc(t, t_prev)
 
         xG0 = f + exp(-z0)*(x_tmp - f)
-        xG1 = (I - exp(-z0)*(I + z0))*Ainv*dfdt
-
-        dAinvdt_eff = dAinvdt + 0.5*Ainv*(A*dAinvdt - dAinvdt*A)
-        xG2 = (I - exp(-z0)*(I + z0 + 0.5*z0^2))*Ainv*(dAinvdt_eff*dfdt + Ainv*dfdt2)
-
-        # this was worse
-        # dAinvdt_eff = dAinvdt + 0.5*Ainv*(A*dAinvdt - dAinvdt*A)
-        # C = dAinvdt_eff*dfdt + Ainv*dfdt2
-        # xG2 = Ainv*C - exp(-z0)*(Ainv +
-        #                          0.5*z0*Ainv + 0.5*Ainv*z0 +
-        #                          0.5*z0*Ainv*z0)*C
-
         x .= xG0
-        order >= 1 ? x .+= xG1 : nothing
-        order >= 2 ? x .+= xG2 : nothing
+        if order == 1
+            B = I - exp(-z0)*(I+z0)
+            xG1 = B*Ainv*dfdt
+            x .+= xG1
+        elseif order == 2
+            D = I - exp(-z0)*(I+z0)
+            E2 = -0.5*exp(-z0)*z0*Ainv*z0
+            Q = Ainv*(Ainv*dAdt - dAdt*Ainv)
+            X = inv(I - 1.5*Q)
+            C = (E2 + D*Ainv)*X
+            B = D + 0.5*C*Q*A
+
+            xG1 = B*Ainv*dfdt
+            xG2 = C*(dAinvdt*dfdt + Ainv*dfdt2)
+            x .+= xG1 .+ xG2
+        end
         append!(x_list, x)
     end
     x_list = reshape(x_list, nx, nt) |> transpose
@@ -299,21 +266,18 @@ tf = 5.0
 x0 = [0.0, 1.0]
 t_vect = t0:dt:tf
 x_exact = x_exact_calc(t_vect)
+order = 2
 
-x_SG = scalar_generator(x0, t_vect; order = 1)
-x_MG = matrix_generator(x0, t_vect; order = 1)
-x_RSL = riemann_sum_left(x0, t_vect)
+x_SG = scalar_generator(x0, t_vect; order)
+x_MG = matrix_generator(x0, t_vect; order)
 x_RSR = riemann_sum_right(x0, t_vect)
 x_TR = trapezoid_rule(x0, t_vect)
 x_MR = midpoint_rule(x0, t_vect)
-x_AM = affine_midpoint(x0, t_vect)
 # x = x_SG
 x = x_MG
-# x = x_RSL
 # x = x_RSR
 # x = x_TR
 # x = x_MR
-# x = x_AM
 
 t_fine = t0:0.01:tf
 plt = plot(t_fine, x_exact_calc(t_fine), color = [:black :gray], linewidth = 1.5);
@@ -324,39 +288,31 @@ display(plt)
 println("Root mean squared error:")
 println("    scalar generator  = ", round(rmsd(x_SG, x_exact); sigdigits))
 println("    matrix generator  = ", round(rmsd(x_MG, x_exact); sigdigits))
-println("    riemann sum left  = ", round(rmsd(x_RSL, x_exact); sigdigits))
 println("    riemann sum right = ", round(rmsd(x_RSR, x_exact); sigdigits))
 println("    trapezoid rule    = ", round(rmsd(x_TR, x_exact); sigdigits))
 println("    midpoint rule     = ", round(rmsd(x_MR, x_exact); sigdigits))
-println("    affine midpoint   = ", round(rmsd(x_AM, x_exact); sigdigits))
 
 # estimate order of accuracy by halving time step and recalculate RMSEs
 x0 = [0.0, 1.0]
 t_vect_2 = t0:(dt/2):tf
 x_exact_2 = x_exact_calc(t_vect_2)
 
-x_SG_2 = scalar_generator(x0, t_vect_2; order = 1)
-x_MG_2 = matrix_generator(x0, t_vect_2; order = 1)
-x_RSL_2 = riemann_sum_left(x0, t_vect_2)
+x_SG_2 = scalar_generator(x0, t_vect_2; order)
+x_MG_2 = matrix_generator(x0, t_vect_2; order)
 x_RSR_2 = riemann_sum_right(x0, t_vect_2)
 x_TR_2 = trapezoid_rule(x0, t_vect_2)
 x_MR_2 = midpoint_rule(x0, t_vect_2)
-x_AM_2 = affine_midpoint(x0, t_vect_2)
 
 p_SG = log2(rmsd(x_SG, x_exact) / rmsd(x_SG_2, x_exact_2))
 p_MG = log2(rmsd(x_MG, x_exact) / rmsd(x_MG_2, x_exact_2))
-p_RSL = log2(rmsd(x_RSL, x_exact) / rmsd(x_RSL_2, x_exact_2))
 p_RSR = log2(rmsd(x_RSR, x_exact) / rmsd(x_RSR_2, x_exact_2))
 p_TR = log2(rmsd(x_TR, x_exact) / rmsd(x_TR_2, x_exact_2))
 p_MR = log2(rmsd(x_MR, x_exact) / rmsd(x_MR_2, x_exact_2))
-p_AM = log2(rmsd(x_AM, x_exact) / rmsd(x_AM_2, x_exact_2))
 
 println("\nOrder of accuracy:")
 println("    scalar generator  = ", round(p_SG; sigdigits))
 println("    matrix generator  = ", round(p_MG; sigdigits))
-println("    riemann sum left  = ", round(p_RSL; sigdigits))
 println("    riemann sum right = ", round(p_RSR; sigdigits))
 println("    trapezoid rule    = ", round(p_TR; sigdigits))
 println("    midpoint rule     = ", round(p_MR; sigdigits))
-println("    affine midpoint   = ", round(p_AM; sigdigits))
 println("\ndone")
