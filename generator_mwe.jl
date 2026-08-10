@@ -11,6 +11,7 @@ function x_exact_calc(t)
 end
 
 b_calc(t) = [0.0, exp(-t)]
+dbdt_calc(t) = [0.0, -exp(-t)]
 f_calc(t) = [0.5*t*exp(-t), exp(-t)]
 dfdt_calc(t) = [0.5*(1.0 - t)*exp(-t), -exp(-t)]
 dfdt2_calc(t) = [0.5*(t - 2.0)*exp(-t), exp(-t)]
@@ -18,6 +19,8 @@ A_calc(t) = [-2.0 t
              0.0  -1.0]
 dAdt_calc(t) = [0.0 1.0
                 0.0 0.0]
+dAdt2_calc(t) = [0.0 0.0
+                 0.0 0.0]
 Ainv_calc(t) = [-0.5 -0.5*t
                 0.0  -1.0]
 dAinvdt_calc(t) = [0.0 -0.5
@@ -140,7 +143,7 @@ function midpoint_rule(x0, t_vect; discrete = true)
     return x_list
 end
 
-function scalar_generator(x0, t_vect; discrete = true, order = 1)
+function scalar_generator(x0, t_vect; discrete = true, order = 2)
     nx = length(x0)
     nt = length(t_vect)
 
@@ -151,6 +154,9 @@ function scalar_generator(x0, t_vect; discrete = true, order = 1)
     x = copy(x0)
     x_tmp = copy(x0)
     x_list = [x0...]
+
+    # trace-free projection
+    PTF(X) = X - tr(X)/nx*I
 
     for n in t_idxs
         if discrete
@@ -164,41 +170,39 @@ function scalar_generator(x0, t_vect; discrete = true, order = 1)
 
         A = A_calc(t)
         Ainv = Ainv_calc(t)
+        dAdt = dAdt_calc(t)
+        dAdt2 = dAdt2_calc(t)
         dAinvdt = dAinvdt_calc(t)
         dAinvdt2 = dAinvdt2_calc(t)
         f = f_calc(t)
         dfdt = dfdt_calc(t)
         dfdt2 = dfdt2_calc(t)
         z0 = z0_calc(t, t_prev)
+        L = Ainv*dAdt
+        zAinv = tr(z0*Ainv)
+        zdAinvdt = tr(z0*dAinvdt)
 
         xG0 = f + exp(-z0)*(x_tmp - f)
-
-        # dfdt_eff = (I - dAinvdt + 1/nx*tr(dAinvdt*A)*Ainv) \ dfdt   # full recursion
-        # dfdt_eff = (I + dAinvdt - 1/nx*tr(dAinvdt*A)*Ainv) * dfdt # truncated correction
-        # xG1 = (I - exp(-z0)*(I + 1/nx*tr(z0*Ainv)*A)) * Ainv * dfdt_eff
-
-        # t-expansion is equivalent for this example
-        # 1/nx*tr(z0*Ainv) = -(t-t_prev), and tr(dAinvdt*A) = 0
-        # dfdt_eff = (I - dAinvdt) \ dfdt
-        # xG1 = (I - exp(-z0)*(I - (t-t_prev)*A)) * Ainv * dfdt_eff
-
-        # note: need 2nd Magnus series term to get 3rd order accuracy
-        D = (t-t_prev)*exp(-z0) + (I - exp(-z0))*Ainv
-        E = -0.5*(t-t_prev)^2*exp(-z0)
-        X = inv(I - dAinvdt)
-        Y = inv(I - dAinvdt2*X*Ainv - 2.0*dAinvdt)
-
-        C = (E + D*X*Ainv)*Y
-        B = (D + C*dAinvdt2)*X
-
-        # 2nd order expansion
-        xG1 = B * dfdt
-        xG2 = C * dfdt2
-
         x .= xG0
-        order >= 1 ? x .+= xG1 : nothing
-        # order >= 2 ? x .+= xG2 : nothing
-        x .+= xG2
+        if order == 1
+            zeta1 = (I - exp(-z0)*(I + zAinv/nx*A))*inv(A + PTF(L))
+            xG1 = zeta1 * dfdt
+            x .+= xG1
+        elseif order == 2
+            source_2b = I - exp(-z0)*(I + zAinv/nx*(I + 1/(2*nx)*(zdAinvdt*I +
+                                      zAinv*(A + dAdt*Ainv)))*A)
+            coeff_2b = (A + 2*PTF(L))*(A + PTF(L)) + PTF(2*dAinvdt*dAdt + Ainv*dAdt2) +
+                        0.5*PTF(L^2) - 0.5*PTF(L)^2
+            zeta2b = source_2b * inv(coeff_2b)
+
+            source_12a = I - exp(-z0)*(I + zAinv/nx*(1.0 + zdAinvdt/(2*nx))*A)
+            K = -PTF(2*dAinvdt*dAdt + Ainv*dAdt2) + 1/(2*nx)*(tr(L^2) - 3/nx*tr(L)^2)*I
+            zeta12a = (source_12a + zeta2b*K)*Ainv*inv(I - dAinvdt)
+
+            xG1 = zeta12a * dfdt
+            xG2 = zeta2b * dfdt2
+            x .+= xG1 .+ xG2
+        end
         append!(x_list, x)
     end
     x_list = reshape(x_list, nx, nt) |> transpose
@@ -242,6 +246,13 @@ function matrix_generator(x0, t_vect; discrete = true, order = 1)
             B = I - exp(-z0)*(I+z0)
             xG1 = B*Ainv*dfdt
             x .+= xG1
+
+            # note: uses alternative matrix variable E = 1 - G
+            # it does work and 1/2 prefactor is real
+            # E0 = I - exp(-z0)
+            # B = 0.5*E0*E0
+            # xG1 = B*Ainv*dfdt
+            # x .+= xG1
         elseif order == 2
             D = I - exp(-z0)*(I+z0)
             E2 = -0.5*exp(-z0)*z0*Ainv*z0
