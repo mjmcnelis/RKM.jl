@@ -30,20 +30,31 @@ function magnus_step(y_n, t_n, dt, y_prev, n; tol = 1e-8, maxiter = 50)
     f_n = f(y_n, t_n)
     J_n = J_y(y_n, t_n)
 
-    # initial guess (tangent quadratic)
-    y = y_n + f_n*dt + J_n*f_n*dt^2/2.0
-
-    trajectory = "quadratic"
-    # trajectory = "linear"
+    # trajectory = "cubic"
+    # trajectory = "quadratic"
+    trajectory = "linear"
 
     # tangent = true
     tangent = false
 
+    y_n_dual = Dual(y_n, f_n)
+    t_n_dual = Dual(t_n, 1.0)
+    f_n_dual = f(y_n_dual, t_n_dual)
+    dfdt_n = partials(f_n_dual, 1)
+
+    # initial guess (tangent quadratic)
+    y = y_n + f_n*dt + dfdt_n*dt^2/2.0
+
     iter = 0
     for k = 1:maxiter
         # reconstruct trajectory:
-        #   y(s) = y_n + b*s + a*s^2
-        if trajectory == "quadratic"
+        #   y(s) = y_n + b*s + a*s^2 + c*s^3
+        if trajectory == "cubic"
+            b = f_n
+            a = 0.5*dfdt_n
+            c = (y - y_n - b*dt - a*dt^2) / dt^3
+        elseif trajectory == "quadratic"
+            c = 0.0
             if n == 1 || tangent
                 # quadratic curve tangent to f_n at t_n
                 b = f_n
@@ -57,11 +68,14 @@ function magnus_step(y_n, t_n, dt, y_prev, n; tol = 1e-8, maxiter = 50)
             # linear interpolation through (y_n, y)
             b = (y - y_n) / dt
             a = 0.0
+            c = 0.0
+        else
+            error("trajectory = $trajectory is not an option")
         end
 
         # trajectory derivatives at end point
-        dydt = b + 2.0*a*dt
-        dydt2 = 2.0*a
+        dydt = b + 2.0*a*dt + 3.0*c*dt^2
+        dydt2 = 2.0*a + 6.0*c*dt
 
         # Jacobian and residual source term
         J = J_y(y, t)
@@ -141,9 +155,9 @@ println("  $method = ", round(rmsd(y_tr, y_ex), sigdigits = 4),)
 println("  Magnus = ", round(rmsd(y_mag, y_ex), sigdigits = 4),)
 
 if show_plot
-    plt = plot(t, y_ex, label = "Exact", lw = 2, legend = :outertopright, size = (900,500),);
-    plot!(sol.t, y_tr, #=marker = :circle,=# label = "OrdinaryDiffEq Trapezoid");
-    plot!(t, y_mag, #=marker = :circle,=# linestyle = :dash, label = "Magnus iteration");
+    plt = plot(t, y_ex, label = "Exact", color = :black, legend = :outertopright, size = (900,500),);
+    plot!(sol.t, y_tr, color = :green, label = "$method");
+    plot!(t, y_mag, color = :red, linestyle = :dash, label = "Magnus");
     display(plt)
 end
 GC.gc()
