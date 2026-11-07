@@ -5,6 +5,12 @@ function reconstruct_method(method::RungeKutta,
     return method.reconstructor(precision)
 end
 
+function reconstruct_method(method::M, precision::Type{T}) where {M <: Magnus,
+                                                                  T <: AbstractFloat}
+    # note: same method bc it doesnt use precision (yet)
+    return method
+end
+
 function reconstruct_method(method::LinearMultistep,
                             precision::Type{T}) where T <: AbstractFloat
     # TODO: this is still using old approach

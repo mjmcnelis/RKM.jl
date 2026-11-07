@@ -1,11 +1,11 @@
 
 @inline function sensitivity_update!(sensitivity::NoSensitivity,
-                                     update_cache::UpdateCache, method::ODEMethod)
+                                     update_cache::RungeKuttaCache, method::ODEMethod)
     return nothing
 end
 
 @inline function sensitivity_update!(sensitivity::DecoupledDirect,
-                                     update_cache::UpdateCache, method::ODEMethod)
+                                     update_cache::RungeKuttaCache, method::ODEMethod)
 
     S = update_cache.S
     S_tmp = update_cache.S_tmp

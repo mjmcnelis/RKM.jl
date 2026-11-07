@@ -1,5 +1,7 @@
+abstract type UpdateCache end
 
-struct UpdateCache{T <: AbstractFloat}
+# TODO: maybe make separate one for multistep?
+struct RungeKuttaCache{T} <: UpdateCache where T <: AbstractFloat
     dy::Matrix{T}
     dy_LM::Matrix{T}
     y::Vector{T}
@@ -20,9 +22,11 @@ struct UpdateCache{T <: AbstractFloat}
     dt_prev::Vector{T}
 end
 
-function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
-                     adaptive::AdaptiveTimeStep, dimensions::Int64, coefficients::Int64,
-                     sensitivity::SensitivityMethod, state_jacobian::JacobianMethod,
+# TODO: could multi-dispatch Magnus to construct a different cache
+function build_cache(method::RungeKutta, precision::Type{T}, y::Vector{T},
+                     state_jacobian::JacobianMethod, adaptive::AdaptiveTimeStep,
+                     dimensions::Int64, coefficients::Int64,
+                     sensitivity::SensitivityMethod,
                      eigenmax::EigenMaxMethod) where T <: AbstractFloat
 
     iteration = method.iteration
@@ -82,6 +86,45 @@ function UpdateCache(precision::Type{T}, y::Vector{T}, method::ODEMethod,
     tol_prev = ones(precision, 2)
     dt_prev  = ones(precision, 3)
 
-    return UpdateCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, res, S,
-                       S_tmp, dS, lambda_LR, x0, e_prev, tol_prev, dt_prev)
+    return RungeKuttaCache(dy, dy_LM, y, y_tmp, f_tmp, f, J, y1, y2, res, S,
+                           S_tmp, dS, lambda_LR, x0, e_prev, tol_prev, dt_prev)
+end
+
+struct MagnusAugmentedCache{T} <: UpdateCache where T <: AbstractFloat
+    # TODO: use dual type if need time derivatives for generator method
+    y::Vector{T}
+    y_tmp::Vector{T}
+    f::Vector{T}
+    f_tmp::Vector{T}
+    J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
+    # TODO: try to reuse for z0
+    J_tmp::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
+    res::Vector{T}
+end
+
+# TODO: could multi-dispatch Magnus to construct a different cache
+function build_cache(method::MagnusAugmented, precision::Type{T}, y::Vector{T},
+                     state_jacobian::JacobianMethod, args...) where T <: AbstractFloat
+
+    ny = length(y)
+    nJ = ny
+    ne = ny
+
+    y_tmp = zeros(precision, ny)
+    f_tmp = zeros(precision, ny)
+    f = zeros(precision, ny)
+
+    if hasproperty(state_jacobian, :sparsity) && size(state_jacobian.sparsity) == (ny, ny)
+        J = state_jacobian.sparsity .|> precision
+    else
+        J = zeros(precision, nJ, nJ)
+    end
+    J_tmp = copy(J)
+
+    res = zeros(precision, ne)
+
+    return MagnusAugmentedCache(y, y_tmp, f, f_tmp, J, J_tmp, res)
+
+    # or I need to update jacobian_method to use y ~ dual vector (time derivative)
+    # jacobian will likely need AD for generator method
 end

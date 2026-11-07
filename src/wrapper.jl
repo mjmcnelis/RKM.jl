@@ -23,8 +23,8 @@ end
 #       is that a type instability conflict?
 
 # used by RKM routines: ode_wrap!(f, t, y)
-function (ode_wrap!::ODEWrapperState)(f::Vector{T}, t::T,
-                                      y::Vector{T}) where T <: AbstractFloat
+function (ode_wrap!::ODEWrapperState)(f::Vector{R}, t::R,
+                                      y::Vector{R}) where R <: Real
     p = ode_wrap!.p
     abstract_params = ode_wrap!.abstract_params
     evaluations = ode_wrap!.evaluations

@@ -58,8 +58,8 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         adaptive = reconstruct_adaptive(adaptive, order)
 
         # configure cache
-        update_cache = UpdateCache(precision, y, method, adaptive, dimensions,
-                                   coefficients, sensitivity, state_jacobian, eigenmax)
+        update_cache = build_cache(method, precision, y, state_jacobian, adaptive,
+                                   dimensions, coefficients, sensitivity, eigenmax)
 
         y = update_cache.y
         y_tmp = update_cache.y_tmp
@@ -67,10 +67,12 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
         f_tmp = update_cache.f_tmp
         J = update_cache.J
         res = update_cache.res
-        S = update_cache.S
-        S_tmp = update_cache.S_tmp
-        lambda_LR = update_cache.lambda_LR
-        x0 = update_cache.x0
+
+        # TODO: magnus cache doesnt have this yet
+        if !(sensitivity isa NoSensitivity)
+            S = update_cache.S
+            S_tmp = update_cache.S_tmp
+        end
 
         # create ODE wrappers
         ode_wrap_y! = ODEWrapperState([t0], p, abstract_params,
@@ -101,7 +103,10 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
 
         # initialize eigenvalue/eigenvector
         @.. y_tmp = y
-        if iteration isa Implicit
+        if iteration isa Implicit && !(eigenmax isa NoEigenMax)
+            # TODO: magnus cache probably won't have these
+            lambda_LR = update_cache.lambda_LR
+            x0 = update_cache.x0
             compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
                                     ode_wrap_y!, y_tmp, f_tmp)
         end
@@ -157,8 +162,11 @@ function evolve_ode!(sol::Solution{T1}, y0::Vector{T}, t0::T, tf::Float64,
             end
             # get updated values from tmp caches
             @.. y = y_tmp
-            @.. S = S_tmp
             @.. f = f_tmp
+            # TODO: magnus cache doesnt have this yet
+            if !(sensitivity isa NoSensitivity)
+                @.. S = S_tmp
+            end
         end
     end
 

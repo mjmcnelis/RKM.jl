@@ -50,10 +50,10 @@ function evolve_one_time_step!(method::Adams, adaptive::Fixed,
     return nothing
 end
 
+# TODO: out of date
 function evolve_one_time_step!(method::DifferentiationFormula, adaptive::Fixed,
-             t::Vector{T}, dt::Vector{T}, ode_wrap!::ODEWrapperState,
-             update_cache::UpdateCache, linear_cache,
-             state_jacobian::JacobianMethod) where T <: AbstractFloat
+                               t::Vector{T}, dt::Vector{T},
+                               config::RKMConfig) where T <: AbstractFloat
 
     stages = method.stages
     iteration = method.iteration

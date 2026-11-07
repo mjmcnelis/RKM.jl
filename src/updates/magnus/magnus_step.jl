@@ -5,165 +5,77 @@ function magnus_step!(method::MagnusAugmented,
 
     ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache
+    state_jacobian = config.state_jacobian
+    root_finder = config.root_finder
+
+    max_iterations = root_finder.max_iterations
+    epsilon = root_finder.epsilon
+    convergence_failures = root_finder.convergence_failures
+    p_norm = root_finder.p_norm
 
     y = update_cache.y
     y_tmp = update_cache.y_tmp
     f = update_cache.f
     f_tmp = update_cache.f_tmp
     J = update_cache.J
+    J_tmp = update_cache.J_tmp
+    res = update_cache.res
 
     ode_wrap_y!(f, t[1], y)
+    set_wrapper!(ode_wrap_y!, t[1])
+    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y, f)
 
-    @show y f t[1]
-    q()
+    # TODO: allocate y_dual (maybe change y to dual)
+    # y_dual = Dual.(y, f)
+    # t_dual = Dual(t[1], 1.0)
+    # f_dual = Dual.(f, 1.0)
+    # ode_wrap_y!(f_dual, t_dual, y_dual)
+    # dfdt = partials.(f_dual, 1)
 
-    @.. y_tmp = y + dt*f
+    @.. y_tmp = y + dt[1]*f #+ 0.5*dt[1]^2*dfdt
 
-    return nothing
-end
+    # reuse f?
+    b = f - J*y
 
-@muladd function runge_kutta_step!(method::RungeKutta, iteration::DiagonalImplicit,
-                                   t::Vector{T}, dt::Vector{T},
-                                   config::RKMConfig) where T <: AbstractFloat
+    set_wrapper!(ode_wrap_y!, t[1] + dt[1])
 
-    ode_wrap_y! = config.ode_wrap_y!
-    update_cache = config.update_cache
-    state_jacobian = config.state_jacobian
-    root_finder = config.root_finder
-    eigenmax = config.eigenmax
-    sensitivity = config.sensitivity
+    for n in 1:max_iterations+1
+        @.. res = y_tmp
 
-    c = method.c
-    A_T = method.A_T
-    b = method.b
-    stages = method.stages
-    explicit_stage = method.explicit_stage
+        ode_wrap_y!(f_tmp, t[1] + dt[1], y_tmp)
+        evaluate_jacobian!(state_jacobian, J_tmp, ode_wrap_y!, y_tmp, f_tmp)
 
-    epsilon = root_finder.epsilon
-    p_norm = root_finder.p_norm
-    max_iterations = root_finder.max_iterations
+        b_tmp = f_tmp - J_tmp*y_tmp
 
-    dy = update_cache.dy
-    y = update_cache.y
-    y_tmp = update_cache.y_tmp
-    f_tmp = update_cache.f_tmp
-    J = update_cache.J
-    res = update_cache.res
-    lambda_LR = update_cache.lambda_LR
-    x0 = update_cache.x0
+        b_int = 0.5*dt[1]*(b + b_tmp)
+        gamma = b_int - dt[1]^2/12.0*(J*b_tmp - J_tmp*b)
 
-    # have while loop stashed but couldn't figure out why it was allocating
-    #= while loop: can try something like
-        restart_step = true
-        while restart_step
-            ...
-            restart_step = false    # if it finishes
-        end
-    =#
-    # so far some of the changes I put in by hand seem fine
-
-    for i in 1:stages
-        # first explicit stage should already be pre-evaluated elsewhere
-        if i == 1 && explicit_stage[i]
-            # note: redo this if restart step with new dt (attempt > 0)
-            # TODO: can probably skip this the first time (attempt = 0)
-            #=
-            attempt = 0     # TMP
-            if attempt > 0
-                @.. dy[:,i] = dt[1] * f
-                @.. y_tmp = y
-                explicit_sensitivity_stage!(sensitivity, i, state_jacobian, t[1], dt[1],
-                                            update_cache, ode_wrap_y!, ode_wrap_p!, method)
-            end
-            =#
-            continue
+        if n == max_iterations + 1
+            println("failed to converge after $(n-1) iterations")
+            convergence_failures[1] += 1
+            break
         end
 
-        # set intermediate time in wrapper
-        t_tmp = t[1] + c[i]*dt[1]
-        set_wrapper!(ode_wrap_y!, t_tmp)
+        # trapezoid is easiest thing to do now
+        # z0 = J_tmp
+        # @.. z0 += J
+        # @.. z0 *= -0.5*dt[1]
+        z0 = -0.5*dt[1]*(J + J_tmp) + dt[1]^2/12.0*(J*J_tmp - J_tmp*J)
 
-        if explicit_stage[i]
-            @.. y_tmp = y
-             for j in 1:i-1
-                if iszero(A_T[j,i])
-                    continue
-                end
-                @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
-            end
-            ode_wrap_y!(f_tmp, t_tmp, y_tmp)
-            @.. dy[:,i] = dt[1] * f_tmp
-        else
-            # trivial predictor
-            @.. dy[:,i] = 0.0
+        y_mag = exp(-z0)*y + (I - exp(-z0))*(z0\gamma)
+        @.. y_tmp = y_mag
 
-            for n in 1:max_iterations+1
-                # evaluate current correction and ODE
-                @.. y_tmp = y
-                for j in 1:i
-                    if iszero(A_T[j,i])
-                        continue
-                    end
-                    @.. y_tmp = y_tmp + A_T[j,i]*dy[:,j]
-                end
-                ode_wrap_y!(f_tmp, t_tmp, y_tmp)
+        # # TODO: is there a better stopping criteria?
+        @.. res -= y_tmp
+        e_norm = norm(res, p_norm)
+        y_norm = norm(y_tmp, p_norm)
+        tol = epsilon * (1.0 + y_norm)
 
-                # compute residual error of root equation
-                # dy - dt.f(t_tmp, y_tmp + A.dy) = 0
-                @.. res = dy[:,i] - dt[1]*f_tmp
-
-                # check for convergence (after at least one iteration)
-                if n > 1
-                    # compute norms and tolerance
-                    # note: LinearAlgebra.norm is slow on mac (so use AppleAccelerate)
-                    e_norm = norm(res, p_norm)
-                    dy_norm = norm(view(dy,:,i), p_norm)
-                    tol = epsilon * dy_norm
-
-                    if e_norm <= tol
-                        root_finder.iteration_bins[n-1] += 1
-                        break
-                    end
-                end
-
-                if n == max_iterations + 1
-                    # println("failed to converge after $(n-1) iterations")
-                    # note: allow f_tmp to store dy_dt! of last iteration for FESAL methods
-                    root_finder.convergence_failures[1] += 1
-                    break
-                end
-
-                # TODO: if J is sparse, make sure all diagonals are nonzero
-                if root_finder isa Newton
-                    # evaluate current state Jacobian
-                    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y_tmp, f_tmp)
-                    # note: might want to compute eigenvalues before this
-
-                    # J <- I - dt*A*J
-                    root_jacobian!(J, A_T[i,i], dt[1])
-                end
-
-                root_iteration!(root_finder, dy, i, res, J)
-            end
+        if e_norm <= tol
+            root_finder.iteration_bins[n] += 1
+            break
         end
-
-        # for sensitivity
-        implicit_sensitivity_stage!(sensitivity, i, t_tmp, dt[1], config, A_T[i,i], method)
     end
-    # evaluate update
-    @.. y_tmp = y
-    for j in 1:stages
-        if iszero(b[j])
-            continue
-        end
-        @.. y_tmp = y_tmp + b[j]*dy[:,j]
-    end
-
-    sensitivity_update!(sensitivity, update_cache, method)
-
-    # estimate max eigenvalue of jacobian
-    compute_max_eigenvalue!(eigenmax, lambda_LR, x0, J, state_jacobian,
-                            ode_wrap_y!, y_tmp, f_tmp)
 
     return nothing
 end

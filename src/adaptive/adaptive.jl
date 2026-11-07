@@ -160,6 +160,16 @@ function rescale_tolerance(adaptive::Embedded,
     return order[2] / order[1]
 end
 
+# tmp until have paired orders in Magnus method
+function reconstruct_adaptive(adaptive::Fixed, order::Int64)
+    return adaptive
+end
+
+function reconstruct_adaptive(adaptive::AdaptiveTimeStep, order::Int64)
+    @warn "order = $order of method is fixed, unable to use adaptive time step $adaptive"
+    return adaptive
+end
+
 function reconstruct_adaptive(adaptive::Fixed,
                               order::SVector{P,T}) where {P, T <: AbstractFloat}
     return adaptive

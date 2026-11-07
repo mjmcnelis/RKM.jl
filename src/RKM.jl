@@ -5,7 +5,7 @@ import DocStringExtensions: TYPEDEF, TYPEDFIELDS
 import DoubleFloats: DoubleFloat, IEEEFloat
 import FastBroadcast: @..
 import FiniteDiff: finite_difference_jacobian!, JacobianCache
-import ForwardDiff: jacobian!, JacobianConfig, Dual, Chunk,
+import ForwardDiff: jacobian!, JacobianConfig, Dual, partials, Chunk,
                     NANSAFE_MODE_ENABLED, DEFAULT_CHUNK_THRESHOLD
 import KrylovKit: eigsolve, exponentiate
 import LinearAlgebra: norm, dot, diagind, transpose, lu, lu!, ldiv!, mul!, eigvals, I, cond
@@ -57,8 +57,6 @@ include("sensitivity/jacobian_vector.jl")
 include("sensitivity/sensitivity.jl")
 include("solution/runtimes.jl")
 include("solution/solution.jl")
-include("cache.jl")
-include("adaptive/controller.jl")
 include("post_process/interpolation/interpolator_types.jl")
 include("post_process/interpolation/cubic_hermite.jl")
 include("post_process/interpolation/continuous_formula.jl")
@@ -86,6 +84,8 @@ include("methods/multistep/adams/adams_bashforth.jl")
 include("methods/multistep/adams/adams_moulton.jl")
 include("methods/multistep/differentiation_formula/backward_differentiation_formula.jl")
 include("methods/multistep/differentiation_formula/numerical_differentiation_formula.jl")
+# Magnus integrators
+include("methods/magnus/magnus.jl")
 # Reconstruct ODE method
 include("methods/utils.jl")
 # Runge-Kutta updates
@@ -97,8 +97,13 @@ include("updates/runge_kutta/central_step.jl")
 # Multistep updates
 include("updates/multistep/adams/adams_step.jl")
 include("updates/multistep/adams/fixed_step.jl")
-include("updates/update.jl")
+# Magnus updates
+include("updates/magnus/magnus_step.jl")
+include("updates/magnus/fixed_step.jl")
 
+include("cache.jl")
+include("updates/update.jl")
+include("adaptive/controller.jl")
 include("options.jl")
 include("plots.jl")
 include("evolve.jl")
@@ -156,6 +161,8 @@ export GaussLegendre42, LobattoIIIA42, LobattoIIIB42, LobattoIIIC42, LobattoIIIC
 # Linear multistep
 export AdamsBashforth, AdamsMoulton, BackwardDifferentiationFormula,
        NumericalDifferentiationFormula
+# Magnus
+export MagnusAugmented, MagnusGenerator
 # Solver options
 export SolverOptions
 # Timer

@@ -1,5 +1,6 @@
 
-function _output_solution!(sol::Solution{T}, update_cache::UpdateCache{T}, t::Vector{T},
+function _output_solution!(sol::Solution{T}, update_cache::RungeKuttaCache{T},
+                           t::Vector{T},
                            options::SolverOptions{T}) where T <: AbstractFloat
 
     save_time_derivative = options.save_time_derivative
@@ -21,7 +22,7 @@ function _output_solution!(sol::Solution{T}, update_cache::UpdateCache{T}, t::Ve
 end
 
 function output_solution!(sol::Solution{T}, save_time::Vector{Float64},
-                          update_cache::UpdateCache{T}, t::Vector{T},
+                          update_cache::RungeKuttaCache{T}, t::Vector{T},
                           options::SolverOptions{T},
                           timer::TimeLimit) where T <: AbstractFloat
 
@@ -34,5 +35,15 @@ function output_solution!(sol::Solution{T}, save_time::Vector{Float64},
     else
         _output_solution!(sol, update_cache, t, options)
     end
+    return nothing
+end
+
+# TODO: how to better integrate output routines?
+function output_solution!(sol::Solution{T}, save_time::Vector{Float64},
+                          update_cache::MagnusAugmentedCache{T}, t::Vector{T},
+                          options::SolverOptions{T},
+                          timer::TimeLimit) where T <: AbstractFloat
+    push!(sol.t, t[1])
+    append!(sol.y, update_cache.y_tmp)
     return nothing
 end
