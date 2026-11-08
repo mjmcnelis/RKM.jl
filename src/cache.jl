@@ -91,7 +91,6 @@ function build_cache(method::RungeKutta, precision::Type{T}, y::Vector{T},
 end
 
 struct MagnusAugmentedCache{T} <: UpdateCache where T <: AbstractFloat
-    # TODO: use dual type if need time derivatives for generator method
     y::Vector{T}
     y_tmp::Vector{T}
     f::Vector{T}
@@ -102,8 +101,41 @@ struct MagnusAugmentedCache{T} <: UpdateCache where T <: AbstractFloat
     res::Vector{T}
 end
 
-# TODO: could multi-dispatch Magnus to construct a different cache
 function build_cache(method::MagnusAugmented, precision::Type{T}, y::Vector{T},
+                     state_jacobian::JacobianMethod, args...) where T <: AbstractFloat
+
+    ny = length(y)
+    nJ = ny
+    ne = ny
+
+    y_tmp = zeros(precision, ny)
+    f_tmp = zeros(precision, ny)
+    f = zeros(precision, ny)
+
+    if hasproperty(state_jacobian, :sparsity) && size(state_jacobian.sparsity) == (ny, ny)
+        J = state_jacobian.sparsity .|> precision
+    else
+        J = zeros(precision, nJ, nJ)
+    end
+    J_tmp = copy(J)
+
+    res = zeros(precision, ne)
+
+    return MagnusAugmentedCache(y, y_tmp, f, f_tmp, J, J_tmp, res)
+end
+
+struct MagnusGeneratorCache{T} <: UpdateCache where T <: AbstractFloat
+    # TODO: use dual type if need time derivatives for generator method
+    y::Vector{T}
+    y_tmp::Vector{T}
+    f::Vector{T}
+    f_tmp::Vector{T}
+    J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
+    J_tmp::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
+    res::Vector{T}
+end
+
+function build_cache(method::MagnusGenerator, precision::Type{T}, y::Vector{T},
                      state_jacobian::JacobianMethod, args...) where T <: AbstractFloat
 
     ny = length(y)

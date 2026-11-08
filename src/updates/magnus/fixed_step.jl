@@ -1,7 +1,7 @@
 
-function evolve_one_time_step!(method::MagnusAugmented, adaptive::Fixed,
+function evolve_one_time_step!(method::M, adaptive::Fixed,
                                t::Vector{T}, dt::Vector{T},
-                               config::RKMConfig) where T <: AbstractFloat
+                               config::RKMConfig) where {M <: Magnus, T <: AbstractFloat}
 
     ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache
