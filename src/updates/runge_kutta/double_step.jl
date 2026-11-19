@@ -94,7 +94,8 @@ function evolve_one_time_step!(method::RungeKutta, adaptive::Doubling,
     return nothing
 end
 
-function double_step!(method, t, dt, config)
+function double_step!(method::RungeKutta, t::Vector{T},
+                      dt::Vector{T}, config::RKMConfig) where T <: AbstractFloat
 
     ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache

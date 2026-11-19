@@ -100,6 +100,7 @@ include("updates/multistep/adams/fixed_step.jl")
 # Magnus updates
 include("updates/magnus/magnus_step.jl")
 include("updates/magnus/fixed_step.jl")
+include("updates/magnus/double_step.jl")
 
 include("cache.jl")
 include("updates/update.jl")

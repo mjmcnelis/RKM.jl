@@ -6,13 +6,13 @@ $(TYPEDEF)
 # Fields
 $(TYPEDFIELDS)
 """
-struct MagnusAugmented <: Magnus
+struct MagnusAugmented{T, P} <: Magnus where T <: AbstractFloat
     """Name of the Magnus method"""
     name::Symbol
     """Number of stages in the Magnus method"""
     stages::Int64
     """Order of the Magnus update"""
-    order::Int64
+    order::SVector{P, T}
     """Nonlinear Magnus method is always implicit"""
     iteration::SingleImplicit
     """Abbreviated name for the Magnus method"""
@@ -34,6 +34,8 @@ function MagnusAugmented(; order::Int64)
 
     stages = 1
 
+    order = SVector{1, Float64}(order)
+
     # note: no need for precision?
     # i need dual jacobian caches, but maybe not here?
     # TODO: is there a more convenient way to group terms? (via matrix)
@@ -52,13 +54,13 @@ $(TYPEDEF)
 # Fields
 $(TYPEDFIELDS)
 """
-struct MagnusGenerator <: Magnus
+struct MagnusGenerator{T, P} <: Magnus where T <: AbstractFloat
     """Name of the Magnus method"""
     name::Symbol
     """Number of stages in the Magnus method"""
     stages::Int64
     """Order of the Magnus update"""
-    order::Int64
+    order::SVector{P, T}
      """Nonlinear Magnus method is always implicit"""
     iteration::SingleImplicit
     """Whether to make the Magnus update time symmetric (order increases by 1 if odd)"""
@@ -81,6 +83,8 @@ function MagnusGenerator(; order::Int64, time_symmetric::Bool = false)
     name = Symbol("Magnus_Generator_$(order)")
 
     stages = 1
+
+    order = SVector{1, Float64}(order)
 
     # note: no need for precision?
     # i need dual jacobian caches, but maybe not here?

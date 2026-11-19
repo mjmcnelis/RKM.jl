@@ -98,14 +98,21 @@ struct MagnusAugmentedCache{T} <: UpdateCache where T <: AbstractFloat
     J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
     # TODO: try to reuse for z0
     J_tmp::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
+    y1::Vector{T}
+    y2::Vector{T}
     res::Vector{T}
+    e_prev::Vector{T}
+    tol_prev::Vector{T}
+    dt_prev::Vector{T}
 end
 
 function build_cache(method::MagnusAugmented, precision::Type{T}, y::Vector{T},
-                     state_jacobian::JacobianMethod, args...) where T <: AbstractFloat
+                     state_jacobian::JacobianMethod, adaptive::AdaptiveTimeStep,
+                     args...) where T <: AbstractFloat
 
     ny = length(y)
     nJ = ny
+    nm = adaptive isa Fixed ? 0 : ny
     ne = ny
 
     y_tmp = zeros(precision, ny)
@@ -119,9 +126,18 @@ function build_cache(method::MagnusAugmented, precision::Type{T}, y::Vector{T},
     end
     J_tmp = copy(J)
 
+    y1 = zeros(precision, nm)
+    y2 = zeros(precision, nm)
     res = zeros(precision, ne)
 
-    return MagnusAugmentedCache(y, y_tmp, f, f_tmp, J, J_tmp, res)
+    # for time step controller
+    e_prev = ones(precision, 2)
+    tol_prev = ones(precision, 2)
+    dt_prev  = ones(precision, 3)
+
+    cache = MagnusAugmentedCache(y, y_tmp, f, f_tmp, J, J_tmp, y1, y2, res,
+                                 e_prev, tol_prev, dt_prev)
+    return cache
 end
 
 struct MagnusGeneratorCache{T} <: UpdateCache where T <: AbstractFloat
@@ -132,14 +148,21 @@ struct MagnusGeneratorCache{T} <: UpdateCache where T <: AbstractFloat
     f_tmp::Vector{T}
     J::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
     J_tmp::Union{Matrix{T}, SparseMatrixCSC{T,Int64}}
+    y1::Vector{T}
+    y2::Vector{T}
     res::Vector{T}
+    e_prev::Vector{T}
+    tol_prev::Vector{T}
+    dt_prev::Vector{T}
 end
 
 function build_cache(method::MagnusGenerator, precision::Type{T}, y::Vector{T},
-                     state_jacobian::JacobianMethod, args...) where T <: AbstractFloat
+                     state_jacobian::JacobianMethod, adaptive::AdaptiveTimeStep,
+                     args...) where T <: AbstractFloat
 
     ny = length(y)
     nJ = ny
+    nm = adaptive isa Fixed ? 0 : ny
     ne = ny
 
     y_tmp = zeros(precision, ny)
@@ -153,10 +176,18 @@ function build_cache(method::MagnusGenerator, precision::Type{T}, y::Vector{T},
     end
     J_tmp = copy(J)
 
+    y1 = zeros(precision, nm)
+    y2 = zeros(precision, nm)
     res = zeros(precision, ne)
 
-    return MagnusAugmentedCache(y, y_tmp, f, f_tmp, J, J_tmp, res)
+    # for time step controller
+    e_prev = ones(precision, 2)
+    tol_prev = ones(precision, 2)
+    dt_prev  = ones(precision, 3)
 
+    cache = MagnusGeneratorCache(y, y_tmp, f, f_tmp, J, J_tmp, y1, y2,
+                                 res, e_prev, tol_prev, dt_prev)
+    return cache
     # or I need to update jacobian_method to use y ~ dual vector (time derivative)
     # jacobian will likely need AD for generator method
 end
