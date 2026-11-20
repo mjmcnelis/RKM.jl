@@ -185,8 +185,11 @@ function build_cache(method::MagnusGenerator, precision::Type{T}, y::Vector{T},
     tol_prev = ones(precision, 2)
     dt_prev  = ones(precision, 3)
 
-    cache = MagnusGeneratorCache(y, y_tmp, f, f_tmp, J, J_tmp, y1, y2,
+    # note: so far cache's are identical
+    cache = MagnusAugmentedCache(y, y_tmp, f, f_tmp, J, J_tmp, y1, y2,
                                  res, e_prev, tol_prev, dt_prev)
+    # cache = MagnusGeneratorCache(y, y_tmp, f, f_tmp, J, J_tmp, y1, y2,
+    #                              res, e_prev, tol_prev, dt_prev)
     return cache
     # or I need to update jacobian_method to use y ~ dual vector (time derivative)
     # jacobian will likely need AD for generator method

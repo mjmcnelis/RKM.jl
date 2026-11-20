@@ -84,6 +84,9 @@ function MagnusGenerator(; order::Int64, time_symmetric::Bool = false)
 
     stages = 1
 
+    if time_symmetric
+        order += 1
+    end
     order = SVector{1, Float64}(order)
 
     # note: no need for precision?
