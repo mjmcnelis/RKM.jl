@@ -27,3 +27,8 @@ doc_notes.jl
 
 # unrelated
 coffee_yield.jl
+
+# magnus testing
+magnus_ode_2.jl
+magnus_ode_3.jl
+magnus_tmp/

@@ -308,7 +308,7 @@ function Tsitouras5(precision::Type{T} = Float64) where T <: AbstractFloat
     ) |> transpose
 
     # polynomial coefficients for continuous output
-    ω = SMatrix{4, 7, Float64, 28}(
+    ω = SMatrix{4, 7, precision, 28}(
         0.9999999999999999, -2.763706197274826, 2.9132554618219126, -1.0530884977290216,
         0.0, 0.13169999999999998, -0.2234, 0.1017,
         0.0, 3.930296236894751, -5.941033872131505, 2.490627285651253,
