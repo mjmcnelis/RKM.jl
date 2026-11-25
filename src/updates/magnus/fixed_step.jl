@@ -5,7 +5,17 @@ function evolve_one_time_step!(method::M, adaptive::Fixed,
 
     ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache
+    state_jacobian = config.state_jacobian
     interpolator = config.interpolator
+
+    y = update_cache.y
+    f = update_cache.f
+    J = update_cache.J
+
+    # initialize ODE and Jacobian
+    ode_wrap_y!(f, t[1], y)
+    set_wrapper!(ode_wrap_y!, t[1])
+    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y, f)
 
     magnus_step!(method, t, dt, config)
 

@@ -25,5 +25,8 @@
 Modules = [RKM]
 Pages   = ["methods/runge_kutta/implicit/low_order.jl",
            "methods/runge_kutta/implicit/fixed/medium_order.jl",
-           "methods/runge_kutta/implicit/embedded/medium_order.jl"]
+           "methods/runge_kutta/implicit/embedded/medium_order.jl",
+           # TMP
+            "methods/magnus/magnus.jl",
+          ]
 ```

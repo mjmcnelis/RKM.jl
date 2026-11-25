@@ -3,7 +3,7 @@ function evolve_one_time_step!(method::M, adaptive::Doubling,
                                t::Vector{T}, dt::Vector{T},
                                config::RKMConfig) where {M <: Magnus,
                                                          T <: AbstractFloat}
-
+    # TODO: reuse step doubling routine for both RK and Magnus
     ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache
 
@@ -91,12 +91,27 @@ end
 function double_step!(method::M, t::Vector{T},
                       dt::Vector{T}, config::RKMConfig) where {M <: Magnus,
                                                                T <: AbstractFloat}
+    ode_wrap_y! = config.ode_wrap_y!
     update_cache = config.update_cache
+    state_jacobian = config.state_jacobian
 
     y = update_cache.y
     y_tmp = update_cache.y_tmp
+    f = update_cache.f
     y1 = update_cache.y1
     y2 = update_cache.y2
+    J = update_cache.J
+
+    # note: reuse initial ODE/Jacobian for first half-step
+    ode_wrap_y!(f, t[1], y)
+    set_wrapper!(ode_wrap_y!, t[1])
+    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y, f)
+
+    # TODO: downside to doing full step first? double check
+
+    # update full time step
+    magnus_step!(method, t, dt, config)
+    @.. y1 = y_tmp
 
     t_start = t[1]
     dt_start = dt[1]
@@ -114,6 +129,12 @@ function double_step!(method::M, t::Vector{T},
     @.. y_tmp = y2
     @.. y2 = y
     @.. y = y_tmp
+
+    # reinitialize ODE/Jacobian for 2nd half-step
+    ode_wrap_y!(f, t[1], y)
+    set_wrapper!(ode_wrap_y!, t[1])
+    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y, f)
+
     magnus_step!(method, t, dt, config)
     @.. y = y2
     @.. y2 = y_tmp
@@ -121,10 +142,6 @@ function double_step!(method::M, t::Vector{T},
     # undo changes to t, dt after double step finished
     t[1] = t_start
     dt[1] = dt_start
-
-    # update full time step
-    magnus_step!(method, t, dt, config)
-    @.. y1 = y_tmp
 
     return nothing
 end

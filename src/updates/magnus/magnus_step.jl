@@ -21,10 +21,6 @@ function magnus_step!(method::MagnusAugmented,
     J_tmp = update_cache.J_tmp
     res = update_cache.res
 
-    ode_wrap_y!(f, t[1], y)
-    set_wrapper!(ode_wrap_y!, t[1])
-    evaluate_jacobian!(state_jacobian, J, ode_wrap_y!, y, f)
-
     # TODO: allocate y_dual (maybe change y to dual)
     y_dual = Dual.(y, f)
     t_dual = Dual(t[1], 1.0)
@@ -42,6 +38,7 @@ function magnus_step!(method::MagnusAugmented,
     for n in 1:max_iterations+1
         @.. res = y_tmp
 
+        # TODO: see if finite jacobian is helping w/ robustness
         ode_wrap_y!(f_tmp, t[1] + dt[1], y_tmp)
         evaluate_jacobian!(state_jacobian, J_tmp, ode_wrap_y!, y_tmp, f_tmp)
 
@@ -53,6 +50,7 @@ function magnus_step!(method::MagnusAugmented,
         if n == max_iterations + 1
             println("failed to converge after $(n-1) iterations")
             convergence_failures[1] += 1
+            @.. y_tmp = y + dt[1]*f + 0.5*dt[1]^2*dfdt
             break
         end
 
@@ -146,10 +144,9 @@ function magnus_step!(method::MagnusGenerator,
         detJ = det(J)
         detJ_tmp = det(J_tmp)
 
-        if iszero(detJ)
-            y_mag = exp(-z0)*y - (I - exp(-z0))*(J_tmp\b_tmp)
-        elseif iszero(detJ_tmp)
-            y_mag = exp(-z0)*y - (I - exp(-z0))*(J\b)
+        if iszero(detJ) || iszero(detJ_tmp)
+            # fall back to numerical quadrature (trapezoid rule)
+            y_mag = exp(-z0)*y + 0.5*dt[1]*(exp(-z0)*b + b_tmp)
         else
             if time_symmetric
                 y_mag = exp(-z0)*y - 0.5*(I - exp(-z0))*(J_tmp\b_tmp + J\b)
